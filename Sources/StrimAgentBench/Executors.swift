@@ -194,6 +194,8 @@ public final class ClaudeArm: ArmExecutor {
         let tmp = ctx.runDir.appendingPathComponent("tmp")
         try? FileManager.default.createDirectory(at: tmp, withIntermediateDirectories: true)
         env["TMPDIR"] = tmp.path
+        env[ClaudeSandbox.claudeTmpEnvVar] = ClaudeSandbox.prepareClaudeTmp(runDir: ctx.runDir.path)
+        defer { try? FileManager.default.removeItem(atPath: ctx.runDir.path + "/claude-tmp") }
         env["GOCACHE"] = ctx.runDir.appendingPathComponent("gocache").path
         env["PYTHONDONTWRITEBYTECODE"] = "1"
         var net = ClaudeSandbox.Net.anthropic
@@ -207,8 +209,10 @@ public final class ClaudeArm: ArmExecutor {
         case .paid, .paidWithMCP:
             let cred = NSHomeDirectory() + "/.claude/.credentials.json"
             if FileManager.default.fileExists(atPath: cred) { authFile = cred }
+            for (k, v) in ClaudeSandbox.loginEnv() { env[k] = v }
         }
-        let profile = ClaudeSandbox.profile(workdir: ctx.workdir.path, runDir: ctx.runDir.path, net: net, claudeBin: claudeBin, authFile: authFile)
+        let profile = ClaudeSandbox.profile(workdir: ctx.workdir.path, runDir: ctx.runDir.path, net: net, claudeBin: claudeBin, authFile: authFile,
+                                            keychainFile: net == .anthropic ? ClaudeSandbox.loginKeychain() : nil)
         let argv = buildArgv(prompt: PromptBuilder.body(t), mcpConfig: mcpPath, repo: ctx.workdir.path, task: t,
                              language: ctx.task.language, sandboxProfile: profile)
         // stdout/stderr come back through host-held fds; the sandboxed child never gets a path the host later reads.
@@ -254,6 +258,9 @@ public final class ClaudeArm: ArmExecutor {
         if !run.sawResult && !r.timedOut {
             let tail = String(decoding: errData, as: UTF8.self).suffix(200)
             o.error = "claude exit \(r.exitCode) without a result: \(tail.replacingOccurrences(of: "\n", with: " | "))"
+            o.infraError = !r.interrupted
+        } else if run.failedBeforeModel {
+            o.error = "infra: claude failed before any model usage: \(run.resultText.prefix(120))"
             o.infraError = !r.interrupted
         } else if run.isError { o.error = "claude reported an error" }
         return o

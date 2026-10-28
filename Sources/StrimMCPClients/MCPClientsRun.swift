@@ -136,11 +136,11 @@ public enum MCPClientsRunner {
         // outbound network only (the real client needs Anthropic, so its network is not narrowed to loopback).
         // The sandbox denies the shared temp areas, so the one config file the client must read is re-allowed by itself.
         let profile = ClaudeSandbox.profile(workdir: repo.path, runDir: clientTmp.path, net: .anthropic, claudeBin: bins.claude,
-                                            extraReadable: mcpPath.map { [$0] } ?? [])
+                                            extraReadable: mcpPath.map { [$0] } ?? [], keychainFile: ClaudeSandbox.loginKeychain())
         let tmp = clientTmp.appendingPathComponent("tmp")
         try FileManager.default.createDirectory(at: tmp, withIntermediateDirectories: true)
         // The token is in the client's environment only on MCP arms (Claude's header expansion needs it there).
-        var extra = ["TMPDIR": tmp.path]
+        var extra = ["TMPDIR": tmp.path, ClaudeSandbox.claudeTmpEnvVar: ClaudeSandbox.prepareClaudeTmp(runDir: clientTmp.path)]
         if c.useMCP { extra[MCPClientsConfig.tokenEnvVar] = endpoint.token }
         let env = MCPClientsConfig.cleanEnvironment(extra: extra)
         let cap = try Proc.runCaptured(argv: ClaudeSandbox.wrap([bins.claude] + argv, profile: profile), env: env,

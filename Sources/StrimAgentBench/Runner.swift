@@ -31,6 +31,8 @@ public struct RunSummary: Sendable, Equatable {
     public var passed = 0
     public var budgetStopped = false
     public var interrupted = false
+    /// Stopped after `BenchRunner.maxConsecutiveInfraErrors` infra errors in a row (the rows stay rerunnable).
+    public var infraStopped = false
 }
 
 public final class BenchRunner {
@@ -51,6 +53,9 @@ public final class BenchRunner {
         self.config = config; self.tasks = tasks; self.executors = executors; self.log = log; self.healthCheck = healthCheck
         ledger = Ledger(url: config.ledgerURL); events = EventLog(url: config.eventsURL)
     }
+
+    /// Stop rule (docs/PLAN-AGENT-HARNESS): abort the run after this many consecutive infra errors.
+    public static let maxConsecutiveInfraErrors = 3
 
     static func iso() -> String { ISO8601DateFormatter().string(from: Date()) }
 
@@ -84,12 +89,13 @@ public final class BenchRunner {
         var summary = RunSummary()
         let existing = ledger.read()
         let done = Set(existing.filter { !$0.infraError }.map(\.key))
-        var budget = BudgetGuard(limit: config.maxParentRuns ?? 0, alreadyUsed: existing.filter { $0.arm.isPaid && !$0.dryRun }.count)
+        var budget = BudgetGuard(limit: config.maxParentRuns ?? 0, alreadyUsed: existing.filter { $0.arm.isPaid && !$0.dryRun && !BudgetGuard.isFree($0) }.count)
         let plan = Planner.plan(taskIds: tasks.map(\.id), arms: config.arms, reps: config.reps, seed: config.seed)
         summary.planned = plan.count
         let byId = Dictionary(uniqueKeysWithValues: tasks.map { ($0.id, $0) })
         let fm = FileManager.default
 
+        var consecutiveInfra = 0
         for item in plan {
             if Interrupt.requested { summary.interrupted = true; events.record("interrupted"); break }
             if done.contains(item.key) { summary.skipped += 1; continue }
@@ -151,8 +157,17 @@ public final class BenchRunner {
             if !config.keepWorkdirs, let w = work { try? fm.removeItem(at: w) } // our own temp copy
             try ledger.append(row)
             summary.executed += 1
+            // An infra error never reached the model, so it does not use up the paid cap (it is rerun on resume).
+            if item.arm.isPaid && !config.dryRun && BudgetGuard.isFree(row) { budget.release() }
+            consecutiveInfra = row.infraError ? consecutiveInfra + 1 : 0
             if row.success { summary.passed += 1 }
             log("  -> \(row.success ? "PASS" : "FAIL")\(row.falseDone ? " false-done" : "")\(row.infraError ? " INFRA" : "") \(row.wallS)s \(row.verifyNote.prefix(120))")
+            if consecutiveInfra >= Self.maxConsecutiveInfraErrors {
+                summary.infraStopped = true
+                events.record("infra_stop", ["consecutive": String(consecutiveInfra), "last": name])
+                log("\(consecutiveInfra) consecutive infra errors: stopping (fix the environment, then resume; infra rows are rerun and not counted against the cap)")
+                break
+            }
         }
         return summary
     }

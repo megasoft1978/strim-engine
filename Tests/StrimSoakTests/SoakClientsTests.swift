@@ -22,11 +22,11 @@ import Testing
         #expect(fg["ANTHROPIC_BASE_URL"] == "http://127.0.0.1:8203")
         #expect(fg["ANTHROPIC_AUTH_TOKEN"] == "tok-1")
         #expect(fg["CLAUDE_CONFIG_DIR"] == "/iso/claude")
-        #expect(fg["HOME"] == "/s/home" && fg["TMPDIR"] == "/s/tmp")
+        #expect(fg["HOME"] == "/s/home" && fg["TMPDIR"] == "/s/tmp" && fg["CLAUDE_CODE_TMPDIR"] == "/s/claude-tmp")
         #expect(fg["ANTHROPIC_CUSTOM_HEADERS"] == nil && fg["ANTHROPIC_API_KEY"] == nil)
         #expect(Set(fg.keys).isSubset(of: ["PATH", "HOME", "TMPDIR", "LANG", "ANTHROPIC_BASE_URL", "ANTHROPIC_AUTH_TOKEN",
                                            "CLAUDE_CONFIG_DIR", "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC",
-                                           "DISABLE_TELEMETRY", "DISABLE_AUTOUPDATER"]))
+                                           "DISABLE_TELEMETRY", "DISABLE_AUTOUPDATER", "CLAUDE_CODE_TMPDIR"]))
         let bg = SoakArgvs.claudeEnv(port: 8203, configDir: "/iso/claude", token: "tok-1", background: true, scratch: "/s")
         #expect(bg["ANTHROPIC_CUSTOM_HEADERS"] == "x-strim-priority: background")
     }

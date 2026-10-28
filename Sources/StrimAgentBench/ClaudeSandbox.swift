@@ -11,6 +11,35 @@ public enum ClaudeSandbox {
 
     public static let sandboxExec = "/usr/bin/sandbox-exec"
 
+    /// Claude Code hardcodes `/tmp/claude-<uid>` for its scratch (task output, shell cwd files, sockets) unless this variable
+    /// moves it. The profile denies reads and writes of /tmp (M1), so every sandboxed Claude child must get a per-run dir
+    /// inside its own writable run dir. The shared `/tmp/claude-<uid>` (the user's interactive sessions) stays unreadable.
+    public static let claudeTmpEnvVar = "CLAUDE_CODE_TMPDIR"
+
+    /// The login keychain database, when it exists (needed by the real client to find its login on macOS).
+    public static func loginKeychain(home: String = NSHomeDirectory()) -> String? {
+        let p = home + "/Library/Keychains/login.keychain-db"
+        return FileManager.default.fileExists(atPath: p) ? p : nil
+    }
+
+    /// Env the real (paid) client needs to find its login: USER/LOGNAME for the keychain lookup and the host's
+    /// CLAUDE_CONFIG_DIR (the keychain item name is derived from it; the sandbox still denies reading that dir).
+    public static func loginEnv(host: [String: String] = ProcessInfo.processInfo.environment) -> [String: String] {
+        var env: [String: String] = [:]
+        let user = host["USER"] ?? NSUserName()
+        env["USER"] = user; env["LOGNAME"] = host["LOGNAME"] ?? user
+        if let c = host["CLAUDE_CONFIG_DIR"], !c.isEmpty { env["CLAUDE_CONFIG_DIR"] = c }
+        return env
+    }
+
+    /// Creates `<runDir>/claude-tmp` (0700) and returns it as a real path; the caller removes it after the run.
+    @discardableResult
+    public static func prepareClaudeTmp(runDir: String) -> String {
+        let p = runDir + "/claude-tmp"
+        try? FileManager.default.createDirectory(atPath: p, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        return variants(p).last ?? p
+    }
+
     /// Directories under the home that the claude binary / node runtime live in (read-only).
     public static func runtimeReadable(claudeBin: String, home: String = NSHomeDirectory()) -> [String] {
         var out: [String] = []
@@ -29,21 +58,38 @@ public enum ClaudeSandbox {
 
     /// Profile text. `authFile`: the single real file P/M may read for login (never the rest of ~/.claude*).
     public static func profile(workdir: String, runDir: String, net: Net, claudeBin: String, authFile: String? = nil,
-                               home: String = NSHomeDirectory(), goCache: String? = nil, extraReadable: [String] = []) -> String {
+                               home: String = NSHomeDirectory(), goCache: String? = nil, extraReadable: [String] = [],
+                               allowPrefsDaemon: Bool = false, keychainFile: String? = nil) -> String {
         var sp = SandboxProfile(access: .write, writableRoots: [workdir, runDir] + (goCache.map { [$0] } ?? []), jobTmp: runDir + "/tmp",
                                 home: home, extraReadable: (runtimeReadable(claudeBin: claudeBin, home: home) + extraReadable).filter { !ReadableRoots.isForbidden($0, home: home) })
         sp.gitWritable = []
         var p = sp.profile
+        // Codex reads its managed preferences through cfprefsd and refuses to start without it (`Failed to synchronize
+        // managed preferences`). Only the cfprefsd services and their read-only shared-memory segments are opened, not mach-lookup or shm in general.
+        if allowPrefsDaemon {
+            p += "(allow mach-lookup (global-name-prefix \"com.apple.cfprefsd\"))\n"
+            p += "(allow ipc-posix-shm-read-data (ipc-posix-name-prefix \"apple.cfprefs\"))\n"
+        }
         switch net {
         case .loopback(let port):
             p += "(allow network-outbound (remote ip \"localhost:\(port)\"))\n"
         case .anthropic:
             // IP only: no blanket unix-socket access to local daemons.
             p += "(allow network-outbound (remote ip))\n"
+            // getaddrinfo talks to mDNSResponder over this one unix socket; without it every lookup fails (ENOTFOUND).
+            for v in variants("/var/run/mDNSResponder") { p += "(allow network-outbound (literal \(quote(v))))\n" }
             // Login/keychain and DNS need mach services for the real client.
             p = p.replacingOccurrences(of: "(deny mach-lookup)\n", with: "")
             if let a = authFile {
                 for v in variants(a) { p += "(allow file-read* (literal \(quote(v))))\n" }
+            }
+            // macOS stores the login in the Keychain (item per CLAUDE_CONFIG_DIR) and the client reads the keychain file itself.
+            // Only the login keychain database file is re-allowed (its directory stays unreadable); items are still
+            // released by securityd under their own access control. Without it the client answers "Not logged in".
+            if let k = keychainFile {
+                for v in variants(k) { p += "(allow file-read* (literal \(quote(v))))\n" }
+                let dir = (k as NSString).deletingLastPathComponent
+                for v in variants(dir) + variants((dir as NSString).deletingLastPathComponent) { p += "(allow file-read-metadata (literal \(quote(v))))\n" }
             }
         }
         return p

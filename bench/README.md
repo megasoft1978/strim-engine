@@ -42,3 +42,19 @@ itself after the client exits). The sandbox must still let Claude read `~/.claud
 log in, so a prompt-injected task repo could in principle make the client's own tool layer misuse them. Residual risk: the file
 tools are denied for `~/.claude*` by permission rule, not by the sandbox. Run paid arms only on corpora you control. Arm M passes
 the Strim bearer token through the `STRIM_MCP_TOKEN` environment variable; `mcp.json` holds no secret.
+
+Sandboxed client scratch: the sandbox denies `/tmp`, `/var/tmp` and `$TMPDIR` (security review M1), but Claude Code hardcodes
+`/tmp/claude-<uid>` for its scratch unless `CLAUDE_CODE_TMPDIR` is set. Every sandboxed Claude child (agentbench C/P/M, soak,
+mcp-clients) therefore gets `CLAUDE_CODE_TMPDIR=<run dir>/claude-tmp` (0700, inside its own writable run dir); the shared
+`/tmp/claude-<uid>` of interactive sessions stays unreadable. The sandboxed Codex (soak) additionally gets the cfprefsd mach
+services and read-only `apple.cfprefs` shared memory, which it needs to load its configuration. Startup regression tests:
+`SoakClientStartupTests` (skipped when `claude` / `codex` are not installed; no model, no paid call).
+
+Runner stop rule: `strim agentbench run` aborts after 3 consecutive infra errors (event `infra_stop`). Infra-error rows that
+spent nothing do not count against `--max-parent-runs` and are rerun on resume.
+
+Paid-client login: on macOS the login is a Keychain item named after `CLAUDE_CONFIG_DIR`, so the paid arms (P, M) and the
+mcp-clients Claude lane pass `USER`, `LOGNAME` and the host's `CLAUDE_CONFIG_DIR` and the profile re-allows the mDNSResponder socket (DNS) and exactly
+`~/Library/Keychains/login.keychain-db` (one literal file; the directory and `~/.claude*` stay denied, no Bash tool, items are
+released by securityd under their own access control). Residual risk: the sandboxed client can read that database file. A client
+that reports an error with zero model usage (for example `Not logged in`) is recorded as an infra error, not a task FAIL.

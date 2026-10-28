@@ -177,11 +177,11 @@ private func runAgentBenchRun(opts: [String: String], flags: Set<String>, fail: 
     do {
         let s = try runner.run()
         print("planned \(s.planned), skipped (already in ledger) \(s.skipped), executed \(s.executed), passed \(s.passed)"
-              + (s.budgetStopped ? ", STOPPED at --max-parent-runs" : "") + (s.interrupted ? ", interrupted" : ""))
+              + (s.budgetStopped ? ", STOPPED at --max-parent-runs" : "") + (s.infraStopped ? ", STOPPED after 3 consecutive infra errors" : "") + (s.interrupted ? ", interrupted" : ""))
         print("ledger: \(ledgerURL.path)")
         try? fm.removeItem(at: workRoot) // our own temp dir
         server?.stop(); lock?.release()
-        exit(s.budgetStopped ? 3 : 0)
+        exit(s.budgetStopped ? 3 : (s.infraStopped ? 4 : 0))
     } catch {
         server?.stop(); lock?.release()
         fail("\(error)")

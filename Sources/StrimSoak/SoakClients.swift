@@ -72,6 +72,8 @@ public enum SoakArgvs {
             "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
             "DISABLE_TELEMETRY": "1",
             "DISABLE_AUTOUPDATER": "1",
+            // Claude Code's scratch defaults to /tmp/claude-<uid>, which the sandbox denies: keep it inside the run scratch.
+            ClaudeSandbox.claudeTmpEnvVar: scratch + "/claude-tmp",
         ])
         if background { env["ANTHROPIC_CUSTOM_HEADERS"] = "\(priorityHeader): background" }
         return env
@@ -152,7 +154,7 @@ public struct CLIClientLauncher: ClientLauncher {
             env = SoakArgvs.codexEnv(codexHome: cfg, token: token, scratch: req.scratch)
         }
         let profile = ClaudeSandbox.profile(workdir: req.repo, runDir: req.scratch, net: .loopback(port: UInt16(port)),
-                                            claudeBin: bin, home: home)
+                                            claudeBin: bin, home: home, allowPrefsDaemon: !isClaude)
         return ([sandboxExec, "-p", profile] + inner, env, profile)
     }
 
@@ -160,7 +162,7 @@ public struct CLIClientLauncher: ClientLauncher {
         guard FileManager.default.isExecutableFile(atPath: sandboxExec) else {
             throw SoakError.io("sandbox-exec unavailable at \(sandboxExec): refusing to run a client unsandboxed")
         }
-        for d in ["home", "tmp"] {
+        for d in ["home", "tmp", "claude-tmp"] {
             try? FileManager.default.createDirectory(atPath: req.scratch + "/" + d, withIntermediateDirectories: true)
         }
         try prepareConfig(req)

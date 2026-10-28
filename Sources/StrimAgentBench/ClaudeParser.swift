@@ -24,6 +24,9 @@ public struct ClaudeRun: Sendable, Equatable {
     /// Local-model usage reported inside strim tool results (arm M).
     public var localPrompt = 0, localCached = 0, localCompletion = 0, localTurns = 0
     public var sawLocalUsage = false
+    /// The client reported an error and never used the model (not logged in, API refused, startup failure): an
+    /// environment problem, not a task result, so it must not count as a run.
+    public var failedBeforeModel: Bool { isError && (total ?? 0) == 0 }
     public var total: Int? {
         guard inputUncached != nil || cacheCreate != nil || cacheRead != nil || output != nil else { return nil }
         return (inputUncached ?? 0) + (cacheCreate ?? 0) + (cacheRead ?? 0) + (output ?? 0)
