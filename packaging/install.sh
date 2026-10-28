@@ -93,8 +93,7 @@ esac
 cat <<NEXT
 
 Next steps:
-  1. Download the model (about 15 GB, not included): see docs/INSTALL.md
-     https://github.com/$repo/blob/main/docs/INSTALL.md
+  1. strim pull          # model + MTP head, about 15 GB, resumable (details: https://github.com/$repo/blob/main/docs/INSTALL.md)
   2. strim serve ~/.strim/models/qwen38-4bit ~/.strim/models/qwen38-mtp-4bit --port 8203
 Uninstall: rm -rf "$dest" "$wrapper"   (state in ~/.strim is kept)
 NEXT
