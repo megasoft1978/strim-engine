@@ -1,0 +1,1 @@
+{"ts": "2026-10-26T16:57:54", "engine": "llama.cpp/ollama", "loadavg": "{ 3.20 2.89 3.29 }", "step": "S1", "status": "skip", "reason": "not run: no local GGUF"}

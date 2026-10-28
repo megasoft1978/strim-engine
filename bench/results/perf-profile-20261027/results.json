@@ -1,0 +1,1379 @@
+{
+  "machine": {
+    "model": "Mac17,14",
+    "cpu": "Apple M5 Max",
+    "mem_gb": 64.0,
+    "os": "Version 27.0.1 (Build 26A434)",
+    "load_avg": [
+      1.97900390625,
+      2.2861328125,
+      2.49267578125
+    ],
+    "git_sha": "d018dd1",
+    "git_dirty": true,
+    "hostname": "host.local",
+    "date": "2026-10-27T19:20:49Z",
+    "thermal": "NSProcessInfoThermalState(rawValue: 0)"
+  },
+  "config": {
+    "chunks": "512,1024,2048,4096",
+    "decode_tokens": "128",
+    "head": "models/qwen38-mtp-4bit",
+    "lengths": "1024,4096,16384,32768",
+    "model": "models/qwen38-4bit",
+    "prompt": "benchprefill: repeating 8-token pattern; benchspec: repeated bench/prompt_seed.txt tokens",
+    "reps": "3",
+    "sections": "ablate,decode,head,prefill"
+  },
+  "rows": [
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 1024,
+      "chunk": 512,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        995.0,
+        992.0,
+        987.0
+      ],
+      "n": 3,
+      "mean": 991.3333333333334,
+      "median": 992.0,
+      "stdev": 4.041451884327381,
+      "cv_pct": 0.4076784012435152,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 1024,
+      "chunk": 1024,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1034.0,
+        1032.0,
+        1034.0
+      ],
+      "n": 3,
+      "mean": 1033.3333333333333,
+      "median": 1034.0,
+      "stdev": 1.1547005383792515,
+      "cv_pct": 0.11174521339154048,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": 512,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        976.0,
+        973.0,
+        976.0
+      ],
+      "n": 3,
+      "mean": 975.0,
+      "median": 976.0,
+      "stdev": 1.7320508075688772,
+      "cv_pct": 0.177646236673731,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": 1024,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1022.0,
+        1021.0,
+        1020.0
+      ],
+      "n": 3,
+      "mean": 1021.0,
+      "median": 1021.0,
+      "stdev": 1.0,
+      "cv_pct": 0.0979431929480901,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": 2048,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1019.0,
+        1022.0,
+        1017.0
+      ],
+      "n": 3,
+      "mean": 1019.3333333333334,
+      "median": 1019.0,
+      "stdev": 2.516611478423583,
+      "cv_pct": 0.24688798022468114,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": 4096,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1026.0,
+        1024.0,
+        1023.0
+      ],
+      "n": 3,
+      "mean": 1024.3333333333333,
+      "median": 1024.0,
+      "stdev": 1.5275252316519468,
+      "cv_pct": 0.1491238429858718,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 16384,
+      "chunk": 512,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        493.0,
+        574.0,
+        887.0
+      ],
+      "n": 3,
+      "mean": 651.3333333333334,
+      "median": 574.0,
+      "stdev": 208.07290389027912,
+      "cv_pct": 31.94568637005309,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 16384,
+      "chunk": 1024,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        966.0,
+        966.0,
+        965.0
+      ],
+      "n": 3,
+      "mean": 965.6666666666666,
+      "median": 966.0,
+      "stdev": 0.5773502691896257,
+      "cv_pct": 0.05978773930165265,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 16384,
+      "chunk": 2048,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        965.0,
+        964.0,
+        961.0
+      ],
+      "n": 3,
+      "mean": 963.3333333333334,
+      "median": 964.0,
+      "stdev": 2.0816659994661326,
+      "cv_pct": 0.21608989613835283,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 16384,
+      "chunk": 4096,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        967.0,
+        967.0,
+        966.0
+      ],
+      "n": 3,
+      "mean": 966.6666666666666,
+      "median": 967.0,
+      "stdev": 0.5773502691896257,
+      "cv_pct": 0.05972588991616818,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": 512,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        725.0,
+        556.0,
+        651.0
+      ],
+      "n": 3,
+      "mean": 644.0,
+      "median": 651.0,
+      "stdev": 84.71717653463199,
+      "cv_pct": 13.154841076806209,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": 1024,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        332.0,
+        393.0,
+        386.0
+      ],
+      "n": 3,
+      "mean": 370.3333333333333,
+      "median": 386.0,
+      "stdev": 33.38163167571851,
+      "cv_pct": 9.013941946638662,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": 2048,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        888.0,
+        891.0,
+        890.0
+      ],
+      "n": 3,
+      "mean": 889.6666666666666,
+      "median": 890.0,
+      "stdev": 1.5275252316519468,
+      "cv_pct": 0.1716963542508745,
+      "note": ""
+    },
+    {
+      "section": "prefill-chunk",
+      "label": "chunk",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": 4096,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        888.0,
+        836.0,
+        886.0
+      ],
+      "n": 3,
+      "mean": 870.0,
+      "median": 886.0,
+      "stdev": 29.46183972531247,
+      "cv_pct": 3.3864183592313184,
+      "note": ""
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "default",
+      "ablation": false,
+      "valid_output": true,
+      "length": 1024,
+      "chunk": 1024,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1013.0,
+        1006.0,
+        1006.0
+      ],
+      "n": 3,
+      "mean": 1008.3333333333334,
+      "median": 1006.0,
+      "stdev": 4.041451884327381,
+      "cv_pct": 0.4008051455531287,
+      "note": ""
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "skip_rec",
+      "ablation": true,
+      "valid_output": false,
+      "length": 1024,
+      "chunk": 1024,
+      "env": {
+        "STRIM_SKIP_REC": "1"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1016.0,
+        1014.0,
+        1015.0
+      ],
+      "n": 3,
+      "mean": 1015.0,
+      "median": 1015.0,
+      "stdev": 1.0,
+      "cv_pct": 0.09852216748768472,
+      "note": "ABLATION: output invalid"
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "tensor",
+      "ablation": false,
+      "valid_output": true,
+      "length": 1024,
+      "chunk": 1024,
+      "env": {
+        "STRIM_GDN_METAL_MAX_S": "8"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        207.0,
+        272.0,
+        255.0
+      ],
+      "n": 3,
+      "mean": 244.66666666666666,
+      "median": 255.0,
+      "stdev": 33.70954365359064,
+      "cv_pct": 13.777742637707346,
+      "note": ""
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "tensor_skip_rec",
+      "ablation": true,
+      "valid_output": false,
+      "length": 1024,
+      "chunk": 1024,
+      "env": {
+        "STRIM_GDN_METAL_MAX_S": "8",
+        "STRIM_SKIP_REC": "1"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1067.0,
+        1067.0,
+        1063.0
+      ],
+      "n": 3,
+      "mean": 1065.6666666666667,
+      "median": 1067.0,
+      "stdev": 2.309401076758503,
+      "cv_pct": 0.21670951611746977,
+      "note": "ABLATION: output invalid"
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "default",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": 1024,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1007.0,
+        1007.0,
+        1000.0
+      ],
+      "n": 3,
+      "mean": 1004.6666666666666,
+      "median": 1007.0,
+      "stdev": 4.041451884327381,
+      "cv_pct": 0.4022679380551474,
+      "note": ""
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "skip_rec",
+      "ablation": true,
+      "valid_output": false,
+      "length": 4096,
+      "chunk": 1024,
+      "env": {
+        "STRIM_SKIP_REC": "1"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1008.0,
+        1011.0,
+        1005.0
+      ],
+      "n": 3,
+      "mean": 1008.0,
+      "median": 1008.0,
+      "stdev": 3.0,
+      "cv_pct": 0.2976190476190476,
+      "note": "ABLATION: output invalid"
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "tensor",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": 1024,
+      "env": {
+        "STRIM_GDN_METAL_MAX_S": "8"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        267.0,
+        252.0,
+        267.0
+      ],
+      "n": 3,
+      "mean": 262.0,
+      "median": 267.0,
+      "stdev": 8.660254037844387,
+      "cv_pct": 3.30544047245969,
+      "note": ""
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "tensor_skip_rec",
+      "ablation": true,
+      "valid_output": false,
+      "length": 4096,
+      "chunk": 1024,
+      "env": {
+        "STRIM_GDN_METAL_MAX_S": "8",
+        "STRIM_SKIP_REC": "1"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1057.0,
+        1057.0,
+        1052.0
+      ],
+      "n": 3,
+      "mean": 1055.3333333333333,
+      "median": 1057.0,
+      "stdev": 2.8867513459481287,
+      "cv_pct": 0.2735392936779655,
+      "note": "ABLATION: output invalid"
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "default",
+      "ablation": false,
+      "valid_output": true,
+      "length": 16384,
+      "chunk": 1024,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        952.0,
+        949.0,
+        948.0
+      ],
+      "n": 3,
+      "mean": 949.6666666666666,
+      "median": 949.0,
+      "stdev": 2.0816659994661326,
+      "cv_pct": 0.21919964894343272,
+      "note": ""
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "skip_rec",
+      "ablation": true,
+      "valid_output": false,
+      "length": 16384,
+      "chunk": 1024,
+      "env": {
+        "STRIM_SKIP_REC": "1"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        955.0,
+        955.0,
+        956.0
+      ],
+      "n": 3,
+      "mean": 955.3333333333334,
+      "median": 955.0,
+      "stdev": 0.5773502691896257,
+      "cv_pct": 0.06043443152717646,
+      "note": "ABLATION: output invalid"
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "tensor",
+      "ablation": false,
+      "valid_output": true,
+      "length": 16384,
+      "chunk": 1024,
+      "env": {
+        "STRIM_GDN_METAL_MAX_S": "8"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        275.0,
+        255.0,
+        262.0
+      ],
+      "n": 3,
+      "mean": 264.0,
+      "median": 262.0,
+      "stdev": 10.14889156509222,
+      "cv_pct": 3.8442771079894773,
+      "note": ""
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "tensor_skip_rec",
+      "ablation": true,
+      "valid_output": false,
+      "length": 16384,
+      "chunk": 1024,
+      "env": {
+        "STRIM_GDN_METAL_MAX_S": "8",
+        "STRIM_SKIP_REC": "1"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        1004.0,
+        1010.0,
+        1004.0
+      ],
+      "n": 3,
+      "mean": 1006.0,
+      "median": 1004.0,
+      "stdev": 3.4641016151377544,
+      "cv_pct": 0.3443440969321824,
+      "note": "ABLATION: output invalid"
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "default",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": 1024,
+      "env": {},
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        199.0,
+        209.0,
+        257.0
+      ],
+      "n": 3,
+      "mean": 221.66666666666666,
+      "median": 209.0,
+      "stdev": 31.00537587795596,
+      "cv_pct": 13.987387614115471,
+      "note": ""
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "skip_rec",
+      "ablation": true,
+      "valid_output": false,
+      "length": 32768,
+      "chunk": 1024,
+      "env": {
+        "STRIM_SKIP_REC": "1"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        328.0,
+        353.0,
+        321.0
+      ],
+      "n": 3,
+      "mean": 334.0,
+      "median": 328.0,
+      "stdev": 16.822603841260722,
+      "cv_pct": 5.0367077369044075,
+      "note": "ABLATION: output invalid"
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "tensor",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": 1024,
+      "env": {
+        "STRIM_GDN_METAL_MAX_S": "8"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        134.0,
+        130.0,
+        131.0
+      ],
+      "n": 3,
+      "mean": 131.66666666666666,
+      "median": 131.0,
+      "stdev": 2.0816659994661326,
+      "cv_pct": 1.5810121514932656,
+      "note": ""
+    },
+    {
+      "section": "gdn-ablation",
+      "label": "tensor_skip_rec",
+      "ablation": true,
+      "valid_output": false,
+      "length": 32768,
+      "chunk": 1024,
+      "env": {
+        "STRIM_GDN_METAL_MAX_S": "8",
+        "STRIM_SKIP_REC": "1"
+      },
+      "metric": "prefill tok/s",
+      "unit": "tok/s",
+      "samples": [
+        312.0,
+        347.0,
+        212.0
+      ],
+      "n": 3,
+      "mean": 290.3333333333333,
+      "median": 312.0,
+      "stdev": 70.059498523279,
+      "cv_pct": 24.13071131685844,
+      "note": "ABLATION: output invalid"
+    },
+    {
+      "section": "mtp-head",
+      "label": "depth0",
+      "ablation": false,
+      "valid_output": true,
+      "length": 1024,
+      "chunk": null,
+      "env": {},
+      "metric": "e2e seconds (n=2)",
+      "unit": "s",
+      "samples": [
+        1.07,
+        1.07,
+        1.07
+      ],
+      "n": 3,
+      "mean": 1.07,
+      "median": 1.07,
+      "stdev": 0.0,
+      "cv_pct": 0.0,
+      "note": ""
+    },
+    {
+      "section": "mtp-head",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 1024,
+      "chunk": null,
+      "env": {},
+      "metric": "e2e seconds (n=2)",
+      "unit": "s",
+      "samples": [
+        1.09,
+        1.09,
+        1.08
+      ],
+      "n": 3,
+      "mean": 1.0866666666666667,
+      "median": 1.09,
+      "stdev": 0.005773502691896263,
+      "cv_pct": 0.5313039287021101,
+      "note": ""
+    },
+    {
+      "section": "mtp-head",
+      "label": "depth0",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": null,
+      "env": {},
+      "metric": "e2e seconds (n=2)",
+      "unit": "s",
+      "samples": [
+        4.08,
+        4.08,
+        4.08
+      ],
+      "n": 3,
+      "mean": 4.08,
+      "median": 4.08,
+      "stdev": 0.0,
+      "cv_pct": 0.0,
+      "note": ""
+    },
+    {
+      "section": "mtp-head",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": null,
+      "env": {},
+      "metric": "e2e seconds (n=2)",
+      "unit": "s",
+      "samples": [
+        4.14,
+        4.15,
+        4.16
+      ],
+      "n": 3,
+      "mean": 4.15,
+      "median": 4.15,
+      "stdev": 0.010000000000000231,
+      "cv_pct": 0.24096385542169227,
+      "note": ""
+    },
+    {
+      "section": "mtp-head",
+      "label": "depth0",
+      "ablation": false,
+      "valid_output": true,
+      "length": 16384,
+      "chunk": null,
+      "env": {},
+      "metric": "e2e seconds (n=2)",
+      "unit": "s",
+      "samples": [
+        17.03,
+        17.01,
+        25.95
+      ],
+      "n": 3,
+      "mean": 19.996666666666666,
+      "median": 17.03,
+      "stdev": 5.155747601787089,
+      "cv_pct": 25.783035181465692,
+      "note": ""
+    },
+    {
+      "section": "mtp-head",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 16384,
+      "chunk": null,
+      "env": {},
+      "metric": "e2e seconds (n=2)",
+      "unit": "s",
+      "samples": [
+        23.35,
+        22.9,
+        17.47
+      ],
+      "n": 3,
+      "mean": 21.24,
+      "median": 22.9,
+      "stdev": 3.2726594689945983,
+      "cv_pct": 15.408001266452912,
+      "note": ""
+    },
+    {
+      "section": "mtp-head",
+      "label": "depth0",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": null,
+      "env": {},
+      "metric": "e2e seconds (n=2)",
+      "unit": "s",
+      "samples": [
+        200.11,
+        248.15,
+        220.14
+      ],
+      "n": 3,
+      "mean": 222.8,
+      "median": 220.14,
+      "stdev": 24.130211354233925,
+      "cv_pct": 10.83043597586801,
+      "note": ""
+    },
+    {
+      "section": "mtp-head",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": null,
+      "env": {},
+      "metric": "e2e seconds (n=2)",
+      "unit": "s",
+      "samples": [],
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "decode tok/s",
+      "unit": "tok/s",
+      "samples": [
+        19.9,
+        19.7,
+        19.9
+      ],
+      "n": 3,
+      "mean": 19.833333333333332,
+      "median": 19.9,
+      "stdev": 0.11547005383792475,
+      "cv_pct": 0.5822019521239903,
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "ms/pass",
+      "unit": "ms",
+      "samples": [
+        134.0,
+        135.3,
+        134.1
+      ],
+      "n": 3,
+      "mean": 134.46666666666667,
+      "median": 134.1,
+      "stdev": 0.7234178138070315,
+      "cv_pct": 0.5379904416016595,
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "tokens/pass",
+      "unit": "tok",
+      "samples": [
+        2.67,
+        2.67,
+        2.67
+      ],
+      "n": 3,
+      "mean": 2.67,
+      "median": 2.67,
+      "stdev": 0.0,
+      "cv_pct": 0.0,
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "accept",
+      "unit": "%",
+      "samples": [
+        70.0,
+        70.0,
+        70.0
+      ],
+      "n": 3,
+      "mean": 70.0,
+      "median": 70.0,
+      "stdev": 0.0,
+      "cv_pct": 0.0,
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "verify ms",
+      "unit": "ms",
+      "samples": [
+        46.8,
+        46.7,
+        46.2
+      ],
+      "n": 3,
+      "mean": 46.56666666666667,
+      "median": 46.7,
+      "stdev": 0.3214550253664298,
+      "cv_pct": 0.6903114360052178,
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "draft ms",
+      "unit": "ms",
+      "samples": [
+        3.5,
+        3.3,
+        3.3
+      ],
+      "n": 3,
+      "mean": 3.3666666666666667,
+      "median": 3.3,
+      "stdev": 0.11547005383792526,
+      "cv_pct": 3.429803579344315,
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 4096,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "reseed ms",
+      "unit": "ms",
+      "samples": [
+        1.5,
+        1.4,
+        1.4
+      ],
+      "n": 3,
+      "mean": 1.4333333333333333,
+      "median": 1.4,
+      "stdev": 0.05773502691896263,
+      "cv_pct": 4.028025133881114,
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "decode tok/s",
+      "unit": "tok/s",
+      "samples": [],
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "ms/pass",
+      "unit": "ms",
+      "samples": [],
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "tokens/pass",
+      "unit": "tok",
+      "samples": [],
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "accept",
+      "unit": "%",
+      "samples": [],
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "verify ms",
+      "unit": "ms",
+      "samples": [
+        56253.3
+      ],
+      "n": 1,
+      "mean": 56253.3,
+      "median": 56253.3,
+      "stdev": 0.0,
+      "cv_pct": 0.0,
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "draft ms",
+      "unit": "ms",
+      "samples": [
+        467.5
+      ],
+      "n": 1,
+      "mean": 467.5,
+      "median": 467.5,
+      "stdev": 0.0,
+      "cv_pct": 0.0,
+      "note": ""
+    },
+    {
+      "section": "decode",
+      "label": "depth2",
+      "ablation": false,
+      "valid_output": true,
+      "length": 32768,
+      "chunk": null,
+      "env": {
+        "STRIM_TIMING": "1"
+      },
+      "metric": "reseed ms",
+      "unit": "ms",
+      "samples": [
+        82.2
+      ],
+      "n": 1,
+      "mean": 82.2,
+      "median": 82.2,
+      "stdev": 0.0,
+      "cv_pct": 0.0,
+      "note": ""
+    }
+  ],
+  "derived": [
+    {
+      "name": "chunk 512 vs 1024",
+      "length": 1024,
+      "value": -4.061895551257255,
+      "unit": "% tok/s",
+      "note": "valid outputs"
+    },
+    {
+      "name": "GDN recurrence share, blocked kernel path (STRIM_SKIP_REC)",
+      "length": 1024,
+      "value": 0.88669950738916,
+      "unit": "% of prefill time",
+      "note": "ablation; STRIM_SKIP_REC is only read on the tensor path, so ~0 here means the flag is a no-op on the blocked path"
+    },
+    {
+      "name": "GDN recurrence share, tensor path (MAX_S=8 + SKIP_REC)",
+      "length": 1024,
+      "value": 76.1012183692596,
+      "unit": "% of tensor-path prefill time",
+      "note": "ablation; tensor recurrence is ~2.7x slower than the blocked kernel, so this overstates the default-path share"
+    },
+    {
+      "name": "blocked kernel vs tensor recurrence",
+      "length": 1024,
+      "value": 294.5098039215686,
+      "unit": "% tok/s",
+      "note": "valid outputs (STRIM_GDN_METAL_MAX_S=8 is a supported A/B)"
+    },
+    {
+      "name": "MTP head prompt seed cost (depth2 - depth0, e2e)",
+      "length": 1024,
+      "value": 20.000000000000018,
+      "unit": "ms",
+      "note": "includes ~1 extra draft+verify round; share of prefill: 1.9%"
+    },
+    {
+      "name": "chunk 512 vs 1024",
+      "length": 4096,
+      "value": -4.407443682664058,
+      "unit": "% tok/s",
+      "note": "valid outputs"
+    },
+    {
+      "name": "chunk 2048 vs 1024",
+      "length": 4096,
+      "value": -0.19588638589618235,
+      "unit": "% tok/s",
+      "note": "valid outputs"
+    },
+    {
+      "name": "chunk 4096 vs 1024",
+      "length": 4096,
+      "value": 0.2938295788442735,
+      "unit": "% tok/s",
+      "note": "valid outputs"
+    },
+    {
+      "name": "GDN recurrence share, blocked kernel path (STRIM_SKIP_REC)",
+      "length": 4096,
+      "value": 0.09920634920635209,
+      "unit": "% of prefill time",
+      "note": "ablation; STRIM_SKIP_REC is only read on the tensor path, so ~0 here means the flag is a no-op on the blocked path"
+    },
+    {
+      "name": "GDN recurrence share, tensor path (MAX_S=8 + SKIP_REC)",
+      "length": 4096,
+      "value": 74.73982970671712,
+      "unit": "% of tensor-path prefill time",
+      "note": "ablation; tensor recurrence is ~2.7x slower than the blocked kernel, so this overstates the default-path share"
+    },
+    {
+      "name": "blocked kernel vs tensor recurrence",
+      "length": 4096,
+      "value": 277.15355805243445,
+      "unit": "% tok/s",
+      "note": "valid outputs (STRIM_GDN_METAL_MAX_S=8 is a supported A/B)"
+    },
+    {
+      "name": "MTP head prompt seed cost (depth2 - depth0, e2e)",
+      "length": 4096,
+      "value": 70.00000000000028,
+      "unit": "ms",
+      "note": "includes ~1 extra draft+verify round; share of prefill: 1.7%"
+    },
+    {
+      "name": "chunk 512 vs 1024",
+      "length": 16384,
+      "value": -40.57971014492754,
+      "unit": "% tok/s",
+      "note": "valid outputs"
+    },
+    {
+      "name": "chunk 2048 vs 1024",
+      "length": 16384,
+      "value": -0.20703933747412417,
+      "unit": "% tok/s",
+      "note": "valid outputs"
+    },
+    {
+      "name": "chunk 4096 vs 1024",
+      "length": 16384,
+      "value": 0.10351966873705098,
+      "unit": "% tok/s",
+      "note": "valid outputs"
+    },
+    {
+      "name": "GDN recurrence share, blocked kernel path (STRIM_SKIP_REC)",
+      "length": 16384,
+      "value": 0.6282722513088833,
+      "unit": "% of prefill time",
+      "note": "ablation; STRIM_SKIP_REC is only read on the tensor path, so ~0 here means the flag is a no-op on the blocked path"
+    },
+    {
+      "name": "GDN recurrence share, tensor path (MAX_S=8 + SKIP_REC)",
+      "length": 16384,
+      "value": 73.90438247011953,
+      "unit": "% of tensor-path prefill time",
+      "note": "ablation; tensor recurrence is ~2.7x slower than the blocked kernel, so this overstates the default-path share"
+    },
+    {
+      "name": "blocked kernel vs tensor recurrence",
+      "length": 16384,
+      "value": 262.2137404580153,
+      "unit": "% tok/s",
+      "note": "valid outputs (STRIM_GDN_METAL_MAX_S=8 is a supported A/B)"
+    },
+    {
+      "name": "MTP head prompt seed cost (depth2 - depth0, e2e)",
+      "length": 16384,
+      "value": 5869.999999999997,
+      "unit": "ms",
+      "note": "includes ~1 extra draft+verify round; share of prefill: 34.5%"
+    },
+    {
+      "name": "chunk 512 vs 1024",
+      "length": 32768,
+      "value": 68.65284974093264,
+      "unit": "% tok/s",
+      "note": "valid outputs"
+    },
+    {
+      "name": "chunk 2048 vs 1024",
+      "length": 32768,
+      "value": 130.5699481865285,
+      "unit": "% tok/s",
+      "note": "valid outputs"
+    },
+    {
+      "name": "chunk 4096 vs 1024",
+      "length": 32768,
+      "value": 129.5336787564767,
+      "unit": "% tok/s",
+      "note": "valid outputs"
+    },
+    {
+      "name": "GDN recurrence share, blocked kernel path (STRIM_SKIP_REC)",
+      "length": 32768,
+      "value": 36.28048780487804,
+      "unit": "% of prefill time",
+      "note": "ablation; STRIM_SKIP_REC is only read on the tensor path, so ~0 here means the flag is a no-op on the blocked path"
+    },
+    {
+      "name": "GDN recurrence share, tensor path (MAX_S=8 + SKIP_REC)",
+      "length": 32768,
+      "value": 58.01282051282052,
+      "unit": "% of tensor-path prefill time",
+      "note": "ablation; tensor recurrence is ~2.7x slower than the blocked kernel, so this overstates the default-path share"
+    },
+    {
+      "name": "blocked kernel vs tensor recurrence",
+      "length": 32768,
+      "value": 59.54198473282444,
+      "unit": "% tok/s",
+      "note": "valid outputs (STRIM_GDN_METAL_MAX_S=8 is a supported A/B)"
+    }
+  ],
+  "kill_criteria": [
+    "P3 at 4096 tok: chunk 4096 vs 1024 = +0.3% -> KILL (below +2%)",
+    "P3 at 16384 tok: chunk 4096 vs 1024 = +0.1% -> KILL (below +2%)",
+    "P3 at 32768 tok: chunk 4096 vs 1024 = +129.5% -> kept",
+    "P5 at 1024 tok (blocked path, STRIM_SKIP_REC): 0.9% -> INCONCLUSIVE (flag is a no-op on blocked path; needs engine hook)",
+    "P5 at 4096 tok (blocked path, STRIM_SKIP_REC): 0.1% -> INCONCLUSIVE (flag is a no-op on blocked path; needs engine hook)",
+    "P5 at 16384 tok (blocked path, STRIM_SKIP_REC): 0.6% -> INCONCLUSIVE (flag is a no-op on blocked path; needs engine hook)",
+    "P5 at 32768 tok (blocked path, STRIM_SKIP_REC): 36.3% -> kept",
+    "P5 at 1024 tok (tensor path upper bound): 76.1% of tensor-path time",
+    "P5 at 4096 tok (tensor path upper bound): 74.7% of tensor-path time",
+    "P5 at 16384 tok (tensor path upper bound): 73.9% of tensor-path time",
+    "P5 at 32768 tok (tensor path upper bound): 58.0% of tensor-path time"
+  ],
+  "skipped": [
+    "step failed or short: mtp-head/depth2/32768: exit 15",
+    "step failed or short: mtp-head/depth2/32768: expected 3 reps, got 0",
+    "step failed or short: decode/depth2/32768: exit 15",
+    "step failed or short: decode/32768: expected 3 reps, got 0",
+    "step failed or short: decode/32768: expected 3 STRIM_TIMING lines, got 1",
+    "attention vs MLP vs MTP-head shares: no ablation flag exists in the engine (only STRIM_SKIP_REC for the GDN recurrence); needs an engine hook",
+    "MTP head over last-N prompt tokens: no flag exists; only the full-prompt seed cost (depth2 - depth0) is reported",
+    "served-path chunk sweep: chunk is the constant PrefixPrefill.chunk=1024 (StrimCore/PrefixCache.swift); served rows are cold TTFT at that chunk only"
+  ]
+}

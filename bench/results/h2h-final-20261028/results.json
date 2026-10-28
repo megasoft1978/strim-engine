@@ -1,0 +1,1165 @@
+{
+  "tie_pct": 2,
+  "engines": [
+    "strim",
+    "rapid-mlx",
+    "mlx-vlm"
+  ],
+  "cells": [
+    {
+      "id": "c4k_pf",
+      "cell": "cold 4K prefill",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 980.124,
+        "rapid-mlx": 991.631,
+        "mlx-vlm": 998.63
+      },
+      "per_pass": {
+        "strim": [
+          976.6924468818856,
+          983.5558243307962
+        ],
+        "rapid-mlx": [
+          989.0731340001196,
+          994.1887645313304
+        ],
+        "mlx-vlm": [
+          986.0222877707475,
+          1011.2378433126582
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9884,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9815,
+          "verdict": "TIE"
+        }
+      }
+    },
+    {
+      "id": "c4k_tt",
+      "cell": "cold 4K TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 4.19034,
+        "rapid-mlx": 4.14169,
+        "mlx-vlm": 4.11329
+      },
+      "per_pass": {
+        "strim": [
+          4.2050084579968825,
+          4.175665374961682
+        ],
+        "rapid-mlx": [
+          4.152372416981962,
+          4.131006250041537
+        ],
+        "mlx-vlm": [
+          4.165220250026323,
+          4.061359082988929
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0117,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0187,
+          "verdict": "TIE"
+        }
+      }
+    },
+    {
+      "id": "d4k",
+      "cell": "decode 256 tok @ 4K ctx",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 67.1442,
+        "rapid-mlx": 50.5042,
+        "mlx-vlm": 29.5422
+      },
+      "per_pass": {
+        "strim": [
+          67.34443632069394,
+          66.94386604127091
+        ],
+        "rapid-mlx": [
+          50.38865087510309,
+          50.61983576025159
+        ],
+        "mlx-vlm": [
+          26.825247244293024,
+          32.259134891020814
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.3295,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 2.2728,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "c16k_pf",
+      "cell": "cold 16K prefill",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 950.749,
+        "rapid-mlx": 969.053,
+        "mlx-vlm": 980.118
+      },
+      "per_pass": {
+        "strim": [
+          950.186930670274,
+          951.3107329865043
+        ],
+        "rapid-mlx": [
+          968.688887008064,
+          969.4178169300383
+        ],
+        "mlx-vlm": [
+          978.506861047243,
+          981.7299943292206
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9811,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9700,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "c16k_tt",
+      "cell": "cold 16K TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 17.2443,
+        "rapid-mlx": 16.9186,
+        "mlx-vlm": 16.7276
+      },
+      "per_pass": {
+        "strim": [
+          17.254499584028963,
+          17.234116500010714
+        ],
+        "rapid-mlx": [
+          16.924938666983508,
+          16.912212374969386
+        ],
+        "mlx-vlm": [
+          16.75512012501713,
+          16.700111124955583
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0193,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0309,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "d16k",
+      "cell": "decode 256 tok @ 16K ctx",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 56.5412,
+        "rapid-mlx": 45.5313,
+        "mlx-vlm": 29.4403
+      },
+      "per_pass": {
+        "strim": [
+          54.10153553426775,
+          58.980899103693545
+        ],
+        "rapid-mlx": [
+          44.813440988902116,
+          46.24921231415701
+        ],
+        "mlx-vlm": [
+          28.341682714396836,
+          30.538916976680767
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.2418,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.9205,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "c32k_pf",
+      "cell": "cold 32K prefill",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 879.633,
+        "rapid-mlx": 904.004,
+        "mlx-vlm": 906.573
+      },
+      "per_pass": {
+        "strim": [
+          879.8606030660152,
+          879.4062226078211
+        ],
+        "rapid-mlx": [
+          901.8396187750427,
+          906.1679092605314
+        ],
+        "mlx-vlm": [
+          897.5384271388559,
+          915.6073437343645
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9730,
+          "verdict": "LOSS"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9703,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "c32k_tt",
+      "cell": "cold 32K TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 37.2644,
+        "rapid-mlx": 36.26,
+        "mlx-vlm": 36.1606
+      },
+      "per_pass": {
+        "strim": [
+          37.25476500001969,
+          37.27401416696375
+        ],
+        "rapid-mlx": [
+          36.346817457990255,
+          36.17320770799415
+        ],
+        "mlx-vlm": [
+          36.5209990000003,
+          35.800280791008845
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0277,
+          "verdict": "LOSS"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0305,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "d32k",
+      "cell": "decode 128 tok @ 32K ctx",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 52.0858,
+        "rapid-mlx": 36.8902,
+        "mlx-vlm": 25.7259
+      },
+      "per_pass": {
+        "strim": [
+          51.90636780678903,
+          52.26516057683536
+        ],
+        "rapid-mlx": [
+          32.03466907936288,
+          41.74578918078037
+        ],
+        "mlx-vlm": [
+          22.41399770033059,
+          29.037791893323835
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.4119,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 2.0246,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "a512c4",
+      "cell": "c=4 512-tok prompts aggregate",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 60.4239,
+        "rapid-mlx": 70.6407,
+        "mlx-vlm": 66.7631
+      },
+      "per_pass": {
+        "strim": [
+          60.2658796401992,
+          60.58202016429836
+        ],
+        "rapid-mlx": [
+          70.14991999598882,
+          71.13157789877184
+        ],
+        "mlx-vlm": [
+          66.65880373973685,
+          66.86732741903762
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.8554,
+          "verdict": "LOSS"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9050,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "p50_512c4",
+      "cell": "c=4 512-tok prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 1.82454,
+        "rapid-mlx": 2.40126,
+        "mlx-vlm": 2.32064
+      },
+      "per_pass": {
+        "strim": [
+          1.8228624789917376,
+          1.8262103335000575
+        ],
+        "rapid-mlx": [
+          2.4524112704966683,
+          2.350114978966303
+        ],
+        "mlx-vlm": [
+          2.318478250002954,
+          2.3228104375011753
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.7598,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.7862,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "p95_512c4",
+      "cell": "c=4 512-tok prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 2.83174,
+        "rapid-mlx": 2.40127,
+        "mlx-vlm": 2.32071
+      },
+      "per_pass": {
+        "strim": [
+          2.832135818697861,
+          2.831349466141546
+        ],
+        "rapid-mlx": [
+          2.4524221579660663,
+          2.3501265811850316
+        ],
+        "mlx-vlm": [
+          2.3185707588796505,
+          2.3228499643097167
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.1793,
+          "verdict": "LOSS"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.2202,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "a512c8",
+      "cell": "c=8 512-tok prompts aggregate",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 67.3717,
+        "rapid-mlx": 71.2155,
+        "mlx-vlm": 74.3057
+      },
+      "per_pass": {
+        "strim": [
+          67.24948090421786,
+          67.49383247504753
+        ],
+        "rapid-mlx": [
+          71.24118894846377,
+          71.18982283095879
+        ],
+        "mlx-vlm": [
+          74.16212751814409,
+          74.44934205757659
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9460,
+          "verdict": "LOSS"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9067,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "p50_512c8",
+      "cell": "c=8 512-tok prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 3.28835,
+        "rapid-mlx": 5.92453,
+        "mlx-vlm": 4.35757
+      },
+      "per_pass": {
+        "strim": [
+          3.2943222710164264,
+          3.2823810830013826
+        ],
+        "rapid-mlx": [
+          5.921406229026616,
+          5.927650750527391
+        ],
+        "mlx-vlm": [
+          4.360597666498506,
+          4.354541895998409
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.5550,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.7546,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "p95_512c8",
+      "cell": "c=8 512-tok prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 5.70068,
+        "rapid-mlx": 9.53028,
+        "mlx-vlm": 4.35865
+      },
+      "per_pass": {
+        "strim": [
+          5.659979094288428,
+          5.741375362550024
+        ],
+        "rapid-mlx": [
+          9.525067422279971,
+          9.535495895933128
+        ],
+        "mlx-vlm": [
+          4.362606927228626,
+          4.354686245968333
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.5982,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.3079,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "aagc4",
+      "cell": "c=4 agent prompts (~2.8K tok) aggregate",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 27.2956,
+        "rapid-mlx": 27.5057,
+        "mlx-vlm": 28.3994
+      },
+      "per_pass": {
+        "strim": [
+          27.44814618327338,
+          27.143021631009738
+        ],
+        "rapid-mlx": [
+          27.461267869362448,
+          27.550046965633964
+        ],
+        "mlx-vlm": [
+          28.338804466033125,
+          28.45998880330355
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9924,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9611,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "p50_agc4",
+      "cell": "c=4 agent prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 8.12118,
+        "rapid-mlx": 13.5443,
+        "mlx-vlm": 12.4893
+      },
+      "per_pass": {
+        "strim": [
+          8.245733208517777,
+          7.996626290958375
+        ],
+        "rapid-mlx": [
+          13.563721770478878,
+          13.524974333005957
+        ],
+        "mlx-vlm": [
+          12.51061608348391,
+          12.467982416506857
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.5996,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.6503,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "p95_agc4",
+      "cell": "c=4 agent prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 12.6037,
+        "rapid-mlx": 13.5444,
+        "mlx-vlm": 12.4894
+      },
+      "per_pass": {
+        "strim": [
+          12.630129354511153,
+          12.577296206148457
+        ],
+        "rapid-mlx": [
+          13.563744234805927,
+          13.524993254386937
+        ],
+        "mlx-vlm": [
+          12.510675498223282,
+          12.468056939236703
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9305,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0092,
+          "verdict": "TIE"
+        }
+      }
+    },
+    {
+      "id": "aagc8",
+      "cell": "c=8 agent prompts aggregate",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 29.4962,
+        "rapid-mlx": 27.8808,
+        "mlx-vlm": 30.9557
+      },
+      "per_pass": {
+        "strim": [
+          29.682937600345344,
+          29.309538157677085
+        ],
+        "rapid-mlx": [
+          27.88256335378495,
+          27.87896858110245
+        ],
+        "mlx-vlm": [
+          30.952401073389307,
+          30.958965871621693
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0579,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9529,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "p50_agc8",
+      "cell": "c=8 agent prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 14.2857,
+        "rapid-mlx": 22.3886,
+        "mlx-vlm": 23.2916
+      },
+      "per_pass": {
+        "strim": [
+          14.598953104490647,
+          13.972491041495232
+        ],
+        "rapid-mlx": [
+          22.392857458005892,
+          22.384270520997234
+        ],
+        "mlx-vlm": [
+          23.28224564550328,
+          23.30088714597514
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.6381,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.6133,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "p95_agc8",
+      "cell": "c=8 agent prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 23.8921,
+        "rapid-mlx": 31.7107,
+        "mlx-vlm": 23.2928
+      },
+      "per_pass": {
+        "strim": [
+          23.836058639694237,
+          23.948061069182586
+        ],
+        "rapid-mlx": [
+          31.713206502082176,
+          31.708216143751635
+        ],
+        "mlx-vlm": [
+          23.284424374764786,
+          23.30115868532448
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.7534,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0257,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "a4kc4",
+      "cell": "c=4 4K prompts aggregate (prefill-bound)",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 12.738,
+        "rapid-mlx": 13.0842,
+        "mlx-vlm": 13.4474
+      },
+      "per_pass": {
+        "strim": [
+          12.688079351016034,
+          12.788013847683162
+        ],
+        "rapid-mlx": [
+          13.046702877149293,
+          13.121788040909022
+        ],
+        "mlx-vlm": [
+          13.425005699475147,
+          13.469879619670035
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9735,
+          "verdict": "LOSS"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9472,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "p50_4kc4",
+      "cell": "c=4 4K prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 10.7364,
+        "rapid-mlx": 16.9699,
+        "mlx-vlm": 16.2458
+      },
+      "per_pass": {
+        "strim": [
+          10.755128770513693,
+          10.717719562497223
+        ],
+        "rapid-mlx": [
+          16.98437095800182,
+          16.955474854505155
+        ],
+        "mlx-vlm": [
+          16.264589332975447,
+          16.22707345848903
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.6327,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.6609,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "p95_4kc4",
+      "cell": "c=4 4K prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 16.6405,
+        "rapid-mlx": 16.97,
+        "mlx-vlm": 16.2459
+      },
+      "per_pass": {
+        "strim": [
+          16.688258647354086,
+          16.59266919828078
+        ],
+        "rapid-mlx": [
+          16.9844079267059,
+          16.95552857068542
+        ],
+        "mlx-vlm": [
+          16.264641181216575,
+          16.22707878120709
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9806,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0243,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "a4kc8",
+      "cell": "c=8 4K prompts aggregate (prefill-bound)",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 12.8833,
+        "rapid-mlx": 13.0929,
+        "mlx-vlm": 13.7853
+      },
+      "per_pass": {
+        "strim": [
+          12.963129206326556,
+          12.803394393037191
+        ],
+        "rapid-mlx": [
+          13.07185869961661,
+          13.113926766108069
+        ],
+        "mlx-vlm": [
+          13.770201507582113,
+          13.800364486639335
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9840,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9346,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "p50_4kc8",
+      "cell": "c=8 4K prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 19.5204,
+        "rapid-mlx": 26.7876,
+        "mlx-vlm": 32.1855
+      },
+      "per_pass": {
+        "strim": [
+          19.564592604525387,
+          19.47623681247933
+        ],
+        "rapid-mlx": [
+          26.83422312498442,
+          26.740960604016436
+        ],
+        "mlx-vlm": [
+          32.208428687998094,
+          32.16255406252458
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.7287,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.6065,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "p95_4kc8",
+      "cell": "c=8 4K prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 33.5139,
+        "rapid-mlx": 36.5401,
+        "mlx-vlm": 32.1872
+      },
+      "per_pass": {
+        "strim": [
+          33.69536652095849,
+          33.332413351870485
+        ],
+        "rapid-mlx": [
+          36.59736324549594,
+          36.48279624375573
+        ],
+        "mlx-vlm": [
+          32.21062262267223,
+          32.163839769302285
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9172,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0412,
+          "verdict": "LOSS"
+        }
+      }
+    },
+    {
+      "id": "aw5",
+      "cell": "W5 4 clients, 16K shared prefix aggregate",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 9.45998,
+        "rapid-mlx": 3.31348,
+        "mlx-vlm": 3.47416
+      },
+      "per_pass": {
+        "strim": [
+          9.459675819139788,
+          9.460283642771484
+        ],
+        "rapid-mlx": [
+          3.2928263791521855,
+          3.334133686395336
+        ],
+        "mlx-vlm": [
+          3.466750774195808,
+          3.481562910461724
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 2.8550,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 2.7230,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "p50_w5",
+      "cell": "W5 p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 20.6874,
+        "rapid-mlx": 74.1986,
+        "mlx-vlm": 70.4212
+      },
+      "per_pass": {
+        "strim": [
+          20.66345810398343,
+          20.711288979509845
+        ],
+        "rapid-mlx": [
+          74.6936197084724,
+          73.7035291250213
+        ],
+        "mlx-vlm": [
+          70.5451977715129,
+          70.29712041650782
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.2788,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.2938,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "p95_w5",
+      "cell": "W5 p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 23.3563,
+        "rapid-mlx": 74.1986,
+        "mlx-vlm": 70.422
+      },
+      "per_pass": {
+        "strim": [
+          23.328216429441817,
+          23.38429433752608
+        ],
+        "rapid-mlx": [
+          74.69365337769268,
+          73.70357000005606
+        ],
+        "mlx-vlm": [
+          70.54661013404257,
+          70.29737586695992
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.3148,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.3317,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "rp8",
+      "cell": "agent replay prefill sum T1-T8",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 49.6885,
+        "rapid-mlx": 49.4481,
+        "mlx-vlm": 193.58
+      },
+      "per_pass": {
+        "strim": [
+          49.68813954090001,
+          49.68887112510856
+        ],
+        "rapid-mlx": [
+          49.50490441505099,
+          49.39123112690868
+        ],
+        "mlx-vlm": [
+          193.58406979189022,
+          193.5755631259526
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0049,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.2567,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "rp6",
+      "cell": "agent replay prefill sum T1-T6",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 35.1093,
+        "rapid-mlx": 34.9725,
+        "mlx-vlm": 108.036
+      },
+      "per_pass": {
+        "strim": [
+          35.10216408292763,
+          35.11647445807466
+        ],
+        "rapid-mlx": [
+          35.005056041060016,
+          34.940037417865824
+        ],
+        "mlx-vlm": [
+          108.03317824995611,
+          108.03951420891099
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0039,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.3250,
+          "verdict": "WIN"
+        }
+      }
+    },
+    {
+      "id": "rpc8",
+      "cell": "agent replay T8 cached fraction",
+      "unit": "frac",
+      "better": "higher",
+      "median": {
+        "strim": 0.872473,
+        "rapid-mlx": 0.872282,
+        "mlx-vlm": 0
+      },
+      "per_pass": {
+        "strim": [
+          0.8724717175179979,
+          0.8724748402262543
+        ],
+        "rapid-mlx": [
+          0.8722883306400274,
+          0.8722758215387629
+        ],
+        "mlx-vlm": [
+          0.0,
+          0.0
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0002,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        }
+      }
+    }
+  ]
+}

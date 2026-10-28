@@ -1,0 +1,52 @@
+{
+ "engine": "tensorfold",
+ "pass": 2,
+ "cmd": [
+  "tensorfold",
+  "serve",
+  "models/qwen38-4bit",
+  "--port",
+  "8651",
+  "--parallel",
+  "4",
+  "--no-update-check"
+ ],
+ "env": {},
+ "cache": "default on",
+ "quant": "MLX 4-bit",
+ "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+ "started": {
+  "t": "2026-10-27T09:57:58+0100",
+  "uptime": "9:57  up 3 days,  3:32, 1 user, load averages: 1.49 1.47 1.58",
+  "loadavg": "{ 1.49 1.47 1.58 }",
+  "top_cpu": [
+   "18.0 26608 /sbin/launchd",
+   "16.6 146752 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "7.6 134992 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "2.6 10432 /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecod",
+   "2.1 20032 /usr/sbin/coreaudiod"
+  ]
+ },
+ "status": "done",
+ "ready_s": 5.0,
+ "model_id": "qwen38-4bit",
+ "pids": [
+  2131
+ ],
+ "warmup_s": 0.0,
+ "ended": {
+  "t": "2026-10-27T10:00:20+0100",
+  "uptime": "10:00  up 3 days,  3:34, 1 user, load averages: 3.08 2.20 1.86",
+  "loadavg": "{ 3.08 2.20 1.86 }",
+  "top_cpu": [
+   "18.1 23248 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadat",
+   "15.8 24944 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadat",
+   "15.5 155376 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "8.4 134560 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "2.8 344976 /Users/user/.local/bin/claude"
+  ]
+ },
+ "killed_pids": [
+  2131
+ ]
+}

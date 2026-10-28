@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 6,
+  "id" : "tf-17",
+  "language" : "swift",
+  "license" : "MIT",
+  "note" : "",
+  "prompt" : "The automated tests of this Swift package currently fail. Run `swift test --build-system native --disable-sandbox` from the repository root to see the failures. Change the package non-test source code so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-swift",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 920,
+  "test_paths" : [
+    "Tests"
+  ],
+  "test_sha256" : {
+    "Tests\/CSVTests\/CSVTests.swift" : "078f2abcd588903887bbff587c6a69eff666db9cb772e8cb7dec5f9cd591c9db"
+  },
+  "tree_sha256" : "83136aae49074d506131550c788871f14539623472a2b0ebdbeaab7de015a42a",
+  "verify_cmd" : "swift test --build-system native --disable-sandbox"
+}

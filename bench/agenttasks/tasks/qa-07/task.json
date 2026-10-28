@@ -1,0 +1,52 @@
+{
+  "answer_env" : "ANSWER_FILE",
+  "archive_excludes" : [
+    "docs",
+    "doc",
+    ".github",
+    "changelog.d",
+    "examples",
+    "perf",
+    "extra",
+    "scripts",
+    "bin",
+    "*.png",
+    "*.jpg",
+    "*.svg",
+    "*.gif",
+    "*.ico",
+    "*.pdf",
+    "*.lock",
+    "*.sum"
+  ],
+  "base_commit" : "f5b54ae1392365a578bb43ab728e3fcdc291f0cd",
+  "class" : "repo-qa",
+  "est_solo_turns" : 4,
+  "expected_answer" : {
+    "all_of" : [
+      "ftoa\\.go",
+      "FtoaWithDigits",
+      "si\\.go"
+    ]
+  },
+  "id" : "qa-07",
+  "known_answer" : "FtoaWithDigits is defined in ftoa.go and called from si.go (ComputeSI\/SI formatting).",
+  "language" : "go",
+  "license" : "MIT",
+  "no_edit" : true,
+  "note" : "",
+  "prompt" : "Answer a question about the repository in the current directory. Do NOT modify any file. Reply with the repo-relative file path(s) and the exact symbol name(s) (function, class, method or variable) that answer it; add line numbers if you have them. Keep the answer short.\n\nQuestion: Which exported function limits a float's string form to a given number of fractional digits, in which file is it defined, and which non-test file calls it when formatting SI values?",
+  "repo" : "https:\/\/github.com\/dustin\/go-humanize",
+  "repo_key" : "go-humanize",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 23997,
+  "test_paths" : [
+
+  ],
+  "test_sha256" : {
+
+  },
+  "tree_sha256" : "23f9c1bbbb39e720451561afd5c9ae36f9b3410b6721e27808e12caf50a21b13",
+  "verify_cmd" : "grep -Eq 'ftoa\\.go' \"$ANSWER_FILE\" && grep -Eq 'FtoaWithDigits' \"$ANSWER_FILE\" && grep -Eq 'si\\.go' \"$ANSWER_FILE\"",
+  "wrong_answer" : "Ftoa in ftoa.go, called from bytes.go."
+}

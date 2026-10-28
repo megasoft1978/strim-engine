@@ -1,0 +1,167 @@
+{
+  "counts" : {
+    "mechanical-edit" : 3,
+    "repo-qa" : 2,
+    "test-fix" : 12
+  },
+  "languages" : {
+    "go" : 9,
+    "swift" : 8
+  },
+  "tasks" : [
+    {
+      "base_commit" : "2d3c2a9cc518326daf99a383f07c4d3c44317e4d",
+      "class" : "mechanical-edit",
+      "id" : "me-06",
+      "language" : "go",
+      "license" : "BSD-3-Clause",
+      "repo" : "https:\/\/github.com\/google\/uuid",
+      "tree_sha256" : "5361710eeec8ca49581aa8398b0dffd7021f335e5a6e69473972f687a2caec36"
+    },
+    {
+      "base_commit" : "d26a4dcd30a3c17923a2083b48bd6233aada9d47",
+      "class" : "mechanical-edit",
+      "id" : "me-07",
+      "language" : "go",
+      "license" : "BSD-3-Clause",
+      "repo" : "https:\/\/github.com\/spf13\/pflag",
+      "tree_sha256" : "ac6d377ad8ca94b58dab1a8ca62ff8018b34ee7607d3e5d2e165eda1f4e581ab"
+    },
+    {
+      "base_commit" : "f5b54ae1392365a578bb43ab728e3fcdc291f0cd",
+      "class" : "mechanical-edit",
+      "id" : "me-08",
+      "language" : "go",
+      "license" : "MIT",
+      "repo" : "https:\/\/github.com\/dustin\/go-humanize",
+      "tree_sha256" : "7457cf97de66c10cf59d655c4b3eb8a5ba0ede58872e292401b3b943077bac96"
+    },
+    {
+      "base_commit" : "d26a4dcd30a3c17923a2083b48bd6233aada9d47",
+      "class" : "repo-qa",
+      "id" : "qa-01",
+      "language" : "go",
+      "license" : "BSD-3-Clause",
+      "repo" : "https:\/\/github.com\/spf13\/pflag",
+      "tree_sha256" : "6c328b023fd05dc2e4660ede347eace8bbe0826d015b0828c33ed7cdb48f4d23"
+    },
+    {
+      "base_commit" : "f5b54ae1392365a578bb43ab728e3fcdc291f0cd",
+      "class" : "repo-qa",
+      "id" : "qa-07",
+      "language" : "go",
+      "license" : "MIT",
+      "repo" : "https:\/\/github.com\/dustin\/go-humanize",
+      "tree_sha256" : "23f9c1bbbb39e720451561afd5c9ae36f9b3410b6721e27808e12caf50a21b13"
+    },
+    {
+      "base_commit" : "212246793da0a95873d1f3be675529f7ab7dc799",
+      "class" : "test-fix",
+      "id" : "tf-02",
+      "language" : "go",
+      "license" : "MIT",
+      "repo" : "https:\/\/github.com\/dustin\/go-humanize",
+      "tree_sha256" : "6753e9cac3ec1417caa7590933b65037ae8561374294f9c7daca992633e34e04"
+    },
+    {
+      "base_commit" : "ad27a401853e78fbd8025291e61fe703cfdaea98",
+      "class" : "test-fix",
+      "id" : "tf-03",
+      "language" : "go",
+      "license" : "BSD-3-Clause",
+      "repo" : "https:\/\/github.com\/spf13\/pflag",
+      "tree_sha256" : "72d3aaf577548318b8b5516fd8d8380c36fc5ab6e4cacba7c98e42148c6bfafb"
+    },
+    {
+      "base_commit" : "69bc3bd5b37fa90e994be9acecf7430269591713",
+      "class" : "test-fix",
+      "id" : "tf-04",
+      "language" : "go",
+      "license" : "BSD-3-Clause",
+      "repo" : "https:\/\/github.com\/spf13\/pflag",
+      "tree_sha256" : "43dccae949dea882cfff1bfd9e18442a28398b77faa4fc41e502b7d07c31e8b1"
+    },
+    {
+      "base_commit" : "2d3c2a9cc518326daf99a383f07c4d3c44317e4d",
+      "class" : "test-fix",
+      "id" : "tf-05",
+      "language" : "go",
+      "license" : "BSD-3-Clause",
+      "repo" : "https:\/\/github.com\/google\/uuid",
+      "tree_sha256" : "b4d0a23397884797240150da398f87ba4b13941482625780a99b02a030aaa773"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-11",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "f4c175918907dd1b3048c8b2ca4b34103dd7cdbcf8009d4dffd1a5ff7b539cd1"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-12",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "0c9e7fe8ccaee15b6a5315386da73e658d9cfcec8f245ba6080c605f891804b4"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-13",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "596fa798200666581b1a415201600cf0e40e01e13ba5add955cc897421454288"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-14",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "7b884f3f62a475bba9b37c9017ca2d36dc400c744443396dbf36805c30f06d03"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-15",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "3f602fce45c4e4cff493bde63582974eb0ea5f909027c022ce4d4ee96c02de03"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-16",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "6e7face57cbd508f03cbf60492a851505c5c33f1676fe4fcceab7b4d109f4057"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-17",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "83136aae49074d506131550c788871f14539623472a2b0ebdbeaab7de015a42a"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-18",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "d3b4105b93b68a16a6509c93c68b5397cf2da44fdbfbb35a8e594e6cb7dc333b"
+    }
+  ],
+  "version" : 2
+}

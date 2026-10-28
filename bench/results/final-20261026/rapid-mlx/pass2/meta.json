@@ -1,0 +1,56 @@
+{
+ "engine": "rapid-mlx",
+ "pass": 2,
+ "cmd": [
+  "rapid-mlx",
+  "--no-telemetry",
+  "serve",
+  "models/qwen38-4bit",
+  "--port",
+  "8651",
+  "--max-num-seqs",
+  "4",
+  "--speculative-config",
+  "{\"method\":\"mtp\",\"model\":\"models/qwen38-mtp-4bit\"}"
+ ],
+ "env": {},
+ "cache": "default on",
+ "quant": "MLX 4-bit + MTP head",
+ "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+ "started": {
+  "t": "2026-10-27T07:36:29+0100",
+  "uptime": "7:36  up 3 days,  1:10, 1 user, load averages: 9.84 3.62 2.37",
+  "loadavg": "{ 9.84 3.62 2.37 }",
+  "top_cpu": [
+   "128.5 607296 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.f",
+   "115.8 618224 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+   "99.9 376544 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.fr",
+   "73.8 296704 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.fr",
+   "44.0 133568 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.fr"
+  ]
+ },
+ "status": "done",
+ "ready_s": 7.1,
+ "model_id": "models/qwen38-4bit",
+ "pids": [
+  57076,
+  57085
+ ],
+ "warmup_s": 5.2,
+ "ended": {
+  "t": "2026-10-27T07:47:38+0100",
+  "uptime": "7:47  up 3 days,  1:21, 1 user, load averages: 2.69 3.11 2.93",
+  "loadavg": "{ 2.69 3.11 2.93 }",
+  "top_cpu": [
+   "26.1 79936 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "22.1 54272 /Applications/Mica.app/Contents/MacOS/Mica",
+   "14.9 138800 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "12.1 82912 /Applications/Stats.app/Contents/MacOS/Stats",
+   "7.3 562288 /Users/user/.local/bin/claude"
+  ]
+ },
+ "killed_pids": [
+  57076,
+  57085
+ ]
+}

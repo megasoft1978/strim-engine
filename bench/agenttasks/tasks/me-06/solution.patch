@@ -1,0 +1,61 @@
+diff --git a/uuid.go b/uuid.go
+index dc75cee..99edb1f 100644
+--- a/uuid.go
++++ b/uuid.go
+@@ -352,7 +352,7 @@ func SetRand(r io.Reader) {
+ 	rander = r
+ }
+ 
+-// EnableRandPool enables internal randomness pool used for Random
++// EnableRandomPool enables internal randomness pool used for Random
+ // (Version 4) UUID generation. The pool contains random bytes read from
+ // the random number generator on demand in batches. Enabling the pool
+ // may improve the UUID generation throughput significantly.
+@@ -360,17 +360,17 @@ func SetRand(r io.Reader) {
+ // Since the pool is stored on the Go heap, this feature may be a bad fit
+ // for security sensitive applications.
+ //
+-// Both EnableRandPool and DisableRandPool are not thread-safe and should
++// Both EnableRandomPool and DisableRandPool are not thread-safe and should
+ // only be called when there is no possibility that New or any other
+ // UUID Version 4 generation function will be called concurrently.
+-func EnableRandPool() {
++func EnableRandomPool() {
+ 	poolEnabled = true
+ }
+ 
+ // DisableRandPool disables the randomness pool if it was previously
+-// enabled with EnableRandPool.
++// enabled with EnableRandomPool.
+ //
+-// Both EnableRandPool and DisableRandPool are not thread-safe and should
++// Both EnableRandomPool and DisableRandPool are not thread-safe and should
+ // only be called when there is no possibility that New or any other
+ // UUID Version 4 generation function will be called concurrently.
+ func DisableRandPool() {
+diff --git a/version4.go b/version4.go
+index 7697802..ea9f364 100644
+--- a/version4.go
++++ b/version4.go
+@@ -27,7 +27,7 @@ func NewString() string {
+ // The strength of the UUIDs is based on the strength of the crypto/rand
+ // package.
+ //
+-// Uses the randomness pool if it was enabled with EnableRandPool.
++// Uses the randomness pool if it was enabled with EnableRandomPool.
+ //
+ // A note about uniqueness derived from the UUID Wikipedia entry:
+ //
+diff --git a/version7.go b/version7.go
+index 3fec671..5e4ceea 100644
+--- a/version7.go
++++ b/version7.go
+@@ -18,7 +18,7 @@ import (
+ // Implementations SHOULD utilize UUID version 7 over UUID version 1 and 6 if possible.
+ //
+ // NewV7 returns a Version 7 UUID based on the current time(Unix Epoch).
+-// Uses the randomness pool if it was enabled with EnableRandPool.
++// Uses the randomness pool if it was enabled with EnableRandomPool.
+ // On error, NewV7 returns Nil and an error
+ func NewV7() (UUID, error) {
+ 	uuid, err := NewRandom()

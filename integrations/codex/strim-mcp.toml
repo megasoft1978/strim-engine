@@ -1,0 +1,10 @@
+# Add to ~/.codex/config.toml (or run: strim mcp-config --codex).
+# Needs: export STRIM_TOKEN=$(cat ~/.strim/token)   (strim serve must be running)
+[mcp_servers.strim]
+url = "http://127.0.0.1:8203/mcp"
+bearer_token_env_var = "STRIM_TOKEN"
+tool_timeout_sec = 60
+# With approval_policy=never Codex rejects MCP calls ("MCP tool call requires approval") unless tools
+# are pre-approved. This auto-approves delegation to a sandboxed, worktree-only agent; delete the line
+# if you prefer a prompt per call.
+default_tools_approval_mode = "approve"

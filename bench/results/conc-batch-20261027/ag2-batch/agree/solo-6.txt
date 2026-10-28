@@ -1,0 +1,9 @@
+### Code Explanation
+
+This Swift code defines the core configuration and state management structures for **StrimEngine**, a high-performance LLM inference engine built on the MLX framework. It focuses on memory efficiency, session management, and speculative decoding.
+
+Here is a breakdown of the key components:
+
+1.  **`EngineConfig`**:
+    *   A `Sendable` struct that holds global engine settings.
+    *   **Memory Management**: It calculates memory budgets (`memoryBudgetBytes`, `mlxCacheLimitBytes`) and prefix cache sizes (`prefixCacheBytes`) based on the physical RAM of the machine and the size of

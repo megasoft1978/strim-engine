@@ -1,0 +1,19 @@
+== real-prompt parity B=8 (6K-char prompts) STRIM_BATCH_DECODE=0
+checkbatchparity ctx=8 B=8 steps=128 lens=[1691, 291, 1575, 1671, 1044, 1712, 1734, 1442]
+tokens: 1017/1024 equal (teacher-forced), max logit diff 4.5000 (step 0: 0.2188), mean abs diff 0.0299
+  MISMATCH step 1 seq 4 ref=5004 batched=5529 top1-top2 margin 0.0000
+  MISMATCH step 19 seq 1 ref=2649 batched=3300 top1-top2 margin 0.0000
+  MISMATCH step 81 seq 3 ref=92217 batched=64700 top1-top2 margin 0.1250
+  MISMATCH step 82 seq 0 ref=593 batched=8 top1-top2 margin 0.1250
+  MISMATCH step 91 seq 7 ref=23975 batched=1132 top1-top2 margin 0.1250
+  MISMATCH step 113 seq 1 ref=31789 batched=57208 top1-top2 margin 0.0000
+  MISMATCH step 114 seq 2 ref=21261 batched=27204 top1-top2 margin 0.0000
+RESULT 7 mismatches, max margin 0.1250 vs max logit diff 4.5000 -> explainable near-ties
+== real-prompt parity B=8 (6K-char prompts) STRIM_BATCH_DECODE=1
+checkbatchparity ctx=8 B=8 steps=128 lens=[1691, 291, 1575, 1671, 1044, 1712, 1734, 1442]
+tokens: 1020/1024 equal (teacher-forced), max logit diff 4.5625 (step 0: 0.2031), mean abs diff 0.0301
+  MISMATCH step 19 seq 1 ref=2649 batched=3300 top1-top2 margin 0.0000
+  MISMATCH step 35 seq 7 ref=424 batched=279 top1-top2 margin 0.1250
+  MISMATCH step 82 seq 0 ref=593 batched=8 top1-top2 margin 0.1250
+  MISMATCH step 113 seq 1 ref=31789 batched=57208 top1-top2 margin 0.0000
+RESULT 4 mismatches, max margin 0.1250 vs max logit diff 4.5625 -> explainable near-ties

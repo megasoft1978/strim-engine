@@ -1,0 +1,8 @@
+natural 59
+code 93
+sql 33
+rust 29
+csvpy 26
+prose 51
+math 41
+json 30

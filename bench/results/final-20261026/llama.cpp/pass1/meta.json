@@ -1,0 +1,63 @@
+{
+ "engine": "llama.cpp",
+ "pass": 1,
+ "cmd": [
+  "llama-server",
+  "-m",
+  "/Users/user/Desktop/Freelance/strim-engine/models/gguf/Qwen3.8-27B-Q4_K_M.gguf",
+  "-ngl",
+  "all",
+  "-fa",
+  "on",
+  "-c",
+  "65536",
+  "-np",
+  "2",
+  "--cache-prompt",
+  "--cache-ram",
+  "8192",
+  "--jinja",
+  "--host",
+  "127.0.0.1",
+  "--port",
+  "8080"
+ ],
+ "env": {},
+ "cache": "--cache-prompt --cache-ram 8192",
+ "quant": "GGUF Q4_K_M",
+ "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+ "started": {
+  "t": "2026-10-27T09:03:54+0100",
+  "uptime": "9:03  up 3 days,  2:38, 1 user, load averages: 1.88 1.77 2.53",
+  "loadavg": "{ 1.88 1.77 2.53 }",
+  "top_cpu": [
+   "17.0 157152 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "8.3 135152 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "7.7 267872 /Users/user/.local/bin/claude",
+   "2.6 10080 /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecod",
+   "2.1 20016 /usr/sbin/coreaudiod"
+  ]
+ },
+ "status": "done",
+ "ready_s": 5.1,
+ "model_id": "/Users/user/Desktop/Freelance/strim-engine/models/gguf/Qwen3.8-27B-Q4_K_M.gguf",
+ "pids": [
+  87788
+ ],
+ "warmup_s": 6.2,
+ "ended": {
+  "t": "2026-10-27T09:22:59+0100",
+  "uptime": "9:22  up 3 days,  2:57, 1 user, load averages: 1.46 1.27 1.58",
+  "loadavg": "{ 1.46 1.27 1.58 }",
+  "top_cpu": [
+   "16.0 156240 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "8.2 134800 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "2.5 10080 /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecod",
+   "2.5 607808 /Users/user/.local/bin/claude",
+   "2.1 20016 /usr/sbin/coreaudiod"
+  ]
+ },
+ "killed_pids": [
+  87788
+ ]
+}

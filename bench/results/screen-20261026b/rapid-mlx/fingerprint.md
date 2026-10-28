@@ -1,0 +1,109 @@
+# fingerprint: rapid-mlx
+
+- checkpoint: same
+- features claimed: MTP spec decode, continuous batching (max-num-seqs 4), prefix cache (default on)
+- engine version: rapid-mlx 0.15.7
+- checkpoint quantization (config.json): {"group_size": 64, "bits": 4, "mode": "affine"}
+- vendor source: vendor/rapid-mlx-src/rapid_mlx; keyword-hit files: 175
+- launch [mtp-cache-default]: `rapid-mlx --no-telemetry serve models/qwen38-4bit --port 8651 --max-num-seqs 4 --speculative-config '{"method":"mtp","model":"models/qwen38-mtp-4bit"}'`
+  - time-to-ready: 7.0 s; RSS idle 15954480 kB, peak 16421088 kB; model id: models/qwen38-4bit
+  - startup log hits: INFO:rapid_mlx.utils.mamba_cache:[MambaCache] Skipping _make_cache patch — mlx-lm ArraysCache has native batching support
+  - startup log hits: INFO:rapid_mlx.kv_cache_dtype:KV cache dtype: bf16 (model=models/qwen38-4bit) — bf16 selected (no QuantizedKVCache wrap)
+  - startup log hits: INFO:rapid_mlx.cli:Non-trimmable model cache detected with --enable-prefix-cache: auto-setting --hybrid-cache-entries=8 (pass --hybrid-cache-entries 0 to disable)
+  - startup log hits: INFO:rapid_mlx.server:Model 'models/qwen38-4bit' auto-downgraded to the text-only lane because the requested speculative decoder is not honored by its vision lane. Pass -
+  - startup log hits: INFO:rapid_mlx.server:Loading model with BatchedEngine: models/qwen38-4bit
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.qwen3_5_inject:[mtp.inject] Built MTP module (1 layer(s), hidden_size=5120).
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.qwen3_5_inject:[mtp.inject] Quantized MTP: 4-bit, group_size=64 (from sidecar tensors)
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.qwen3_5_inject:[mtp.inject] Loaded 31/31 expected MTP weight tensors from model.safetensors
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.cache_patch:[mtp.cache_patch] Installed rollback_state slot on ArraysCache (vendored from mlx-lm PR #990).
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.cache_patch:[mtp.cache_patch] Installed GatedDeltaNet chunk-split for MTP rollback (snapshot at cache.n_confirmed_for_mtp boundary).
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.qwen3_5_inject:[mtp.inject] Patched TextModel with MTP surfaces (return_hidden, n_confirmed, mtp_forward, make_mtp_cache).
+  - startup log hits: INFO:rapid_mlx.engine.batched:[MTP-vendored] dispatch_mtp_inject succeeded for model_type='qwen3_5' sidecar='models/qwen38-mtp-4bit'
+  - startup log hits: INFO:rapid_mlx.engine.batched:Metal memory limits set (auto): allocation_limit=54.1GB (90% of 60.1GB, weights=15.4GB), cache_limit=13.5GB
+  - startup log hits: INFO:rapid_mlx.memory_cache:MemoryAwarePrefixCache initialized: max_memory=8696.1MB, max_entries=1000, radix_index=on
+  - startup log hits: INFO:rapid_mlx.scheduler:Memory-aware cache enabled: limit=8696.1MB (agent-session floor 4096.0MB), index=radix
+  - startup log hits: INFO:rapid_mlx.engine_core:Model profile: models/qwen38-4bit → pure attention, throttle OFF, spec decode MTP (active), tool=hermes, reasoning=qwen3
+  - startup log hits: INFO:rapid_mlx.engine.batched:BatchedEngine loaded: models/qwen38-4bit (mllm=False)
+  - startup log hits: INFO:rapid_mlx.scheduler:[cache_fetch] request=4129b57f-06a MISS prompt_tokens=53 time=0.000s entries=0
+  - startup log hits: INFO:rapid_mlx.scheduler:[MTP-vendored] installed on GenerationBatch._step (single-request adaptive chain-of-K with request-local sampling; request state reaped on finish
+  - startup log hits: INFO:rapid_mlx.scheduler:[dense_sampler_fastpath] installed on BatchGenerator
+  - startup log hits: INFO:rapid_mlx.singleton_cache_fastpath:[singleton-fastpath] installed (B=1 keeps singleton KV caches)
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.reproducible_depth:[MTP] greedy requests on '18:models/qwen38-4bit+mtp:models/qwen38-mtp-4bit': depth <= 1, default verify curve, round cos
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.draft_k_controller_v2:[MTP-controller] created DepthController for model_id='18:models/qwen38-4bit+mtp:models/qwen38-mtp-4bit' max_k=1 (pro
+  - startup log hits: INFO:rapid_mlx.memory_cache:[cache_persist] LOADED 8 entries from /Users/user/.cache/rapid-mlx/prefix_cache/models--qwen38-4bit--25434a87a733f061 in 0.0s (2674MB to
+  - startup log hits: INFO:rapid_mlx.runtime.radix_index:[radix] loaded radix index from /Users/user/.cache/rapid-mlx/prefix_cache/models--qwen38-4bit--25434a87a733f061/radix.index: 8 en
+- launch [mtp-cache-off]: `rapid-mlx --no-telemetry serve models/qwen38-4bit --port 8651 --max-num-seqs 4 --speculative-config '{"method":"mtp","model":"models/qwen38-mtp-4bit"}' --disable-prefix-cache --hybrid-cache-entries 0`
+  - time-to-ready: 6.0 s; RSS idle 15968432 kB, peak 15974400 kB; model id: models/qwen38-4bit
+  - startup log hits: INFO:rapid_mlx.utils.mamba_cache:[MambaCache] Skipping _make_cache patch — mlx-lm ArraysCache has native batching support
+  - startup log hits: INFO:rapid_mlx.kv_cache_dtype:KV cache dtype: bf16 (model=models/qwen38-4bit) — bf16 selected (no QuantizedKVCache wrap)
+  - startup log hits: INFO:rapid_mlx.server:Model 'models/qwen38-4bit' auto-downgraded to the text-only lane because the requested speculative decoder is not honored by its vision lane. Pass -
+  - startup log hits: INFO:rapid_mlx.server:Loading model with BatchedEngine: models/qwen38-4bit
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.qwen3_5_inject:[mtp.inject] Built MTP module (1 layer(s), hidden_size=5120).
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.qwen3_5_inject:[mtp.inject] Quantized MTP: 4-bit, group_size=64 (from sidecar tensors)
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.qwen3_5_inject:[mtp.inject] Loaded 31/31 expected MTP weight tensors from model.safetensors
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.cache_patch:[mtp.cache_patch] Installed rollback_state slot on ArraysCache (vendored from mlx-lm PR #990).
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.cache_patch:[mtp.cache_patch] Installed GatedDeltaNet chunk-split for MTP rollback (snapshot at cache.n_confirmed_for_mtp boundary).
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.qwen3_5_inject:[mtp.inject] Patched TextModel with MTP surfaces (return_hidden, n_confirmed, mtp_forward, make_mtp_cache).
+  - startup log hits: INFO:rapid_mlx.engine.batched:[MTP-vendored] dispatch_mtp_inject succeeded for model_type='qwen3_5' sidecar='models/qwen38-mtp-4bit'
+  - startup log hits: INFO:rapid_mlx.engine.batched:Metal memory limits set (auto): allocation_limit=54.1GB (90% of 60.1GB, weights=15.4GB), cache_limit=13.5GB
+  - startup log hits: INFO:rapid_mlx.engine_core:Model profile: models/qwen38-4bit → pure attention, throttle OFF, spec decode MTP (active), tool=hermes, reasoning=qwen3
+  - startup log hits: INFO:rapid_mlx.engine.batched:BatchedEngine loaded: models/qwen38-4bit (mllm=False)
+  - startup log hits: INFO:rapid_mlx.scheduler:[MTP-vendored] installed on GenerationBatch._step (single-request adaptive chain-of-K with request-local sampling; request state reaped on finish
+  - startup log hits: INFO:rapid_mlx.scheduler:[dense_sampler_fastpath] installed on BatchGenerator
+  - startup log hits: INFO:rapid_mlx.singleton_cache_fastpath:[singleton-fastpath] installed (B=1 keeps singleton KV caches)
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.reproducible_depth:[MTP] greedy requests on '18:models/qwen38-4bit+mtp:models/qwen38-mtp-4bit': depth <= 1, default verify curve, round cos
+  - startup log hits: INFO:rapid_mlx.spec_decode.mtp.draft_k_controller_v2:[MTP-controller] created DepthController for model_id='18:models/qwen38-4bit+mtp:models/qwen38-mtp-4bit' max_k=1 (pro
+  - startup log hits: INFO:rapid_mlx.scheduler:[cache_persist] no memory-aware cache to load into
+  - startup log hits: Mode: Continuous batching (for multiple concurrent users)
+  - startup log hits: MTP: enabled via --speculative-config, max_k=1
+  - startup log hits: Spec-decode: mtp (chain) +sidecar=models/qwen38-mtp-4bit
+  - startup log hits: Images:    off. Speculative decoding (MTP) is on, and only the text lane runs it. Image input also needs a working vision runtime (mlx-vlm). Install the optional runtime 
+  - startup log hits: File "/opt/homebrew/Cellar/python@3.15/3.15.0_1/Frameworks/Python.framework/Versions/3.15/lib/python3.15/concurrent/futures/thread.py", line 116 in _worker
+
+## --help keyword lines (speculative/MTP/cache/batching/quant)
+- [--disk-stream-cache-gb DISK_STREAM_CACHE_GB]
+- [--max-concurrent-requests MAX_CONCURRENT_REQUESTS]
+- [--prefill-batch-size PREFILL_BATCH_SIZE]
+- [--completion-batch-size COMPLETION_BATCH_SIZE]
+- [--scheduling-max-deferrals N] [--enable-prefix-cache]
+- [--disable-prefix-cache] [--disable-disk-caches]
+- [--prefix-cache-size PREFIX_CACHE_SIZE]
+- [--cache-memory-mb CACHE_MEMORY_MB]
+- [--cache-memory-percent CACHE_MEMORY_PERCENT]
+- [--idle-cache-clear-seconds IDLE_CACHE_CLEAR_SECONDS]
+- [--hybrid-cache-entries HYBRID_CACHE_ENTRIES]
+- [--response-cache-entries RESPONSE_CACHE_ENTRIES]
+- [--no-memory-aware-cache]
+- [--prefix-cache-index {radix,hash}]
+- [--mllm-media-prefix-cache {auto,off}]
+- [--kv-cache-dtype {bf16,int8,int4}] [--reasoning]
+- [--kv-cache-quantization]
+- [--kv-cache-quantization-bits {4,8}]
+- [--kv-cache-quantization-group-size KV_CACHE_QUANTIZATION_GROUP_SIZE]
+- [--kv-cache-min-quantize-tokens KV_CACHE_MIN_QUANTIZE_TOKENS]
+- [--kv-cache-turboquant [{v4,k8v4,none}]]
+- [--kv-cache-turboquant-bits {3,4}]
+- [--kv-cache-turboquant-group-size KV_CACHE_TURBOQUANT_GROUP_SIZE]
+- [--speculative-config SPECULATIVE_CONFIG]
+- [--use-paged-cache]
+- [--paged-cache-block-size PAGED_CACHE_BLOCK_SIZE]
+- [--max-cache-blocks MAX_CACHE_BLOCKS] [--enable-audio]
+- know the HF cache lives on a different filesystem
+- --disk-stream-cache-gb DISK_STREAM_CACHE_GB
+- Byte budget (GB) for the disk-stream expert LRU cache.
+- matching rapid_mlx.expert_cache.ExpertCache's default.
+- --host/--port are ignored for binding. Native MTP,
+- Max concurrent sequences
+- --max-concurrent-requests MAX_CONCURRENT_REQUESTS
+- --prefill-batch-size PREFILL_BATCH_SIZE
+- under concurrent cold load — requests start decoding
+- batched attention onto a slower path (see #1861).
+- --completion-batch-size COMPLETION_BATCH_SIZE
+- Completion batch size
+- shortest_validated_tail favors cache-hot and short
+
+## notes
+- [mtp-cache-default] stopped: port free after = True
+- [mtp-cache-off] stopped: port free after = True
+- ANE/NAX use: unknown unless listed in log hits or help lines above.
+- batching/prefix-cache behavior: see help lines and cache columns in summary.md.

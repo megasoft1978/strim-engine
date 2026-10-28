@@ -1,0 +1,28 @@
+diff --git a/ftoa.go b/ftoa.go
+index a4433af..c212e84 100644
+--- a/ftoa.go
++++ b/ftoa.go
+@@ -42,8 +42,8 @@ func Ftoa(num float64) string {
+ 	return stripTrailingZeros(strconv.FormatFloat(num, 'f', 6, 64))
+ }
+ 
+-// FtoaWithDigits converts a float to a string but limits the resulting string
++// FtoaLimited converts a float to a string but limits the resulting string
+ // to the given number of decimal places, and no trailing zeros.
+-func FtoaWithDigits(num float64, digits int) string {
++func FtoaLimited(num float64, digits int) string {
+ 	return stripTrailingZeros(stripTrailingDigits(strconv.FormatFloat(num, 'f', 6, 64), digits))
+ }
+diff --git a/si.go b/si.go
+index b3f7b01..15551fd 100644
+--- a/si.go
++++ b/si.go
+@@ -151,7 +151,7 @@ func SI(input float64, unit string) string {
+ // e.g. SIWithDigits(2.2345e-12, 2, "F") -> 2.23 pF
+ func SIWithDigits(input float64, decimals int, unit string) string {
+ 	value, prefix := ComputeSI(input)
+-	return FtoaWithDigits(value, decimals) + " " + prefix + unit
++	return FtoaLimited(value, decimals) + " " + prefix + unit
+ }
+ 
+ var errInvalid = errors.New("invalid input")

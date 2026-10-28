@@ -1,0 +1,8 @@
+### What This Code Does
+
+This Swift code defines a lightweight parser for the **header** of a `.safetensors` file. It does **not** load the actual tensor data (weights) into memory; it only reads and parses the JSON metadata that describes the tensors.
+
+Here’s a breakdown of the components:
+
+1.  **`TensorInfo`**: A `Sendable` and `Equatable` struct representing metadata for a single tensor:
+    *

@@ -1,0 +1,9 @@
+[strim rep0 turn 1/8] ttft=4.139s prompt=4091 cached=0 flag=ok err=None
+[strim rep0 turn 2/8] ttft=5.584s prompt=9346 cached=4084 flag=ok err=None
+[strim rep0 turn 3/8] ttft=5.875s prompt=14627 cached=9339 flag=ok err=None
+[strim rep0 turn 4/8] ttft=6.225s prompt=19884 cached=14620 flag=ok err=None
+[strim rep0 turn 5/8] ttft=6.521s prompt=25156 cached=19877 flag=ok err=None
+[strim rep0 turn 6/8] ttft=6.759s prompt=30378 cached=25149 flag=ok err=None
+[strim rep0 turn 7/8] ttft=7.181s prompt=35637 cached=30371 flag=ok err=None
+[strim rep0 turn 8/8] ttft=7.405s prompt=40838 cached=35630 flag=ok err=None
+wrote bench/results/h2h-final-20261028/strim/pass1/replay/raw.jsonl and bench/results/h2h-final-20261028/strim/pass1/replay/summary.md

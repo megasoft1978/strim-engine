@@ -1,0 +1,596 @@
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchprefill /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit 1024 3
+n=1024  1.20 s  855 tok/s  (rep 0)
+n=1024  1.12 s  918 tok/s  (rep 1)
+n=1024  1.11 s  923 tok/s  (rep 2)
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchprefill /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit 4096 3
+n=4096  4.55 s  899 tok/s  (rep 0)
+n=4096  4.46 s  919 tok/s  (rep 1)
+n=4096  4.46 s  918 tok/s  (rep 2)
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 0 760,1328,310,4778,2136,42903,369,5122,1754,4528,6681,2957,791,3817,13,357,41163,23776,369,4779,6608,506,6937,1331,799,11,748,279,2790,3296,369,524,1204,1599,18484,1406,7289,279,21966,628,4125,11,694,1204,1575,279,9705,22327,9966,1452,13914,494,4779,1345,9976,1396,6007,12655,13 5
+rep 1 spec: passes 64  emitted 64  1.00 tok/pass  26.1 tok/s  26.1 decode  accept 0% (0/0)  38.3 ms/pass  2.45s
+parity: EXACT (123 tokens)
+rep 2 spec: passes 64  emitted 64  1.00 tok/pass  26.3 tok/s  26.3 decode  accept 0% (0/0)  38.1 ms/pass  2.44s
+parity: EXACT (123 tokens)
+rep 3 spec: passes 64  emitted 64  1.00 tok/pass  26.2 tok/s  26.2 decode  accept 0% (0/0)  38.2 ms/pass  2.45s
+parity: EXACT (123 tokens)
+rep 4 spec: passes 64  emitted 64  1.00 tok/pass  26.3 tok/s  26.3 decode  accept 0% (0/0)  38.1 ms/pass  2.44s
+parity: EXACT (123 tokens)
+rep 5 spec: passes 64  emitted 64  1.00 tok/pass  26.2 tok/s  26.3 decode  accept 0% (0/0)  38.1 ms/pass  2.44s
+parity: EXACT (123 tokens)
+aggregate: emitted=320 requested=320 seconds=12.21 decode_seconds=12.20 e2e_tok_s=26.21 decode_tok_s=26.24
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 2 760,1328,310,4778,2136,42903,369,5122,1754,4528,6681,2957,791,3817,13,357,41163,23776,369,4779,6608,506,6937,1331,799,11,748,279,2790,3296,369,524,1204,1599,18484,1406,7289,279,21966,628,4125,11,694,1204,1575,279,9705,22327,9966,1452,13914,494,4779,1345,9976,1396,6007,12655,13 5
+rep 1 spec: passes 32  emitted 64  2.00 tok/pass  40.6 tok/s  40.7 decode  accept 51% (32/63)  49.2 ms/pass  1.58s
+parity: EXACT (123 tokens)
+rep 2 spec: passes 32  emitted 64  2.00 tok/pass  40.8 tok/s  40.9 decode  accept 51% (32/63)  49.0 ms/pass  1.57s
+parity: EXACT (123 tokens)
+rep 3 spec: passes 32  emitted 64  2.00 tok/pass  40.5 tok/s  40.6 decode  accept 51% (32/63)  49.4 ms/pass  1.58s
+parity: EXACT (123 tokens)
+rep 4 spec: passes 32  emitted 64  2.00 tok/pass  40.1 tok/s  40.2 decode  accept 51% (32/63)  49.8 ms/pass  1.59s
+parity: EXACT (123 tokens)
+rep 5 spec: passes 32  emitted 64  2.00 tok/pass  40.6 tok/s  40.6 decode  accept 51% (32/63)  49.3 ms/pass  1.58s
+parity: EXACT (123 tokens)
+aggregate: emitted=320 requested=320 seconds=7.90 decode_seconds=7.88 e2e_tok_s=40.53 decode_tok_s=40.61
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchpathspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 48 2 760,1328,310,4778,2136,42903,369,5122,1754,4528,6681,2957,791,3817,13,357,41163,23776,369,4779,6608,506,6937,1331,799,11,748,279,2790,3296,369,524,1204,1599,18484,1406,7289,279,21966,628,4125,11,694,1204,1575,279,9705,22327,9966,1452,13914,494,4779,1345,9976,1396,6007,12655,13 5
+  rep 0 tensor   64.36 ms/pass   29.8 tok/s  accept 23/50
+  rep 0 kernel   50.27 ms/pass   38.2 tok/s  accept 23/50
+  rep 1 kernel   50.02 ms/pass   38.4 tok/s  accept 23/50
+  rep 1 tensor   63.42 ms/pass   30.3 tok/s  accept 23/50
+  rep 2 tensor   63.06 ms/pass   30.4 tok/s  accept 23/50
+  rep 2 kernel   50.16 ms/pass   38.3 tok/s  accept 23/50
+  rep 3 kernel   50.32 ms/pass   38.2 tok/s  accept 23/50
+  rep 3 tensor   63.34 ms/pass   30.3 tok/s  accept 23/50
+  rep 4 tensor   63.10 ms/pass   30.4 tok/s  accept 23/50
+  rep 4 kernel   50.66 ms/pass   37.9 tok/s  accept 23/50
+tensor min  63.06 ms/pass   30.4 tok/s  accept 46%
+kernel min  50.02 ms/pass   38.4 tok/s  accept 46%
+delta -13.04 ms/pass (-20.7%)
+determinism: tensor stable kernel stable | cross-path: identical | acceptance counts: identical
+=== independent gen16 reference
+ids: [9707, 1234, 5678, 198, 2, 220, 17, 15, 17, 18, 95859, 16, 17, 96212, 17, 17, 95971, 9616, 96012]
+elapsed: 1.7 s for 16 tokens -> 9.29 tok/s
+ids: [9707, 1234, 5678, 198, 2, 220, 17, 15, 17, 18, 95859, 16, 17, 96212, 17, 17, 95971, 9616, 96012]
+gen16 reference: EXACT
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 2 464,313,7846,11,13825,333,494,359,2840,6750,271,1479,709,958,229844,18863,1094,3025,2163,927,25,345,11,7383,283,220,18,15,15,1590,345,313,198,220,713,498,36683,18863,11,716,229844,18863,60,283,7846,3553,1174,198,220,13825,4903,574,313,198,262,713,850,283,13850,4903,574,716,229844,18863,3553,681,7383,1174,198,262,460,1659,574,51436,3598,1174,198,220,2390,498,927,11,7383,14545,198,220,460,4083,18863,26,198,92,198 5
+rep 1 spec: passes 17  emitted 64  3.76 tok/pass  62.4 tok/s  62.5 decode  accept 94% (47/50)  60.4 ms/pass  1.03s
+parity: EXACT (157 tokens)
+rep 2 spec: passes 17  emitted 64  3.76 tok/pass  62.6 tok/s  62.8 decode  accept 94% (47/50)  60.1 ms/pass  1.02s
+parity: EXACT (157 tokens)
+rep 3 spec: passes 17  emitted 64  3.76 tok/pass  62.5 tok/s  62.7 decode  accept 94% (47/50)  60.3 ms/pass  1.02s
+parity: EXACT (157 tokens)
+rep 4 spec: passes 17  emitted 64  3.76 tok/pass  62.9 tok/s  63.1 decode  accept 94% (47/50)  59.9 ms/pass  1.02s
+parity: EXACT (157 tokens)
+rep 5 spec: passes 17  emitted 64  3.76 tok/pass  62.7 tok/s  63.0 decode  accept 94% (47/50)  60.0 ms/pass  1.02s
+parity: EXACT (157 tokens)
+aggregate: emitted=320 requested=320 seconds=5.11 decode_seconds=5.09 e2e_tok_s=62.62 decode_tok_s=62.82
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 2 7734,264,7622,3134,421,4523,279,1844,220,16,15,6112,539,2702,1906,869,303,279,1483,220,24,15,2756,11,2583,836,2469,321,3046,11,11128,41662,13 5
+rep 1 spec: passes 19  emitted 64  3.37 tok/pass  61.1 tok/s  61.2 decode  accept 85% (45/53)  55.2 ms/pass  1.05s
+parity: EXACT (97 tokens)
+rep 2 spec: passes 19  emitted 64  3.37 tok/pass  61.7 tok/s  61.8 decode  accept 85% (45/53)  54.6 ms/pass  1.04s
+parity: EXACT (97 tokens)
+rep 3 spec: passes 19  emitted 64  3.37 tok/pass  61.5 tok/s  61.7 decode  accept 85% (45/53)  54.8 ms/pass  1.04s
+parity: EXACT (97 tokens)
+rep 4 spec: passes 19  emitted 64  3.37 tok/pass  61.2 tok/s  61.4 decode  accept 85% (45/53)  55.0 ms/pass  1.05s
+parity: EXACT (97 tokens)
+rep 5 spec: passes 19  emitted 64  3.37 tok/pass  61.3 tok/s  61.5 decode  accept 85% (45/53)  55.0 ms/pass  1.04s
+parity: EXACT (97 tokens)
+aggregate: emitted=320 requested=320 seconds=5.22 decode_seconds=5.20 e2e_tok_s=61.35 decode_tok_s=61.53
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 2 7734,264,32671,709,421,15339,264,999,1500,539,1500,11,14159,3299,32655,11,321,4523,279,5600,1379,4047,4105,430,264,10985,314,43716,13 5
+rep 1 spec: passes 19  emitted 64  3.37 tok/pass  59.5 tok/s  59.7 decode  accept 76% (45/59)  56.6 ms/pass  1.08s
+parity: EXACT (93 tokens)
+rep 2 spec: passes 19  emitted 64  3.37 tok/pass  59.3 tok/s  59.5 decode  accept 76% (45/59)  56.8 ms/pass  1.08s
+parity: EXACT (93 tokens)
+rep 3 spec: passes 19  emitted 64  3.37 tok/pass  59.4 tok/s  59.5 decode  accept 76% (45/59)  56.7 ms/pass  1.08s
+parity: EXACT (93 tokens)
+rep 4 spec: passes 19  emitted 64  3.37 tok/pass  59.5 tok/s  59.7 decode  accept 76% (45/59)  56.6 ms/pass  1.07s
+parity: EXACT (93 tokens)
+rep 5 spec: passes 19  emitted 64  3.37 tok/pass  59.9 tok/s  60.1 decode  accept 76% (45/59)  56.3 ms/pass  1.07s
+parity: EXACT (93 tokens)
+aggregate: emitted=320 requested=320 seconds=5.38 decode_seconds=5.36 e2e_tok_s=59.52 decode_tok_s=59.71
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 2 7734,264,12654,709,421,15339,264,26555,999,321,4523,1141,6761,430,264,1103,314,55588,11,440,6881,494,279,1118,1500,13 5
+rep 1 spec: passes 23  emitted 64  2.78 tok/pass  52.3 tok/s  52.5 decode  accept 67% (41/61)  53.2 ms/pass  1.22s
+parity: EXACT (90 tokens)
+rep 2 spec: passes 23  emitted 64  2.78 tok/pass  51.9 tok/s  52.1 decode  accept 67% (41/61)  53.6 ms/pass  1.23s
+parity: EXACT (90 tokens)
+rep 3 spec: passes 23  emitted 64  2.78 tok/pass  52.6 tok/s  52.8 decode  accept 67% (41/61)  52.9 ms/pass  1.22s
+parity: EXACT (90 tokens)
+rep 4 spec: passes 23  emitted 64  2.78 tok/pass  52.3 tok/s  52.4 decode  accept 67% (41/61)  53.2 ms/pass  1.22s
+parity: EXACT (90 tokens)
+rep 5 spec: passes 23  emitted 64  2.78 tok/pass  50.8 tok/s  51.0 decode  accept 67% (41/61)  54.7 ms/pass  1.26s
+parity: EXACT (90 tokens)
+aggregate: emitted=320 requested=320 seconds=6.15 decode_seconds=6.14 e2e_tok_s=51.99 decode_tok_s=52.13
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 2 760,1328,310,4778,2136,42903,369,5122,1754,4528,6681,2957,791,3817,13,357,41163,23776,369,4779,6608,506,6937,1331,799,11,748,279,2790,3296,369,524,1204,1599,18484,1406,7289,279,21966,628,4125,11,694,1204,1575,424,22327,9966,1452,13914,13 5
+rep 1 spec: passes 36  emitted 64  1.78 tok/pass  36.0 tok/s  36.1 decode  accept 39% (28/71)  49.4 ms/pass  1.78s
+parity: MISMATCH (spec 115 tokens, greedy 115)
+  first diff at 53: spec 561 greedy 8169
+  spec   [760, 1328, 310, 4778, 2136, 42903, 369, 5122, 1754, 4528, 6681, 2957, 791, 3817, 13, 357, 41163, 23776, 369, 4779, 6608, 506, 6937, 1331, 799, 11, 748, 279, 2790, 3296, 369, 524, 1204, 1599, 18484, 1406, 7289, 279, 21966, 628, 4125, 11, 694, 1204, 1575, 424, 22327, 9966, 1452, 13914, 13, 271, 550, 561, 13453, 9447, 271, 32, 220, 22, 33, 5555, 1558, 506, 2400, 15579, 73165, 220, 16, 19, 18295, 314, 18588, 1354, 13, 2332, 220, 23, 14813, 9966, 1954, 424, 20382, 310, 220, 22, 18295, 13, 2332, 220, 19, 14813, 11, 220, 18, 13, 20, 18295, 13, 561, 33633, 19987, 314, 264, 3074, 3817, 4487, 1440, 369, 16757, 220, 17, 5639, 314, 4528]
+  greedy [760, 1328, 310, 4778, 2136, 42903, 369, 5122, 1754, 4528, 6681, 2957, 791, 3817, 13, 357, 41163, 23776, 369, 4779, 6608, 506, 6937, 1331, 799, 11, 748, 279, 2790, 3296, 369, 524, 1204, 1599, 18484, 1406, 7289, 279, 21966, 628, 4125, 11, 694, 1204, 1575, 424, 22327, 9966, 1452, 13914, 13, 271, 550, 8169, 1167, 19, 9802, 1203, 2091, 279, 25739, 22573, 271, 760, 1167, 19, 9802, 1203, 3443, 29318, 220, 19, 13, 20, 9192, 791, 4528, 13, 1690, 264, 220, 22, 33, 1558, 421, 3254, 16757, 220, 19, 13, 16, 18295, 314, 13914, 11, 864, 17759, 303, 220, 23, 18295, 314, 18588, 1354, 440, 2956, 364, 279, 81726, 6297, 13, 561, 710, 71196, 1720]
+rep 2 spec: passes 36  emitted 64  1.78 tok/pass  36.0 tok/s  36.1 decode  accept 39% (28/71)  49.4 ms/pass  1.78s
+parity: MISMATCH (spec 115 tokens, greedy 115)
+  first diff at 53: spec 561 greedy 8169
+  spec   [760, 1328, 310, 4778, 2136, 42903, 369, 5122, 1754, 4528, 6681, 2957, 791, 3817, 13, 357, 41163, 23776, 369, 4779, 6608, 506, 6937, 1331, 799, 11, 748, 279, 2790, 3296, 369, 524, 1204, 1599, 18484, 1406, 7289, 279, 21966, 628, 4125, 11, 694, 1204, 1575, 424, 22327, 9966, 1452, 13914, 13, 271, 550, 561, 13453, 9447, 271, 32, 220, 22, 33, 5555, 1558, 506, 2400, 15579, 73165, 220, 16, 19, 18295, 314, 18588, 1354, 13, 2332, 220, 23, 14813, 9966, 1954, 424, 20382, 310, 220, 22, 18295, 13, 2332, 220, 19, 14813, 11, 220, 18, 13, 20, 18295, 13, 561, 33633, 19987, 314, 264, 3074, 3817, 4487, 1440, 369, 16757, 220, 17, 5639, 314, 4528]
+  greedy [760, 1328, 310, 4778, 2136, 42903, 369, 5122, 1754, 4528, 6681, 2957, 791, 3817, 13, 357, 41163, 23776, 369, 4779, 6608, 506, 6937, 1331, 799, 11, 748, 279, 2790, 3296, 369, 524, 1204, 1599, 18484, 1406, 7289, 279, 21966, 628, 4125, 11, 694, 1204, 1575, 424, 22327, 9966, 1452, 13914, 13, 271, 550, 8169, 1167, 19, 9802, 1203, 2091, 279, 25739, 22573, 271, 760, 1167, 19, 9802, 1203, 3443, 29318, 220, 19, 13, 20, 9192, 791, 4528, 13, 1690, 264, 220, 22, 33, 1558, 421, 3254, 16757, 220, 19, 13, 16, 18295, 314, 13914, 11, 864, 17759, 303, 220, 23, 18295, 314, 18588, 1354, 440, 2956, 364, 279, 81726, 6297, 13, 561, 710, 71196, 1720]
+rep 3 spec: passes 36  emitted 64  1.78 tok/pass  36.4 tok/s  36.5 decode  accept 39% (28/71)  48.8 ms/pass  1.76s
+parity: MISMATCH (spec 115 tokens, greedy 115)
+  first diff at 53: spec 561 greedy 8169
+  spec   [760, 1328, 310, 4778, 2136, 42903, 369, 5122, 1754, 4528, 6681, 2957, 791, 3817, 13, 357, 41163, 23776, 369, 4779, 6608, 506, 6937, 1331, 799, 11, 748, 279, 2790, 3296, 369, 524, 1204, 1599, 18484, 1406, 7289, 279, 21966, 628, 4125, 11, 694, 1204, 1575, 424, 22327, 9966, 1452, 13914, 13, 271, 550, 561, 13453, 9447, 271, 32, 220, 22, 33, 5555, 1558, 506, 2400, 15579, 73165, 220, 16, 19, 18295, 314, 18588, 1354, 13, 2332, 220, 23, 14813, 9966, 1954, 424, 20382, 310, 220, 22, 18295, 13, 2332, 220, 19, 14813, 11, 220, 18, 13, 20, 18295, 13, 561, 33633, 19987, 314, 264, 3074, 3817, 4487, 1440, 369, 16757, 220, 17, 5639, 314, 4528]
+  greedy [760, 1328, 310, 4778, 2136, 42903, 369, 5122, 1754, 4528, 6681, 2957, 791, 3817, 13, 357, 41163, 23776, 369, 4779, 6608, 506, 6937, 1331, 799, 11, 748, 279, 2790, 3296, 369, 524, 1204, 1599, 18484, 1406, 7289, 279, 21966, 628, 4125, 11, 694, 1204, 1575, 424, 22327, 9966, 1452, 13914, 13, 271, 550, 8169, 1167, 19, 9802, 1203, 2091, 279, 25739, 22573, 271, 760, 1167, 19, 9802, 1203, 3443, 29318, 220, 19, 13, 20, 9192, 791, 4528, 13, 1690, 264, 220, 22, 33, 1558, 421, 3254, 16757, 220, 19, 13, 16, 18295, 314, 13914, 11, 864, 17759, 303, 220, 23, 18295, 314, 18588, 1354, 440, 2956, 364, 279, 81726, 6297, 13, 561, 710, 71196, 1720]
+rep 4 spec: passes 36  emitted 64  1.78 tok/pass  36.3 tok/s  36.4 decode  accept 39% (28/71)  49.0 ms/pass  1.76s
+parity: MISMATCH (spec 115 tokens, greedy 115)
+  first diff at 53: spec 561 greedy 8169
+  spec   [760, 1328, 310, 4778, 2136, 42903, 369, 5122, 1754, 4528, 6681, 2957, 791, 3817, 13, 357, 41163, 23776, 369, 4779, 6608, 506, 6937, 1331, 799, 11, 748, 279, 2790, 3296, 369, 524, 1204, 1599, 18484, 1406, 7289, 279, 21966, 628, 4125, 11, 694, 1204, 1575, 424, 22327, 9966, 1452, 13914, 13, 271, 550, 561, 13453, 9447, 271, 32, 220, 22, 33, 5555, 1558, 506, 2400, 15579, 73165, 220, 16, 19, 18295, 314, 18588, 1354, 13, 2332, 220, 23, 14813, 9966, 1954, 424, 20382, 310, 220, 22, 18295, 13, 2332, 220, 19, 14813, 11, 220, 18, 13, 20, 18295, 13, 561, 33633, 19987, 314, 264, 3074, 3817, 4487, 1440, 369, 16757, 220, 17, 5639, 314, 4528]
+  greedy [760, 1328, 310, 4778, 2136, 42903, 369, 5122, 1754, 4528, 6681, 2957, 791, 3817, 13, 357, 41163, 23776, 369, 4779, 6608, 506, 6937, 1331, 799, 11, 748, 279, 2790, 3296, 369, 524, 1204, 1599, 18484, 1406, 7289, 279, 21966, 628, 4125, 11, 694, 1204, 1575, 424, 22327, 9966, 1452, 13914, 13, 271, 550, 8169, 1167, 19, 9802, 1203, 2091, 279, 25739, 22573, 271, 760, 1167, 19, 9802, 1203, 3443, 29318, 220, 19, 13, 20, 9192, 791, 4528, 13, 1690, 264, 220, 22, 33, 1558, 421, 3254, 16757, 220, 19, 13, 16, 18295, 314, 13914, 11, 864, 17759, 303, 220, 23, 18295, 314, 18588, 1354, 440, 2956, 364, 279, 81726, 6297, 13, 561, 710, 71196, 1720]
+rep 5 spec: passes 36  emitted 64  1.78 tok/pass  36.1 tok/s  36.2 decode  accept 39% (28/71)  49.2 ms/pass  1.77s
+parity: MISMATCH (spec 115 tokens, greedy 115)
+  first diff at 53: spec 561 greedy 8169
+  spec   [760, 1328, 310, 4778, 2136, 42903, 369, 5122, 1754, 4528, 6681, 2957, 791, 3817, 13, 357, 41163, 23776, 369, 4779, 6608, 506, 6937, 1331, 799, 11, 748, 279, 2790, 3296, 369, 524, 1204, 1599, 18484, 1406, 7289, 279, 21966, 628, 4125, 11, 694, 1204, 1575, 424, 22327, 9966, 1452, 13914, 13, 271, 550, 561, 13453, 9447, 271, 32, 220, 22, 33, 5555, 1558, 506, 2400, 15579, 73165, 220, 16, 19, 18295, 314, 18588, 1354, 13, 2332, 220, 23, 14813, 9966, 1954, 424, 20382, 310, 220, 22, 18295, 13, 2332, 220, 19, 14813, 11, 220, 18, 13, 20, 18295, 13, 561, 33633, 19987, 314, 264, 3074, 3817, 4487, 1440, 369, 16757, 220, 17, 5639, 314, 4528]
+  greedy [760, 1328, 310, 4778, 2136, 42903, 369, 5122, 1754, 4528, 6681, 2957, 791, 3817, 13, 357, 41163, 23776, 369, 4779, 6608, 506, 6937, 1331, 799, 11, 748, 279, 2790, 3296, 369, 524, 1204, 1599, 18484, 1406, 7289, 279, 21966, 628, 4125, 11, 694, 1204, 1575, 424, 22327, 9966, 1452, 13914, 13, 271, 550, 8169, 1167, 19, 9802, 1203, 2091, 279, 25739, 22573, 271, 760, 1167, 19, 9802, 1203, 3443, 29318, 220, 19, 13, 20, 9192, 791, 4528, 13, 1690, 264, 220, 22, 33, 1558, 421, 3254, 16757, 220, 19, 13, 16, 18295, 314, 13914, 11, 864, 17759, 303, 220, 23, 18295, 314, 18588, 1354, 440, 2956, 364, 279, 81726, 6297, 13, 561, 710, 71196, 1720]
+aggregate: emitted=320 requested=320 seconds=8.85 decode_seconds=8.83 e2e_tok_s=36.17 decode_tok_s=36.24
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 2 32,5257,33060,220,16,17,15,12754,303,220,17,3979,13,1368,424,1179,33060,506,279,1788,4478,364,2361,220,16,13,20,3979,11,1204,2944,1503,424,5640,303,2702,30,6712,678,944,13 5
+rep 1 spec: passes 19  emitted 64  3.37 tok/pass  60.0 tok/s  60.2 decode  accept 83% (45/54)  56.1 ms/pass  1.07s
+parity: EXACT (105 tokens)
+rep 2 spec: passes 19  emitted 64  3.37 tok/pass  60.1 tok/s  60.4 decode  accept 83% (45/54)  56.0 ms/pass  1.06s
+parity: EXACT (105 tokens)
+rep 3 spec: passes 19  emitted 64  3.37 tok/pass  60.1 tok/s  60.3 decode  accept 83% (45/54)  56.0 ms/pass  1.06s
+parity: EXACT (105 tokens)
+rep 4 spec: passes 19  emitted 64  3.37 tok/pass  60.4 tok/s  60.6 decode  accept 83% (45/54)  55.8 ms/pass  1.06s
+parity: EXACT (105 tokens)
+rep 5 spec: passes 19  emitted 64  3.37 tok/pass  59.7 tok/s  59.9 decode  accept 83% (45/54)  56.4 ms/pass  1.07s
+parity: EXACT (105 tokens)
+aggregate: emitted=320 requested=320 seconds=5.33 decode_seconds=5.31 e2e_tok_s=60.08 decode_tok_s=60.27
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 2 7734,264,4566,10485,364,264,1156,5353,440,803,11,2469,11,4092,11,321,264,1103,314,13822,11,1754,440,8329,11,3177,11,321,3046,13 5
+rep 1 spec: passes 19  emitted 64  3.37 tok/pass  58.5 tok/s  58.7 decode  accept 73% (45/62)  57.6 ms/pass  1.09s
+parity: EXACT (94 tokens)
+rep 2 spec: passes 19  emitted 64  3.37 tok/pass  59.1 tok/s  59.2 decode  accept 73% (45/62)  57.0 ms/pass  1.08s
+parity: EXACT (94 tokens)
+rep 3 spec: passes 19  emitted 64  3.37 tok/pass  58.5 tok/s  58.7 decode  accept 73% (45/62)  57.5 ms/pass  1.09s
+parity: EXACT (94 tokens)
+rep 4 spec: passes 19  emitted 64  3.37 tok/pass  58.7 tok/s  58.9 decode  accept 73% (45/62)  57.4 ms/pass  1.09s
+parity: EXACT (94 tokens)
+rep 5 spec: passes 19  emitted 64  3.37 tok/pass  58.8 tok/s  59.0 decode  accept 73% (45/62)  57.3 ms/pass  1.09s
+parity: EXACT (94 tokens)
+aggregate: emitted=320 requested=320 seconds=5.45 decode_seconds=5.43 e2e_tok_s=58.73 decode_tok_s=58.90
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchpassS /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit 8
+S=1    38.79 ms/pass  (38.8 ms/token)
+S=2    37.48 ms/pass  (18.7 ms/token)
+S=3    40.00 ms/pass  (13.3 ms/token)
+S=4    43.56 ms/pass  (10.9 ms/token)
+=== swift test --disable-sandbox
+Building for debugging...
+[Computing dependencies]
+[11 / 43] cLogSupport
+[22 / 46] MLX
+[42 / 66] MLX
+[47 / 83] MLX
+[67 / 108] MLXNN
+[78 / 98] MLXNN
+[80 / 98] MLXNN
+[83 / 101] StrimCore
+[97 / 115] StrimCore
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/QGEMV.swift:14:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 12 |     public static let threads = 32
+ 13 | 
+ 14 |     nonisolated(unsafe) static let kernel = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 15 |         name: "qgemv4",
+ 16 |         inputNames: ["xv", "wq", "sc", "bs", "dims"],
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/QGEMV.swift:68:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 66 |     /// streamed once and M dot products fall out of it. MLX's quantizedMatmul drops to
+ 67 |     /// 114-253 GB/s for M=2..3 where this should stay near the M=1 rate.
+ 68 |     nonisolated(unsafe) static let kernelM = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 69 |         name: "qgemv4_m",
+ 70 |         inputNames: ["xv", "wq", "sc", "bs", "dims"],
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/Weights.swift:89:16: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 87 |                     bits: Int? = nil, groupSize: Int = 64) -> MLXArray {
+ 88 |         let depth = bits ?? WeightStore.quantBits(w, s, groupSize: groupSize)
+ 89 |         return quantizedMatmul(x, w, scales: s, biases: b, transpose: true,
+    |                |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+    |                `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 90 |                                groupSize: groupSize, bits: depth)
+ 91 |     }
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDNMetal.swift:17:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 15 |     static let Dk = 128
+ 16 | 
+ 17 |     nonisolated(unsafe) static let kernel = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 18 |         name: "gdn_recurrence",
+ 19 |         inputNames: ["q", "k", "v", "g", "beta", "ssm", "dims"],
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDNMetal.swift:95:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 93 |     /// are read once per threadgroup instead of once per value row. The recurrence is
+ 94 |     /// still the exact sequential one; only the f32 reduction tree changes.
+ 95 |     nonisolated(unsafe) static let blockedKernel = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 96 |         name: "gdn_blocked_prefill",
+ 97 |         inputNames: ["q", "k", "v", "g", "beta", "ssm", "dims"],
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDNMetal.swift:213:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+211 |     /// Arithmetic is bf16 step-by-step in k order 0,1,2,3 with contraction off, to match
+212 |     /// `GDN.depthwise` followed by `silence` exactly.
+213 |     nonisolated(unsafe) static let convKernel = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+214 |         name: "gdn_conv_silu",
+215 |         inputNames: ["convIn", "w", "dims"],
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDNMetal.swift:244:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+242 |     /// difference from `GDN.depthwise` + `GDN.silence`. mode 0 = sum+silu, 1 = bf16 sum
+243 |     /// only, 2 = silu only (input is the already-computed sum, `[1,1,C]`).
+244 |     nonisolated(unsafe) static let convDebugKernel = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+245 |         name: "gdn_conv_debug",
+246 |         inputNames: ["convIn", "w", "dims"],
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDN.swift:136:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+134 |     }
+135 | 
+136 |     nonisolated(unsafe) static let useMM = ProcessInfo.processInfo.environment["STRIM_REC_ELEM"] == nil
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+137 |     nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["STRIM_SKIP_REC"] != nil
+138 |     /// Default ON since 2026-10-26: the conv kernel is bit-exact and the recurrence kernel now
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDN.swift:137:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+135 | 
+136 |     nonisolated(unsafe) static let useMM = ProcessInfo.processInfo.environment["STRIM_REC_ELEM"] == nil
+137 |     nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["STRIM_SKIP_REC"] != nil
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+138 |     /// Default ON since 2026-10-26: the conv kernel is bit-exact and the recurrence kernel now
+139 |     /// matches MLX's gemv FMA association, so it passes `gen 16`, depth-0 EXACT and ties the tensor
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDN.swift:144:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+142 |     /// `STRIM_GDN_TENSOR=1` forces the reference-TF32 path. `STRIM_GDN_METAL=1` still forces the
+143 |     /// kernel.
+144 |     nonisolated(unsafe) static let metalDefault =
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+145 |         ProcessInfo.processInfo.environment["STRIM_GDN_METAL"] != nil
+146 |         || ProcessInfo.processInfo.environment["STRIM_GDN_TENSOR"] == nil
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDN.swift:156:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Int', consider removing it
+154 |     /// therefore covers prefill too; `STRIM_GDN_METAL_MAX_S=8` restores the tensor
+155 |     /// prefill path for A/B.
+156 |     nonisolated(unsafe) static let metalMaxS =
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Int', consider removing it
+157 |         Int(ProcessInfo.processInfo.environment["STRIM_GDN_METAL_MAX_S"] ?? "") ?? 1_000_000
+158 | 
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDNMetal.swift:17:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 15 |     static let Dk = 128
+ 16 | 
+ 17 |     nonisolated(unsafe) static let kernel = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 18 |         name: "gdn_recurrence",
+ 19 |         inputNames: ["q", "k", "v", "g", "beta", "ssm", "dims"],
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDNMetal.swift:95:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 93 |     /// are read once per threadgroup instead of once per value row. The recurrence is
+ 94 |     /// still the exact sequential one; only the f32 reduction tree changes.
+ 95 |     nonisolated(unsafe) static let blockedKernel = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 96 |         name: "gdn_blocked_prefill",
+ 97 |         inputNames: ["q", "k", "v", "g", "beta", "ssm", "dims"],
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDNMetal.swift:213:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+211 |     /// Arithmetic is bf16 step-by-step in k order 0,1,2,3 with contraction off, to match
+212 |     /// `GDN.depthwise` followed by `silence` exactly.
+213 |     nonisolated(unsafe) static let convKernel = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+214 |         name: "gdn_conv_silu",
+215 |         inputNames: ["convIn", "w", "dims"],
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDNMetal.swift:244:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+242 |     /// difference from `GDN.depthwise` + `GDN.silence`. mode 0 = sum+silu, 1 = bf16 sum
+243 |     /// only, 2 = silu only (input is the already-computed sum, `[1,1,C]`).
+244 |     nonisolated(unsafe) static let convDebugKernel = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+245 |         name: "gdn_conv_debug",
+246 |         inputNames: ["convIn", "w", "dims"],
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/QGEMV.swift:14:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 12 |     public static let threads = 32
+ 13 | 
+ 14 |     nonisolated(unsafe) static let kernel = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 15 |         name: "qgemv4",
+ 16 |         inputNames: ["xv", "wq", "sc", "bs", "dims"],
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/QGEMV.swift:68:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 66 |     /// streamed once and M dot products fall out of it. MLX's quantizedMatmul drops to
+ 67 |     /// 114-253 GB/s for M=2..3 where this should stay near the M=1 rate.
+ 68 |     nonisolated(unsafe) static let kernelM = MLXFast.metalKernel(
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'MLXFast.MLXFastKernel', consider removing it
+ 69 |         name: "qgemv4_m",
+ 70 |         inputNames: ["xv", "wq", "sc", "bs", "dims"],
+[100 / 111] StrimCore
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDN.swift:136:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+134 |     }
+135 | 
+136 |     nonisolated(unsafe) static let useMM = ProcessInfo.processInfo.environment["STRIM_REC_ELEM"] == nil
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+137 |     nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["STRIM_SKIP_REC"] != nil
+138 |     /// Default ON since 2026-10-26: the conv kernel is bit-exact and the recurrence kernel now
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDN.swift:137:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+135 | 
+136 |     nonisolated(unsafe) static let useMM = ProcessInfo.processInfo.environment["STRIM_REC_ELEM"] == nil
+137 |     nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["STRIM_SKIP_REC"] != nil
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+138 |     /// Default ON since 2026-10-26: the conv kernel is bit-exact and the recurrence kernel now
+139 |     /// matches MLX's gemv FMA association, so it passes `gen 16`, depth-0 EXACT and ties the tensor
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDN.swift:144:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+142 |     /// `STRIM_GDN_TENSOR=1` forces the reference-TF32 path. `STRIM_GDN_METAL=1` still forces the
+143 |     /// kernel.
+144 |     nonisolated(unsafe) static let metalDefault =
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Bool', consider removing it
+145 |         ProcessInfo.processInfo.environment["STRIM_GDN_METAL"] != nil
+146 |         || ProcessInfo.processInfo.environment["STRIM_GDN_TENSOR"] == nil
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCore/GDN.swift:156:5: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Int', consider removing it
+154 |     /// therefore covers prefill too; `STRIM_GDN_METAL_MAX_S=8` restores the tensor
+155 |     /// prefill path for A/B.
+156 |     nonisolated(unsafe) static let metalMaxS =
+    |     `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'Int', consider removing it
+157 |         Int(ProcessInfo.processInfo.environment["STRIM_GDN_METAL_MAX_S"] ?? "") ?? 1_000_000
+158 | 
+[105 / 112] StrimCore-product
+[109 / 116] StrimCoreTests-product
+[111 / 116] strim-product
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:350:27: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 348 |         }
+ 349 |         time("conv1d") { conv1d(convIn, convW, groups: 10240) }
+ 350 |         time("qmm_qkv") { quantizedMatmul(x, qw, scales: qs, biases: qb, transpose: true, groupSize: 64, bits: 4) }
+     |                           |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                           `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 351 |         time("qmm_z") { quantizedMatmul(x, zw, scales: zs, biases: zb, transpose: true, groupSize: 64, bits: 4) }
+ 352 |         time("qmm_b") { quantizedMatmul(x, bw, scales: bs, biases: bb, transpose: true, groupSize: 64, bits: 4) }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:351:25: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 349 |         time("conv1d") { conv1d(convIn, convW, groups: 10240) }
+ 350 |         time("qmm_qkv") { quantizedMatmul(x, qw, scales: qs, biases: qb, transpose: true, groupSize: 64, bits: 4) }
+ 351 |         time("qmm_z") { quantizedMatmul(x, zw, scales: zs, biases: zb, transpose: true, groupSize: 64, bits: 4) }
+     |                         |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                         `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 352 |         time("qmm_b") { quantizedMatmul(x, bw, scales: bs, biases: bb, transpose: true, groupSize: 64, bits: 4) }
+ 353 |         time("qmm_out") { quantizedMatmul(MLXArray.zeros([1, 1, 6144], dtype: .bfloat16), ow,
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:352:25: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 350 |         time("qmm_qkv") { quantizedMatmul(x, qw, scales: qs, biases: qb, transpose: true, groupSize: 64, bits: 4) }
+ 351 |         time("qmm_z") { quantizedMatmul(x, zw, scales: zs, biases: zb, transpose: true, groupSize: 64, bits: 4) }
+ 352 |         time("qmm_b") { quantizedMatmul(x, bw, scales: bs, biases: bb, transpose: true, groupSize: 64, bits: 4) }
+     |                         |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                         `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 353 |         time("qmm_out") { quantizedMatmul(MLXArray.zeros([1, 1, 6144], dtype: .bfloat16), ow,
+ 354 |                                           scales: os, biases: ob, transpose: true, groupSize: 64, bits: 4) }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:353:27: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 351 |         time("qmm_z") { quantizedMatmul(x, zw, scales: zs, biases: zb, transpose: true, groupSize: 64, bits: 4) }
+ 352 |         time("qmm_b") { quantizedMatmul(x, bw, scales: bs, biases: bb, transpose: true, groupSize: 64, bits: 4) }
+ 353 |         time("qmm_out") { quantizedMatmul(MLXArray.zeros([1, 1, 6144], dtype: .bfloat16), ow,
+     |                           |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                           `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 354 |                                           scales: os, biases: ob, transpose: true, groupSize: 64, bits: 4) }
+ 355 |         time("ssm_mul") { (rec * kT).sum(axis: -1) }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:637:7: warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+ 635 |                          refVsMM.max().item(Float.self)))
+ 636 |         }
+ 637 |     } catch {
+     |       `- warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+ 638 |         FileHandle.standardError.write(Data("checkmetal failed: \(error)\n".utf8)); exit(1)
+ 639 |     }
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+[114 / 118] StrimCoreTests-product
+[116 / 119] StrimCoreTests-product
+[116 / 119] strim-product
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:305:21: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 303 |         let dw = try store.tensor(p + "down_proj.weight"), ds = try store.tensor(p + "down_proj.scales"), db = try store.tensor(p + "down_proj.biases")
+ 304 |         func body(_ x: MLXArray) -> MLXArray {
+ 305 |             let g = quantizedMatmul(x, gw, scales: gs, biases: gb, transpose: true, groupSize: 64, bits: 4)
+     |                     |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                     `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 306 |             let u = quantizedMatmul(x, uw, scales: us, biases: ub, transpose: true, groupSize: 64, bits: 4)
+ 307 |             let act = (g * sigmoid(g) * u).asType(x.dtype)
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:306:21: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 304 |         func body(_ x: MLXArray) -> MLXArray {
+ 305 |             let g = quantizedMatmul(x, gw, scales: gs, biases: gb, transpose: true, groupSize: 64, bits: 4)
+ 306 |             let u = quantizedMatmul(x, uw, scales: us, biases: ub, transpose: true, groupSize: 64, bits: 4)
+     |                     |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                     `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 307 |             let act = (g * sigmoid(g) * u).asType(x.dtype)
+ 308 |             return quantizedMatmul(act, dw, scales: ds, biases: db, transpose: true, groupSize: 64, bits: 4)
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:308:20: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 306 |             let u = quantizedMatmul(x, uw, scales: us, biases: ub, transpose: true, groupSize: 64, bits: 4)
+ 307 |             let act = (g * sigmoid(g) * u).asType(x.dtype)
+ 308 |             return quantizedMatmul(act, dw, scales: ds, biases: db, transpose: true, groupSize: 64, bits: 4)
+     |                    |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                    `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 309 |         }
+ 310 |         let compiled = compile { (a: [MLXArray]) -> [MLXArray] in [body(a[0])] }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:350:27: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 348 |         }
+ 349 |         time("conv1d") { conv1d(convIn, convW, groups: 10240) }
+ 350 |         time("qmm_qkv") { quantizedMatmul(x, qw, scales: qs, biases: qb, transpose: true, groupSize: 64, bits: 4) }
+     |                           |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                           `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 351 |         time("qmm_z") { quantizedMatmul(x, zw, scales: zs, biases: zb, transpose: true, groupSize: 64, bits: 4) }
+ 352 |         time("qmm_b") { quantizedMatmul(x, bw, scales: bs, biases: bb, transpose: true, groupSize: 64, bits: 4) }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:351:25: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 349 |         time("conv1d") { conv1d(convIn, convW, groups: 10240) }
+ 350 |         time("qmm_qkv") { quantizedMatmul(x, qw, scales: qs, biases: qb, transpose: true, groupSize: 64, bits: 4) }
+ 351 |         time("qmm_z") { quantizedMatmul(x, zw, scales: zs, biases: zb, transpose: true, groupSize: 64, bits: 4) }
+     |                         |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                         `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 352 |         time("qmm_b") { quantizedMatmul(x, bw, scales: bs, biases: bb, transpose: true, groupSize: 64, bits: 4) }
+ 353 |         time("qmm_out") { quantizedMatmul(MLXArray.zeros([1, 1, 6144], dtype: .bfloat16), ow,
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:352:25: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 350 |         time("qmm_qkv") { quantizedMatmul(x, qw, scales: qs, biases: qb, transpose: true, groupSize: 64, bits: 4) }
+ 351 |         time("qmm_z") { quantizedMatmul(x, zw, scales: zs, biases: zb, transpose: true, groupSize: 64, bits: 4) }
+ 352 |         time("qmm_b") { quantizedMatmul(x, bw, scales: bs, biases: bb, transpose: true, groupSize: 64, bits: 4) }
+     |                         |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                         `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 353 |         time("qmm_out") { quantizedMatmul(MLXArray.zeros([1, 1, 6144], dtype: .bfloat16), ow,
+ 354 |                                           scales: os, biases: ob, transpose: true, groupSize: 64, bits: 4) }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:353:27: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+ 351 |         time("qmm_z") { quantizedMatmul(x, zw, scales: zs, biases: zb, transpose: true, groupSize: 64, bits: 4) }
+ 352 |         time("qmm_b") { quantizedMatmul(x, bw, scales: bs, biases: bb, transpose: true, groupSize: 64, bits: 4) }
+ 353 |         time("qmm_out") { quantizedMatmul(MLXArray.zeros([1, 1, 6144], dtype: .bfloat16), ow,
+     |                           |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                           `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+ 354 |                                           scales: os, biases: ob, transpose: true, groupSize: 64, bits: 4) }
+ 355 |         time("ssm_mul") { (rec * kT).sum(axis: -1) }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:1135:29: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+1133 |         eval(wf, sf, bf)   // must be materialised, else every call re-does the concat
+1134 |         func split() -> [MLXArray] {
+1135 |             (0 ..< 4).map { quantizedMatmul(x, w[$0], scales: s[$0], biases: b[$0],
+     |                             |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                             `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+1136 |                                             transpose: true, groupSize: 64, bits: 4) }
+1137 |         }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:1139:13: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+1137 |         }
+1138 |         func fused() -> MLXArray {
+1139 |             quantizedMatmul(x, wf, scales: sf, biases: bf, transpose: true, groupSize: 64, bits: 4)
+     |             |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |             `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+1140 |         }
+1141 |         func bench(_ body: () -> [MLXArray]) -> Double {
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:1235:36: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+1233 |                     return Date().timeIntervalSince(t0) * 1000 / Double(n)
+1234 |                 }
+1235 |                 let mlxClosure = { quantizedMatmul(x, w, scales: s, biases: b, transpose: true, groupSize: 64, bits: 4) }
+     |                                    |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                                    `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+1236 |                 let gvClosure = { QGEMV.multi(x: x, w: w, scales: s, biases: b) }
+1237 |                 _ = timeOnce(mlxClosure); _ = timeOnce(gvClosure)      // warm both paths
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:1360:25: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+1358 |                 func body() -> [MLXArray] {
+1359 |                     (0 ..< n).map { _ in
+1360 |                         quantizedMatmul(x, w, scales: s, biases: b, transpose: true,
+     |                         |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                         `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+1361 |                                         groupSize: 64, bits: 4)
+1362 |                     }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:1396:27: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+1394 |             func best(_ x: MLXArray) -> Double {
+1395 |                 let bits = WeightStore.quantBits(w, s)
+1396 |                 let f = { quantizedMatmul(x, w, scales: s, biases: b, transpose: true,
+     |                           |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                           `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+1397 |                                           groupSize: 64, bits: bits) }
+1398 |                 eval(f())
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:1468:23: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+1466 |             let bs = try! store.tensor(prefix + ".biases")
+1467 |             let x = MLXRandom.normal([1, 1, nIn]).asType(.bfloat16)
+1468 |             let ref = quantizedMatmul(x, w, scales: sc, biases: bs, transpose: true,
+     |                       |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                       `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+1469 |                                       groupSize: 64, bits: 4)
+1470 |             let got = QGEMV.linear(x: x, w: w, scales: sc, biases: bs)
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:1507:29: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+1505 |             outs.reserveCapacity(50)
+1506 |             for _ in 0 ..< 50 {
+1507 |                 outs.append(quantizedMatmul(xin, w, scales: s, biases: b, transpose: true,
+     |                             |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                             `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+1508 |                                             groupSize: 64, bits: 4))
+1509 |             }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:1514:30: warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+1512 |             var outs2: [MLXArray] = []
+1513 |             for _ in 0 ..< 50 {
+1514 |                 outs2.append(quantizedMatmul(xin, w, scales: s, biases: b, transpose: true,
+     |                              |- warning: 'quantizedMatmul(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' is deprecated: renamed to 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' [#DeprecatedDeclaration]
+     |                              `- note: use 'quantizedMM(_:_:scales:biases:transpose:groupSize:bits:mode:stream:)' instead
+1515 |                                              groupSize: 64, bits: 4))
+1516 |             }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:637:7: warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+ 635 |                          refVsMM.max().item(Float.self)))
+ 636 |         }
+ 637 |     } catch {
+     |       `- warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+ 638 |         FileHandle.standardError.write(Data("checkmetal failed: \(error)\n".utf8)); exit(1)
+ 639 |     }
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:341:13: warning: initialization of immutable value 'qT' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+ 339 |         let rec = MLXArray.zeros([1, 48, 128, 128], dtype: .float32)
+ 340 |         let kT = MLXArray.zeros([1, 48, 1, 128], dtype: .float32)
+ 341 |         let qT = MLXArray.zeros([1, 48, 1, 128], dtype: .float32)
+     |             `- warning: initialization of immutable value 'qT' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+ 342 |         func time(_ label: String, _ f: () -> MLXArray) {
+ 343 |             var a = f(); eval(a)
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:848:13: warning: initialization of variable 'pendingIdx' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+ 846 |         var ttftI: [Double] = [], ttftB: [Double] = []
+ 847 |         let tb0 = Date()
+ 848 |         var pendingIdx = 0
+     |             `- warning: initialization of variable 'pendingIdx' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+ 849 |         let eos: Set<Int32> = [248044, 248046]
+ 850 |         while !pending.isEmpty || !active.isEmpty {
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:1392:17: warning: initialization of immutable value 'mb' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+1390 |         func measure(_ label: String, _ w: MLXArray, _ s: MLXArray, _ b: MLXArray,
+1391 |                      _ nOut: Int, _ nIn: Int) {
+1392 |             let mb = Double(nOut) * Double(nIn) * 0.5 / 1e6
+     |                 `- warning: initialization of immutable value 'mb' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+1393 |             let gf = 2.0 * Double(M) * Double(nOut) * Double(nIn) / 1e9
+1394 |             func best(_ x: MLXArray) -> Double {
+
+/Users/user/Desktop/Freelance/strim-engine/Sources/StrimCLI/main.swift:1542:17: warning: initialization of variable 'h' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+1540 |         func run(_ skip: String) -> Double {
+1541 |             let cache = ModelCache()
+1542 |             var h = x
+     |                 `- warning: initialization of variable 'h' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+1543 |             func one() -> MLXArray {
+1544 |                 var h = x
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+[118 / 119] strim-product
+warning: missing creator for mutated node: ('/Users/user/Desktop/Freelance/strim-engine/.build/out/Products/Debug/mlx-swift_Cmlx.bundle/Contents/MacOS')
+Build complete! (4.03 sec)
+Test Suite 'All tests' started at 2026-10-26 13:15:36.673.
+Test Suite 'All tests' passed at 2026-10-26 13:15:36.674.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 2084
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Test speedConfigIsFourBit() started.
+◇ Test indexGroupsShards() started.
+◇ Test rejectsMissingOffsets() started.
+◇ Test speculativeDepthStaysWithinOutputBudget() started.
+◇ Test qualityConfigIsEightBit() started.
+◇ Test parsesHeaderAndPayloadOffsets() started.
+✔ Test speculativeDepthStaysWithinOutputBudget() passed after 0.001 seconds.
+✔ Test qualityConfigIsEightBit() passed after 0.001 seconds.
+✔ Test speedConfigIsFourBit() passed after 0.001 seconds.
+✔ Test indexGroupsShards() passed after 0.001 seconds.
+✔ Test parsesHeaderAndPayloadOffsets() passed after 0.001 seconds.
+✔ Test rejectsMissingOffsets() passed after 0.001 seconds.
+✔ Test run with 6 tests in 0 suites passed after 0.002 seconds.
+=== /Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/python /Users/user/Desktop/Freelance/strim-engine/bench/test_priority.py
+priority gate: OK
+{'max_inflight': 2, 'max_background': 1, 'active': {'interactive': 0, 'background': 0}, 'waiting': {'interactive': 0, 'background': 0}, 'admitted': {'interactive': 2, 'background': 3}, 'total_wait_s': {'interactive': 0.05, 'background': 0.41}}
+=== /Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/python /Users/user/Desktop/Freelance/strim-engine/bench/test_priority_ordering.py
+priority ordering: OK (slot held before upstream send)
+=== /Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/python /Users/user/Desktop/Freelance/strim-engine/bench/test_mcp_gate.py
+mcp gate: OK (slot held during delegate post)
+=== /Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/python /Users/user/Desktop/Freelance/strim-engine/bench/test_tool_bridge.py
+tool bridge: OK (conversion + special tokens)
+raw logs: /Users/user/Desktop/Freelance/strim-engine/bench/results/ab-20261026-131238
+correctness gate failed; mismatches are recorded in /Users/user/Desktop/Freelance/strim-engine/bench/results/ab-20261026-131238/raw.txt

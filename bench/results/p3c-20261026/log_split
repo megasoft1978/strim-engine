@@ -1,0 +1,33 @@
+## benchbatchsplit 4096 B=4
+pair 1 start | load averages: 2.61 3.68 3.65 | RESULT ctx=4096 B=4 total 59.805 ms/step 
+pair 1 new | load averages: 2.30 3.49 3.58 | RESULT ctx=4096 B=4 total 51.112 ms/step 
+pair 2 start | load averages: 2.48 3.40 3.54 | RESULT ctx=4096 B=4 total 59.136 ms/step 
+pair 2 new | load averages: 2.22 3.24 3.48 | RESULT ctx=4096 B=4 total 51.224 ms/step 
+pair 3 start | load averages: 1.89 3.07 3.41 | RESULT ctx=4096 B=4 total 59.213 ms/step 
+pair 3 new | load averages: 2.21 3.03 3.38 | RESULT ctx=4096 B=4 total 52.106 ms/step 
+pair 4 start | load averages: 3.86 3.34 3.48 | RESULT ctx=4096 B=4 total 61.481 ms/step 
+pair 4 new | load averages: 3.91 3.40 3.49 | RESULT ctx=4096 B=4 total 53.224 ms/step 
+pair 5 start | load averages: 3.02 3.25 3.44 | RESULT ctx=4096 B=4 total 59.238 ms/step 
+pair 5 new | load averages: 2.73 3.16 3.40 | RESULT ctx=4096 B=4 total 51.979 ms/step 
+## benchbatchsplit 1024 B=4
+pair 1 start | load averages: 2.87 3.14 3.38 | RESULT ctx=1024 B=4 total 50.996 ms/step 
+pair 1 new | load averages: 2.45 3.04 3.34 | RESULT ctx=1024 B=4 total 49.372 ms/step 
+pair 2 start | load averages: 2.60 3.04 3.33 | RESULT ctx=1024 B=4 total 51.365 ms/step 
+pair 2 new | load averages: 2.52 3.00 3.31 | RESULT ctx=1024 B=4 total 49.294 ms/step 
+pair 3 start | load averages: 2.69 3.01 3.31 | RESULT ctx=1024 B=4 total 50.891 ms/step 
+pair 3 new | load averages: 2.54 2.96 3.28 | RESULT ctx=1024 B=4 total 48.918 ms/step 
+pair 4 start | load averages: 2.58 2.94 3.27 | RESULT ctx=1024 B=4 total 50.444 ms/step 
+pair 4 new | load averages: 2.66 2.95 3.26 | RESULT ctx=1024 B=4 total 48.957 ms/step 
+pair 5 start | load averages: 4.07 3.28 3.37 | RESULT ctx=1024 B=4 total 50.841 ms/step 
+pair 5 new | load averages: 3.68 3.22 3.35 | RESULT ctx=1024 B=4 total 49.171 ms/step 
+## benchbatchsplit 1024 B=2
+pair 1 start | load averages: 3.49 3.19 3.34 | RESULT ctx=1024 B=2 total 40.470 ms/step 
+pair 1 new | load averages: 3.18 3.14 3.32 | RESULT ctx=1024 B=2 total 39.395 ms/step 
+pair 2 start | load averages: 3.04 3.11 3.31 | RESULT ctx=1024 B=2 total 40.770 ms/step 
+pair 2 new | load averages: 2.95 3.09 3.30 | RESULT ctx=1024 B=2 total 39.426 ms/step 
+pair 3 start | load averages: 2.88 3.07 3.29 | RESULT ctx=1024 B=2 total 41.887 ms/step 
+pair 3 new | load averages: 3.06 3.10 3.30 | RESULT ctx=1024 B=2 total 39.396 ms/step 
+pair 4 start | load averages: 3.37 3.17 3.31 | RESULT ctx=1024 B=2 total 40.981 ms/step 
+pair 4 new | load averages: 3.53 3.21 3.33 | RESULT ctx=1024 B=2 total 39.750 ms/step 
+pair 5 start | load averages: 3.54 3.22 3.33 | RESULT ctx=1024 B=2 total 41.088 ms/step 
+pair 5 new | load averages: 3.61 3.24 3.34 | RESULT ctx=1024 B=2 total 40.532 ms/step 

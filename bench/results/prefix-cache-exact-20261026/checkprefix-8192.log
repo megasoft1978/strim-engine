@@ -1,0 +1,23 @@
+checkprefix model=models/qwen38-4bit N=8192 shared=6144 chunk=1024
+(a) miss reference (no store)
+  hash 50b014ea8c40eb25  tokens [220, 197, 1, 197, 1, 197, 1, 197, 1, 197, 1, 197, 1, 197, 1, 197]  8.200 s
+(b) hit vs miss
+  PASS  cold-store miss == reference
+  store after warm: nodes 6 bytes 1264 MB
+  PASS  hit == miss (hash+tokens)  hit hash 50b014ea8c40eb25 matched 6144
+  PASS  matched == 6144
+  PASS  second hit unchanged (no aliasing)
+  PASS  reverse: short prompt hit == short miss  matched 6144
+  PASS  forked tail hit == miss
+(c) eviction with tiny budget
+  PASS  insert run == reference
+  PASS  budget respected  bytes 421 MB budget 527 MB nodes 2 evictions 1
+  PASS  post-eviction hit == reference  matched 2048
+(d) unrelated prompt
+  PASS  unrelated -> miss, identical
+(e) TTFT N=8192, shared 6144
+  miss 8.204 s  hit 3.440 s  speedup 2.38x
+  bytes: total store 3794 MB over 18 nodes (~210 MB/node); restored ModelCache.byteSize 594 MB
+(f) policy-prefill cost vs one-shot, N=8192
+  chunked 1009 tok/s (8.117 s)  one-shot 1008 tok/s (8.130 s)  cost -0.2%
+checkprefix: ALL PASS

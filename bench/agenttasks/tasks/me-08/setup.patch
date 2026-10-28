@@ -1,0 +1,36 @@
+diff --git a/ftoa_precision_test.go b/ftoa_precision_test.go
+index 8a4f3e2..2467e2b 100644
+--- a/ftoa_precision_test.go
++++ b/ftoa_precision_test.go
+@@ -6,8 +6,8 @@ func TestFtoaWithDigitsLargeLimit(t *testing.T) {
+ 	maxInt := int(^uint(0) >> 1)
+ 	for _, digits := range []int{6, 7, maxInt - 1, maxInt} {
+ 		for _, num := range []float64{1.25, -1.25, 1234.25} {
+-			if got, want := FtoaWithDigits(num, digits), Ftoa(num); got != want {
+-				t.Errorf("FtoaWithDigits(%v, %d) = %q, want %q", num, digits, got, want)
++			if got, want := FtoaLimited(num, digits), Ftoa(num); got != want {
++				t.Errorf("FtoaLimited(%v, %d) = %q, want %q", num, digits, got, want)
+ 			}
+ 		}
+ 	}
+diff --git a/ftoa_test.go b/ftoa_test.go
+index 43c74d5..2f54fec 100644
+--- a/ftoa_test.go
++++ b/ftoa_test.go
+@@ -24,11 +24,11 @@ func TestFtoa(t *testing.T) {
+ 
+ func TestFtoaWithDigits(t *testing.T) {
+ 	testList{
+-		{"1.23, 0", FtoaWithDigits(1.23, 0), "1"},
+-		{"20, 0", FtoaWithDigits(20.0, 0), "20"},
+-		{"1.23, 1", FtoaWithDigits(1.23, 1), "1.2"},
+-		{"1.23, 2", FtoaWithDigits(1.23, 2), "1.23"},
+-		{"1.23, 3", FtoaWithDigits(1.23, 3), "1.23"},
++		{"1.23, 0", FtoaLimited(1.23, 0), "1"},
++		{"20, 0", FtoaLimited(20.0, 0), "20"},
++		{"1.23, 1", FtoaLimited(1.23, 1), "1.2"},
++		{"1.23, 2", FtoaLimited(1.23, 2), "1.23"},
++		{"1.23, 3", FtoaLimited(1.23, 3), "1.23"},
+ 	}.validate(t)
+ }
+ 

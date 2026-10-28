@@ -1,0 +1,9 @@
+prompt 0 bytes=     601 batch8: SAME  batch4: SAME
+prompt 1 bytes=     525 batch8: SAME  batch4: SAME
+prompt 2 bytes=     635 batch8: bench/results/conc-batch-20261027/ag2-batch/agree/solo-2.txt bench/results/conc-batch-20261027/ag2-batch/agree/conc8-2.txt differ: char 346, line 7  batch4: bench/results/conc-batch-20261027/ag2-batch/agree/solo-2.txt bench/results/conc-batch-20261027/ag2-batch/agree/conc4a-2.txt differ: char 346, line 7
+prompt 3 bytes=     572 batch8: SAME  batch4: SAME
+prompt 4 bytes=     586 batch8: SAME  batch4: SAME
+prompt 5 bytes=     588 batch8: SAME  batch4: SAME
+prompt 6 bytes=     606 batch8: SAME  batch4: SAME
+prompt 7 bytes=     615 batch8: bench/results/conc-batch-20261027/ag2-batch/agree/solo-7.txt bench/results/conc-batch-20261027/ag2-batch/agree/conc8-7.txt differ: char 214, line 3  batch4: bench/results/conc-batch-20261027/ag2-batch/agree/solo-7.txt bench/results/conc-batch-20261027/ag2-batch/agree/conc4b-7.txt differ: char 214, line 3
+MATCH batch8 6/8  batch4 6/8

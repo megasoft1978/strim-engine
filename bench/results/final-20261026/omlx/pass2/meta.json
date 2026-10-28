@@ -1,0 +1,52 @@
+{
+ "engine": "omlx",
+ "pass": 2,
+ "cmd": [
+  "omlx",
+  "serve",
+  "--model-dir",
+  "/private/tmp/claude-501/final-20261026-scratch/omlx-models",
+  "--port",
+  "8651"
+ ],
+ "env": {
+  "HOME": "/private/tmp/claude-501/final-20261026-scratch/omlx-home"
+ },
+ "cache": "default on",
+ "quant": "MLX 4-bit (qwen38-4bit linked into omlx model dir)",
+ "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+ "started": {
+  "t": "2026-10-27T09:49:27+0100",
+  "uptime": "9:49  up 3 days,  3:23, 1 user, load averages: 2.49 1.67 1.76",
+  "loadavg": "{ 2.49 1.67 1.76 }",
+  "top_cpu": [
+   "16.7 623312 /Users/user/.local/bin/claude",
+   "13.2 159792 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "9.9 135120 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "4.5 194304 /Applications/Stats.app/Contents/MacOS/Stats",
+   "2.3 10112 /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecod"
+  ]
+ },
+ "status": "done",
+ "ready_s": 1.6,
+ "model_id": "qwen38-4bit",
+ "pids": [
+  843
+ ],
+ "warmup_s": 0.0,
+ "ended": {
+  "t": "2026-10-27T09:53:38+0100",
+  "uptime": "9:53  up 3 days,  3:27, 1 user, load averages: 1.81 1.50 1.64",
+  "loadavg": "{ 1.81 1.50 1.64 }",
+  "top_cpu": [
+   "13.8 194400 /Applications/Stats.app/Contents/MacOS/Stats",
+   "6.7 134832 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "6.5 144832 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "2.5 28784 /System/Library/CoreServices/loginwindow.app/Contents/MacOS/loginwindow",
+   "2.0 25040 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata"
+  ]
+ },
+ "killed_pids": [
+  843
+ ]
+}

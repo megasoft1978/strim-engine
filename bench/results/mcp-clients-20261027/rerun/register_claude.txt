@@ -1,0 +1,25 @@
+printed command (token expanded by shell at run time): claude mcp add -s user -t http strim http://127.0.0.1:8213/mcp -H "Authorization: Bearer $(cat ~/.strim/token)"
+ran: claude mcp add -s user -t http strim http://127.0.0.1:8213/mcp -H ...
+add rc=0
+Added HTTP MCP server strim with URL: http://127.0.0.1:8213/mcp to user config
+Headers: {
+  "Authorization": "[REDACTED]"
+}
+File modified: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/cc-iso-s051i6i0/.claude.json
+
+--- mcp list
+Checking MCP server health…
+
+strim: http://127.0.0.1:8213/mcp (HTTP) - ✔ Connected
+
+--- mcp get
+strim:
+  Scope: User config (available in all your projects)
+  Status: ✔ Connected
+  Type: http
+  URL: http://127.0.0.1:8213/mcp
+  Headers:
+    Authorization: Bearer <redacted>
+
+To remove this server, run: claude mcp remove strim -s user
+

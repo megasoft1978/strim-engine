@@ -1,0 +1,6 @@
+### Explanation of the Code
+
+This code defines a `CutPolicy` struct within a Swift file (`PrefixCache.swift`) that is part of a system likely dealing with Large Language Model (LLM) inference optimization, specifically **Prefix Caching**.
+
+**Core Purpose:**
+The `CutPolicy` determines how a sequence of tokens is divided into "blocks" or "chunks" for processing. This partitioning is critical for prefix caching because it ensures that if a new prompt shares

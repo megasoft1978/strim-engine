@@ -1,0 +1,40 @@
+diff --git a/uuid_test.go b/uuid_test.go
+index 906ecbe..a4fc652 100644
+--- a/uuid_test.go
++++ b/uuid_test.go
+@@ -185,7 +185,7 @@ func TestRandomUUID(t *testing.T) {
+ 
+ func TestRandomUUID_Pooled(t *testing.T) {
+ 	defer DisableRandPool()
+-	EnableRandPool()
++	EnableRandomPool()
+ 	m := make(map[string]bool)
+ 	for x := 1; x < 128; x++ {
+ 		uuid := New()
+@@ -543,7 +543,7 @@ func TestRandomFromReader(t *testing.T) {
+ 
+ func TestRandPool(t *testing.T) {
+ 	myString := "8059ddhdle77cb52"
+-	EnableRandPool()
++	EnableRandomPool()
+ 	SetRand(strings.NewReader(myString))
+ 	_, err := NewRandom()
+ 	if err == nil {
+@@ -755,7 +755,7 @@ func BenchmarkUUID_New(b *testing.B) {
+ }
+ 
+ func BenchmarkUUID_NewPooled(b *testing.B) {
+-	EnableRandPool()
++	EnableRandomPool()
+ 	b.RunParallel(func(pb *testing.PB) {
+ 		for pb.Next() {
+ 			_, err := NewRandom()
+@@ -848,7 +848,7 @@ func TestVersion7(t *testing.T) {
+ // uuid1.Time() == uuid2.Time() is right, but uuid1 must != uuid2
+ func TestVersion7_pooled(t *testing.T) {
+ 	SetRand(nil)
+-	EnableRandPool()
++	EnableRandomPool()
+ 	defer DisableRandPool()
+ 
+ 	m := make(map[string]bool)

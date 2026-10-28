@@ -1,0 +1,2 @@
+client 0 prompt_tokens=466 completion=128 ttft=.56488 decode_tps=59.404
+AGG c=1 chars=1800 tokens=128 wall=2.7167 agg_tps=47.115

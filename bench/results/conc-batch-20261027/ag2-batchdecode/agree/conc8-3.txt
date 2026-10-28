@@ -1,0 +1,8 @@
+### What This Code Does
+
+This code implements a **Prefix Cache** system for Large Language Models (LLMs), specifically optimized for models using the **MLX** framework (commonly used on Apple Silicon). Its primary goal is to speed up inference by reusing previously computed Key-Value (KV) states and internal model states (like GDN conv/SSM states) when a new prompt shares a prefix with a previously processed prompt.
+
+Here is a breakdown of the key components:
+
+1.  **`CutPolicy` (Chunking Strategy):**
+    *   It defines how the input token sequence is divided into "

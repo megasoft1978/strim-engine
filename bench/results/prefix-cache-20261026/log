@@ -1,0 +1,10 @@
+== 4K prefix
+requests 4  slots 4  maxTokens 64  done 4  prefixWarm 4.51s
+sequential wall 27.92 s  9.5 tok/s aggregate
+batched    wall 6.30 s  41.9 tok/s aggregate  mean TTFT 6121 ms  mean decode 11.2 tok/s/req
+tokens match sequential: no — req 0 at 0: seq 12 batched 1234
+== 1K prefix
+requests 4  slots 4  maxTokens 16  done 4  prefixWarm 1.19s
+sequential wall 7.05 s  10.2 tok/s aggregate
+batched    wall 1.41 s  51.2 tok/s aggregate  mean TTFT 1320 ms  mean decode 16.8 tok/s/req
+tokens match sequential: no — req 0 at 0: seq 121 batched 1234

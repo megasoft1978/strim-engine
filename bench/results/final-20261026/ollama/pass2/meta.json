@@ -1,0 +1,55 @@
+{
+ "engine": "ollama",
+ "pass": 2,
+ "cmd": [
+  "ollama",
+  "serve"
+ ],
+ "env": {
+  "OLLAMA_HOST": "127.0.0.1:11435",
+  "OLLAMA_MODELS": "/private/tmp/claude-501/final-20261026-scratch/ollama-models",
+  "OLLAMA_NUM_PARALLEL": "2",
+  "OLLAMA_CONTEXT_LENGTH": "65536",
+  "OLLAMA_KEEP_ALIVE": "2h",
+  "OLLAMA_FLASH_ATTENTION": "1",
+  "OLLAMA_NOPRUNE": "1"
+ },
+ "cache": "default (ollama prompt reuse per slot)",
+ "quant": "GGUF Q4_K_M (imported via Modelfile)",
+ "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+ "started": {
+  "t": "2026-10-27T10:00:20+0100",
+  "uptime": "10:00  up 3 days,  3:34, 1 user, load averages: 3.08 2.20 1.86",
+  "loadavg": "{ 3.08 2.20 1.86 }",
+  "top_cpu": [
+   "17.5 155488 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "12.2 24944 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadat",
+   "11.4 23248 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadat",
+   "7.9 134560 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "2.3 10416 /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecod"
+  ]
+ },
+ "status": "done",
+ "ready_s": 1.0,
+ "model_id": "qwen38-27b-q4km",
+ "pids": [
+  2397
+ ],
+ "warmup_s": 0.0,
+ "ended": {
+  "t": "2026-10-27T10:06:02+0100",
+  "uptime": "10:06  up 3 days,  3:40, 1 user, load averages: 0.67 1.35 1.57",
+  "loadavg": "{ 0.67 1.35 1.57 }",
+  "top_cpu": [
+   "8.8 86384 /Applications/Stats.app/Contents/MacOS/Stats",
+   "4.4 133456 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "4.0 88000 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "3.7 34720 lazygit",
+   "3.7 441888 /Users/user/.local/bin/claude"
+  ]
+ },
+ "killed_pids": [
+  2397,
+  2437
+ ]
+}

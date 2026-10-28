@@ -1,0 +1,65 @@
+[2026-10-26T17:57:51] done rapid-mlx
+# screen summary
+
+Generated 2026-10-26T17:57:51 from raw.jsonl. Medians of valid rows, min-max in parens; n = valid rows. Cold rows (S2, S3) with any cache hit are excluded (labeled hit). Prefill = prompt_tokens / (TTFT - one decode step), one decode step = 1/decode_tps of the same row; plain prompt_tokens/TTFT is in the S2 table. Verdict uses the adjusted prefill (Strim: its benchprefill time has no decode step, so plain). Rules: CONTENDER only if decode >= 0.85x best AND prefill >= 0.85x best (best over all measured rows incl. Strim; being ahead of Strim on one axis is not enough); BEHIND otherwise; NOT COMPARABLE if S1/S2 missing or a different checkpoint. Token check: HTTP engines must give the same prompt_tokens and completion_tokens for the same prompt, else MISMATCH.
+
+## S1 decode (64 tok, greedy, 3 prompts x 2 reps; rapid-mlx and strim use MTP; thinking disabled for HTTP)
+
+| engine | decode tok/s median (min-max) | n | TTFT s median (non-warm) | cache | token flags | token check | verdict | reason |
+|---|---|---|---|---|---|---|---|---|
+| strim | 63.6 (41.9-65.0) | 3 | n/a | none (in-process) | ok | n/a (raw ids) | REFERENCE | in-process reference row; method differs from HTTP rows |
+| rapid-mlx | 45.8 (44.2-52.3) | 6 | n/a | hit | ok | match | BEHIND | decode 45.8 = 0.70x best 65.0; prefill 995.9 = 0.97x best 1023.0 |
+
+## S2 cold prefill (4K distinct per rep, 16 tok, 2 reps; strim: synthetic 4K, fresh cache, no decode)
+
+| engine | prefill tok/s adj median (min-max) | n | plain prompt/TTFT tok/s median | TTFT s median | cache | warm excluded | cold assert | verdict |
+|---|---|---|---|---|---|---|---|---|
+| strim | 1019.0 (1015.0-1023.0) | 2 | 1019.0 (1015.0-1023.0) | 4.0 (4.0-4.0) | none (in-process, fresh ModelCache) | 0 | n/a | REFERENCE |
+| rapid-mlx | 995.9 (994.3-997.5) | 2 | 989.8 (988.0-991.6) | 4.1 (4.1-4.2) | unknown | 0 | PASS no cached_tokens field; no cache-hit log lines (unverified from usage) | BEHIND |
+
+## S3 concurrency (4 x ~1K distinct cold, equal length, 32 tok, 1 run; strim: TTFT per request from benchserve)
+
+| engine | aggregate tok/s | wall s | per-req TTFT s median (arrival -> first token) | per-req decode tok/s median | cache | cold assert | flags |
+|---|---|---|---|---|---|---|---|
+| strim | 23.3 | 5.66 | 2.49 | 10.3 | none (prefix mode off) | n/a (in-process) | ok |
+| rapid-mlx | 22.8 | 5.61 | 4.38 | 25.3 | unknown | PASS no cached_tokens field; no cache-hit log lines (unverified from usage) | ok |
+
+## S3x4K concurrency (4 x 4K distinct cold, 32 tok, 1 run; rapid-mlx: cache-OFF launch; strim CLI)
+
+| engine | aggregate tok/s | wall s | per-req TTFT s median (arrival -> first token) | per-req decode tok/s median | cache | cold assert | flags |
+|---|---|---|---|---|---|---|---|
+| strim | n/a | n/a | n/a | n/a | n/a | n/a | not run |
+| rapid-mlx | n/a | n/a | n/a | n/a | n/a | n/a | not run |
+
+## Run timeline (uptime / loadavg from the first and last row of each engine)
+
+| engine | first row ts | uptime | loadavg | last row ts | uptime | loadavg |
+|---|---|---|---|---|---|---|
+| strim | 2026-10-26T17:56:28 | 17:56  up 2 days, 11:30, 1 user, load averages: 4.79 3.55 3.61 | { 4.79 3.55 3.61 } | 2026-10-26T17:57:04 | 17:57  up 2 days, 11:31, 1 user, load averages: 5.60 3.91 3.74 | { 5.60 3.91 3.74 } |
+| rapid-mlx | 2026-10-26T17:57:16 | 17:57  up 2 days, 11:31, 1 user, load averages: 5.66 3.98 3.77 | { 5.66 3.98 3.77 } | 2026-10-26T17:57:50 | 17:57  up 2 days, 11:31, 1 user, load averages: 6.87 4.45 3.94 | { 6.87 4.45 3.94 } |
+
+## S4 quality proxy (greedy text; rep 1 of S1, plus S2 rep 1 as extra)
+
+CHEAP PROXY ONLY. Strim has no text reference (its CLI prints greedy ids only on MISMATCH). HTTP engines use the same chat template and the same token counts (see token check). A pair is compared only when both outputs are valid: no error, not empty. Invalid outputs are reported as errors, never as identical.
+
+| engine | vs | prompt | status | common prefix chars | longer len | identical |
+|---|---|---|---|---|---|---|
+
+Self-determinism (rep 1 vs rep 2, same engine, greedy):
+
+- rapid-mlx code: identical
+- rapid-mlx natural: identical
+- rapid-mlx json: identical
+
+## Consistency (token counts; same prompt must give same prompt_tokens and completion_tokens)
+
+- no HTTP mismatches
+- strim S1 code: raw ids 93 prompt tokens (HTTP chat prompt 104), completion 64
+- strim S1 natural: raw ids 59 prompt tokens (HTTP chat prompt 71), completion 64
+- strim S1 json: raw ids 30 prompt tokens (HTTP chat prompt 42), completion 64
+- strim S2 rep 1: synthetic 4096 prompt tokens (HTTP chat prompt 4107); not the same prompt
+- strim S2 rep 2: synthetic 4096 prompt tokens (HTTP chat prompt 4107); not the same prompt
+
+## Failures, skips and flags
+
+- llama.cpp/ollama: not run: no local GGUF

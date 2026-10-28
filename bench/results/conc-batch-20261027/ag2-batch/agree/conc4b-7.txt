@@ -1,0 +1,8 @@
+### Explanation of the Code
+
+This file defines `LocalEngineClient`, an in-process implementation of the `EngineClient` protocol for a machine learning inference engine (likely based on MLX, given the comments). It acts as a bridge between asynchronous Swift code and a single, dedicated background thread (the "engine thread") where all heavy computation and state management occurs.
+
+**Key Components:**
+
+1.  **Thread Safety & Architecture:**
+    *   **`EngineCore` & `EngineLoop`:** The core logic runs on a single thread managed by `EngineLoop`. This ensures that mutable state (like the model weights,

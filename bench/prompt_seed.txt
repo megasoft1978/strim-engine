@@ -1,0 +1,55 @@
+Repository review notes for the payments service.
+
+The `PaymentRouter` class decides which provider handles a charge. It currently
+keeps a dictionary of provider callbacks and retries twice on a `TimeoutError`.
+The retry loop does not reset the idempotency key, which means a timeout after
+the provider accepted the request can produce a duplicate capture. The fix is
+to derive the key from `(invoice_id, attempt)` only for the first attempt and
+reuse it for every retry, and to persist the key before the first network call.
+
+```python
+class PaymentRouter:
+    def __init__(self, providers, ledger, clock):
+        self.providers = providers
+        self.ledger = ledger
+        self.clock = clock
+
+    def charge(self, invoice, amount, currency):
+        key = invoice.idempotency_key
+        for attempt in range(3):
+            provider = self._select(invoice, amount, currency)
+            try:
+                result = provider.capture(invoice, amount, currency, key)
+                self.ledger.record(invoice.id, result)
+                return result
+            except TimeoutError:
+                if attempt == 2:
+                    raise
+                self.clock.sleep(0.2 * (attempt + 1))
+```
+
+The test suite covers the happy path and one timeout, but not the duplicate
+capture case. Add a fake provider that records every call and raises
+`TimeoutError` after recording the first charge. Assert that exactly one capture
+exists after the router returns or raises, and that the idempotency key is
+identical across attempts.
+
+Edge cases to keep: zero-amount refunds, currency mismatch between invoice and
+provider, and a provider that returns a pending status instead of a capture.
+For pending results the ledger must store a provisional entry and the router
+must not retry, because a retry would create a second authorization hold.
+Instrumentation should emit one structured log line per attempt with the
+invoice id, provider, attempt number, and outcome, but never the card token.
+
+Deployment notes: the router is constructed once at boot and shared by the HTTP
+handlers. Provider callbacks capture a connection pool, so replacing the router
+at runtime requires draining in-flight requests first. The health check must
+report the provider set and the ledger lag, not the last error, because the last
+error is already surfaced by the alert on the capture failure metric.
+
+Migration plan: ship the idempotency fix behind a feature flag, run it on one
+percent of traffic for a day, compare duplicate-capture rate and p99 latency,
+then ramp to one hundred percent. Keep the old path for a week so a rollback
+does not require a deploy. Remove the flag and the old path together in the
+next release, and delete the fake provider that only exists to exercise the
+timeout branch once the integration test uses the real provider sandbox.

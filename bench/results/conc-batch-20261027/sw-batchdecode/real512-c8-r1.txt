@@ -1,0 +1,9 @@
+client 0 prompt_tokens=622 completion=128 ttft=.66490 decode_tps=10.031
+client 1 prompt_tokens=546 completion=128 ttft=2.0007 decode_tps=10.813
+client 2 prompt_tokens=516 completion=128 ttft=1.3513 decode_tps=10.308
+client 3 prompt_tokens=493 completion=128 ttft=2.5722 decode_tps=11.328
+client 4 prompt_tokens=489 completion=128 ttft=3.1593 decode_tps=11.906
+client 5 prompt_tokens=488 completion=128 ttft=3.7422 decode_tps=12.547
+client 6 prompt_tokens=525 completion=128 ttft=4.4000 decode_tps=13.372
+client 7 prompt_tokens=264 completion=128 ttft=4.8221 decode_tps=13.948
+AGG c=8 chars=1800 tokens=1024 wall=13.991 agg_tps=73.187

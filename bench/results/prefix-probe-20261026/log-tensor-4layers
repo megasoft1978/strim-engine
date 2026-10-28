@@ -1,0 +1,56 @@
+probesplit  model=models/qwen38-4bit  N=4096  layers=4/64  GDN path=tensor (metalOverride=false)
+
+== kernel microprobes ==
+component                                               bitwise  max|diff|
+qmm linear_attn.in_proj_qkv M=1024 vs M=512             yes      0
+qmm linear_attn.in_proj_qkv M=2048 vs M=512             yes      0
+qmm self_attn.q_proj M=1024 vs M=512                    yes      0
+qmm self_attn.q_proj M=2048 vs M=512                    yes      0
+GDN blocked-metal S=2048 vs 1024+1024 (out)             no       121.5
+GDN blocked-metal S=2048 vs 1024+1024 (ssm state)       yes      0
+GDN blocked-metal S=2048 vs 1024+1024 (conv state)      yes      0
+GDN blocked-metal S=2048 run 1 vs run 2 (out)           no       181.5
+GDN blocked-metal S=1324 vs 1024+300 tail (out)         no       51.5
+GDN blocked-metal S=1324 vs 1024+300 tail (ssm state)   no       22.3343
+GDN tensor-path S=2048 vs 1024+1024 (out)               no       0.25
+GDN tensor-path S=2048 vs 1024+1024 (ssm state)         no       0.0484619
+GDN tensor-path S=2048 vs 1024+1024 (conv state)        yes      0
+GDN tensor-path S=2048 run 1 vs run 2 (out)             yes      0
+GDN tensor-path S=1324 vs 1024+300 tail (out)           no       0.25
+GDN tensor-path S=1324 vs 1024+300 tail (ssm state)     no       0.0242808
+SDPA causal N vs cached chunks C=1024                   yes      0
+SDPA causal N vs cached chunks C=512                    no       0.00390625
+SDPA causal N vs cached split p=1000                    no       0.00390625
+
+== layer level: one-shot N vs split C=1024 (all 4 layers, positions [0,4096)) ==
+component                                               bitwise  max|diff|
+GDN mixer output (3 layers)                             no       0.25
+attention mixer output (1 layers)                       no       0.75
+MLP output (4 layers)                                   no       0.1875
+layer output / residual (4 layers)                      no       0.625
+first diverging layer: 0 (GDN; mixer diff 0.25, mlp diff 0.0625)
+final-logit hash one-shot d9008eae4d5deb25  split 4e7b9b7ca39ceb25  DIFFERENT
+
+== layer level: one-shot N vs split C=512 (all 4 layers, positions [0,4096)) ==
+component                                               bitwise  max|diff|
+GDN mixer output (3 layers)                             no       0.25
+attention mixer output (1 layers)                       no       0.625
+MLP output (4 layers)                                   no       0.1875
+layer output / residual (4 layers)                      no       0.5
+first diverging layer: 0 (GDN; mixer diff 0.25, mlp diff 0.0625)
+final-logit hash one-shot d9008eae4d5deb25  split 218e833cedb7eb25  DIFFERENT
+
+== layer level: one-shot N vs split p=1000 (all 4 layers, positions [0,4096)) ==
+component                                               bitwise  max|diff|
+GDN mixer output (3 layers)                             no       0.25
+attention mixer output (1 layers)                       no       0.875
+MLP output (4 layers)                                   no       0.15625
+layer output / residual (4 layers)                      no       0.5
+first diverging layer: 0 (GDN; mixer diff 0.25, mlp diff 0.0625)
+final-logit hash one-shot d9008eae4d5deb25  split 63947d751c58eb25  DIFFERENT
+
+== verdict ==
+aligned split (C=1024): FAIL
+unaligned split (p=1000): FAIL
+info: C=512: FAIL
+rc=0

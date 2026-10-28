@@ -1,0 +1,25 @@
+[W4] rep0 strim: 12 req, 0 err, 61.0s
+[W4] rep1 strim: 12 req, 0 err, 60.7s
+# Scoreboard 20261027-233003
+
+- reps: 2; value = median over reps of per-rep median; cv = stdev/mean over reps
+- tokens: tokenizer (strim tokenizer: /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit/tokenizer.json)
+- skipped (pending): none
+- cache info: usage.prompt_tokens_details.cached_tokens, else server log, else unknown
+- thinking: disabled (chat_template_kwargs.enable_thinking=false)
+- excluded rows (no_usage, short) have no decode tok/s and void their concurrent batch's aggregate; ttft kept
+
+| workload | variant | metric | strim |
+|---|---|---|---|
+| W4 | distinct-c4 | aggregate_tps | 12.34 cv 1.2% (n=2) |
+| W4 | distinct-c4 | decode_tps | 6.77 cv 3.6% (n=2) |
+| W4 | distinct-c4 | ttft_s | 10.78 cv 0.2% (n=2) |
+| W4 | distinct-c8 | aggregate_tps | 12.78 cv 0.1% (n=2) |
+| W4 | distinct-c8 | decode_tps | 3.211 cv 0.4% (n=2) |
+| W4 | distinct-c8 | ttft_s | 19.6 cv 0.2% (n=2) |
+
+## Flags per arm
+
+- strim: requests 24, errors 0, tokens mismatch 0, short 0, no usage 0, retokenized 0, excluded rows 0 (decode/aggregate dropped), cache_info {'usage': 24}, W4 rows not zero-hit/verified 0
+
+wrote bench/results/conc-batch-20261027/k4-auto/w4-4k

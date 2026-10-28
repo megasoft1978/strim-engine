@@ -1,0 +1,19 @@
+Strim
+Copyright (c) 2026 Gabriele Ferreri. Licensed under the MIT License (LICENSE).
+
+This product includes material from third parties. Full list and licenses:
+docs/THIRD-PARTY.md.
+
+Adapted code (attribution required):
+
+* Sources/StrimCore/GDNMetal.swift, `blockedKernel` (blocked-sequential Gated
+  DeltaNet prefill Metal kernel): ported from `rapid_mlx/gdn_prefill.py` in
+  Rapid-MLX (https://github.com/raullenchai/Rapid-MLX), Copyright 2025-2026 the
+  Rapid-MLX contributors, Apache License 2.0, which in turn adapted it from oMLX
+  (https://github.com/jundot/omlx), Apache License 2.0. Full text:
+  LICENSES/Apache-2.0.txt.
+
+* bench/agenttasks/tasks/*/snapshot.tar.gz, setup.patch, solution.patch: small
+  excerpts of the MIT / BSD-3-Clause projects listed in bench/agenttasks/manifest.json
+  (more-itertools, python-semver, jmespath.py, parse, google/uuid, spf13/pflag,
+  dustin/go-humanize, cachetools, xmltodict). Each remains under its own license.

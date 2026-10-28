@@ -1,0 +1,9 @@
+### Code Explanation
+
+This Swift code defines a configuration struct named `EngineConfig` for a language model inference engine (likely part of a system called "Strim"). It is designed to manage resource allocation and performance tuning for running Large Language Models (LLMs) using the MLX framework.
+
+Key components include:
+
+1.  **Model & Speculation Settings**:
+    *   `modelDir`: Path to the model weights.
+    *   `headDir`:

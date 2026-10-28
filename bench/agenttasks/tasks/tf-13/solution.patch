@@ -1,0 +1,19 @@
+diff --git a/Sources/Version/Version.swift b/Sources/Version/Version.swift
+index 487cc95..2fc3b5e 100644
+--- a/Sources/Version/Version.swift
++++ b/Sources/Version/Version.swift
+@@ -11,7 +11,13 @@ public struct Version: Comparable, CustomStringConvertible {
+     public var description: String { parts.map(String.init).joined(separator: ".") }
+ 
+     public static func < (a: Version, b: Version) -> Bool {
+-        return a.description < b.description
++        let n = max(a.parts.count, b.parts.count)
++        for i in 0..<n {
++            let x = i < a.parts.count ? a.parts[i] : 0
++            let y = i < b.parts.count ? b.parts[i] : 0
++            if x != y { return x < y }
++        }
++        return false
+     }
+ 
+     public static func == (a: Version, b: Version) -> Bool {

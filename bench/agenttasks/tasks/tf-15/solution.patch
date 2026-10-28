@@ -1,0 +1,13 @@
+diff --git a/Sources/WordWrap/WordWrap.swift b/Sources/WordWrap/WordWrap.swift
+index 1237147..7bd6212 100644
+--- a/Sources/WordWrap/WordWrap.swift
++++ b/Sources/WordWrap/WordWrap.swift
+@@ -6,7 +6,7 @@ public enum WordWrap {
+         for word in text.split(whereSeparator: { $0 == " " || $0 == "\n" }) {
+             if current.isEmpty {
+                 current = String(word)
+-            } else if current.count + 1 + word.count < width {
++            } else if current.count + 1 + word.count <= width {
+                 current += " " + word
+             } else {
+                 lines.append(current)

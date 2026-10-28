@@ -1,0 +1,88 @@
+  greedy code B=2 batch     : agg 48.9 [48.8-49.2] tok/s (1.00x)  per-seq 24.7 [24.4-25.0]  ttft 0.18s  identical-to-solo 8/8
+  greedy code B=2 roundrobin: agg 74.2 [72.8-74.6] tok/s (1.52x)  per-seq 37.4 [36.4-38.5]  ttft 0.18s  identical-to-solo 8/8
+  greedy code B=2 auto      : agg 73.7 [73.0-73.9] tok/s (1.51x)  per-seq 37.3 [36.5-38.2]  ttft 0.18s  identical-to-solo 8/8
+  (load avg1 min/max 2.3/3.6)
+  [PASS] greedy code B=2: roundrobin sequences bitwise == single-stream
+  greedy prose B=2 batch     : agg 49.0 [48.8-49.1] tok/s (1.00x)  per-seq 24.7 [24.4-25.0]  ttft 0.17s  identical-to-solo 0/8
+  greedy prose B=2 roundrobin: agg 44.2 [43.8-44.5] tok/s (0.90x)  per-seq 22.6 [21.9-23.4]  ttft 0.18s  identical-to-solo 8/8
+  greedy prose B=2 auto      : agg 47.7 [47.5-48.1] tok/s (0.97x)  per-seq 24.4 [23.8-25.2]  ttft 0.18s  identical-to-solo 2/8
+  (load avg1 min/max 1.6/2.2)
+  [PASS] greedy prose B=2: roundrobin sequences bitwise == single-stream
+  greedy mixed B=2 batch     : agg 48.7 [48.7-49.1] tok/s (1.00x)  per-seq 24.6 [24.3-24.9]  ttft 0.18s  identical-to-solo 4/8
+  greedy mixed B=2 roundrobin: agg 55.4 [54.7-55.8] tok/s (1.14x)  per-seq 32.9 [27.4-38.3]  ttft 0.18s  identical-to-solo 8/8
+  greedy mixed B=2 auto      : agg 55.5 [54.8-56.3] tok/s (1.14x)  per-seq 32.9 [27.4-38.5]  ttft 0.18s  identical-to-solo 8/8
+  (load avg1 min/max 1.5/3.5)
+  [PASS] greedy mixed B=2: roundrobin sequences bitwise == single-stream
+enginebench: ALL PASS
+  greedy code B=3 batch     : agg 63.7 [63.6-63.9] tok/s (1.00x)  per-seq 21.3 [21.2-21.7]  ttft 0.25s  identical-to-solo 12/12
+  greedy code B=3 roundrobin: agg 74.0 [73.4-75.0] tok/s (1.16x)  per-seq 25.2 [24.5-26.6]  ttft 0.26s  identical-to-solo 12/12
+  greedy code B=3 auto      : agg 73.7 [73.3-74.7] tok/s (1.16x)  per-seq 25.1 [24.4-26.5]  ttft 0.26s  identical-to-solo 12/12
+  (load avg1 min/max 1.8/2.7)
+  [PASS] greedy code B=3: roundrobin sequences bitwise == single-stream
+  greedy prose B=3 batch     : agg 63.7 [63.6-63.8] tok/s (1.00x)  per-seq 21.3 [21.2-21.7]  ttft 0.25s  identical-to-solo 0/12
+  greedy prose B=3 roundrobin: agg 44.5 [44.1-44.8] tok/s (0.70x)  per-seq 15.3 [14.7-15.8]  ttft 0.25s  identical-to-solo 12/12
+  greedy prose B=3 auto      : agg 62.1 [62.0-62.2] tok/s (0.98x)  per-seq 21.1 [20.7-21.6]  ttft 0.25s  identical-to-solo 4/12
+  (load avg1 min/max 1.9/2.3)
+  [PASS] greedy prose B=3: roundrobin sequences bitwise == single-stream
+  greedy mixed B=3 batch     : agg 63.7 [63.6-63.7] tok/s (1.00x)  per-seq 21.3 [21.2-21.7]  ttft 0.26s  identical-to-solo 8/12
+  greedy mixed B=3 roundrobin: agg 60.6 [59.9-61.2] tok/s (0.95x)  per-seq 25.0 [20.0-26.5]  ttft 0.26s  identical-to-solo 12/12
+  greedy mixed B=3 auto      : agg 62.3 [62.2-62.6] tok/s (0.98x)  per-seq 20.9 [20.7-21.8]  ttft 0.25s  identical-to-solo 5/12
+  (load avg1 min/max 1.7/2.5)
+  [PASS] greedy mixed B=3: roundrobin sequences bitwise == single-stream
+enginebench: ALL PASS
+  greedy code B=4 batch     : agg 75.6 [75.5-76.2] tok/s (1.00x)  per-seq 19.1 [18.9-19.5]  ttft 0.33s  identical-to-solo 16/16
+  greedy code B=4 roundrobin: agg 70.7 [70.4-70.8] tok/s (0.93x)  per-seq 18.9 [17.6-20.2]  ttft 0.34s  identical-to-solo 16/16
+  greedy code B=4 auto      : agg 74.8 [74.7-75.0] tok/s (0.99x)  per-seq 18.9 [18.7-19.3]  ttft 0.33s  identical-to-solo 12/16
+  (load avg1 min/max 2.3/2.7)
+  [PASS] greedy code B=4: roundrobin sequences bitwise == single-stream
+  greedy prose B=4 batch     : agg 75.8 [75.7-76.0] tok/s (1.00x)  per-seq 19.1 [18.9-19.5]  ttft 0.32s  identical-to-solo 0/16
+  greedy prose B=4 roundrobin: agg 47.2 [46.6-47.6] tok/s (0.62x)  per-seq 12.2 [11.7-14.2]  ttft 0.33s  identical-to-solo 16/16
+  greedy prose B=4 auto      : agg 73.7 [73.4-73.9] tok/s (0.97x)  per-seq 18.7 [18.4-19.2]  ttft 0.32s  identical-to-solo 4/16
+  (load avg1 min/max 2.0/2.6)
+  [PASS] greedy prose B=4: roundrobin sequences bitwise == single-stream
+  greedy mixed B=4 batch     : agg 75.7 [75.6-75.9] tok/s (1.00x)  per-seq 19.1 [18.9-19.5]  ttft 0.33s  identical-to-solo 8/16
+  greedy mixed B=4 roundrobin: agg 55.3 [54.8-55.6] tok/s (0.73x)  per-seq 16.8 [13.7-20.5]  ttft 0.34s  identical-to-solo 16/16
+  greedy mixed B=4 auto      : agg 74.7 [74.6-75.0] tok/s (0.99x)  per-seq 18.8 [18.7-19.4]  ttft 0.34s  identical-to-solo 12/16
+  (load avg1 min/max 1.8/2.4)
+  [PASS] greedy mixed B=4: roundrobin sequences bitwise == single-stream
+enginebench: ALL PASS
+  sampled code B=2 batch     : agg 47.7 [47.2-48.7] tok/s (1.00x)  per-seq 24.1 [23.6-24.7]  ttft 0.18s  identical-to-solo 0/8
+  sampled code B=2 roundrobin: agg 73.8 [73.6-75.0] tok/s (1.55x)  per-seq 38.7 [36.8-40.6]  ttft 0.18s  identical-to-solo 8/8
+  sampled code B=2 auto      : agg 74.1 [72.9-75.1] tok/s (1.55x)  per-seq 38.6 [36.4-40.7]  ttft 0.18s  identical-to-solo 8/8
+  (load avg1 min/max 1.8/2.3)
+  sampled prose B=2 batch     : agg 47.5 [47.4-48.1] tok/s (1.00x)  per-seq 24.1 [23.7-24.5]  ttft 0.18s  identical-to-solo 0/8
+  sampled prose B=2 roundrobin: agg 42.6 [42.4-42.9] tok/s (0.90x)  per-seq 21.4 [21.2-21.7]  ttft 0.18s  identical-to-solo 8/8
+  sampled prose B=2 auto      : agg 46.8 [46.7-47.5] tok/s (0.98x)  per-seq 23.9 [23.3-24.6]  ttft 0.18s  identical-to-solo 0/8
+  (load avg1 min/max 1.4/2.1)
+  sampled mixed B=2 batch     : agg 47.5 [47.4-47.5] tok/s (1.00x)  per-seq 23.9 [23.7-24.2]  ttft 0.18s  identical-to-solo 0/8
+  sampled mixed B=2 roundrobin: agg 57.3 [57.2-57.5] tok/s (1.21x)  per-seq 35.4 [28.6-42.4]  ttft 0.18s  identical-to-solo 8/8
+  sampled mixed B=2 auto      : agg 57.6 [56.7-58.1] tok/s (1.21x)  per-seq 35.5 [28.3-42.9]  ttft 0.18s  identical-to-solo 8/8
+  (load avg1 min/max 1.4/2.1)
+enginebench: ALL PASS
+  sampled code B=3 batch     : agg 61.2 [61.0-61.4] tok/s (1.00x)  per-seq 20.5 [20.3-20.9]  ttft 0.25s  identical-to-solo 0/12
+  sampled code B=3 roundrobin: agg 61.6 [61.4-61.9] tok/s (1.01x)  per-seq 25.0 [20.5-28.3]  ttft 0.26s  identical-to-solo 12/12
+  sampled code B=3 auto      : agg 61.3 [60.4-62.7] tok/s (1.00x)  per-seq 20.9 [20.1-28.5]  ttft 0.25s  identical-to-solo 6/12
+  (load avg1 min/max 1.5/2.0)
+  sampled prose B=3 batch     : agg 61.5 [61.1-61.9] tok/s (1.00x)  per-seq 20.7 [20.4-21.1]  ttft 0.25s  identical-to-solo 0/12
+  sampled prose B=3 roundrobin: agg 43.6 [43.1-43.8] tok/s (0.71x)  per-seq 14.7 [14.4-15.4]  ttft 0.26s  identical-to-solo 12/12
+  sampled prose B=3 auto      : agg 59.7 [59.6-60.2] tok/s (0.97x)  per-seq 20.1 [19.9-20.6]  ttft 0.25s  identical-to-solo 0/12
+  (load avg1 min/max 1.8/2.4)
+  sampled mixed B=3 batch     : agg 61.2 [61.1-61.4] tok/s (1.00x)  per-seq 20.5 [20.4-20.9]  ttft 0.26s  identical-to-solo 0/12
+  sampled mixed B=3 roundrobin: agg 55.8 [55.2-55.9] tok/s (0.91x)  per-seq 20.4 [18.4-28.9]  ttft 0.26s  identical-to-solo 12/12
+  sampled mixed B=3 auto      : agg 60.8 [59.3-60.9] tok/s (0.99x)  per-seq 20.4 [19.8-23.0]  ttft 0.25s  identical-to-solo 0/12
+  (load avg1 min/max 1.7/2.6)
+enginebench: ALL PASS
+  sampled code B=4 batch     : agg 72.6 [72.3-73.6] tok/s (1.00x)  per-seq 18.3 [18.1-18.9]  ttft 0.33s  identical-to-solo 0/16
+  sampled code B=4 roundrobin: agg 60.5 [59.9-60.9] tok/s (0.83x)  per-seq 17.5 [15.0-21.9]  ttft 0.34s  identical-to-solo 16/16
+  sampled code B=4 auto      : agg 71.5 [71.2-72.4] tok/s (0.99x)  per-seq 18.0 [17.8-18.8]  ttft 0.33s  identical-to-solo 0/16
+  (load avg1 min/max 2.0/2.8)
+  sampled prose B=4 batch     : agg 72.8 [72.5-73.0] tok/s (1.00x)  per-seq 18.3 [18.1-18.7]  ttft 0.32s  identical-to-solo 0/16
+  sampled prose B=4 roundrobin: agg 44.5 [44.4-44.8] tok/s (0.61x)  per-seq 11.4 [11.1-12.0]  ttft 0.33s  identical-to-solo 16/16
+  sampled prose B=4 auto      : agg 70.8 [70.2-71.1] tok/s (0.97x)  per-seq 17.9 [17.5-18.2]  ttft 0.32s  identical-to-solo 0/16
+  (load avg1 min/max 1.9/2.7)
+  sampled mixed B=4 batch     : agg 72.4 [72.2-72.5] tok/s (1.00x)  per-seq 18.2 [18.0-18.6]  ttft 0.33s  identical-to-solo 0/16
+  sampled mixed B=4 roundrobin: agg 50.5 [50.0-50.8] tok/s (0.70x)  per-seq 14.1 [12.5-22.0]  ttft 0.34s  identical-to-solo 16/16
+  sampled mixed B=4 auto      : agg 71.5 [71.1-71.9] tok/s (0.99x)  per-seq 18.1 [17.8-18.7]  ttft 0.33s  identical-to-solo 0/16
+  (load avg1 min/max 1.7/2.2)
+enginebench: ALL PASS
+DONE

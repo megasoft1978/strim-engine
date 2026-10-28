@@ -1,0 +1,3091 @@
+{
+ "meta": {
+  "title": "Final all-engine benchmark",
+  "model": "Qwen3.8-27B",
+  "path": "bench/results/final-20261026",
+  "generated_by": "bench/final_aggregate.py"
+ },
+ "datasets": [
+  {
+   "id": "final",
+   "label": "Final all-engine benchmark",
+   "path": "bench/results/final-20261026",
+   "needs": "summary.md"
+  }
+ ],
+ "figures": [
+  {
+   "id": "final.w1_decode.strim",
+   "value": 63.3,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: strim, greedy decode, 64 tokens. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Strim and rapid-mlx n=4 (ABAB, 2 passes x 2 reps); Strim default settings; MTP on. See summary.md caveats (prefill is not a Strim win; per-request decode in concurrency; W5 shared prefix).",
+   "n": "4",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w3_4k_ttft.strim",
+   "value": 4.18,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: strim, 4K cold TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Strim and rapid-mlx n=4 (ABAB, 2 passes x 2 reps); Strim default settings; MTP on. See summary.md caveats (prefill is not a Strim win; per-request decode in concurrency; W5 shared prefix).",
+   "n": "4",
+   "dataset": "final"
+  },
+  {
+   "id": "final.s3_agg.strim",
+   "value": 12.4,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: strim, aggregate, 4 concurrent distinct 4K cold prompts (W4 c4). HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Strim and rapid-mlx n=4 (ABAB, 2 passes x 2 reps); Strim default settings; MTP on. See summary.md caveats (prefill is not a Strim win; per-request decode in concurrency; W5 shared prefix).",
+   "n": "4",
+   "dataset": "final"
+  },
+  {
+   "id": "final.replay_prefill.strim",
+   "value": 54.5,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: strim, agent replay (synthetic 8 turns), summed per-turn TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Strim and rapid-mlx n=4 (ABAB, 2 passes x 2 reps); Strim default settings; MTP on. See summary.md caveats (prefill is not a Strim win; per-request decode in concurrency; W5 shared prefix).",
+   "n": "4",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w1_decode.rapid-mlx",
+   "value": 50.2,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: rapid-mlx, greedy decode, 64 tokens. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=4 (ABAB, 2 passes x 2 reps); MTP on, prefix cache default; ignore_eos not honored on replay turns 3-8 (TTFT kept). See summary.md caveats.",
+   "n": "4",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w3_4k_ttft.rapid-mlx",
+   "value": 4.15,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: rapid-mlx, 4K cold TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=4 (ABAB, 2 passes x 2 reps); MTP on, prefix cache default; ignore_eos not honored on replay turns 3-8 (TTFT kept). See summary.md caveats.",
+   "n": "4",
+   "dataset": "final"
+  },
+  {
+   "id": "final.s3_agg.rapid-mlx",
+   "value": 13.0,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: rapid-mlx, aggregate, 4 concurrent distinct 4K cold prompts (W4 c4). HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=4 (ABAB, 2 passes x 2 reps); MTP on, prefix cache default; ignore_eos not honored on replay turns 3-8 (TTFT kept). See summary.md caveats.",
+   "n": "4",
+   "dataset": "final"
+  },
+  {
+   "id": "final.replay_prefill.rapid-mlx",
+   "value": 49.7,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: rapid-mlx, agent replay (synthetic 8 turns), summed per-turn TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=4 (ABAB, 2 passes x 2 reps); MTP on, prefix cache default; ignore_eos not honored on replay turns 3-8 (TTFT kept). See summary.md caveats.",
+   "n": "4",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w1_decode.mlx-lm",
+   "value": 30.4,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: mlx-lm, greedy decode, 64 tokens. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=3, no MTP; replay from a re-run pass counting tool_calls deltas.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w3_4k_ttft.mlx-lm",
+   "value": 5.48,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: mlx-lm, 4K cold TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=3, no MTP; replay from a re-run pass counting tool_calls deltas.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.s3_agg.mlx-lm",
+   "value": 12.9,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: mlx-lm, aggregate, 4 concurrent distinct 4K cold prompts (W4 c4). HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=3, no MTP; replay from a re-run pass counting tool_calls deltas.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.replay_prefill.mlx-lm",
+   "value": 54.4,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: mlx-lm, agent replay (synthetic 8 turns), summed per-turn TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=3, no MTP; replay from a re-run pass counting tool_calls deltas.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w1_decode.tensorfold",
+   "value": 30.3,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: tensorfold, greedy decode, 64 tokens. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Default context 32768: 32K and replay turns 7-8 refused; the replay sum is n/a at default settings.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w3_4k_ttft.tensorfold",
+   "value": 4.11,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: tensorfold, 4K cold TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Default context 32768: 32K and replay turns 7-8 refused; the replay sum is n/a at default settings.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.s3_agg.tensorfold",
+   "value": 9.6,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: tensorfold, aggregate, 4 concurrent distinct 4K cold prompts (W4 c4). HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Default context 32768: 32K and replay turns 7-8 refused; the replay sum is n/a at default settings.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.replay_prefill.tensorfold",
+   "value": null,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: tensorfold, agent replay (synthetic 8 turns), summed per-turn TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Default context 32768: 32K and replay turns 7-8 refused; the replay sum is n/a at default settings.",
+   "n": "0",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w1_decode.omlx",
+   "value": 35.6,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: omlx, greedy decode, 64 tokens. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "MLX 4-bit; W5 n=1 (memory guard abort); replay from a re-run pass.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w3_4k_ttft.omlx",
+   "value": 5.1,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: omlx, 4K cold TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "MLX 4-bit; W5 n=1 (memory guard abort); replay from a re-run pass.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.s3_agg.omlx",
+   "value": 11.6,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: omlx, aggregate, 4 concurrent distinct 4K cold prompts (W4 c4). HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "MLX 4-bit; W5 n=1 (memory guard abort); replay from a re-run pass.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.replay_prefill.omlx",
+   "value": 65.2,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: omlx, agent replay (synthetic 8 turns), summed per-turn TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "MLX 4-bit; W5 n=1 (memory guard abort); replay from a re-run pass.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w1_decode.mlx-vlm",
+   "value": 32.0,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: mlx-vlm, greedy decode, 64 tokens. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=3, no MTP.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w3_4k_ttft.mlx-vlm",
+   "value": 4.04,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: mlx-vlm, 4K cold TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=3, no MTP.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.s3_agg.mlx-vlm",
+   "value": 13.5,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: mlx-vlm, aggregate, 4 concurrent distinct 4K cold prompts (W4 c4). HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=3, no MTP.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.replay_prefill.mlx-vlm",
+   "value": 192.9,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: mlx-vlm, agent replay (synthetic 8 turns), summed per-turn TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "n=3, no MTP.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w1_decode.llamacpp",
+   "value": 28.3,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: llama.cpp, greedy decode, 64 tokens. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Final all-engine HTTP benchmark, see summary.md caveats. MLX 4-bit weights.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w3_4k_ttft.llamacpp",
+   "value": 5.45,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: llama.cpp, 4K cold TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Final all-engine HTTP benchmark, see summary.md caveats. MLX 4-bit weights.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.s3_agg.llamacpp",
+   "value": 9.3,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: llama.cpp, aggregate, 4 concurrent distinct 4K cold prompts (W4 c4). HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Final all-engine HTTP benchmark, see summary.md caveats. MLX 4-bit weights.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.replay_prefill.llamacpp",
+   "value": null,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: llama.cpp, agent replay (synthetic 8 turns), summed per-turn TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "Final all-engine HTTP benchmark, see summary.md caveats. MLX 4-bit weights.",
+   "n": "0",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w1_decode.ollama",
+   "value": 24.1,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: ollama, greedy decode, 64 tokens. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "GGUF Q4_K_M, not the MLX 4-bit weights; hand-written ChatML template.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.w3_4k_ttft.ollama",
+   "value": 5.89,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: ollama, 4K cold TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "GGUF Q4_K_M, not the MLX 4-bit weights; hand-written ChatML template.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.s3_agg.ollama",
+   "value": 7.5,
+   "unit": "tok/s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: ollama, aggregate, 4 concurrent distinct 4K cold prompts (W4 c4). HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "GGUF Q4_K_M, not the MLX 4-bit weights; hand-written ChatML template.",
+   "n": "3",
+   "dataset": "final"
+  },
+  {
+   "id": "final.replay_prefill.ollama",
+   "value": 87.5,
+   "unit": "s",
+   "source_path": "bench/results/final-20261026/summary.md",
+   "method_note": "Final all-engine benchmark: ollama, agent replay (synthetic 8 turns), summed per-turn TTFT. HTTP, each engine served alone, Qwen3.8-27B, thinking off, medians over reps.",
+   "caveat": "GGUF Q4_K_M, not the MLX 4-bit weights; hand-written ChatML template.",
+   "n": "3",
+   "dataset": "final"
+  }
+ ],
+ "skipped": {
+  "(none skipped entirely)": "all 8 engines launched and served requests. Partial coverage is listed below and in the caveats.",
+  "tensorfold, 32K cold (W3) and replay turns 7-8": "tensorfold's default max context is 32768 tokens; it refused the 32.8K W3 prompts and the 35.6K/40.8K replay turns (server log: 'maximum context length is 32768'). Cells are n/a for the default launch. A supplemental `--context 65536` launch (tensorfold-ctx64k, W3 + replay only) is shown as an extra column; it is not the default configuration.",
+  "llama.cpp, 32K cold (W3) and replay turns 7-8": "with the mandated `-c 65536 -np 2` each slot has 32768 tokens; requests of 32.8K/35.6K/40.8K prompt tokens got HTTP 400 ('exceeds the available context size'). n/a, not retried with other flags.",
+  "omlx, W5 reps 2-3 (n=1)": "during W5 (4 concurrent 16K prompts) oMLX's process memory guard hit the hard limit (54.5 GB of a 56 GB ceiling), aborted the requests and unloaded the model; later requests in that pass returned HTTP 500. W5 is the single completed rep. Its replay and sampled decode were re-run in a fresh pass2.",
+  "mlx-vlm decode concerns": "screen-20261026 could not measure mlx-vlm decode (burst timing, no usage); with mlx-vlm 0.7.10 the server returned usage and the rows are valid, so it is included.",
+  "4-way 1K burst, per-engine MTP/draft ablations, cache-off arms": "not part of this run (cache default only)."
+ },
+ "engines": {
+  "strim": {
+   "passes": [
+    {
+     "pass": "pass1",
+     "status": "done",
+     "ready_s": 3.0,
+     "warmup_s": 4.7,
+     "model_id": "qwen38-4bit",
+     "cmd": [
+      ".build/release/strim",
+      "serve",
+      "models/qwen38-4bit",
+      "models/qwen38-mtp-4bit",
+      "--port",
+      "8203",
+      "--no-auth"
+     ],
+     "env": {},
+     "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+     "cache": "default (STRIM_PREFIX_CACHE_MB default 12288)",
+     "quant": "MLX 4-bit + MTP head"
+    },
+    {
+     "pass": "pass2",
+     "status": "done",
+     "ready_s": 3.0,
+     "warmup_s": 4.6,
+     "model_id": "qwen38-4bit",
+     "cmd": [
+      ".build/release/strim",
+      "serve",
+      "models/qwen38-4bit",
+      "models/qwen38-mtp-4bit",
+      "--port",
+      "8203",
+      "--no-auth"
+     ],
+     "env": {},
+     "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+     "cache": "default (STRIM_PREFIX_CACHE_MB default 12288)",
+     "quant": "MLX 4-bit + MTP head"
+    }
+   ],
+   "cells": {
+    "W1 greedy-64 decode tok/s": {
+     "value": 63.28040249981089,
+     "n": 4,
+     "cv_pct": 0.6613988040806836,
+     "values": [
+      63.75458507339427,
+      63.1546160910484,
+      63.406188908573384,
+      62.60736401454115
+     ]
+    },
+    "W1 greedy-64 TTFT s": {
+     "value": 0.11061792699911166,
+     "n": 4,
+     "cv_pct": 0.6507184423958693,
+     "values": [
+      0.11183268750028219,
+      0.10985314600111451,
+      0.1104351459944155,
+      0.11080070800380781
+     ]
+    },
+    "W1 greedy-256 decode tok/s": {
+     "value": 68.259222800179,
+     "n": 4,
+     "cv_pct": 0.7318199562092811,
+     "values": [
+      68.46310926296346,
+      68.05533633739454,
+      67.59936699616922,
+      68.9521187220464
+     ]
+    },
+    "W2 temp0.6-256 decode tok/s": {
+     "value": 68.44942243888767,
+     "n": 4,
+     "cv_pct": 0.6918937600438468,
+     "values": [
+      68.14311083622411,
+      68.83720405800182,
+      68.75573404155124,
+      67.67922404703495
+     ]
+    },
+    "W3 4K cold decode tok/s": {
+     "value": 61.912136914641025,
+     "n": 4,
+     "cv_pct": 1.8272556290034596,
+     "values": [
+      62.20934657547444,
+      60.97305920988607,
+      64.02212307614161,
+      61.6149272538076
+     ]
+    },
+    "W3 4K cold TTFT s": {
+     "value": 4.18162229200243,
+     "n": 4,
+     "cv_pct": 0.39692557561878006,
+     "values": [
+      4.176685000013094,
+      4.211312083003577,
+      4.1665527079603635,
+      4.186559583991766
+     ]
+    },
+    "W3 16K cold decode tok/s": {
+     "value": 48.75099539135221,
+     "n": 4,
+     "cv_pct": 2.5104893514216298,
+     "values": [
+      48.6727221728612,
+      48.829268609843226,
+      46.075270526586564,
+      49.04854432541663
+     ]
+    },
+    "W3 16K cold TTFT s": {
+     "value": 17.406827666491154,
+     "n": 4,
+     "cv_pct": 0.29638339585057194,
+     "values": [
+      17.412404082977446,
+      17.47767754099914,
+      17.40125125000486,
+      17.33221537497593
+     ]
+    },
+    "W3 32K cold decode tok/s": {
+     "value": 48.50341874429431,
+     "n": 4,
+     "cv_pct": 6.8324922409207876,
+     "values": [
+      50.78136916872522,
+      46.2254683198634,
+      51.513654719240364,
+      43.54759200567699
+     ]
+    },
+    "W3 32K cold TTFT s": {
+     "value": 37.51743827101018,
+     "n": 4,
+     "cv_pct": 0.16402172102205417,
+     "values": [
+      37.50809604200185,
+      37.57390570797725,
+      37.405439708032645,
+      37.5267805000185
+     ]
+    },
+    "W4 c2 aggregate tok/s": {
+     "value": 11.809812956548836,
+     "n": 4,
+     "cv_pct": 0.2312492081675704,
+     "values": [
+      11.779747390896848,
+      11.80234025965937,
+      11.817285653438299,
+      11.854817705526791
+     ]
+    },
+    "W4 c2 per-request decode tok/s": {
+     "value": 18.676053809941042,
+     "n": 4,
+     "cv_pct": 0.29363742250825026,
+     "values": [
+      18.715477023978067,
+      18.636630595904016,
+      18.754399598439313,
+      18.621861249791266
+     ]
+    },
+    "W4 c4 aggregate tok/s": {
+     "value": 12.405466946867106,
+     "n": 4,
+     "cv_pct": 0.18969246148811106,
+     "values": [
+      12.39406228756136,
+      12.367757615812774,
+      12.416871606172853,
+      12.429516232417361
+     ]
+    },
+    "W4 c4 per-request decode tok/s": {
+     "value": 6.762824788974645,
+     "n": 4,
+     "cv_pct": 0.1398749096898697,
+     "values": [
+      6.770152665593286,
+      6.761356222231482,
+      6.7642933557178075,
+      6.744691363560541
+     ]
+    },
+    "W4 c4 TTFT s": {
+     "value": 10.703660208004294,
+     "n": 4,
+     "cv_pct": 0.4039247030610607,
+     "values": [
+      10.724378353508655,
+      10.75637308350997,
+      10.682942062499933,
+      10.641542041528737
+     ]
+    },
+    "W5 4x16K shared aggregate tok/s": {
+     "value": 3.3343755713109595,
+     "n": 4,
+     "cv_pct": 0.19270382803750422,
+     "values": [
+      3.33279359326847,
+      3.323106422864105,
+      3.3406428273061315,
+      3.335957549353449
+     ]
+    },
+    "W5 4x16K shared TTFT s": {
+     "value": 46.60054090648919,
+     "n": 4,
+     "cv_pct": 0.1801664670815865,
+     "values": [
+      46.64519112549897,
+      46.726193353999406,
+      46.50730543752434,
+      46.555890687479405
+     ]
+    }
+   },
+   "replay_stats": {
+    "prefill_sum6_s": 37.83927712500736,
+    "reps6": 4,
+    "reps_complete": 4,
+    "reps_total": 4,
+    "prefill_sum_s": 54.49261179252062,
+    "prefill_sums": [
+     54.60119833404315,
+     54.38402525099809,
+     54.216977998032235,
+     54.604114624031354
+    ],
+    "ttft_t1_s": 4.095866542018484,
+    "ttft_t8_s": 8.547853438009042,
+    "cached_frac_t8": 0.8525079887172626,
+    "decode_tps": 53.492889275056555,
+    "short_rows": 0,
+    "rows": 32
+   },
+   "sampled_stats": {
+    "n_ok": 6,
+    "n_rows": 6,
+    "median_ok": 47.61972945409663,
+    "median_any": 47.61972945409663,
+    "flags": [
+     "ok"
+    ]
+   },
+   "flags": {
+    "ok": 148
+   },
+   "cache": {
+    "W1": {
+     "rows": 64,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W2": {
+     "rows": 32,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W3": {
+     "rows": 12,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W4": {
+     "rows": 24,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W5": {
+     "rows": 16,
+     "hit_rows": 4,
+     "cached_tokens": 4096,
+     "unknown": 0
+    }
+   },
+   "requests": 148,
+   "errors": 0,
+   "rss": [
+    8906656,
+    8907024,
+    8911536,
+    8911584,
+    8918832,
+    8919904,
+    8924960,
+    8925648,
+    8926912,
+    8926720,
+    8906544,
+    8906928,
+    8911808,
+    8911856,
+    8919216,
+    8920192,
+    8925424,
+    8926176,
+    8927520,
+    8927136
+   ],
+   "loads": [
+    "{ 1.50 1.93 2.02 }",
+    "{ 1.65 1.92 2.01 }",
+    "{ 1.76 1.92 2.00 }",
+    "{ 2.01 1.96 2.01 }",
+    "{ 2.18 2.00 2.02 }",
+    "{ 2.06 1.97 2.00 }",
+    "{ 2.17 2.04 2.03 }",
+    "{ 1.96 2.00 2.01 }",
+    "{ 1.73 1.94 1.99 }",
+    "{ 1.48 1.81 1.94 }",
+    "{ 1.89 1.58 1.67 }",
+    "{ 1.97 1.64 1.68 }",
+    "{ 1.92 1.68 1.70 }",
+    "{ 1.90 1.70 1.70 }",
+    "{ 1.77 1.69 1.70 }",
+    "{ 1.36 1.59 1.66 }",
+    "{ 1.64 1.61 1.66 }",
+    "{ 1.42 1.55 1.63 }",
+    "{ 1.82 1.62 1.66 }",
+    "{ 2.03 1.74 1.70 }"
+   ]
+  },
+  "rapid-mlx": {
+   "passes": [
+    {
+     "pass": "pass1",
+     "status": "done",
+     "ready_s": 6.1,
+     "warmup_s": 4.8,
+     "model_id": "models/qwen38-4bit",
+     "cmd": [
+      "rapid-mlx",
+      "--no-telemetry",
+      "serve",
+      "models/qwen38-4bit",
+      "--port",
+      "8651",
+      "--max-num-seqs",
+      "4",
+      "--speculative-config",
+      "{\"method\":\"mtp\",\"model\":\"models/qwen38-mtp-4bit\"}"
+     ],
+     "env": {},
+     "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+     "cache": "default on",
+     "quant": "MLX 4-bit + MTP head"
+    },
+    {
+     "pass": "pass2",
+     "status": "done",
+     "ready_s": 7.1,
+     "warmup_s": 5.2,
+     "model_id": "models/qwen38-4bit",
+     "cmd": [
+      "rapid-mlx",
+      "--no-telemetry",
+      "serve",
+      "models/qwen38-4bit",
+      "--port",
+      "8651",
+      "--max-num-seqs",
+      "4",
+      "--speculative-config",
+      "{\"method\":\"mtp\",\"model\":\"models/qwen38-mtp-4bit\"}"
+     ],
+     "env": {},
+     "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+     "cache": "default on",
+     "quant": "MLX 4-bit + MTP head"
+    }
+   ],
+   "cells": {
+    "W1 greedy-64 decode tok/s": {
+     "value": 50.20252223448771,
+     "n": 4,
+     "cv_pct": 4.25387534203537,
+     "values": [
+      50.49992811115815,
+      50.10173323629206,
+      45.4892335043651,
+      50.303311232683356
+     ]
+    },
+    "W1 greedy-64 TTFT s": {
+     "value": 0.2664877605056972,
+     "n": 4,
+     "cv_pct": 2.3868597592411405,
+     "values": [
+      0.2699167920072796,
+      0.26305872900411487,
+      0.2778126040357165,
+      0.26171395849087276
+     ]
+    },
+    "W1 greedy-256 decode tok/s": {
+     "value": 50.584920755010835,
+     "n": 4,
+     "cv_pct": 1.0332395430404646,
+     "values": [
+      50.53986135957934,
+      50.62998015044233,
+      49.41135393296646,
+      50.653547928334845
+     ]
+    },
+    "W2 temp0.6-256 decode tok/s": {
+     "value": 52.42909933317739,
+     "n": 4,
+     "cv_pct": 1.27926767282966,
+     "values": [
+      52.36885689769348,
+      52.61966440036083,
+      52.48934176866129,
+      50.96676669169442
+     ]
+    },
+    "W3 4K cold decode tok/s": {
+     "value": 47.69456054877536,
+     "n": 4,
+     "cv_pct": 2.053975635811815,
+     "values": [
+      48.04994469497917,
+      48.13451435785375,
+      47.33917640257154,
+      45.71351097220155
+     ]
+    },
+    "W3 4K cold TTFT s": {
+     "value": 4.147110271005658,
+     "n": 4,
+     "cv_pct": 0.41178916374079355,
+     "values": [
+      4.134266750013921,
+      4.129965957952663,
+      4.1599537919973955,
+      4.170643375022337
+     ]
+    },
+    "W3 16K cold decode tok/s": {
+     "value": 44.63847475641326,
+     "n": 4,
+     "cv_pct": 1.1746478833218954,
+     "values": [
+      44.47595764126805,
+      45.10765190304233,
+      44.80099187155846,
+      43.70281319483927
+     ]
+    },
+    "W3 16K cold TTFT s": {
+     "value": 16.989137416996527,
+     "n": 4,
+     "cv_pct": 0.41914978752341114,
+     "values": [
+      16.918595291033853,
+      16.920481792010833,
+      17.06590620795032,
+      17.057793041982222
+     ]
+    },
+    "W3 32K cold decode tok/s": {
+     "value": 40.63505148124556,
+     "n": 4,
+     "cv_pct": 0.89644615316254,
+     "values": [
+      40.66140306982566,
+      41.15016659755469,
+      40.60869989266546,
+      40.12119285467841
+     ]
+    },
+    "W3 32K cold TTFT s": {
+     "value": 36.331856770499144,
+     "n": 4,
+     "cv_pct": 0.4969983968761451,
+     "values": [
+      36.16529620799702,
+      36.142808125005104,
+      36.52992900001118,
+      36.49841733300127
+     ]
+    },
+    "W4 c2 aggregate tok/s": {
+     "value": 11.861647854259306,
+     "n": 4,
+     "cv_pct": 0.4151097203393913,
+     "values": [
+      11.894100872126744,
+      11.935918849174245,
+      11.829194836391869,
+      11.814063803065823
+     ]
+    },
+    "W4 c2 per-request decode tok/s": {
+     "value": 29.477352311413167,
+     "n": 4,
+     "cv_pct": 0.5734487287700912,
+     "values": [
+      29.548540513404063,
+      29.803472122767403,
+      29.374118831748127,
+      29.40616410942227
+     ]
+    },
+    "W4 c4 aggregate tok/s": {
+     "value": 13.045104902450294,
+     "n": 4,
+     "cv_pct": 0.45217247347047046,
+     "values": [
+      13.099561760821294,
+      13.113039197638406,
+      12.986797879969584,
+      12.990648044079293
+     ]
+    },
+    "W4 c4 per-request decode tok/s": {
+     "value": 24.510932526714974,
+     "n": 4,
+     "cv_pct": 0.42171702887629964,
+     "values": [
+      24.5278848491574,
+      24.63501402086492,
+      24.493980204272546,
+      24.346172035209847
+     ]
+    },
+    "W4 c4 TTFT s": {
+     "value": 17.043119854250108,
+     "n": 4,
+     "cv_pct": 0.47884297123769026,
+     "values": [
+      16.968149687512778,
+      16.96431954149739,
+      17.139456083008554,
+      17.118090020987438
+     ]
+    },
+    "W5 4x16K shared aggregate tok/s": {
+     "value": 3.3207694744741545,
+     "n": 4,
+     "cv_pct": 0.3244931219661075,
+     "values": [
+      3.328689224965576,
+      3.3288691991096506,
+      3.3036486006641255,
+      3.3128497239827333
+     ]
+    },
+    "W5 4x16K shared TTFT s": {
+     "value": 73.99490012499155,
+     "n": 4,
+     "cv_pct": 0.3524312091342902,
+     "values": [
+      73.827994021005,
+      73.74248079149402,
+      74.39256516651949,
+      74.1618062289781
+     ]
+    }
+   },
+   "replay_stats": {
+    "prefill_sum6_s": 35.09128464659443,
+    "reps6": 4,
+    "reps_complete": 4,
+    "reps_total": 4,
+    "prefill_sum_s": 49.65345939659164,
+    "prefill_sums": [
+     49.40803016605787,
+     49.386411792133,
+     49.898888627125416,
+     49.92668537411373
+    ],
+    "ttft_t1_s": 4.129053146025399,
+    "ttft_t8_s": 7.353513792011654,
+    "cached_frac_t8": 0.8722836399950589,
+    "decode_tps": 46.37894692746206,
+    "short_rows": 24,
+    "rows": 32
+   },
+   "sampled_stats": {
+    "n_ok": 6,
+    "n_rows": 6,
+    "median_ok": 47.35964360031768,
+    "median_any": 47.35964360031768,
+    "flags": [
+     "ok"
+    ]
+   },
+   "flags": {
+    "ok": 128,
+    "short": 20
+   },
+   "cache": {
+    "W1": {
+     "rows": 64,
+     "hit_rows": 12,
+     "cached_tokens": 546,
+     "unknown": 52
+    },
+    "W2": {
+     "rows": 32,
+     "hit_rows": 8,
+     "cached_tokens": 256,
+     "unknown": 24
+    },
+    "W3": {
+     "rows": 12,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 12
+    },
+    "W4": {
+     "rows": 24,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 24
+    },
+    "W5": {
+     "rows": 16,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 16
+    }
+   },
+   "requests": 148,
+   "errors": 0,
+   "rss": [
+    15956576,
+    15956592,
+    15958192,
+    15958432,
+    15987136,
+    15997920,
+    16002688,
+    15996272,
+    15997344,
+    15997104,
+    15995424,
+    15995344,
+    15996848,
+    15997104,
+    16024208,
+    16034144,
+    16037120,
+    16031936,
+    16032320,
+    15536432
+   ],
+   "loads": [
+    "{ 1.75 1.73 1.85 }",
+    "{ 2.04 1.79 1.86 }",
+    "{ 2.07 1.82 1.87 }",
+    "{ 1.84 1.80 1.85 }",
+    "{ 1.62 1.75 1.83 }",
+    "{ 1.50 1.68 1.80 }",
+    "{ 1.60 1.63 1.77 }",
+    "{ 1.61 1.62 1.76 }",
+    "{ 1.88 1.68 1.77 }",
+    "{ 1.30 1.56 1.72 }",
+    "{ 8.95 3.63 2.39 }",
+    "{ 8.06 4.17 2.66 }",
+    "{ 5.79 4.13 2.73 }",
+    "{ 5.80 4.30 2.85 }",
+    "{ 5.42 4.32 2.91 }",
+    "{ 4.48 4.27 2.99 }",
+    "{ 4.44 4.33 3.12 }",
+    "{ 4.18 4.26 3.13 }",
+    "{ 4.20 4.26 3.17 }",
+    "{ 2.18 3.65 3.03 }"
+   ]
+  },
+  "mlx-lm": {
+   "passes": [
+    {
+     "pass": "pass1",
+     "status": "done",
+     "ready_s": 5.2,
+     "warmup_s": 7.2,
+     "model_id": "/Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit",
+     "cmd": [
+      "/Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/mlx_lm.server",
+      "--model",
+      "models/qwen38-4bit",
+      "--port",
+      "8651",
+      "--decode-concurrency",
+      "4",
+      "--prompt-concurrency",
+      "4"
+     ],
+     "env": {},
+     "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+     "cache": "default on",
+     "quant": "MLX 4-bit (no MTP)"
+    },
+    {
+     "pass": "pass2",
+     "status": "done",
+     "ready_s": 4.2,
+     "warmup_s": 0.0,
+     "model_id": "/Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit",
+     "cmd": [
+      "/Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/mlx_lm.server",
+      "--model",
+      "models/qwen38-4bit",
+      "--port",
+      "8651",
+      "--decode-concurrency",
+      "4",
+      "--prompt-concurrency",
+      "4"
+     ],
+     "env": {},
+     "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+     "cache": "default on",
+     "quant": "MLX 4-bit (no MTP)"
+    }
+   ],
+   "cells": {
+    "W1 greedy-64 decode tok/s": {
+     "value": 30.44908944733094,
+     "n": 3,
+     "cv_pct": 0.7152199306449505,
+     "values": [
+      30.390306124147706,
+      30.44908944733094,
+      30.880758443217225
+     ]
+    },
+    "W1 greedy-64 TTFT s": {
+     "value": 0.21581002051243559,
+     "n": 3,
+     "cv_pct": 0.736136644253685,
+     "values": [
+      0.21755262499209493,
+      0.21581002051243559,
+      0.2136703750002198
+     ]
+    },
+    "W1 greedy-256 decode tok/s": {
+     "value": 30.082485783080855,
+     "n": 3,
+     "cv_pct": 0.0658924962264558,
+     "values": [
+      30.058084648759134,
+      30.106638335521087,
+      30.082485783080855
+     ]
+    },
+    "W2 temp0.6-256 decode tok/s": {
+     "value": 30.65043900298832,
+     "n": 3,
+     "cv_pct": 0.5061390627801012,
+     "values": [
+      30.89565703133987,
+      30.65043900298832,
+      30.52110846673459
+     ]
+    },
+    "W3 4K cold decode tok/s": {
+     "value": 29.006468499918793,
+     "n": 3,
+     "cv_pct": 1.0437718551710893,
+     "values": [
+      29.558604500887473,
+      29.006468499918793,
+      28.849404539532316
+     ]
+    },
+    "W3 4K cold TTFT s": {
+     "value": 5.483594416989945,
+     "n": 3,
+     "cv_pct": 10.12543234429446,
+     "values": [
+      4.392496125015896,
+      5.503400500048883,
+      5.483594416989945
+     ]
+    },
+    "W3 16K cold decode tok/s": {
+     "value": 27.856600728874284,
+     "n": 3,
+     "cv_pct": 0.9828800132537535,
+     "values": [
+      27.856600728874284,
+      28.000406116344198,
+      27.363685819497583
+     ]
+    },
+    "W3 16K cold TTFT s": {
+     "value": 18.143665666982997,
+     "n": 3,
+     "cv_pct": 0.11187808314241199,
+     "values": [
+      18.1843144170125,
+      18.139142416999675,
+      18.143665666982997
+     ]
+    },
+    "W3 32K cold decode tok/s": {
+     "value": 26.7151201367579,
+     "n": 3,
+     "cv_pct": 0.15367436717902935,
+     "values": [
+      26.76169526912687,
+      26.66123108416865,
+      26.7151201367579
+     ]
+    },
+    "W3 32K cold TTFT s": {
+     "value": 39.33409416698851,
+     "n": 3,
+     "cv_pct": 0.0416573233437207,
+     "values": [
+      39.33409416698851,
+      39.30585095798597,
+      39.34466191701358
+     ]
+    },
+    "W4 c2 aggregate tok/s": {
+     "value": 11.544156262382828,
+     "n": 3,
+     "cv_pct": 8.91111562401354,
+     "values": [
+      9.518647658213343,
+      11.544156262382828,
+      11.608978012906622
+     ]
+    },
+    "W4 c2 per-request decode tok/s": {
+     "value": 27.517311435040767,
+     "n": 3,
+     "cv_pct": 1.3613110566435083,
+     "values": [
+      26.776783906860036,
+      27.517311435040767,
+      27.605550895347054
+     ]
+    },
+    "W4 c4 aggregate tok/s": {
+     "value": 12.857649521746682,
+     "n": 3,
+     "cv_pct": 0.38956021934716795,
+     "values": [
+      12.75341885503179,
+      12.861057145375634,
+      12.857649521746682
+     ]
+    },
+    "W4 c4 per-request decode tok/s": {
+     "value": 22.81716701647269,
+     "n": 3,
+     "cv_pct": 0.7836675822494646,
+     "values": [
+      22.62084714850249,
+      23.05836288511986,
+      22.81716701647269
+     ]
+    },
+    "W4 c4 TTFT s": {
+     "value": 17.17139066697564,
+     "n": 3,
+     "cv_pct": 0.35198559713688904,
+     "values": [
+      17.286433708504774,
+      17.17139066697564,
+      17.147849291475723
+     ]
+    },
+    "W5 4x16K shared aggregate tok/s": {
+     "value": 3.247992654106343,
+     "n": 3,
+     "cv_pct": 1.0667194527628079,
+     "values": [
+      3.2950772363552976,
+      3.247992654106343,
+      3.210301313493282
+     ]
+    },
+    "W5 4x16K shared TTFT s": {
+     "value": 75.61517133351299,
+     "n": 3,
+     "cv_pct": 1.108702578957938,
+     "values": [
+      74.48647968750447,
+      75.61517133351299,
+      76.53454572948976
+     ]
+    }
+   },
+   "replay_stats": {
+    "prefill_sum6_s": 39.58424725104123,
+    "reps6": 3,
+    "reps_complete": 3,
+    "reps_total": 6,
+    "prefill_sum_s": 54.413274083985016,
+    "prefill_sums": [
+     56.465679208922666,
+     54.36124491796363,
+     54.413274083985016
+    ],
+    "ttft_t1_s": 4.427434667013586,
+    "ttft_t8_s": 7.501480792008806,
+    "cached_frac_t8": 0.8726279963761906,
+    "decode_tps": 93.2290510089856,
+    "short_rows": 23,
+    "rows": 48
+   },
+   "sampled_stats": {
+    "n_ok": 3,
+    "n_rows": 3,
+    "median_ok": 30.684961903465247,
+    "median_any": 30.684961903465247,
+    "flags": [
+     "ok"
+    ]
+   },
+   "flags": {
+    "ok": 99,
+    "short": 12
+   },
+   "cache": {
+    "W1": {
+     "rows": 48,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W2": {
+     "rows": 24,
+     "hit_rows": 15,
+     "cached_tokens": 651,
+     "unknown": 0
+    },
+    "W3": {
+     "rows": 9,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W4": {
+     "rows": 18,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W5": {
+     "rows": 12,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    }
+   },
+   "requests": 111,
+   "errors": 0,
+   "rss": [
+    15719520,
+    15724128,
+    15725728,
+    15726384,
+    15719472,
+    15719760,
+    15737584,
+    15738320,
+    15741328,
+    15743200,
+    15739360,
+    15739440,
+    15739552,
+    15741136,
+    15031360
+   ],
+   "loads": [
+    "{ 2.70 3.09 2.93 }",
+    "{ 2.20 2.83 2.84 }",
+    "{ 2.97 2.92 2.87 }",
+    "{ 3.13 2.97 2.89 }",
+    "{ 2.61 2.86 2.85 }",
+    "{ 2.54 2.78 2.82 }",
+    "{ 2.43 2.70 2.79 }",
+    "{ 2.26 2.61 2.74 }",
+    "{ 2.06 2.48 2.68 }",
+    "{ 2.17 2.37 2.62 }",
+    "{ 2.63 2.45 2.63 }",
+    "{ 2.58 2.45 2.63 }",
+    "{ 2.48 2.43 2.61 }",
+    "{ 2.73 2.43 2.59 }",
+    "{ 1.96 2.23 2.49 }"
+   ]
+  },
+  "tensorfold": {
+   "passes": [
+    {
+     "pass": "pass1",
+     "status": "done",
+     "ready_s": 5.1,
+     "warmup_s": 4.8,
+     "model_id": "qwen38-4bit",
+     "cmd": [
+      "tensorfold",
+      "serve",
+      "models/qwen38-4bit",
+      "--port",
+      "8651",
+      "--parallel",
+      "4",
+      "--no-update-check"
+     ],
+     "env": {},
+     "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+     "cache": "default on",
+     "quant": "MLX 4-bit"
+    },
+    {
+     "pass": "pass2",
+     "status": "done",
+     "ready_s": 5.0,
+     "warmup_s": 0.0,
+     "model_id": "qwen38-4bit",
+     "cmd": [
+      "tensorfold",
+      "serve",
+      "models/qwen38-4bit",
+      "--port",
+      "8651",
+      "--parallel",
+      "4",
+      "--no-update-check"
+     ],
+     "env": {},
+     "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+     "cache": "default on",
+     "quant": "MLX 4-bit"
+    }
+   ],
+   "cells": {
+    "W1 greedy-64 decode tok/s": {
+     "value": 30.252840046113185,
+     "n": 3,
+     "cv_pct": 0.17528972313772664,
+     "values": [
+      30.252840046113185,
+      30.2580916800694,
+      30.14319346847977
+     ]
+    },
+    "W1 greedy-64 TTFT s": {
+     "value": 0.08791645799647085,
+     "n": 3,
+     "cv_pct": 1.8023918751639687,
+     "values": [
+      0.08649279150995426,
+      0.08791645799647085,
+      0.09034556199912913
+     ]
+    },
+    "W1 greedy-256 decode tok/s": {
+     "value": 30.06954329009904,
+     "n": 3,
+     "cv_pct": 0.9957821305210595,
+     "values": [
+      30.06954329009904,
+      30.13340260624229,
+      29.472473101837323
+     ]
+    },
+    "W2 temp0.6-256 decode tok/s": {
+     "value": 30.095631478328812,
+     "n": 3,
+     "cv_pct": 0.11981666305366698,
+     "values": [
+      30.080773805597225,
+      30.1636522962922,
+      30.095631478328812
+     ]
+    },
+    "W3 4K cold decode tok/s": {
+     "value": 29.373893151964268,
+     "n": 3,
+     "cv_pct": 0.2382705890834974,
+     "values": [
+      29.44769913016273,
+      29.276832841346888,
+      29.373893151964268
+     ]
+    },
+    "W3 4K cold TTFT s": {
+     "value": 4.105889791972004,
+     "n": 3,
+     "cv_pct": 14.656917291201749,
+     "values": [
+      4.105889791972004,
+      4.072578874998726,
+      5.507338791969232
+     ]
+    },
+    "W3 16K cold decode tok/s": {
+     "value": 28.329996877403318,
+     "n": 3,
+     "cv_pct": 0.07273551401793871,
+     "values": [
+      28.35987897625576,
+      28.30970366670908,
+      28.329996877403318
+     ]
+    },
+    "W3 16K cold TTFT s": {
+     "value": 16.812787292001303,
+     "n": 3,
+     "cv_pct": 0.08353345083091747,
+     "values": [
+      16.806954834028147,
+      16.812787292001303,
+      16.839244582981337
+     ]
+    },
+    "W3 32K cold decode tok/s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W3 32K cold TTFT s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W4 c2 aggregate tok/s": {
+     "value": 9.333806574359688,
+     "n": 3,
+     "cv_pct": 10.680885157191684,
+     "values": [
+      10.235903182087883,
+      7.865707082524596,
+      9.333806574359688
+     ]
+    },
+    "W4 c2 per-request decode tok/s": {
+     "value": 16.746375636367013,
+     "n": 3,
+     "cv_pct": 4.219858386313172,
+     "values": [
+      16.746375636367013,
+      16.416768660306683,
+      18.0838476683188
+     ]
+    },
+    "W4 c4 aggregate tok/s": {
+     "value": 9.619587268318597,
+     "n": 3,
+     "cv_pct": 17.699786486067413,
+     "values": [
+      9.36692531497526,
+      9.619587268318597,
+      13.560890759619221
+     ]
+    },
+    "W4 c4 per-request decode tok/s": {
+     "value": 5.835589720149411,
+     "n": 3,
+     "cv_pct": 16.273782272020313,
+     "values": [
+      5.161761084739256,
+      5.835589720149411,
+      7.551873232839143
+     ]
+    },
+    "W4 c4 TTFT s": {
+     "value": 14.458094375004293,
+     "n": 3,
+     "cv_pct": 16.790711308293993,
+     "values": [
+      14.458094375004293,
+      15.033828083513072,
+      10.074807291966863
+     ]
+    },
+    "W5 4x16K shared aggregate tok/s": {
+     "value": 6.34445463026174,
+     "n": 3,
+     "cv_pct": 17.04485870184281,
+     "values": [
+      4.326230725028393,
+      6.34445463026174,
+      6.426920959260544
+     ]
+    },
+    "W5 4x16K shared TTFT s": {
+     "value": 35.91993514553178,
+     "n": 3,
+     "cv_pct": 20.76135145112524,
+     "values": [
+      54.15735854150262,
+      35.91993514553178,
+      35.5235339999781
+     ]
+    }
+   },
+   "replay_stats": {
+    "prefill_sum6_s": 35.44613737598411,
+    "reps6": 6,
+    "reps_complete": 0,
+    "reps_total": 6,
+    "prefill_sum_s": null,
+    "prefill_sums": [],
+    "ttft_t1_s": null,
+    "ttft_t8_s": null,
+    "cached_frac_t8": null,
+    "decode_tps": 27.281631705212625,
+    "short_rows": 0,
+    "rows": 48
+   },
+   "sampled_stats": {
+    "n_ok": 3,
+    "n_rows": 3,
+    "median_ok": 30.0609885895802,
+    "median_any": 30.0609885895802,
+    "flags": [
+     "ok"
+    ]
+   },
+   "flags": {
+    "ok": 108,
+    "null": 3
+   },
+   "cache": {
+    "W1": {
+     "rows": 48,
+     "hit_rows": 48,
+     "cached_tokens": 144,
+     "unknown": 0
+    },
+    "W2": {
+     "rows": 24,
+     "hit_rows": 24,
+     "cached_tokens": 72,
+     "unknown": 0
+    },
+    "W3": {
+     "rows": 9,
+     "hit_rows": 6,
+     "cached_tokens": 18,
+     "unknown": 3
+    },
+    "W4": {
+     "rows": 18,
+     "hit_rows": 18,
+     "cached_tokens": 54,
+     "unknown": 0
+    },
+    "W5": {
+     "rows": 12,
+     "hit_rows": 12,
+     "cached_tokens": 98466,
+     "unknown": 0
+    }
+   },
+   "requests": 111,
+   "errors": 3,
+   "rss": [
+    21579856,
+    21580784,
+    21580976,
+    21581824,
+    21581984,
+    21582048,
+    21594064,
+    21596304,
+    21597648,
+    21601024,
+    15455808,
+    15457488,
+    15502192,
+    15504816,
+    15510192
+   ],
+   "loads": [
+    "{ 2.64 2.46 2.50 }",
+    "{ 2.39 2.43 2.49 }",
+    "{ 2.57 2.49 2.50 }",
+    "{ 2.43 2.49 2.50 }",
+    "{ 2.37 2.44 2.48 }",
+    "{ 2.39 2.45 2.48 }",
+    "{ 1.74 2.25 2.40 }",
+    "{ 1.84 2.22 2.38 }",
+    "{ 2.80 2.42 2.45 }",
+    "{ 3.23 2.56 2.50 }",
+    "{ 3.57 2.74 2.56 }",
+    "{ 3.34 2.77 2.58 }",
+    "{ 3.81 2.96 2.66 }",
+    "{ 4.05 3.22 2.78 }",
+    "{ 2.79 3.00 2.72 }"
+   ]
+  },
+  "omlx": {
+   "passes": [
+    {
+     "pass": "pass1",
+     "status": "done",
+     "ready_s": 1.6,
+     "warmup_s": 8.5,
+     "model_id": "qwen38-4bit",
+     "cmd": [
+      "omlx",
+      "serve",
+      "--model-dir",
+      "/private/tmp/claude-501/final-20261026-scratch/omlx-models",
+      "--port",
+      "8651"
+     ],
+     "env": {
+      "HOME": "/private/tmp/claude-501/final-20261026-scratch/omlx-home"
+     },
+     "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+     "cache": "default on",
+     "quant": "MLX 4-bit (qwen38-4bit linked into omlx model dir)"
+    },
+    {
+     "pass": "pass2",
+     "status": "done",
+     "ready_s": 1.6,
+     "warmup_s": 0.0,
+     "model_id": "qwen38-4bit",
+     "cmd": [
+      "omlx",
+      "serve",
+      "--model-dir",
+      "/private/tmp/claude-501/final-20261026-scratch/omlx-models",
+      "--port",
+      "8651"
+     ],
+     "env": {
+      "HOME": "/private/tmp/claude-501/final-20261026-scratch/omlx-home"
+     },
+     "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+     "cache": "default on",
+     "quant": "MLX 4-bit (qwen38-4bit linked into omlx model dir)"
+    }
+   ],
+   "cells": {
+    "W1 greedy-64 decode tok/s": {
+     "value": 35.56336947645596,
+     "n": 3,
+     "cv_pct": 0.13470073507033772,
+     "values": [
+      35.576853358731846,
+      35.46924192413992,
+      35.56336947645596
+     ]
+    },
+    "W1 greedy-64 TTFT s": {
+     "value": 0.3892707710037939,
+     "n": 3,
+     "cv_pct": 0.5189875025528149,
+     "values": [
+      0.3884140209702309,
+      0.3930742914963048,
+      0.3892707710037939
+     ]
+    },
+    "W1 greedy-256 decode tok/s": {
+     "value": 33.77824667695471,
+     "n": 3,
+     "cv_pct": 0.6905015178328137,
+     "values": [
+      33.98917018360631,
+      33.77824667695471,
+      33.42463640604095
+     ]
+    },
+    "W2 temp0.6-256 decode tok/s": {
+     "value": 33.38052432068221,
+     "n": 3,
+     "cv_pct": 2.044262982453567,
+     "values": [
+      31.955404969492392,
+      33.38430418103228,
+      33.38052432068221
+     ]
+    },
+    "W3 4K cold decode tok/s": {
+     "value": 33.12037122426349,
+     "n": 3,
+     "cv_pct": 0.7059260952212397,
+     "values": [
+      33.490455360404404,
+      32.92575539709625,
+      33.12037122426349
+     ]
+    },
+    "W3 4K cold TTFT s": {
+     "value": 5.097334249992855,
+     "n": 3,
+     "cv_pct": 4.5019457458179994,
+     "values": [
+      4.62870479200501,
+      5.104199124965817,
+      5.097334249992855
+     ]
+    },
+    "W3 16K cold decode tok/s": {
+     "value": 31.296268328857987,
+     "n": 3,
+     "cv_pct": 0.2913110966723267,
+     "values": [
+      31.279614875679012,
+      31.296268328857987,
+      31.48115031494711
+     ]
+    },
+    "W3 16K cold TTFT s": {
+     "value": 18.628267874999437,
+     "n": 3,
+     "cv_pct": 0.2654958099103911,
+     "values": [
+      18.54867012501927,
+      18.628267874999437,
+      18.667458457988687
+     ]
+    },
+    "W3 32K cold decode tok/s": {
+     "value": 29.416847478024724,
+     "n": 3,
+     "cv_pct": 6.160416974245199,
+     "values": [
+      25.74771647410975,
+      29.416847478024724,
+      29.450113910550684
+     ]
+    },
+    "W3 32K cold TTFT s": {
+     "value": 40.428267500014044,
+     "n": 3,
+     "cv_pct": 0.2116437614208799,
+     "values": [
+      40.283207040978596,
+      40.428267500014044,
+      40.486566542007495
+     ]
+    },
+    "W4 c2 aggregate tok/s": {
+     "value": 10.914907399968557,
+     "n": 3,
+     "cv_pct": 2.3369701823187055,
+     "values": [
+      10.648033679607822,
+      10.914907399968557,
+      11.272386227029878
+     ]
+    },
+    "W4 c2 per-request decode tok/s": {
+     "value": 18.125694344885876,
+     "n": 3,
+     "cv_pct": 20.97182824665338,
+     "values": [
+      18.125694344885876,
+      17.788689039682406,
+      27.331600129498614
+     ]
+    },
+    "W4 c4 aggregate tok/s": {
+     "value": 11.629426330982586,
+     "n": 3,
+     "cv_pct": 0.5319245662588427,
+     "values": [
+      11.629426330982586,
+      11.58790713456356,
+      11.735119758997405
+     ]
+    },
+    "W4 c4 per-request decode tok/s": {
+     "value": 11.769939185863755,
+     "n": 3,
+     "cv_pct": 18.998095031739304,
+     "values": [
+      16.477008569197388,
+      11.769939185863755,
+      10.81843530407632
+     ]
+    },
+    "W4 c4 TTFT s": {
+     "value": 15.73063689598348,
+     "n": 3,
+     "cv_pct": 11.330456834662609,
+     "values": [
+      17.919065874972148,
+      15.73063689598348,
+      13.552282291493611
+     ]
+    },
+    "W5 4x16K shared aggregate tok/s": {
+     "value": 3.5047176294722515,
+     "n": 1,
+     "cv_pct": null,
+     "values": [
+      3.5047176294722515
+     ]
+    },
+    "W5 4x16K shared TTFT s": {
+     "value": 76.41342518699821,
+     "n": 1,
+     "cv_pct": null,
+     "values": [
+      76.41342518699821
+     ]
+    }
+   },
+   "replay_stats": {
+    "prefill_sum6_s": 45.118052209028974,
+    "reps6": 3,
+    "reps_complete": 3,
+    "reps_total": 6,
+    "prefill_sum_s": 65.18362750002416,
+    "prefill_sums": [
+     68.5118677499704,
+     64.99693950096844,
+     65.18362750002416
+    ],
+    "ttft_t1_s": 4.527394999982789,
+    "ttft_t8_s": 9.64110587502364,
+    "cached_frac_t8": 0.852518426014349,
+    "decode_tps": 34.30605375496738,
+    "short_rows": 18,
+    "rows": 48
+   },
+   "sampled_stats": {
+    "n_ok": 3,
+    "n_rows": 6,
+    "median_ok": 33.33634395392885,
+    "median_any": 33.33634395392885,
+    "flags": [
+     "no_usage",
+     "ok"
+    ]
+   },
+   "flags": {
+    "ok": 90,
+    "short": 12,
+    "retokenized": 1,
+    "null": 8
+   },
+   "cache": {
+    "W1": {
+     "rows": 48,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W2": {
+     "rows": 24,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W3": {
+     "rows": 9,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W4": {
+     "rows": 18,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W5": {
+     "rows": 12,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 9
+    }
+   },
+   "requests": 111,
+   "errors": 8,
+   "rss": [
+    17639264,
+    17102400,
+    17102480,
+    17108400,
+    17108416,
+    17108400,
+    19487248,
+    21585200,
+    24109648,
+    23619024,
+    23735168,
+    24291024,
+    23518480,
+    23869680,
+    426112
+   ],
+   "loads": [
+    "{ 3.14 3.09 2.81 }",
+    "{ 3.21 3.16 2.86 }",
+    "{ 3.73 3.35 2.96 }",
+    "{ 5.40 3.79 3.15 }",
+    "{ 8.13 4.96 3.63 }",
+    "{ 4.87 4.59 3.58 }",
+    "{ 5.52 4.79 3.71 }",
+    "{ 5.20 4.60 3.72 }",
+    "{ 4.03 4.54 3.78 }",
+    "{ 3.18 4.19 3.71 }",
+    "{ 2.84 4.00 3.66 }",
+    "{ 2.57 3.80 3.60 }",
+    "{ 3.18 3.82 3.61 }",
+    "{ 2.97 3.65 3.57 }",
+    "{ 2.90 3.63 3.56 }"
+   ]
+  },
+  "mlx-vlm": {
+   "passes": [
+    {
+     "pass": "pass1",
+     "status": "done",
+     "ready_s": 7.1,
+     "warmup_s": 4.9,
+     "model_id": "/Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit",
+     "cmd": [
+      "/Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/mlx_vlm.server",
+      "--model",
+      "/Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit",
+      "--port",
+      "8651"
+     ],
+     "env": {},
+     "git_head": "19a35fb8329b4ebe8f2a0c975811d4dc9505661e",
+     "cache": "default",
+     "quant": "MLX 4-bit"
+    }
+   ],
+   "cells": {
+    "W1 greedy-64 decode tok/s": {
+     "value": 32.018759488060596,
+     "n": 3,
+     "cv_pct": 1.0106062042609354,
+     "values": [
+      32.6709823610819,
+      32.018759488060596,
+      31.947567654066763
+     ]
+    },
+    "W1 greedy-64 TTFT s": {
+     "value": 0.16919806296937168,
+     "n": 3,
+     "cv_pct": 2.3367833280214727,
+     "values": [
+      0.16422012454131618,
+      0.16919806296937168,
+      0.17389827052829787
+     ]
+    },
+    "W1 greedy-256 decode tok/s": {
+     "value": 32.217716626700565,
+     "n": 3,
+     "cv_pct": 1.1641656103294113,
+     "values": [
+      32.217716626700565,
+      31.93125539164474,
+      32.833310287095486
+     ]
+    },
+    "W2 temp0.6-256 decode tok/s": {
+     "value": 31.85191797951652,
+     "n": 3,
+     "cv_pct": 0.9919327027101644,
+     "values": [
+      31.410850233252788,
+      32.18115887573649,
+      31.85191797951652
+     ]
+    },
+    "W3 4K cold decode tok/s": {
+     "value": 32.13633566034357,
+     "n": 3,
+     "cv_pct": 0.696037722768755,
+     "values": [
+      31.715974706178987,
+      32.22796489048603,
+      32.13633566034357
+     ]
+    },
+    "W3 4K cold TTFT s": {
+     "value": 4.039471791009419,
+     "n": 3,
+     "cv_pct": 0.06433736888199951,
+     "values": [
+      4.042119666002691,
+      4.039471791009419,
+      4.035782708029728
+     ]
+    },
+    "W3 16K cold decode tok/s": {
+     "value": 30.466879136496118,
+     "n": 3,
+     "cv_pct": 0.06315894842764071,
+     "values": [
+      30.455393258027335,
+      30.466879136496118,
+      30.50073562005769
+     ]
+    },
+    "W3 16K cold TTFT s": {
+     "value": 16.69233449996682,
+     "n": 3,
+     "cv_pct": 0.06925863609781745,
+     "values": [
+      16.69516212499002,
+      16.669356458005495,
+      16.69233449996682
+     ]
+    },
+    "W3 32K cold decode tok/s": {
+     "value": 29.105381087986604,
+     "n": 3,
+     "cv_pct": 0.22898983222567745,
+     "values": [
+      29.004254539856486,
+      29.105381087986604,
+      29.16572506051317
+     ]
+    },
+    "W3 32K cold TTFT s": {
+     "value": 35.68887395900674,
+     "n": 3,
+     "cv_pct": 0.039417952729530185,
+     "values": [
+      35.68887395900674,
+      35.71005850000074,
+      35.675926583993714
+     ]
+    },
+    "W4 c2 aggregate tok/s": {
+     "value": 12.303409872839143,
+     "n": 3,
+     "cv_pct": 4.114082241836453,
+     "values": [
+      11.262207383213443,
+      12.308195336510188,
+      12.303409872839143
+     ]
+    },
+    "W4 c2 per-request decode tok/s": {
+     "value": 21.67565932203175,
+     "n": 3,
+     "cv_pct": 5.180588645512894,
+     "values": [
+      19.381075881706764,
+      21.683081219194765,
+      21.67565932203175
+     ]
+    },
+    "W4 c4 aggregate tok/s": {
+     "value": 13.471432295434715,
+     "n": 3,
+     "cv_pct": 0.1548480976984353,
+     "values": [
+      13.430732022646616,
+      13.477774182942566,
+      13.471432295434715
+     ]
+    },
+    "W4 c4 per-request decode tok/s": {
+     "value": 22.72882737672657,
+     "n": 3,
+     "cv_pct": 0.4570096270467962,
+     "values": [
+      22.531123011177804,
+      22.72882737672657,
+      22.767859805465935
+     ]
+    },
+    "W4 c4 TTFT s": {
+     "value": 16.235536916501587,
+     "n": 3,
+     "cv_pct": 0.10846460392733431,
+     "values": [
+      16.26397179198102,
+      16.221649166982388,
+      16.235536916501587
+     ]
+    },
+    "W5 4x16K shared aggregate tok/s": {
+     "value": 3.488769157215805,
+     "n": 3,
+     "cv_pct": 0.005359373024173142,
+     "values": [
+      3.489165659886686,
+      3.4887688600603233,
+      3.488769157215805
+     ]
+    },
+    "W5 4x16K shared TTFT s": {
+     "value": 70.14774222898996,
+     "n": 3,
+     "cv_pct": 0.002110894135576389,
+     "values": [
+      70.1505155415216,
+      70.14710441650823,
+      70.14774222898996
+     ]
+    }
+   },
+   "replay_stats": {
+    "prefill_sum6_s": 107.6813965429319,
+    "reps6": 3,
+    "reps_complete": 3,
+    "reps_total": 3,
+    "prefill_sum_s": 192.93322333495598,
+    "prefill_sums": [
+     192.93322333495598,
+     192.9233133769594,
+     192.97898370801704
+    ],
+    "ttft_t1_s": 3.990904333011713,
+    "ttft_t8_s": 45.93714804103365,
+    "cached_frac_t8": 0.0,
+    "decode_tps": 31.897318474524145,
+    "short_rows": 18,
+    "rows": 24
+   },
+   "sampled_stats": {
+    "n_ok": 3,
+    "n_rows": 3,
+    "median_ok": 32.49953493014657,
+    "median_any": 32.49953493014657,
+    "flags": [
+     "ok"
+    ]
+   },
+   "flags": {
+    "ok": 99,
+    "short": 12
+   },
+   "cache": {
+    "W1": {
+     "rows": 48,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W2": {
+     "rows": 24,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W3": {
+     "rows": 9,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W4": {
+     "rows": 18,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W5": {
+     "rows": 12,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    }
+   },
+   "requests": 111,
+   "errors": 0,
+   "rss": [
+    16647216,
+    16648416,
+    16648688,
+    16650448,
+    16650496,
+    16651712,
+    16679296,
+    16679824,
+    16692352,
+    16698640,
+    16700768,
+    16701408,
+    16708544,
+    16709872,
+    16710688
+   ],
+   "loads": [
+    "{ 2.62 3.52 3.52 }",
+    "{ 5.98 4.36 3.84 }",
+    "{ 5.60 4.48 3.92 }",
+    "{ 3.46 4.08 3.81 }",
+    "{ 10.35 5.92 4.51 }",
+    "{ 5.92 5.44 4.42 }",
+    "{ 6.63 5.68 4.57 }",
+    "{ 5.09 5.50 4.60 }",
+    "{ 4.91 5.53 4.69 }",
+    "{ 4.15 5.16 4.61 }",
+    "{ 5.34 5.31 4.68 }",
+    "{ 4.12 5.04 4.60 }",
+    "{ 3.07 4.68 4.49 }",
+    "{ 1.86 3.96 4.23 }",
+    "{ 1.04 3.25 3.94 }"
+   ]
+  },
+  "llama.cpp": {
+   "passes": [
+    {
+     "pass": "pass1",
+     "status": "done",
+     "ready_s": 5.1,
+     "warmup_s": 6.2,
+     "model_id": "/Users/user/Desktop/Freelance/strim-engine/models/gguf/Qwen3.8-27B-Q4_K_M.gguf",
+     "cmd": [
+      "llama-server",
+      "-m",
+      "/Users/user/Desktop/Freelance/strim-engine/models/gguf/Qwen3.8-27B-Q4_K_M.gguf",
+      "-ngl",
+      "all",
+      "-fa",
+      "on",
+      "-c",
+      "65536",
+      "-np",
+      "2",
+      "--cache-prompt",
+      "--cache-ram",
+      "8192",
+      "--jinja",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8080"
+     ],
+     "env": {},
+     "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+     "cache": "--cache-prompt --cache-ram 8192",
+     "quant": "GGUF Q4_K_M"
+    }
+   ],
+   "cells": {
+    "W1 greedy-64 decode tok/s": {
+     "value": 28.306611296708503,
+     "n": 3,
+     "cv_pct": 1.5143572125137401,
+     "values": [
+      28.306611296708503,
+      27.407029721055245,
+      28.306851558210955
+     ]
+    },
+    "W1 greedy-64 TTFT s": {
+     "value": 0.24690004147123545,
+     "n": 3,
+     "cv_pct": 6.277664955273505,
+     "values": [
+      0.27733783301664516,
+      0.24690004147123545,
+      0.24071404201094992
+     ]
+    },
+    "W1 greedy-256 decode tok/s": {
+     "value": 27.398863940974437,
+     "n": 3,
+     "cv_pct": 0.22928335899741226,
+     "values": [
+      27.398863940974437,
+      27.459142510108904,
+      27.30644647581321
+     ]
+    },
+    "W2 temp0.6-256 decode tok/s": {
+     "value": 27.345426064495463,
+     "n": 3,
+     "cv_pct": 0.2123890223467343,
+     "values": [
+      27.422120192623787,
+      27.279985974282944,
+      27.345426064495463
+     ]
+    },
+    "W3 4K cold decode tok/s": {
+     "value": 27.83747786108696,
+     "n": 3,
+     "cv_pct": 1.6480109641796186,
+     "values": [
+      27.83747786108696,
+      27.87026516125987,
+      26.891742317227575
+     ]
+    },
+    "W3 4K cold TTFT s": {
+     "value": 5.445795666018967,
+     "n": 3,
+     "cv_pct": 0.1008962788006073,
+     "values": [
+      5.445795666018967,
+      5.451573042024393,
+      5.438158500008285
+     ]
+    },
+    "W3 16K cold decode tok/s": {
+     "value": 25.57236992023032,
+     "n": 3,
+     "cv_pct": 1.415248050913684,
+     "values": [
+      26.306369749157714,
+      25.57236992023032,
+      25.49720128246782
+     ]
+    },
+    "W3 16K cold TTFT s": {
+     "value": 23.35791462502675,
+     "n": 3,
+     "cv_pct": 0.05845779227407902,
+     "values": [
+      23.35791462502675,
+      23.344369583996013,
+      23.377628958027344
+     ]
+    },
+    "W3 32K cold decode tok/s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W3 32K cold TTFT s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W4 c2 aggregate tok/s": {
+     "value": 9.261549746891209,
+     "n": 3,
+     "cv_pct": 0.4361264393740416,
+     "values": [
+      9.192272557216677,
+      9.287900255251667,
+      9.261549746891209
+     ]
+    },
+    "W4 c2 per-request decode tok/s": {
+     "value": 20.72933414548872,
+     "n": 3,
+     "cv_pct": 0.6712326732950662,
+     "values": [
+      20.72933414548872,
+      20.84964406146478,
+      20.513808356169207
+     ]
+    },
+    "W4 c4 aggregate tok/s": {
+     "value": 9.27439965162882,
+     "n": 3,
+     "cv_pct": 0.32325898383694446,
+     "values": [
+      9.221144605572755,
+      9.27439965162882,
+      9.291442419665893
+     ]
+    },
+    "W4 c4 per-request decode tok/s": {
+     "value": 18.078923177007916,
+     "n": 3,
+     "cv_pct": 0.7449992385006478,
+     "values": [
+      17.799705904569578,
+      18.088824572060837,
+      18.078923177007916
+     ]
+    },
+    "W4 c4 TTFT s": {
+     "value": 17.55194635450607,
+     "n": 3,
+     "cv_pct": 0.22748127845148833,
+     "values": [
+      17.600474645994836,
+      17.55194635450607,
+      17.50267522901413
+     ]
+    },
+    "W5 4x16K shared aggregate tok/s": {
+     "value": 4.5172442734730645,
+     "n": 3,
+     "cv_pct": 0.11834137942668536,
+     "values": [
+      4.5264536504393655,
+      4.513780677150061,
+      4.5172442734730645
+     ]
+    },
+    "W5 4x16K shared TTFT s": {
+     "value": 50.71320352048497,
+     "n": 3,
+     "cv_pct": 0.11582281266150961,
+     "values": [
+      50.60297150001861,
+      50.71320352048497,
+      50.73805410350906
+     ]
+    }
+   },
+   "replay_stats": {
+    "prefill_sum6_s": 48.73683612403693,
+    "reps6": 3,
+    "reps_complete": 0,
+    "reps_total": 3,
+    "prefill_sum_s": null,
+    "prefill_sums": [],
+    "ttft_t1_s": null,
+    "ttft_t8_s": null,
+    "cached_frac_t8": null,
+    "decode_tps": 25.917041008337776,
+    "short_rows": 0,
+    "rows": 24
+   },
+   "sampled_stats": {
+    "n_ok": 3,
+    "n_rows": 3,
+    "median_ok": 27.80063847902472,
+    "median_any": 27.80063847902472,
+    "flags": [
+     "ok"
+    ]
+   },
+   "flags": {
+    "ok": 108,
+    "null": 3
+   },
+   "cache": {
+    "W1": {
+     "rows": 48,
+     "hit_rows": 10,
+     "cached_tokens": 699,
+     "unknown": 0
+    },
+    "W2": {
+     "rows": 24,
+     "hit_rows": 3,
+     "cached_tokens": 300,
+     "unknown": 0
+    },
+    "W3": {
+     "rows": 9,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 3
+    },
+    "W4": {
+     "rows": 18,
+     "hit_rows": 0,
+     "cached_tokens": 0,
+     "unknown": 0
+    },
+    "W5": {
+     "rows": 12,
+     "hit_rows": 6,
+     "cached_tokens": 98346,
+     "unknown": 0
+    }
+   },
+   "requests": 111,
+   "errors": 3,
+   "rss": [
+    25475136,
+    25647424,
+    25647424,
+    26993440,
+    27318960,
+    27318976,
+    28387648,
+    31102704,
+    32238688,
+    34443648,
+    36125072,
+    36545712,
+    36551216,
+    32905168,
+    32856080
+   ],
+   "loads": [
+    "{ 1.66 1.72 2.51 }",
+    "{ 2.57 1.91 2.49 }",
+    "{ 1.64 1.75 2.36 }",
+    "{ 1.53 1.67 2.25 }",
+    "{ 1.56 1.66 2.20 }",
+    "{ 0.61 1.34 2.03 }",
+    "{ 1.43 1.45 2.02 }",
+    "{ 1.26 1.40 1.97 }",
+    "{ 1.90 1.51 1.98 }",
+    "{ 1.29 1.41 1.93 }",
+    "{ 0.72 1.25 1.84 }",
+    "{ 0.80 1.20 1.79 }",
+    "{ 0.85 1.16 1.75 }",
+    "{ 1.34 1.24 1.74 }",
+    "{ 1.56 1.30 1.73 }"
+   ]
+  },
+  "ollama": {
+   "passes": [
+    {
+     "pass": "pass1",
+     "status": "done",
+     "ready_s": 1.0,
+     "warmup_s": 8.6,
+     "model_id": "qwen38-27b-q4km",
+     "cmd": [
+      "ollama",
+      "serve"
+     ],
+     "env": {
+      "OLLAMA_HOST": "127.0.0.1:11435",
+      "OLLAMA_MODELS": "/private/tmp/claude-501/final-20261026-scratch/ollama-models",
+      "OLLAMA_NUM_PARALLEL": "2",
+      "OLLAMA_CONTEXT_LENGTH": "65536",
+      "OLLAMA_KEEP_ALIVE": "2h",
+      "OLLAMA_FLASH_ATTENTION": "1",
+      "OLLAMA_NOPRUNE": "1"
+     },
+     "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+     "cache": "default (ollama prompt reuse per slot)",
+     "quant": "GGUF Q4_K_M (imported via Modelfile)"
+    },
+    {
+     "pass": "pass2",
+     "status": "done",
+     "ready_s": 1.0,
+     "warmup_s": 0.0,
+     "model_id": "qwen38-27b-q4km",
+     "cmd": [
+      "ollama",
+      "serve"
+     ],
+     "env": {
+      "OLLAMA_HOST": "127.0.0.1:11435",
+      "OLLAMA_MODELS": "/private/tmp/claude-501/final-20261026-scratch/ollama-models",
+      "OLLAMA_NUM_PARALLEL": "2",
+      "OLLAMA_CONTEXT_LENGTH": "65536",
+      "OLLAMA_KEEP_ALIVE": "2h",
+      "OLLAMA_FLASH_ATTENTION": "1",
+      "OLLAMA_NOPRUNE": "1"
+     },
+     "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+     "cache": "default (ollama prompt reuse per slot)",
+     "quant": "GGUF Q4_K_M (imported via Modelfile)"
+    }
+   ],
+   "cells": {
+    "W1 greedy-64 decode tok/s": {
+     "value": 24.143103084575873,
+     "n": 3,
+     "cv_pct": 0.8071787198221426,
+     "values": [
+      24.44263232139371,
+      24.143103084575873,
+      23.97005581948198
+     ]
+    },
+    "W1 greedy-64 TTFT s": {
+     "value": 0.18753012499655597,
+     "n": 3,
+     "cv_pct": 26.08094574887453,
+     "values": [
+      0.3089619580132421,
+      0.18753012499655597,
+      0.18083677047980018
+     ]
+    },
+    "W1 greedy-256 decode tok/s": {
+     "value": 24.003319612811634,
+     "n": 3,
+     "cv_pct": 0.05327202527434314,
+     "values": [
+      24.0296670269767,
+      24.003319612811634,
+      24.001808042107644
+     ]
+    },
+    "W2 temp0.6-256 decode tok/s": {
+     "value": 24.061507536118445,
+     "n": 3,
+     "cv_pct": 0.06347585304013224,
+     "values": [
+      24.061507536118445,
+      24.078678829233255,
+      24.0413095701979
+     ]
+    },
+    "W3 4K cold decode tok/s": {
+     "value": 23.566053391000302,
+     "n": 3,
+     "cv_pct": 0.7783478446861258,
+     "values": [
+      23.88756705274657,
+      23.45336882555462,
+      23.566053391000302
+     ]
+    },
+    "W3 4K cold TTFT s": {
+     "value": 5.892993750050664,
+     "n": 3,
+     "cv_pct": 1.6083661521080872,
+     "values": [
+      5.8306929169921204,
+      6.056726792012341,
+      5.892993750050664
+     ]
+    },
+    "W3 16K cold decode tok/s": {
+     "value": 22.468794307093034,
+     "n": 3,
+     "cv_pct": 0.4101191787074585,
+     "values": [
+      22.468794307093034,
+      22.65035151733282,
+      22.44267338268425
+     ]
+    },
+    "W3 16K cold TTFT s": {
+     "value": 26.3950166249997,
+     "n": 3,
+     "cv_pct": 0.050165575085312906,
+     "values": [
+      26.410028833022807,
+      26.3950166249997,
+      26.377624708984513
+     ]
+    },
+    "W3 32K cold decode tok/s": {
+     "value": 21.528479678293063,
+     "n": 3,
+     "cv_pct": 0.44037522054228206,
+     "values": [
+      21.528479678293063,
+      21.564149348149048,
+      21.34804319982534
+     ]
+    },
+    "W3 32K cold TTFT s": {
+     "value": 63.284893208998255,
+     "n": 3,
+     "cv_pct": 0.08386190289427309,
+     "values": [
+      63.284893208998255,
+      63.327154083992355,
+      63.199583083041944
+     ]
+    },
+    "W4 c2 aggregate tok/s": {
+     "value": 7.507486921990305,
+     "n": 3,
+     "cv_pct": 0.23787131676875906,
+     "values": [
+      7.5267584163465,
+      7.507486921990305,
+      7.483123838738008
+     ]
+    },
+    "W4 c2 per-request decode tok/s": {
+     "value": 23.963395110006818,
+     "n": 3,
+     "cv_pct": 1.1147148554464381,
+     "values": [
+      23.988515837461197,
+      23.963395110006818,
+      23.413855336498713
+     ]
+    },
+    "W4 c4 aggregate tok/s": {
+     "value": 7.508589057937927,
+     "n": 3,
+     "cv_pct": 0.22562545254803065,
+     "values": [
+      7.478733164998347,
+      7.508589057937927,
+      7.518575451979522
+     ]
+    },
+    "W4 c4 per-request decode tok/s": {
+     "value": 23.856686895931652,
+     "n": 3,
+     "cv_pct": 0.6620793347095827,
+     "values": [
+      23.585434632864448,
+      23.856686895931652,
+      23.958871742057866
+     ]
+    },
+    "W4 c4 TTFT s": {
+     "value": 18.655632020992925,
+     "n": 3,
+     "cv_pct": 0.17683125926682988,
+     "values": [
+      18.723996354005067,
+      18.652352666511433,
+      18.655632020992925
+     ]
+    },
+    "W5 4x16K shared aggregate tok/s": {
+     "value": 5.737053364232569,
+     "n": 3,
+     "cv_pct": 0.264011157100782,
+     "values": [
+      5.757503019516001,
+      5.737053364232569,
+      5.720460470361343
+     ]
+    },
+    "W5 4x16K shared TTFT s": {
+     "value": 34.63747502100887,
+     "n": 3,
+     "cv_pct": 0.29189420269024025,
+     "values": [
+      34.4412212705065,
+      34.63747502100887,
+      34.66960924997693
+     ]
+    }
+   },
+   "replay_stats": {
+    "prefill_sum6_s": 58.515546666050795,
+    "reps6": 3,
+    "reps_complete": 3,
+    "reps_total": 6,
+    "prefill_sum_s": 87.54887241695542,
+    "prefill_sums": [
+     88.95969587605214,
+     87.54374308203114,
+     87.54887241695542
+    ],
+    "ttft_t1_s": 6.128816915967036,
+    "ttft_t8_s": 15.034598666999955,
+    "cached_frac_t8": 0.8726636657207163,
+    "decode_tps": 24.264372739775087,
+    "short_rows": 0,
+    "rows": 48
+   },
+   "sampled_stats": {
+    "n_ok": 3,
+    "n_rows": 3,
+    "median_ok": 23.619791657913073,
+    "median_any": 23.619791657913073,
+    "flags": [
+     "ok"
+    ]
+   },
+   "flags": {
+    "ok": 105,
+    "short": 6
+   },
+   "cache": {
+    "W1": {
+     "rows": 48,
+     "hit_rows": 48,
+     "cached_tokens": 3131,
+     "unknown": 0
+    },
+    "W2": {
+     "rows": 24,
+     "hit_rows": 24,
+     "cached_tokens": 1926,
+     "unknown": 0
+    },
+    "W3": {
+     "rows": 9,
+     "hit_rows": 9,
+     "cached_tokens": 378,
+     "unknown": 0
+    },
+    "W4": {
+     "rows": 18,
+     "hit_rows": 18,
+     "cached_tokens": 756,
+     "unknown": 0
+    },
+    "W5": {
+     "rows": 12,
+     "hit_rows": 12,
+     "cached_tokens": 143433,
+     "unknown": 0
+    }
+   },
+   "requests": 111,
+   "errors": 0,
+   "rss": [
+    27772560,
+    27947536,
+    27947616,
+    28287360,
+    28768688,
+    28768688,
+    31299232,
+    35203104,
+    30214256,
+    32708512,
+    35203200,
+    30513520,
+    30516016,
+    31758288,
+    33000608
+   ],
+   "loads": [
+    "{ 1.36 1.29 1.57 }",
+    "{ 1.98 1.49 1.61 }",
+    "{ 3.10 1.97 1.77 }",
+    "{ 3.73 2.63 2.06 }",
+    "{ 3.25 2.73 2.14 }",
+    "{ 2.56 2.62 2.16 }",
+    "{ 2.92 2.63 2.19 }",
+    "{ 2.52 2.52 2.20 }",
+    "{ 1.38 2.23 2.13 }",
+    "{ 0.63 1.68 1.92 }",
+    "{ 2.27 1.97 2.01 }",
+    "{ 1.88 1.90 1.98 }",
+    "{ 1.04 1.68 1.89 }",
+    "{ 2.02 1.81 1.93 }",
+    "{ 2.42 1.92 1.96 }"
+   ]
+  },
+  "tensorfold-ctx64k": {
+   "passes": [
+    {
+     "pass": "pass1",
+     "status": "done",
+     "ready_s": 5.0,
+     "warmup_s": 4.8,
+     "model_id": "qwen38-4bit",
+     "cmd": [
+      "tensorfold",
+      "serve",
+      "models/qwen38-4bit",
+      "--port",
+      "8651",
+      "--parallel",
+      "4",
+      "--no-update-check",
+      "--context",
+      "65536"
+     ],
+     "env": {},
+     "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+     "cache": "default on",
+     "quant": "MLX 4-bit (supplemental: --context 65536)"
+    }
+   ],
+   "cells": {
+    "W1 greedy-64 decode tok/s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W1 greedy-64 TTFT s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W1 greedy-256 decode tok/s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W2 temp0.6-256 decode tok/s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W3 4K cold decode tok/s": {
+     "value": 29.4767132030824,
+     "n": 3,
+     "cv_pct": 0.10050167756181702,
+     "values": [
+      29.4767132030824,
+      29.427126545027978,
+      29.49777397779177
+     ]
+    },
+    "W3 4K cold TTFT s": {
+     "value": 4.112779500021134,
+     "n": 3,
+     "cv_pct": 0.33038210406760793,
+     "values": [
+      4.089318584010471,
+      4.121445999946445,
+      4.112779500021134
+     ]
+    },
+    "W3 16K cold decode tok/s": {
+     "value": 28.361032142889393,
+     "n": 3,
+     "cv_pct": 0.14596987466218167,
+     "values": [
+      28.412734341490516,
+      28.31133319404482,
+      28.361032142889393
+     ]
+    },
+    "W3 16K cold TTFT s": {
+     "value": 16.803204707975965,
+     "n": 3,
+     "cv_pct": 0.10996840871133676,
+     "values": [
+      16.836451624985784,
+      16.793203000037465,
+      16.803204707975965
+     ]
+    },
+    "W3 32K cold decode tok/s": {
+     "value": 26.523727445471277,
+     "n": 3,
+     "cv_pct": 0.03057136505035299,
+     "values": [
+      26.523727445471277,
+      26.512516444173727,
+      26.53232027827858
+     ]
+    },
+    "W3 32K cold TTFT s": {
+     "value": 36.46398258401314,
+     "n": 3,
+     "cv_pct": 0.08852416137134785,
+     "values": [
+      36.46398258401314,
+      36.49910487502348,
+      36.42020120896632
+     ]
+    },
+    "W4 c2 aggregate tok/s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W4 c2 per-request decode tok/s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W4 c4 aggregate tok/s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W4 c4 per-request decode tok/s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W4 c4 TTFT s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W5 4x16K shared aggregate tok/s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    },
+    "W5 4x16K shared TTFT s": {
+     "value": null,
+     "n": 0,
+     "cv_pct": null,
+     "values": []
+    }
+   },
+   "replay_stats": {
+    "prefill_sum6_s": 35.276193332043476,
+    "reps6": 3,
+    "reps_complete": 3,
+    "reps_total": 3,
+    "prefill_sum_s": 50.11906599998474,
+    "prefill_sums": [
+     50.11906599998474,
+     50.170676917012315,
+     50.09156962309498
+    ],
+    "ttft_t1_s": 4.11135550000472,
+    "ttft_t8_s": 7.571021791023668,
+    "cached_frac_t8": 0.8724935732647815,
+    "decode_tps": 27.251956975046355,
+    "short_rows": 0,
+    "rows": 24
+   },
+   "sampled_stats": {
+    "n_ok": 0,
+    "n_rows": 0,
+    "median_ok": null,
+    "median_any": null,
+    "flags": []
+   },
+   "flags": {
+    "ok": 9
+   },
+   "cache": {
+    "W3": {
+     "rows": 9,
+     "hit_rows": 9,
+     "cached_tokens": 27,
+     "unknown": 0
+    }
+   },
+   "requests": 9,
+   "errors": 0,
+   "rss": [
+    21581632,
+    21417200,
+    21417888
+   ],
+   "loads": [
+    "{ 1.04 1.33 1.55 }",
+    "{ 1.73 1.53 1.61 }",
+    "{ 2.00 1.68 1.66 }"
+   ]
+  }
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "engine": "ollama",
+ "pass": 1,
+ "cmd": [
+  "ollama",
+  "serve"
+ ],
+ "env": {
+  "OLLAMA_HOST": "127.0.0.1:11435",
+  "OLLAMA_MODELS": "/private/tmp/claude-501/final-20261026-scratch/ollama-models",
+  "OLLAMA_NUM_PARALLEL": "2",
+  "OLLAMA_CONTEXT_LENGTH": "65536",
+  "OLLAMA_KEEP_ALIVE": "2h",
+  "OLLAMA_FLASH_ATTENTION": "1",
+  "OLLAMA_NOPRUNE": "1"
+ },
+ "cache": "default (ollama prompt reuse per slot)",
+ "quant": "GGUF Q4_K_M (imported via Modelfile)",
+ "git_head": "0474d7beca09d141ef32102d9cc6e16544911c4e",
+ "started": {
+  "t": "2026-10-27T09:22:59+0100",
+  "uptime": "9:22  up 3 days,  2:57, 1 user, load averages: 1.46 1.27 1.58",
+  "loadavg": "{ 1.46 1.27 1.58 }",
+  "top_cpu": [
+   "19.2 156352 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "11.7 26384 /Library/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Content",
+   "8.7 134800 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "6.7 434624 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadat",
+   "3.9 26144 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata"
+  ]
+ },
+ "status": "done",
+ "ready_s": 1.0,
+ "model_id": "qwen38-27b-q4km",
+ "pids": [
+  92672,
+  92802
+ ],
+ "warmup_s": 8.6,
+ "ended": {
+  "t": "2026-10-27T09:49:22+0100",
+  "uptime": "9:49  up 3 days,  3:23, 1 user, load averages: 2.84 1.71 1.78",
+  "loadavg": "{ 2.84 1.71 1.78 }",
+  "top_cpu": [
+   "14.9 160400 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "8.7 135136 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "2.2 10112 /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecod",
+   "2.0 311488 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.fra",
+   "1.9 20032 /usr/sbin/coreaudiod"
+  ]
+ },
+ "killed_pids": [
+  92672,
+  92802
+ ]
+}

@@ -1,0 +1,9 @@
+no_token http=401
+bad_token http=401
+wrong_host http=403
+wrong_origin http=403
+isError=false text=strim job j_yxaz5be2en: failed turn 0/40 0s
+reason: invalid cwd: refusing the filesystem root, the home directory or an ancestor of it
+isError=false status=done
+marker process after cancel: 0 (expect 0)
+/private/var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/tmp.HFaj8SN8YA/cancel_repo  28496fd [main]

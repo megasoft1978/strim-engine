@@ -1,0 +1,123 @@
+{
+  "classes" : [
+    {
+      "arms" : {
+        "C" : {
+          "claimedDone" : 2,
+          "delegations" : 0,
+          "falseDone" : 1,
+          "falseDoneRate" : 0.05,
+          "medianLocalTokens" : 223173,
+          "medianWallS" : 82,
+          "n" : 20,
+          "passRate" : 0.75,
+          "passes" : 15,
+          "redos" : 0,
+          "timeouts" : 0
+        },
+        "H" : {
+          "claimedDone" : 6,
+          "delegations" : 20,
+          "falseDone" : 0,
+          "falseDoneRate" : 0,
+          "medianLocalTokens" : 69937,
+          "medianWallS" : 29.5,
+          "n" : 20,
+          "passRate" : 0.75,
+          "passes" : 15,
+          "redos" : 0,
+          "timeouts" : 0
+        }
+      },
+      "gate" : [
+
+      ],
+      "repsPerArm" : {
+        "C" : 2,
+        "H" : 2
+      },
+      "taskClass" : "mechanical-edit",
+      "tasks" : 10
+    },
+    {
+      "arms" : {
+        "C" : {
+          "claimedDone" : 20,
+          "delegations" : 0,
+          "falseDone" : 0,
+          "falseDoneRate" : 0,
+          "medianLocalTokens" : 29798,
+          "medianWallS" : 13.2,
+          "n" : 20,
+          "passRate" : 1,
+          "passes" : 20,
+          "redos" : 0,
+          "timeouts" : 0
+        },
+        "H" : {
+          "claimedDone" : 19,
+          "delegations" : 20,
+          "falseDone" : 1,
+          "falseDoneRate" : 0.05,
+          "medianLocalTokens" : 17551,
+          "medianWallS" : 7.5,
+          "n" : 20,
+          "passRate" : 0.9,
+          "passes" : 18,
+          "redos" : 0,
+          "timeouts" : 0
+        }
+      },
+      "gate" : [
+
+      ],
+      "repsPerArm" : {
+        "C" : 2,
+        "H" : 2
+      },
+      "taskClass" : "repo-qa",
+      "tasks" : 10
+    },
+    {
+      "arms" : {
+        "C" : {
+          "claimedDone" : 0,
+          "delegations" : 0,
+          "falseDone" : 0,
+          "falseDoneRate" : 0,
+          "medianLocalTokens" : 1018709,
+          "medianWallS" : 224.25,
+          "n" : 20,
+          "passRate" : 0.1,
+          "passes" : 2,
+          "redos" : 0,
+          "timeouts" : 3
+        },
+        "H" : {
+          "claimedDone" : 0,
+          "delegations" : 20,
+          "falseDone" : 0,
+          "falseDoneRate" : 0,
+          "medianLocalTokens" : 78502.5,
+          "medianWallS" : 77.6,
+          "n" : 20,
+          "passRate" : 0.1,
+          "passes" : 2,
+          "redos" : 0,
+          "timeouts" : 0
+        }
+      },
+      "gate" : [
+
+      ],
+      "repsPerArm" : {
+        "C" : 2,
+        "H" : 2
+      },
+      "taskClass" : "test-fix",
+      "tasks" : 10
+    }
+  ],
+  "generatedAt" : "2026-10-27T13:53:45Z",
+  "rows" : 120
+}

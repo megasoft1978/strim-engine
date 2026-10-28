@@ -1,0 +1,45 @@
+diff --git a/bigbytes.go b/bigbytes.go
+index 3b015fd..eea26c7 100644
+--- a/bigbytes.go
++++ b/bigbytes.go
+@@ -115,6 +115,12 @@ func humanateBigBytes(s, base *big.Int, sizes []string) string {
+ 	}
+ 	c := (&big.Int{}).Set(s)
+ 	val, mag := oomm(c, base, len(sizes)-1)
++	// Values this close to the next unit round up when formatted without
++	// decimals. Promote the suffix too, unless it is already the last one.
++	if val >= float64(base.Int64())-0.5 && mag+1 < len(sizes) {
++		val = 1
++		mag++
++	}
+ 	suffix := sizes[mag]
+ 	f := "%.0f %s"
+ 	if val < 10 {
+diff --git a/bytes.go b/bytes.go
+index e07fce8..044751a 100644
+--- a/bytes.go
++++ b/bytes.go
+@@ -80,7 +80,6 @@ func humanateBytes(s uint64, base float64, minDigits int, sizes []string) string
+ 		return fmt.Sprintf("%d B", s)
+ 	}
+ 	e := math.Floor(logn(float64(s), base))
+-	suffix := sizes[int(e)]
+ 	val := float64(s) / math.Pow(base, e)
+ 
+ 	// Determine how many decimal places to keep based on the unrounded
+@@ -100,6 +99,15 @@ func humanateBytes(s uint64, base float64, minDigits int, sizes []string) string
+ 		digits = max(digits-(newIntDigits-intDigits), 0)
+ 	}
+ 
++	// A rounded value may now fit the next unit (1000 kB -> 1.0 MB).
++	// Recompute the precision for that unit without rounding the input again.
++	if val >= base && int(e)+1 < len(sizes) {
++		e++
++		val /= base
++		digits = max(minDigits-countDigits(int64(val)), 0)
++	}
++	suffix := sizes[int(e)]
++
+ 	ff := "%%.%df %%s"
+ 	f := fmt.Sprintf(ff, digits)
+ 	return fmt.Sprintf(f, val, suffix)

@@ -1,0 +1,50 @@
+[
+ {
+  "name": "p4k_a",
+  "tokens": 4096,
+  "offset": 0,
+  "preview": "# Swift engine \u2014 next implementation step (handoff)  > **Verdict after six measured approaches (202"
+ },
+ {
+  "name": "p4k_b",
+  "tokens": 4096,
+  "offset": 6000,
+  "preview": " difference is the recurrent work.  | S | full | recurrence skipped | recurrence share | |--:|--:|--"
+ },
+ {
+  "name": "p4k_c",
+  "tokens": 4096,
+  "offset": 12000,
+  "preview": " is not bit-identical to per-token math in either path, exactly as this document said at the very start"
+ },
+ {
+  "name": "p4k_d",
+  "tokens": 4096,
+  "offset": 18000,
+  "preview": "6:** the cause was MLX's > bf16 `Sigmoid` rounding at every step; the kernel"
+ },
+ {
+  "name": "p4k_e",
+  "tokens": 4096,
+  "offset": 24000,
+  "preview": " hash differs), and at all 16 positions.   Rewriting its sigmoid to MLX's exact form (`"
+ },
+ {
+  "name": "p1k_a",
+  "tokens": 1024,
+  "offset": 30000,
+  "preview": " decode, `c804f9c` q/k staging, `6c366a1"
+ },
+ {
+  "name": "p1k_b",
+  "tokens": 1024,
+  "offset": 32000,
+  "preview": " 0.94\u20130.97\u00d7, token mismatch; 1K only 1.04"
+ },
+ {
+  "name": "p1k_c",
+  "tokens": 1024,
+  "offset": 34000,
+  "preview": "6. **Language: Swift** for the product layer (MLX Swift, Metal 4 tooling, Swift "
+ }
+]

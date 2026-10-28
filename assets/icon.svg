@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#161920"/><stop offset="100%" stop-color="#0E1116"/></linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2DE2C5"/><stop offset="100%" stop-color="#1A9E8A"/></linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFB454"/><stop offset="100%" stop-color="#FF8C00"/></linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2DE2C5" stop-opacity=".3"/><stop offset="100%" stop-color="#2DE2C5" stop-opacity=".08"/></linearGradient>
+  </defs>
+  <g transform="translate(512 512) scale(0.82) translate(-512 -512)">
+  <rect x="0" y="0" width="1024" height="1024" rx="220" fill="url(#bg)"/>
+  <circle cx="512" cy="512" r="320" fill="none" stroke="url(#ring)" stroke-width="3"/>
+  <circle cx="512" cy="192" r="8" fill="#2DE2C5" opacity=".6"/>
+  <circle cx="832" cy="512" r="8" fill="#2DE2C5" opacity=".6"/>
+  <circle cx="512" cy="832" r="8" fill="#2DE2C5" opacity=".6"/>
+  <circle cx="192" cy="512" r="8" fill="#2DE2C5" opacity=".6"/>
+  <rect x="120" y="340" width="280" height="56" rx="28" fill="url(#bar)"/>
+  <rect x="120" y="434" width="220" height="56" rx="28" fill="url(#bar)" opacity=".75"/>
+  <rect x="120" y="528" width="160" height="56" rx="28" fill="url(#bar)" opacity=".5"/>
+  <path d="M560 200 L480 440 L560 440 L440 824 L680 480 L580 480 Z" fill="url(#bolt)" opacity=".95"/>
+  <path d="M560 200 L480 440 L560 440 L440 824 L680 480 L580 480 Z" fill="none" stroke="#FFB454" stroke-width="2" opacity=".4"/>
+
+  </g>
+</svg>

@@ -1,0 +1,51 @@
+{
+ "engine": "strim",
+ "pass": 2,
+ "cmd": [
+  ".build/release/strim",
+  "serve",
+  "models/qwen38-4bit",
+  "models/qwen38-mtp-4bit",
+  "--port",
+  "8203",
+  "--no-auth"
+ ],
+ "env": {},
+ "cache": "default (STRIM_PREFIX_CACHE_MB default 12288)",
+ "quant": "MLX 4-bit + MTP head",
+ "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+ "started": {
+  "t": "2026-10-27T07:25:41+0100",
+  "uptime": "7:25  up 3 days, 59 mins, 3 users, load averages: 1.96 1.59 1.67",
+  "loadavg": "{ 1.96 1.59 1.67 }",
+  "top_cpu": [
+   "19.0 116992 /Applications/Stats.app/Contents/MacOS/Stats",
+   "14.0 153824 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "12.3 80896 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "2.3 15280 /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecod",
+   "1.8 16560 /usr/sbin/coreaudiod"
+  ]
+ },
+ "status": "done",
+ "ready_s": 3.0,
+ "model_id": "qwen38-4bit",
+ "pids": [
+  54294
+ ],
+ "warmup_s": 4.6,
+ "ended": {
+  "t": "2026-10-27T07:36:29+0100",
+  "uptime": "7:36  up 3 days,  1:10, 1 user, load averages: 9.84 3.62 2.37",
+  "loadavg": "{ 9.84 3.62 2.37 }",
+  "top_cpu": [
+   "139.6 615792 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+   "116.7 410736 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.f",
+   "111.5 594944 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.f",
+   "45.6 120448 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "42.7 254848 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.fr"
+  ]
+ },
+ "killed_pids": [
+  54294
+ ]
+}

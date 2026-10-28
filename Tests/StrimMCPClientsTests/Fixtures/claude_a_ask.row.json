@@ -1,0 +1,56 @@
+{
+ "run": "claude_a_ask",
+ "client": "claude",
+ "model_alias": "sonnet",
+ "mcp": true,
+ "rc": 0,
+ "wall_s": 9.6,
+ "check_ok": null,
+ "check_detail": "n/a",
+ "polls": 0,
+ "task_calls": 0,
+ "ask_calls": 1,
+ "apply_ok": null,
+ "turns": 2,
+ "in": 4,
+ "out": 270,
+ "cache_create": 9352,
+ "cache_read": 9039,
+ "cost_usd": 0.041019900000000005,
+ "first_turn": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 9039,
+  "cache_read_input_tokens": 0
+ },
+ "tools_used": [
+  "mcp__strim__strim_ask"
+ ],
+ "init_mcp": [
+  {
+   "name": "strim",
+   "status": "connected",
+   "source": "dynamic"
+  }
+ ],
+ "n_init_tools": 10,
+ "result_text": "Per the local agent, `slugify(text)` in `mathkit/text.py` strips surrounding whitespace, lowercases the string, and replaces each run of whitespace with a single hyphen. I haven't checked this against the file, and the agent's answer is untrusted.",
+ "is_error": false,
+ "model_usage": {
+  "claude-sonnet-5-5": {
+   "inputTokens": 4,
+   "outputTokens": 270,
+   "cacheReadInputTokens": 9039,
+   "cacheCreationInputTokens": 9352,
+   "webSearchRequests": 0,
+   "costUSD": 0.041019900000000005,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 128000,
+   "thinkingTokens": 0,
+   "cacheCreationEphemeral5mInputTokens": 0,
+   "cacheCreationEphemeral1hInputTokens": 9352,
+   "canonicalModel": "claude-sonnet-5-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ }
+}

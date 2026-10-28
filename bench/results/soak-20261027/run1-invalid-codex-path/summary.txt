@@ -1,0 +1,431 @@
+strim soak summary  run1
+usage: soak.py --duration 30.0 --clients both --task-timeout 240 --concurrent-every 6 --poll 15.0
+started 2026-10-27T05:33:39+00:00  elapsed 30.3 min
+
+Tasks: 192 total, 89 passed (46.4%)
+  claude: 89/96 passed (92.7%)
+  codex: 0/96 passed (0.0%)
+  phase seq: 65/144 passed
+  phase conc: 24/48 passed
+  timeouts: 1
+  longest task: claude run_tests_report 240.0s (seq 113)
+
+Server:
+  crashes: 0  restarts: 0  restart_failures: 0
+  pids seen: 1  polls: 121
+  http 5xx events: 0  unhealthy samples: 0
+  log hits (first 20/poll kept): {'error': 0, 'unhealthy': 0, 'insufficient_memory': 0}
+  server requests_total last: 510  failed: 0
+RSS MB: min 8599.5  max 8710.1  first-quartile median 8704.8  last-quartile median 8620.9  slope -200.7 MB/h
+TTFT ms (n=513): first-quartile median 256.5  last-quartile median 249.0  p90 2073
+
+Failures (103):
+  - seq 1 codex fix_median [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-z2xpow4m
+  - seq 3 codex rename_word_count [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-9frokxqb
+  - seq 5 codex run_tests_report [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-ohjg3bpa
+  - seq 7 codex add_clamp [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-eh4it09j
+  - seq 9 codex fix_slugify [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-cwnkflem
+  - seq 11 codex add_stdev [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-pqlm9jqx
+  - seq 12 codex explain_stats [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-rt0rq76g
+  - seq 15 codex rename_word_count [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-51eqhuhz
+  - seq 16 codex add_docstrings [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-c4y76bc2
+  - seq 18 codex refactor_normalize [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-y1mb0wu2
+  - seq 19 claude add_clamp [seq]: exit 0; check 0 rc=1
+      stderr: [claude-code:unrecognized_model] {"model":"qwen38-4bit","query_source":"sdk"}
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-uy5vatw6
+  - seq 20 codex explain_cli [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-k6k5gzuv
+  - seq 23 codex add_stdev [conc]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-wfel46cg
+  - seq 25 codex fix_median [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-j9jpg3y7
+  - seq 27 codex rename_word_count [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-9h5ba_x7
+  - seq 29 codex run_tests_report [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-9hqoa8rh
+  - seq 31 codex add_clamp [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-2fbxdkvx
+  - seq 33 codex fix_slugify [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-zsnf7f1z
+  - seq 35 codex add_stdev [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-qy0un_re
+  - seq 36 codex explain_stats [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-6aldn9d6
+  - seq 39 codex rename_word_count [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-4anjb8dk
+  - seq 40 codex add_docstrings [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-_h2f4579
+  - seq 41 claude run_tests_report [seq]: exit 0; check 0 rc=1
+      stderr: [claude-code:unrecognized_model] {"model":"qwen38-4bit","query_source":"sdk"}
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-uowl9qqt
+  - seq 42 codex refactor_normalize [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-jamjgt1h
+  - seq 44 codex explain_cli [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-_s_5cfhm
+  - seq 47 codex add_stdev [conc]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-d1ved3cj
+  - seq 49 codex fix_median [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-9uqhwhqc
+  - seq 51 codex rename_word_count [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-1aw6xcul
+  - seq 53 codex run_tests_report [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-cyd2pq3a
+  - seq 55 codex add_clamp [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-llecd5vy
+  - seq 57 codex fix_slugify [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-fm51mv2v
+  - seq 59 codex add_stdev [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-lehhg_0o
+  - seq 60 codex explain_stats [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-aoj9s6zk
+  - seq 63 codex rename_word_count [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-xbco1xw5
+  - seq 64 codex add_docstrings [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-ful3vxmh
+  - seq 65 claude run_tests_report [seq]: exit 0; check 0 rc=1
+      stderr: [claude-code:unrecognized_model] {"model":"qwen38-4bit","query_source":"sdk"}
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-ku70qcy4
+  - seq 66 codex refactor_normalize [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-57y76eeh
+  - seq 68 codex explain_cli [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-caj12mgf
+  - seq 71 codex add_stdev [conc]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-pwg2ok7f
+  - seq 73 codex fix_median [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-x5uxr4il
+  - seq 75 codex rename_word_count [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-nmx6lxf0
+  - seq 77 codex run_tests_report [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-hu66_pve
+  - seq 79 codex add_clamp [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-92r2oo25
+  - seq 81 codex fix_slugify [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-pmyrjzcr
+  - seq 83 codex add_stdev [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-kv5lvzkw
+  - seq 84 codex explain_stats [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-y5_h1oaf
+  - seq 87 codex rename_word_count [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-q_kxqfc6
+  - seq 88 codex add_docstrings [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-ypsc_g_1
+  - seq 89 claude run_tests_report [seq]: exit 0; check 0 rc=1
+      stderr: [claude-code:unrecognized_model] {"model":"qwen38-4bit","query_source":"sdk"}
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-08418cxg
+  - seq 90 codex refactor_normalize [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-13qwjj_s
+  - seq 92 codex explain_cli [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-6zwhc2ez
+  - seq 95 codex add_stdev [conc]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-ng5qrdpw
+  - seq 97 codex fix_median [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-moj3g9fq
+  - seq 99 codex rename_word_count [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-all787xg
+  - seq 101 codex run_tests_report [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-m5d47bwd
+  - seq 103 codex add_clamp [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-knfx2oh0
+  - seq 105 codex fix_slugify [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-rrakdibw
+  - seq 107 codex add_stdev [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-nxjc1r5f
+  - seq 108 codex explain_stats [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-qn07kkk9
+  - seq 111 codex rename_word_count [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-m4kfz8u_
+  - seq 112 codex add_docstrings [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-470c9upk
+  - seq 113 claude run_tests_report [seq]: timeout; check 0 rc=1
+      stderr: [claude-code:unrecognized_model] {"model":"qwen38-4bit","query_source":"sdk"}
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-am0f801r
+  - seq 114 codex refactor_normalize [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-jp9tuw1g
+  - seq 116 codex explain_cli [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-s03ndxs1
+  - seq 119 codex add_stdev [conc]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-qguqr2wt
+  - seq 121 codex fix_median [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-3uqnuhl0
+  - seq 123 codex rename_word_count [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-4dbsr2tk
+  - seq 125 codex run_tests_report [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-eznnoxh8
+  - seq 127 codex add_clamp [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-27qs6fb2
+  - seq 129 codex fix_slugify [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-xwwcrvdr
+  - seq 131 codex add_stdev [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-59taadde
+  - seq 132 codex explain_stats [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-4if9jniv
+  - seq 135 codex rename_word_count [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-_cipg6b4
+  - seq 136 codex add_docstrings [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-gq9sdfzn
+  - seq 137 claude run_tests_report [seq]: exit 0; check 0 rc=1
+      stderr: [claude-code:unrecognized_model] {"model":"qwen38-4bit","query_source":"sdk"}
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-34e2nzp0
+  - seq 138 codex refactor_normalize [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-uyjnfezr
+  - seq 140 codex explain_cli [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-0jfa6ffl
+  - seq 143 codex add_stdev [conc]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-ae5k_eat
+  - seq 145 codex fix_median [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-g8h6z9ny
+  - seq 147 codex rename_word_count [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-fonzmq_r
+  - seq 149 codex run_tests_report [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-x4wo5bxq
+  - seq 151 codex add_clamp [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-rdvdj4oh
+  - seq 153 codex fix_slugify [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-0qtmp6cq
+  - seq 155 codex add_stdev [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-q0a0_bc6
+  - seq 156 codex explain_stats [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-ntdpn5lr
+  - seq 159 codex rename_word_count [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-actm84ou
+  - seq 160 codex add_docstrings [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-0vkj8y8m
+  - seq 162 codex refactor_normalize [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-la4zjh0k
+  - seq 164 codex explain_cli [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-2q9lz90q
+  - seq 167 codex add_stdev [conc]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-m5qaqpj2
+  - seq 169 codex fix_median [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-gfgg3toj
+  - seq 171 codex rename_word_count [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-po7vpag3
+  - seq 173 codex run_tests_report [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-1yc264ce
+  - seq 175 codex add_clamp [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-braz_dxk
+  - seq 177 codex fix_slugify [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-2fx3ncqt
+  - seq 179 codex add_stdev [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-woh46hqq
+  - seq 180 codex explain_stats [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-1w9q3kj6
+  - seq 183 codex rename_word_count [conc]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-me_qr4u2
+  - seq 184 codex add_docstrings [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-2azm_hz9
+  - seq 185 claude run_tests_report [seq]: exit 0; check 0 rc=1
+      stderr: [claude-code:unrecognized_model] {"model":"qwen38-4bit","query_source":"sdk"}
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-7qo12c79
+  - seq 186 codex refactor_normalize [seq]: exit 1; check 1 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-_d_aciak
+  - seq 188 codex explain_cli [seq]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-d8j1kj63
+  - seq 191 codex add_stdev [conc]: exit 1; check 0 rc=1
+      stderr: WARNING: proceeding, even though we could not create PATH aliases: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      stderr: Error finding codex home: CODEX_HOME points to "bench/results/soak-20261027/run1/isolated/codex-home", but that path does not exist
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-3pnr1xnx/soak-mu6d2dod
+
+Server error events (0):
+
+Files: tasks.jsonl server.jsonl server.log summary.txt

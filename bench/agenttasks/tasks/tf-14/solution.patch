@@ -1,0 +1,12 @@
+diff --git a/Sources/LRUCache/LRUCache.swift b/Sources/LRUCache/LRUCache.swift
+index 74fd5b9..4680aa2 100644
+--- a/Sources/LRUCache/LRUCache.swift
++++ b/Sources/LRUCache/LRUCache.swift
+@@ -15,6 +15,7 @@ public struct LRUCache<Key: Hashable, Value> {
+ 
+     public mutating func get(_ key: Key) -> Value? {
+         guard let value = values[key] else { return nil }
++        touch(key)
+         return value
+     }
+ 

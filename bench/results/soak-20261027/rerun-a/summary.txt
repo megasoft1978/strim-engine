@@ -1,0 +1,33 @@
+strim soak summary  rerun-a
+usage: soak.py --duration 10.0 --clients claude --task-timeout 240 --concurrent-every 6 --poll 15.0
+started 2026-10-27T10:41:09+00:00  elapsed 1.8 min
+
+Tasks: 4 total, 1 passed (25.0%)
+  claude: 1/4 passed (25.0%)
+  phase seq: 1/4 passed
+  timeouts: 0
+  longest task: claude run_tests_report 42.8s (seq 2)
+
+Server:
+  crashes: 0  restarts: 0  restart_failures: 0
+  pids seen: 1  polls: 7
+  http 5xx events: 0  unhealthy samples: 0
+  log hits (first 20/poll kept): {'error': 0, 'unhealthy': 0, 'insufficient_memory': 0}
+  server requests_total last: 26  failed: 0
+RSS MB: min 8689.7  max 8705.0  first-quartile median 8689.7  last-quartile median 8705.0  slope 421.8 MB/h
+TTFT ms (n=29): first-quartile median 443  last-quartile median 177  p90 2062
+
+Failures (3):
+  - seq 1 claude run_tests_report [seq]: exit 0; check 0 rc=1
+      stderr: [claude-code:unrecognized_model] {"model":"qwen38-4bit","query_source":"sdk"}
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-t6149dmy/soak-twf5o358
+  - seq 2 claude run_tests_report [seq]: exit 0; check 0 rc=1
+      stderr: [claude-code:unrecognized_model] {"model":"qwen38-4bit","query_source":"sdk"}
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-t6149dmy/soak-794ir977
+  - seq 3 claude run_tests_report [seq]: exit 0; check 0 rc=1
+      stderr: [claude-code:unrecognized_model] {"model":"qwen38-4bit","query_source":"sdk"}
+      workdir kept: /var/folders/kr/jkdm_jq1749dlrtw5lbb8lb40000gn/T/strim-soak-root-t6149dmy/soak-61rfhjy0
+
+Server error events (0):
+
+Files: tasks.jsonl server.jsonl server.log summary.txt

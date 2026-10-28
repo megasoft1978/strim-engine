@@ -1,0 +1,10 @@
+{
+  "natural": "The key to fast local inference is reading each weight exactly once per token. A transformer decoder is memory bound at batch size one, so the design question is not how many floating point operations the GPU can issue, but how well the kernel streams quantized weights from memory while keeping every core busy.",
+  "code": "import { useState, useEffect } from 'react';\n\nexport function useDebouncedValue<T>(value: T, delay = 300): T {\n  const [debounced, setDebounced] = useState(value);\n  useEffect(() => {\n    const id = setTimeout(() => setDebounced(value), delay);\n    return () => clearTimeout(id);\n  }, [value, delay]);\n  return debounced;\n}\n",
+  "sql": "Write a SQL query that returns the top 10 customers by total order value in the last 90 days, including their email and country, ordered descending.",
+  "rust": "Write a Rust function that reads a file line by line, counts word frequencies, and returns the ten most common words as a Vec of tuples.",
+  "csvpy": "Write a Python function that reads a CSV file and returns its rows as a list of dictionaries, with headers from the first line.",
+  "prose": "The key to fast local inference is reading each weight exactly once per token. A transformer decoder is memory bound at batch size one, so the design question is not how many floating point operations the GPU can issue, but how well it streams quantized weights.",
+  "math": "A train travels 120 km in 2 hours. If it then travels at the same speed for another 1.5 hours, how far does it travel in total? Show your work.",
+  "json": "Write a JSON schema for a user profile with name, email, age, and a list of addresses, each with street, city, and country."
+}

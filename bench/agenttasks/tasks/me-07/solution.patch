@@ -1,0 +1,72 @@
+diff --git a/bool.go b/bool.go
+index 7286df8..58a635e 100644
+--- a/bool.go
++++ b/bool.go
+@@ -65,7 +65,7 @@ func (f *FlagSet) BoolVar(p *bool, name string, value bool, usage string) {
+ 
+ // BoolVarP is like BoolVar, but accepts a shorthand letter that can be used after a single dash.
+ func (f *FlagSet) BoolVarP(p *bool, name, shorthand string, value bool, usage string) {
+-	flag := f.VarPF(newBoolValue(value, p), name, shorthand, usage)
++	flag := f.VarWithShorthand(newBoolValue(value, p), name, shorthand, usage)
+ 	flag.NoOptDefVal = "true"
+ }
+ 
+@@ -77,7 +77,7 @@ func BoolVar(p *bool, name string, value bool, usage string) {
+ 
+ // BoolVarP is like BoolVar, but accepts a shorthand letter that can be used after a single dash.
+ func BoolVarP(p *bool, name, shorthand string, value bool, usage string) {
+-	flag := CommandLine.VarPF(newBoolValue(value, p), name, shorthand, usage)
++	flag := CommandLine.VarWithShorthand(newBoolValue(value, p), name, shorthand, usage)
+ 	flag.NoOptDefVal = "true"
+ }
+ 
+diff --git a/bool_func.go b/bool_func.go
+index 83d77af..d193346 100644
+--- a/bool_func.go
++++ b/bool_func.go
+@@ -22,7 +22,7 @@ func (f *FlagSet) BoolFunc(name string, usage string, fn func(string) error) {
+ // BoolFuncP is like BoolFunc, but accepts a shorthand letter that can be used after a single dash.
+ func (f *FlagSet) BoolFuncP(name, shorthand string, usage string, fn func(string) error) {
+ 	var val Value = boolfuncValue(fn)
+-	flag := f.VarPF(val, name, shorthand, usage)
++	flag := f.VarWithShorthand(val, name, shorthand, usage)
+ 	flag.NoOptDefVal = "true"
+ }
+ 
+diff --git a/count.go b/count.go
+index 521b5d2..886981a 100644
+--- a/count.go
++++ b/count.go
+@@ -53,7 +53,7 @@ func (f *FlagSet) CountVar(p *int, name string, usage string) {
+ 
+ // CountVarP is like CountVar only take a shorthand for the flag name.
+ func (f *FlagSet) CountVarP(p *int, name, shorthand string, usage string) {
+-	flag := f.VarPF(newCountValue(0, p), name, shorthand, usage)
++	flag := f.VarWithShorthand(newCountValue(0, p), name, shorthand, usage)
+ 	flag.NoOptDefVal = "+1"
+ }
+ 
+diff --git a/flag.go b/flag.go
+index 2670bb7..f775a6c 100644
+--- a/flag.go
++++ b/flag.go
+@@ -920,8 +920,8 @@ func (f *FlagSet) Var(value Value, name string, usage string) {
+ 	f.VarP(value, name, "", usage)
+ }
+ 
+-// VarPF is like VarP, but returns the flag created
+-func (f *FlagSet) VarPF(value Value, name, shorthand, usage string) *Flag {
++// VarWithShorthand is like VarP, but returns the flag created
++func (f *FlagSet) VarWithShorthand(value Value, name, shorthand, usage string) *Flag {
+ 	// Remember the default value as a string; it won't change.
+ 	flag := &Flag{
+ 		Name:      name,
+@@ -936,7 +936,7 @@ func (f *FlagSet) VarPF(value Value, name, shorthand, usage string) *Flag {
+ 
+ // VarP is like Var, but accepts a shorthand letter that can be used after a single dash.
+ func (f *FlagSet) VarP(value Value, name, shorthand, usage string) {
+-	f.VarPF(value, name, shorthand, usage)
++	f.VarWithShorthand(value, name, shorthand, usage)
+ }
+ 
+ // AddFlag will add the flag to the FlagSet

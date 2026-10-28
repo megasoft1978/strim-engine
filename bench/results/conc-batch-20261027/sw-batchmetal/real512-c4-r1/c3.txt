@@ -1,0 +1,4 @@
+first 1793136326.868483000
+usage data: {"id": "chatcmpl-a3fb810c0fa24447953a9c41", "object": "chat.completion.chunk", "created": 1793136324, "model": "qwen38-4bit", "choices": [], "usage": {"prompt_tokens": 540, "completion_tokens": 128, "total_tokens": 668, "prompt_tokens_details": {"cached_tokens": 0}}}
+start 1793136324.326630000
+end 1793136333.103177000

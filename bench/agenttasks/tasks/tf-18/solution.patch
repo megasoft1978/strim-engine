@@ -1,0 +1,13 @@
+diff --git a/Sources/Elapsed/Elapsed.swift b/Sources/Elapsed/Elapsed.swift
+index f429056..ba81400 100644
+--- a/Sources/Elapsed/Elapsed.swift
++++ b/Sources/Elapsed/Elapsed.swift
+@@ -3,7 +3,7 @@ public enum Elapsed {
+     public static func format(seconds: Int) -> String {
+         guard seconds > 0 else { return "0s" }
+         let h = seconds / 3600
+-        let m = seconds / 60
++        let m = (seconds % 3600) / 60
+         let s = seconds % 60
+         var parts: [String] = []
+         if h > 0 { parts.append("\(h)h") }

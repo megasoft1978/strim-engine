@@ -1,0 +1,9 @@
+### Code Explanation
+
+This Swift code defines data structures for managing **batched inference state** in a neural network model (likely a hybrid Transformer/State-Space Model architecture, given the `gdn` reference). It is built on top of the `MLX` framework.
+
+Here’s a breakdown of the key components:
+
+1.  **`BatchedAttentionCache`**:
+    *   Manages attention keys/values for a **batch of sequences**.
+   

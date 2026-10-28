@@ -1,0 +1,39 @@
+.build/
+.venv-sprint/
+.cache/
+models/
+wheelhouse/
+runs/
+logs/
+bench/ref_*.bin
+
+__pycache__/
+vendor/
+bench/omlx-home/
+.build-*/
+
+# build outputs and local state
+dist/
+*.o
+*.aria2
+*.log
+.DS_Store
+.env
+.env.*
+.venv*/
+.swiftpm/
+.index-build/
+*.xcodeproj/xcuserdata/
+bench/omlx-models/
+bench/results/**/isolated/
+!bench/results/*/checkprefix-*.log
+
+# secrets / machine info must never be committed
+*.token
+control-token
+bench/results/**/env.txt
+
+# model weights and app bundles
+*.gguf
+*.safetensors
+*.bundle

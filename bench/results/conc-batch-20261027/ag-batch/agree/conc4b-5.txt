@@ -1,0 +1,8 @@
+### Code Explanation
+
+This Swift file defines the infrastructure for loading and managing **MTP (Multi-Token Prediction) draft vocabulary weights** within a machine learning application (likely using the MLX framework). Here’s a breakdown of its components:
+
+1.  **`WeightError` Enum**:
+    *   Defines custom error types for weight loading failures.
+    *   `missingTensor(String)`: Raised when a specific tensor name is not found in the model weights.
+

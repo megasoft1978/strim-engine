@@ -1,0 +1,9 @@
+prompt 0 bytes=     412 batch8: SAME  batch4: SAME
+prompt 1 bytes=     438 batch8: SAME  batch4: SAME
+prompt 2 bytes=     448 batch8: SAME  batch4: SAME
+prompt 3 bytes=     459 batch8: SAME  batch4: SAME
+prompt 4 bytes=     402 batch8: SAME  batch4: SAME
+prompt 5 bytes=     457 batch8: SAME  batch4: SAME
+prompt 6 bytes=     434 batch8: SAME  batch4: SAME
+prompt 7 bytes=     460 batch8: SAME  batch4: SAME
+MATCH batch8 8/8  batch4 8/8

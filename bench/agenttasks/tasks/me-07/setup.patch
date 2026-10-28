@@ -1,0 +1,31 @@
+diff --git a/bool_test.go b/bool_test.go
+index 4cf36ed..a226195 100644
+--- a/bool_test.go
++++ b/bool_test.go
+@@ -58,7 +58,7 @@ func (v *triStateValue) Type() string {
+ func setUpFlagSet(tristate *triStateValue) *FlagSet {
+ 	f := NewFlagSet("test", ContinueOnError)
+ 	*tristate = triStateFalse
+-	flag := f.VarPF(tristate, "tristate", "t", "tristate value (true, maybe or false)")
++	flag := f.VarWithShorthand(tristate, "tristate", "t", "tristate value (true, maybe or false)")
+ 	flag.NoOptDefVal = "true"
+ 	return f
+ }
+@@ -156,7 +156,7 @@ func TestCustomIsBoolFlagGetsNoOptDefaultAutomatically(t *testing.T) {
+ 	var tristate triStateValue
+ 	f := NewFlagSet("test", ContinueOnError)
+ 	tristate = triStateFalse
+-	f.VarPF(&tristate, "tristate", "t", "tristate value (true, maybe or false)")
++	f.VarWithShorthand(&tristate, "tristate", "t", "tristate value (true, maybe or false)")
+ 
+ 	if err := f.Parse([]string{"--tristate"}); err != nil {
+ 		t.Fatal("expected no error; got", err)
+@@ -170,7 +170,7 @@ func TestCustomIsBoolFlagShortFormGetsNoOptDefaultAutomatically(t *testing.T) {
+ 	var tristate triStateValue
+ 	f := NewFlagSet("test", ContinueOnError)
+ 	tristate = triStateFalse
+-	f.VarPF(&tristate, "tristate", "t", "tristate value (true, maybe or false)")
++	f.VarWithShorthand(&tristate, "tristate", "t", "tristate value (true, maybe or false)")
+ 
+ 	if err := f.Parse([]string{"-t"}); err != nil {
+ 		t.Fatal("expected no error; got", err)

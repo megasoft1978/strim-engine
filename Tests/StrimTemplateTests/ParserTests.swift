@@ -1,0 +1,165 @@
+import Foundation
+import Testing
+@testable import StrimTemplate
+
+private let tools: [ToolSpec] = [
+    ToolSpec(name: "read_file", description: "Read", parameters: .ordered([
+        ("type", .string("object")),
+        ("properties", .ordered([("path", .ordered([("type", .string("string"))])), ("limit", .ordered([("type", .string("integer"))]))])),
+    ])),
+    ToolSpec(name: "create", description: "Create", parameters: .ordered([
+        ("type", .string("object")),
+        ("properties", .ordered([
+            ("title", .ordered([("type", .string("string"))])),
+            ("labels", .ordered([("type", .string("array"))])),
+            ("meta", .ordered([("type", .string("object"))])),
+            ("ratio", .ordered([("type", .string("number"))])),
+            ("dry", .ordered([("type", .string("boolean"))])),
+            ("opt", .ordered([("type", .array([.string("integer"), .string("null")]))])),
+            ("any", .ordered([("description", .string("untyped"))])),
+        ])),
+    ])),
+]
+
+private func parse(_ text: String, reasoning: Bool = false, tools t: [ToolSpec] = tools) -> [ParserEvent] {
+    var p = ToolCallParser(tools: t, startsInReasoning: reasoning)
+    return (p.feed(text) + p.finish()).coalesced()
+}
+
+private func call(_ name: String, _ args: [(String, OrderedJSON)]) -> [ParserEvent] {
+    [.toolCallBegin(name: name)] + args.map { .toolCallArg(key: $0.0, value: $0.1) } + [.toolCallEnd]
+}
+
+private let readCall = "<tool_call>\n<function=read_file>\n<parameter=path>\nsrc/main.ts\n</parameter>\n<parameter=limit>\n20\n</parameter>\n</function>\n</tool_call>"
+
+@Test func parsesReasoningTextAndToolCall() {
+    let ev = parse("Plan the read.</think>\n\nLet me read it.\n\n" + readCall, reasoning: true)
+    #expect(ev == [.reasoning("Plan the read."), .text("Let me read it.")] + call("read_file", [("path", .string("src/main.ts")), ("limit", .int(20))]))
+}
+
+@Test func explicitThinkTagAndContentMode() {
+    #expect(parse("<think>\nhm\n</think>\n\nanswer") == [.reasoning("hm\n"), .text("answer")])
+    #expect(parse("\n\nplain answer  \n") == [.text("plain answer  \n")])
+    #expect(ToolCallParser.promptOpensReasoning("<|im_start|>assistant\n<think>\n"))
+    #expect(!ToolCallParser.promptOpensReasoning("<|im_start|>assistant\n<think>\n\n</think>\n\n"))
+}
+
+@Test func parallelCallsAndSchemaTyping() {
+    let text = "<tool_call>\n<function=create>\n<parameter=title>\n42\n</parameter>\n<parameter=labels>\n[\"bug\", \"docs\"]\n</parameter>\n"
+        + "<parameter=meta>\n{\"z\": 1, \"a\": {\"k\": null}}\n</parameter>\n<parameter=ratio>\n0.5\n</parameter>\n<parameter=dry>\ntrue\n</parameter>\n"
+        + "<parameter=opt>\nnull\n</parameter>\n<parameter=any>\n{\"x\": [1, 2]}\n</parameter>\n<parameter=undeclared>\nhello world\n</parameter>\n</function>\n</tool_call>\n"
+        + "<tool_call>\n<function=read_file>\n<parameter=path>\n/a b\n</parameter>\n<parameter=limit>\nnot a number\n</parameter>\n</function>\n</tool_call>"
+    let ev = parse(text)
+    let expected = call("create", [
+        ("title", .string("42")), ("labels", .array([.string("bug"), .string("docs")])),
+        ("meta", .ordered([("z", .int(1)), ("a", .ordered([("k", .null)]))])), ("ratio", .double(0.5)), ("dry", .bool(true)),
+        ("opt", .null), ("any", .ordered([("x", .array([.int(1), .int(2)]))])), ("undeclared", .string("hello world")),
+    ]) + call("read_file", [("path", .string("/a b")), ("limit", .string("not a number"))])
+    #expect(ev == expected)
+}
+
+@Test func multilineValuesKeepInnerWhitespace() {
+    let ev = parse("<tool_call>\n<function=read_file>\n<parameter=path>\n\n  a\n\nb  \n\n</parameter>\n</function>\n</tool_call>")
+    #expect(ev == call("read_file", [("path", .string("\n  a\n\nb  \n"))]))
+}
+
+@Test func literalCloseTagInsideValueSurvives() {
+    let v = "x</parameter> y\n</parameter>z"
+    let ev = parse("<tool_call>\n<function=read_file>\n<parameter=path>\n\(v)\n</parameter>\n</function>\n</tool_call>")
+    #expect(ev == call("read_file", [("path", .string(v))]))
+}
+
+@Test func unparseableBlockPassesThroughAsText() {
+    #expect(parse("x <tool_call>garbage</tool_call> y") == [.text("x <tool_call>garbage</tool_call> y")])
+    #expect(parse("<tool_call>{\"name\": \"read_file\", \"arguments\": {}}</tool_call>") == [.text("<tool_call>{\"name\": \"read_file\", \"arguments\": {}}</tool_call>")])
+    #expect(parse("a <tool_call>\n<function=>\n</function>") == [.text("a <tool_call>\n<function=>\n</function>")])
+    #expect(parse("a <tool_cal") == [.text("a <tool_cal")])
+    #expect(parse("a <tool_call>\n<func") == [.text("a <tool_call>\n<func")])
+    // no tools declared: tool calls are plain text
+    #expect(parse("a\n\n" + readCall, tools: []) == [.text("a\n\n" + readCall)])
+}
+
+@Test func truncatedCallIsClosedAndPartialParamDropped() {
+    let ev = parse("<tool_call>\n<function=read_file>\n<parameter=path>\nsrc/a.ts\n</parameter>\n<parameter=limit>\n2")
+    #expect(ev == call("read_file", [("path", .string("src/a.ts"))]))
+}
+
+@Test func toleratesMissingFunctionClose() {
+    let ev = parse("<tool_call>\n<function=read_file>\n<parameter=path>\na\n</parameter>\n</tool_call> done")
+    #expect(ev == call("read_file", [("path", .string("a"))]) + [.text("done")])  // leading whitespace of content is dropped while `lead` is set
+}
+
+private let samples: [(String, Bool)] = [
+    ("Plan the read.</think>\n\nLet me read it.\n\n" + readCall, true),
+    ("<think>\nhm</think>\n\nsome  text \n\n" + readCall + "\n\n" + readCall + "\n", false),
+    ("Think \u{1F600} e\u{0301}.</think>\n\ncaf\u{00e9} \u{4E2D}\u{6587} \u{1F600}\n\n<tool_call>\n<function=read_file>\n<parameter=path>\n\u{4E2D}\u{6587}\u{0301}\n</parameter>\n</function>\n</tool_call>\u{0301}tail", true),
+    ("x</parameter>y <tool_call>\n<function=read_file>\n<parameter=path>\na</parameter>b\n</parameter>\n</function>\n</tool_call>", false),
+    ("<tool_call>\n<function=create>\n<parameter=meta>\n{\"a\": [1, {\"b\": \"</tool_call>\"}]}\n</parameter>\n</function>\n</tool_call>", false),
+    ("x <tool_call>garbage</tool_call> y <tool_call>\n<function=read_file>\n</function>\n</tool_call>", false),
+    ("<tool_call>\n<function=read_file>\n<parameter=path>\ntrunc", false),
+    ("no think close at all, reasoning only", true),
+    ("a<tool_call>\n  \n<function=read_file>\ngarbage <parameter=path>\nq\n</parameter>  junk </function>\n  <function=create>\n</function></tool_call>", false),
+    ("</think></think> <think> <tool_call><tool_call>\n<function=read_file>\n</function>", true),
+]
+
+/// Property test: any chunking yields the same coalesced events as the unsplit text.
+@Test func chunkingNeverChangesEvents() {
+    var checks = 0
+    var rng = SystemRandomNumberGeneratorSeeded(seed: 0x5eed)
+    for (text, reasoning) in samples {
+        let scalars = Array(text.unicodeScalars)
+        func make(_ r: Range<Int>) -> String { var v = String.UnicodeScalarView(); v.append(contentsOf: scalars[r]); return String(v) }
+        let expected = parse(text, reasoning: reasoning)
+        // every single split point
+        for cut in 0...scalars.count {
+            var p = ToolCallParser(tools: tools, startsInReasoning: reasoning)
+            let ev = (p.feed(make(0..<cut)) + p.feed(make(cut..<scalars.count)) + p.finish()).coalesced()
+            #expect(ev == expected, "split at \(cut) of \(text.debugDescription)")
+            checks += 1
+        }
+        // one scalar at a time
+        var p1 = ToolCallParser(tools: tools, startsInReasoning: reasoning)
+        var ev1 = [ParserEvent]()
+        for i in 0..<scalars.count { ev1 += p1.feed(make(i..<i + 1)) }
+        #expect((ev1 + p1.finish()).coalesced() == expected, "char-by-char \(text.debugDescription)")
+        // random chunkings
+        for _ in 0..<60 {
+            var p = ToolCallParser(tools: tools, startsInReasoning: reasoning)
+            var ev = [ParserEvent]()
+            var i = 0
+            while i < scalars.count {
+                let n = min(scalars.count - i, 1 + Int(rng.next() % 12))
+                ev += p.feed(make(i..<i + n))
+                i += n
+            }
+            #expect((ev + p.finish()).coalesced() == expected, "random chunking of \(text.debugDescription)")
+            checks += 1
+        }
+    }
+    #expect(checks > 1000)
+}
+
+/// Template-rendered assistant tool calls parse back to the same typed arguments.
+@Test func templateRoundTrip() throws {
+    let args: [(String, OrderedJSON)] = [
+        ("title", .string("Fix caf\u{00e9} </parameter> \u{1F600}")), ("labels", .array([.string("bug")])),
+        ("meta", .ordered([("z", .int(1)), ("a", .ordered([("k", .null), ("f", .double(2.0))]))])), ("ratio", .double(0.25)),
+        ("dry", .bool(false)), ("opt", .int(7)),
+    ]
+    let msgs: [Message] = [.user("go"), .assistant("Doing it.", toolCalls: [ToolCall(name: "create", arguments: args)])]
+    let text = try ChatTemplate.render(messages: msgs, tools: tools, addGenerationPrompt: false, enableThinking: false)
+    let start = text.range(of: "Doing it.", options: .backwards)!.lowerBound
+    var body = String(text[start...])
+    body.removeLast("<|im_end|>\n".count)
+    let ev = parse(body)
+    #expect(ev == [.text("Doing it.")] + call("create", args))
+}
+
+struct SystemRandomNumberGeneratorSeeded {
+    var s: UInt64
+    init(seed: UInt64) { s = seed }
+    mutating func next() -> UInt64 {
+        s = s &* 6364136223846793005 &+ 1442695040888963407
+        return s >> 33
+    }
+}

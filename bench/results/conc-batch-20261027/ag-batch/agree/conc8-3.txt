@@ -1,0 +1,6 @@
+### Explanation of the Code
+
+The provided code defines a `CutPolicy` struct within a Swift file (`PrefixCache.swift`) that imports `Foundation` and `MLX`. This struct is designed to control how a **prefix cache** partitions a sequence of tokens into blocks (or chunks) for efficient processing, likely in the context of Large Language Model (LLM) inference.
+
+#### Key Components:
+1.  **Purpose**: It determines where to cut a token sequence

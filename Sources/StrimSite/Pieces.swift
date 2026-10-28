@@ -1,0 +1,175 @@
+import Foundation
+
+extension SiteBuilder {
+    func soakBlock() -> String {
+        let ids = ["soak.tasks_total", "soak.tasks_passed", "soak.claude_tasks", "soak.claude_passed", "soak.pass_claude",
+                   "soak.codex_tasks", "soak.codex_passed", "soak.pass_codex", "soak.failures", "soak.elapsed_min",
+                   "soak.crashes", "soak.restarts", "soak.http5xx", "soak.requests_total", "soak.requests_failed",
+                   "soak.rss_min", "soak.rss_max", "soak.rss_slope", "soak.ttft_q1", "soak.ttft_q4", "soak.ttft_p90"]
+        let pend = ids.allSatisfy { D.pending($0) }
+        let labels: [String: String] = [
+            "soak.tasks_total": "Tasks run", "soak.tasks_passed": "Tasks passed",
+            "soak.claude_tasks": "Claude Code + Strim tasks", "soak.claude_passed": "Claude Code + Strim passed",
+            "soak.pass_claude": "Claude Code pass rate", "soak.codex_tasks": "Codex + Strim tasks",
+            "soak.codex_passed": "Codex + Strim passed", "soak.pass_codex": "Codex pass rate",
+            "soak.failures": "Failed tasks", "soak.elapsed_min": "Run length",
+            "soak.crashes": "Server crashes", "soak.restarts": "Server restarts",
+            "soak.http5xx": "HTTP 5xx events", "soak.requests_total": "Requests served", "soak.requests_failed": "Requests failed",
+            "soak.rss_min": "RSS minimum", "soak.rss_max": "RSS maximum", "soak.rss_slope": "RSS slope",
+            "soak.ttft_q1": "TTFT median, first quartile", "soak.ttft_q4": "TTFT median, last quartile",
+            "soak.ttft_p90": "TTFT p90",
+        ]
+        let rows = ids.map { [esc(labels[$0]!), td($0, unit: true)] }
+        let t = table("30-minute real-client soak", ["Measure", "Value"], rows, numcols: [1])
+        if pend {
+            return "<div class=\"pendbox\"><p><strong>Soak: pending.</strong> The 30-minute soak (<code>strim soak</code>) is still running "
+                + "or has not been summarised. No interim numbers are shown: a run in progress is not a result. "
+                + "When a complete run (duration of at least 30 minutes) exists under <code>bench/results/soak-20261027/</code> or <code>bench/soak/results/</code>, <code>strim site refresh-soak</code> fills this table from its <code>summary.txt</code>.</p></div>" + t
+        }
+        return t
+    }
+
+    func versionRows() -> String {
+        var rows: [[String]] = []
+        let items: [(String, String)] = [
+            ("ver.hw", "Hardware"), ("ver.macos", "macOS"), ("ver.mlx_swift", "MLX Swift"),
+            ("ver.strim_h2h", "Strim build in the head-to-head"), ("ver.rapid", "rapid-mlx"), ("ver.mlxvlm", "mlx-vlm"),
+            ("ver.claude", "Claude Code (soak client)"), ("ver.codex", "Codex (soak client)"),
+        ]
+        for (i, label) in items {
+            let f = fig(i)
+            rows.append([esc(label), tdText("<span title=\"\(esc(i))\">\(esc(f.raw["value"]?.pyStr ?? "None"))</span>"), tdText(srcLink(f.sourcePath), "src")])
+        }
+        return table("Versions", ["Component", "Version", "Source"], rows)
+    }
+
+    func verdictCell(_ id: String) -> String {
+        guard D.figs[id] != nil else { return tdText("n/a", "muted") }
+        let v = D.text(id)
+        let cls = v == "WIN" ? "ahead" : v == "LOSS" ? "behind" : v == "TIE" ? "tied" : ""
+        return cls.isEmpty ? tdText(esc(v), "muted") : tdText("<span class=\"tag \(cls)\" title=\"\(esc(id))\">\(esc(v))</span>")
+    }
+
+    func bars(_ cell: String, strimLabel: String = "Strim") -> [Bar] {
+        ENGINES.map { (e: String) -> Bar in
+            (e == "strim" ? strimLabel : ENG_LABEL[e] ?? e, fid(cell, e), e == "strim" ? "strim" : "")
+        }
+    }
+
+    func cellUnit(_ id: String) -> String { finalCells().first(where: { $0.id == id })?.unit ?? "" }
+
+    func finalSection() -> String {
+        guard D.raw["final"]?.truthy ?? false else {
+            return "<h3 id=\"r-final\">Final head-to-head</h3><div class=\"pendbox\"><p><strong>Missing.</strong> <code>\(FINAL_REL)/</code> was not found, so no final figures exist.</p></div>"
+        }
+        var o = "<h3 id=\"r-final\">Final head-to-head: Strim, rapid-mlx and mlx-vlm</h3>"
+        o += "<p>Qwen3.8-27B 4-bit served alone over HTTP by each engine, one engine on the GPU at a time, thinking off, greedy decoding, on one Apple M5 Max with 64&nbsp;GB. "
+            + "\(n("final.claim.passes")) passes (pass 1 Strim, rapid-mlx, mlx-vlm; pass 2 reversed), one rep per pass, so each value is the median of two runs, which is their mean. "
+            + "All \(n("final.claim.cells")) cells ran to completion, swap growth was \(n("final.claim.swap"))&nbsp;MB in every session, and only \(n("final.claim.flips")) of the 33 cells change verdict if a single pass is used (all within 2 to 4%). "
+            + "Strim is build \(n("final.claim.build")); rapid-mlx runs with its MTP speculative head on and <code>--max-num-seqs 4</code>; mlx-vlm runs its server defaults, which means no MTP and no cross-request prefix cache. "
+            + "Verdict: WIN / LOSS when the ratio is outside a 2% band, otherwise TIE. Raw files, launch lines and the full per-rival tables: <a href=\"../\(FINAL_REL)/summary.md\">summary.md</a>.</p>"
+        o += chart("Decode speed, tok/s (higher is better)", "Greedy, after a cold prompt of each size: 256 tokens at 4K and 16K, 128 tokens at 32K.", [
+            ("4K context", bars("d4k")), ("16K context", bars("d16k")), ("32K context", bars("d32k")),
+        ], "tok/s")
+        o += "<p>Strim decodes \(n("final.claim.decode_vs_rapid")) faster than rapid-mlx and \(n("final.claim.decode_vs_vlm")) faster than mlx-vlm at 4K to 32K context. "
+            + "rapid-mlx also uses MTP, so the gap to it is the engine, not the speculative head. mlx-vlm has no MTP, so its gap includes it.</p>"
+        o += chart("Cold prompt time to first token, s (lower is better)", "One distinct prompt at a time, no cache hit possible.", [
+            ("4K prompt", bars("c4k_tt")), ("16K prompt", bars("c16k_tt")), ("32K prompt", bars("c32k_tt")),
+        ], "s")
+        o += "<p class=\"note\">Cold prefill is a tie at 4K and about \(n("final.claim.prefill_slower")) slower than the best rival at 16K and 32K. Treat it as a small, real gap, not a win.</p>"
+        o += chart("Median first-token latency under concurrency, s (lower is better)", "c = number of simultaneous requests. 512-token, agent-style (about 2.8K tokens) and distinct 4K prompts.", [
+            ("c=4, 512-token prompts", bars("p50_512c4")), ("c=8, 512-token prompts", bars("p50_512c8")),
+            ("c=4, agent prompts", bars("p50_agc4")), ("c=8, agent prompts", bars("p50_agc8")),
+            ("c=4, 4K prompts", bars("p50_4kc4")), ("c=8, 4K prompts", bars("p50_4kc8")),
+        ], "s")
+        o += "<p>Strim has the lowest median first-token latency at 4 to 8 concurrent requests, \(n("final.claim.ttft_p50_lower"))&nbsp;lower than each rival. "
+            + "Caveat: rival p50 and p95 are nearly identical (their requests report first tokens batch-synchronously), so their p50 is a weaker number than Strim's per-request TTFT.</p>"
+        o += chart("Aggregate decode throughput under concurrency, tok/s (higher is better)", "Total generated tokens per second across all simultaneous requests: the one fully comparable concurrency number.", [
+            ("c=4, 512-token prompts", bars("a512c4")), ("c=8, 512-token prompts", bars("a512c8")),
+            ("c=4, agent prompts", bars("aagc4")), ("c=8, agent prompts", bars("aagc8")),
+            ("c=4, 4K prompts", bars("a4kc4")), ("c=8, 4K prompts", bars("a4kc8")),
+        ], "tok/s")
+        o += "<p class=\"note\">Strim is behind on aggregate throughput: \(n("final.claim.agg_lower")) lower than the best rival across these six cells (rapid-mlx at c=4 with 512-token prompts, mlx-vlm in most others). "
+            + "Batched decode narrows the gap but the remaining cost is the quantized matmul at 4 to 8 rows (<a href=\"#how-batch\">below</a>).</p>"
+        o += chart("Tail first-token latency (p95), s (lower is better)", "With 4 or 8 requests per cell, p95 is the slowest request.", [
+            ("c=4, 512-token prompts", bars("p95_512c4")), ("c=8, 512-token prompts", bars("p95_512c8")),
+        ], "s")
+        o += "<p class=\"note\">Strim's p95 is \(n("final.claim.p95_worse")) worse than the best rival at 512-token concurrency. The same staggering that gives a low median pushes the last request out. "
+            + "On agent and 4K prompts at c=4 and c=8 the p95 is within a few percent (see the table).</p>"
+        o += chart("Four agents sharing a 16K prefix: median first-token latency, s (lower is better)", "Four clients send the same 16K prefix with different suffixes at once.", [
+            (nil, bars("p50_w5")),
+        ], "s")
+        o += chart("Four agents sharing a 16K prefix: aggregate throughput, tok/s (higher is better)", "Neither rival shares the prefix across requests in this setup.", [
+            (nil, bars("aw5")),
+        ], "tok/s")
+        o += "<p>With a shared 16K prefix Strim is \(n("final.claim.w5_speedup"))&nbsp;faster than each rival in aggregate throughput.</p>"
+        o += chart("Agent replay: summed prefill over 8 turns, s (lower is better)", "Synthetic session, prompts 4.1K to 40.8K tokens, each turn resends the history. Prefill sum is the sum of per-turn first-token latency.", [
+            ("Turns 1 to 8", bars("rp8")), ("Turns 1 to 6", bars("rp6")),
+        ], "s")
+        o += "<p>Strim ties rapid-mlx on the 8-turn replay (\(n(fid("rp8", "strim")))&nbsp;s vs \(n(fid("rp8", "rapid-mlx")))&nbsp;s) and on cold 4K prefill; both reuse about \(n(fid("rpc8", "strim")))% of the turn-8 prompt from cache. mlx-vlm has no cross-request prefix cache (\(n(fid("rp8", "mlx-vlm")))&nbsp;s). "
+            + "Replay resends recorded assistant turns, so Strim's token ledger and hot-session reuse do not apply: a lower bound for Strim on a live agent.</p>"
+        // full table
+        var rows: [[String]] = []
+        for c in finalCells() {
+            let best = bestEngine(c.id, c.better)
+            var r = [esc(c.label), tdText(esc(c.unit), "muted")]
+            for e in ENGINES { r.append(D.figs[fid(c.id, e)] != nil ? td(fid(c.id, e), e == best) : tdText("n/a", "num muted")) }
+            for rv in RIVALS { r.append(D.figs[fratio(c.id, rv)] != nil ? td(fratio(c.id, rv), unit: true) : tdText("n/a", "num muted")) }
+            for rv in RIVALS { r.append(verdictCell(fverdict(c.id, rv))) }
+            rows.append(r)
+        }
+        o += table("All 33 cells: median of 2 passes; ratio = Strim / rival; bold = best of the three",
+                   ["Cell", "Unit", "Strim", "rapid-mlx (MTP)", "mlx-vlm (no MTP)", "Strim / rapid-mlx", "Strim / mlx-vlm", "vs rapid-mlx", "vs mlx-vlm"], rows, numcols: [2, 3, 4, 5, 6],
+                   foot: "Verdicts: WIN means Strim is better by more than 2%, LOSS worse by more than 2%, TIE within 2%. Lower-is-better cells (TTFT, time) win with a ratio below 1.")
+        // memory
+        let mrows: [[String]] = [["Peak physical footprint, whole run", td("final.mem.strim"), td("final.mem.rapid-mlx"), td("final.mem.mlx-vlm")]]
+        o += table("Peak memory over the whole run (engine process tree, includes Metal buffers), GB", ["Measure", "Strim", "rapid-mlx", "mlx-vlm"], mrows, numcols: [1, 2, 3],
+                   foot: "Whole-run maximum over passes and sessions, not steady state. All were under the 42&nbsp;GB abort limit and no engine swapped (swap growth \(n("final.claim.swap"))&nbsp;MB).")
+        // agreement
+        o += "<h4 id=\"r-agree\">Greedy agreement (sanity check only)</h4><p>8 fixed prompts, 64 greedy tokens. Strim against itself across the two passes: \(n("final.agree.self")) identical. Strim against rapid-mlx: \(n("final.agree.rapid-mlx")); against mlx-vlm: \(n("final.agree.mlx-vlm")). "
+            + "The divergences are bf16 near-ties, where a single flipped token changes every later one; it is a sanity check, not a quality measurement.</p>"
+        // honest list
+        o += "<h4 id=\"r-caveats\">Caveats that change how to read the table</h4><ul>"
+        for c in [
+            "<strong>Two passes, one rep each.</strong> Pass-to-pass spread is small (median under 1%) but decode at 16K and 32K can swing by a few percent for Strim and up to about a quarter for rapid-mlx and mlx-vlm; the decode wins are larger than that. Prefill gaps of 2 to 3% sit at the edge of the 2% tie band.",
+            "<strong>Rival pass 1 ran under more system load</strong> (other CPU work; the GPU was not shared). Pass 2 was clean. Conclusions hold in both passes except the borderline cells counted above.",
+            "<strong>Rival configuration.</strong> rapid-mlx used MTP and <code>--max-num-seqs 4</code> (so c=8 queues); mlx-vlm had no MTP and no prefix cache. Defaults were used otherwise; rival tuning was not explored.",
+            "<strong>TTFT definitions differ in practice.</strong> Rivals report batch-synchronous first tokens, so aggregate throughput is the only fully comparable concurrency number.",
+            "<strong>The Strim build predates the final server hardening commits.</strong> Engine hot paths are otherwise unchanged at HEAD, but HEAD was not re-benchmarked.",
+            "<strong>One model, one machine, thinking off,</strong> synthetic agent prompts and a synthetic 8-turn fixture.",
+            "<strong>Earlier 8-engine run (2026-10-26) not repeated for the final build.</strong> That run also measured mlx-lm, TensorFold, oMLX, llama.cpp and Ollama on a different configuration; it is no longer shown, and none of its numbers describe this build.",
+        ] { o += "<li>\(c)</li>" }
+        o += "</ul>"
+        return o
+    }
+
+    func tierTable() -> String {
+        let rows: [[String]] = [
+            ["8 GB", tdText("<span title=\"qt.t8\">unsupported</span>"), tdText("Does not fit: even a 2-bit 27B exceeds the GPU budget.", "wrapcell")],
+            ["16 GB", tdText("<span title=\"qt.t16\">unsupported</span>"), tdText("Does not fit in practice with 4-bit weights plus MTP head and runtime.", "wrapcell")],
+            ["24 GB", td("qt.t24"), tdText("Estimate for 4-bit: very short context only (bf16 KV / q8 KV, low and high GPU budget).", "wrapcell")],
+            ["32 GB", td("qt.t32"), tdText("Estimate (bf16 KV / q8 KV).", "wrapcell")],
+            ["36 GB", td("qt.t36"), tdText("Estimate (bf16 KV / q8 KV).", "wrapcell")],
+            ["48 GB", td("qt.t48"), tdText("Estimate (bf16 KV).", "wrapcell")],
+            ["64 GB", tdText("<span title=\"qt.t64\">full context</span> (measured machine)"), tdText("The only tier Strim has been run on.", "wrapcell")],
+        ]
+        return table("Memory tiers for the supported 4-bit checkpoint (computed, not measured, except 64 GB)", ["Mac memory", "Context (tokens)", "Status"], rows,
+                     foot: "Computed from the model config with an assumed 5.5&nbsp;GiB for macOS and apps; weights are \(n("qt.w4"))&nbsp;GiB of text-only 4-bit and the fixed engine overhead is about \(n("qt.f4"))&nbsp;GiB. "
+                         + "On the test machine the GPU working-set limit measured \(n("qt.mem_gib"))&nbsp;GiB. Source: <a href=\"../docs/RESEARCH-QUANT-TIERS-2026-10-27.md\">RESEARCH-QUANT-TIERS</a>. No smaller Mac has been tested.")
+    }
+
+    func figureIndex() -> String {
+        var rows = ""
+        for i in D.order {
+            let f = D.figs[i]!
+            for k in ["unit", "source_path", "method_note", "caveat"] where f.raw[k] == nil { fail("KeyError: '\(k)' (\(i))") }
+            let v = D.text(i)
+            let tag = D.pending(i) ? " <span class=\"tag\">pending</span>" : ""
+            rows += "<tr id=\"fig-\(esc(i))\"><th scope=\"row\"><code>\(esc(i))</code></th><td class=\"num\">\(esc(v))\(tag)</td><td>\(esc(f.unit))</td>"
+                + "<td class=\"src\">\(srcLink(f.sourcePath))</td><td class=\"wrapcell\">\(esc(f.raw["method_note"]?.pyStr ?? ""))</td><td class=\"wrapcell\">\(esc(f.raw["caveat"]?.pyStr ?? ""))</td></tr>"
+        }
+        let h = ["id", "value", "unit", "source", "method", "caveat"].map { "<th scope=\"col\">\($0)</th>" }.joined()
+        return "<div class=\"tablewrap\" tabindex=\"0\" role=\"region\" aria-label=\"All figures\"><table><thead><tr>\(h)</tr></thead><tbody>\(rows)</tbody></table></div>"
+    }
+
+}

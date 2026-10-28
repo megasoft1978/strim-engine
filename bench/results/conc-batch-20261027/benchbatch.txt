@@ -1,0 +1,30 @@
+== B=2 X=0
+batch vs single logits: max 0.14844
+sequential 1.658 s  14.5 tok/s/req  28.9 aggregate
+batched    0.955 s  25.1 tok/s/req  50.3 aggregate
+tokens match: yes
+== B=2 STRIM_BATCH_DECODE=1
+batch vs single logits: max 0.12500
+sequential 1.609 s  14.9 tok/s/req  29.8 aggregate
+batched    0.878 s  27.3 tok/s/req  54.6 aggregate
+tokens match: yes
+== B=2 STRIM_GDN_BATCH_METAL=1
+batch vs single logits: max 0.12500
+sequential 1.646 s  14.6 tok/s/req  29.2 aggregate
+batched    0.919 s  26.1 tok/s/req  52.2 aggregate
+tokens match: yes
+== B=4 X=0
+batch vs single logits: max 7.31250
+sequential 3.285 s  7.3 tok/s/req  29.2 aggregate
+batched    1.188 s  20.2 tok/s/req  80.8 aggregate
+tokens match: yes
+== B=4 STRIM_BATCH_DECODE=1
+batch vs single logits: max 7.31250
+sequential 3.348 s  7.2 tok/s/req  28.7 aggregate
+batched    1.014 s  23.7 tok/s/req  94.7 aggregate
+tokens match: yes
+== B=4 STRIM_GDN_BATCH_METAL=1
+batch vs single logits: max 7.31250
+sequential 3.232 s  7.4 tok/s/req  29.7 aggregate
+batched    1.144 s  21.0 tok/s/req  83.9 aggregate
+tokens match: yes

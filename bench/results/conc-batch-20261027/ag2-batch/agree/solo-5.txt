@@ -1,0 +1,9 @@
+### Code Explanation
+
+This Swift file defines the logic for loading and managing neural network weights, specifically tailored for a model inference engine (likely based on Apple's MLX framework). It handles two main concerns:
+
+1.  **Weight Loading (`WeightStore`):**
+    *   It manages a directory of model shards (files containing parts of the model's tensors).
+    *   It uses a `ModelIndex` to map tensor names to specific shard files.
+    *   It implements **lazy loading**: shards are only loaded into memory (`MLXArray`) when a specific tensor is requested.
+    *   It supports **

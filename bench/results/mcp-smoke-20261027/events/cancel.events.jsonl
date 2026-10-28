@@ -1,0 +1,5 @@
+{"n":1,"ts":1793075816.8873348,"type":"turn"}
+{"cached":2048,"completion":46,"prompt":2308,"ts":1793075817.7763801,"type":"usage"}
+{"args":"{\"command\": \"sleep 1234\", \"timeout_s\": 600}","name":"bash","ts":1793075817.776511,"type":"tool_call"}
+{"is_error":true,"name":"bash","output":"[exit code: 137]","ts":1793075817.945102,"type":"tool_result"}
+{"status":"cancelled","ts":1793075817.9454441,"type":"finished"}

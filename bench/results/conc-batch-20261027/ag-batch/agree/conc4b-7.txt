@@ -1,0 +1,8 @@
+### Code Explanation
+
+This Swift code defines a **local, in-process client** for a machine learning or text processing engine (likely an LLM or tokenizer-based system). It bridges the gap between asynchronous Swift code and a dedicated background thread where the heavy lifting happens.
+
+Here’s a breakdown of the key components:
+
+1.  **`EngineContext`**:
+    *   A lightweight handle that provides access to the engine’s internal state (`WeightStore`, `Tokenizer`,

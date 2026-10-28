@@ -1,0 +1,9 @@
+[strim rep0 turn 1/8] ttft=4.161s prompt=4092 cached=0 flag=ok err=None
+[strim rep0 turn 2/8] ttft=5.617s prompt=9347 cached=4085 flag=ok err=None
+[strim rep0 turn 3/8] ttft=5.910s prompt=14628 cached=9340 flag=ok err=None
+[strim rep0 turn 4/8] ttft=6.212s prompt=19885 cached=14621 flag=ok err=None
+[strim rep0 turn 5/8] ttft=6.555s prompt=25157 cached=19878 flag=ok err=None
+[strim rep0 turn 6/8] ttft=6.773s prompt=30379 cached=25150 flag=ok err=None
+[strim rep0 turn 7/8] ttft=7.161s prompt=35638 cached=30372 flag=ok err=None
+[strim rep0 turn 8/8] ttft=7.393s prompt=40839 cached=35631 flag=ok err=None
+wrote bench/results/postsec-sanity-20261028/old/strim/pass2/replay/raw.jsonl and bench/results/postsec-sanity-20261028/old/strim/pass2/replay/summary.md

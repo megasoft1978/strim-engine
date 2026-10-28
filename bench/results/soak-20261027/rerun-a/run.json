@@ -1,0 +1,11 @@
+{
+  "duration": 10.0,
+  "clients": "claude",
+  "task_timeout": 240,
+  "concurrent_every": 6,
+  "poll": 15.0,
+  "port": 8203,
+  "started": "2026-10-27T10:41:09+00:00",
+  "elapsed_min": 1.8,
+  "aborted": false
+}

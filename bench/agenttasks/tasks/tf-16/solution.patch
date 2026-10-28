@@ -1,0 +1,13 @@
+diff --git a/Sources/Matrix/Matrix.swift b/Sources/Matrix/Matrix.swift
+index be8e830..6eac0c5 100644
+--- a/Sources/Matrix/Matrix.swift
++++ b/Sources/Matrix/Matrix.swift
+@@ -30,7 +30,7 @@ public struct Matrix: Equatable {
+         for i in 0..<rows {
+             for j in 0..<other.cols {
+                 var sum = 0.0
+-                for k in 0..<cols { sum = self[i, k] * other[k, j] }
++                for k in 0..<cols { sum += self[i, k] * other[k, j] }
+                 out[i, j] = sum
+             }
+         }

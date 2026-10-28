@@ -1,0 +1,1 @@
+Note: the Python-task results in this directory (me/qa/tf tasks on Python repos) were invalid: pytest was not reachable inside the sandboxes, so those runs measured the environment, not the model or harness. The results are kept as committed. The corpus is now Swift/Go only (see bench/agenttasks/README.md); Python tasks, PythonEnv and the Python tooling were removed.

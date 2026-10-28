@@ -1,0 +1,9 @@
+### Code Explanation
+
+This Swift file defines high-performance, fused operations for a neural network model (likely a variant of Qwen or Llama) using the **MLX** framework. It focuses on optimizing specific mathematical patterns that appear frequently in transformer architectures.
+
+Here is a breakdown of the key components:
+
+1.  **`Fused` Enum**:
+    *   **Purpose**: Implements "fused" kernels for element-wise operations. Instead of performing multiple separate array operations (which incur memory allocation and bandwidth costs), it compiles a single function that performs the entire chain of operations in one pass.
+    *   **

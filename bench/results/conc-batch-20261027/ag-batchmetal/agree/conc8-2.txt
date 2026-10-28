@@ -1,0 +1,8 @@
+### Code Explanation
+
+This Swift code defines a `Fused` enum within the `StrimCore` module, designed to optimize element-wise neural network operations using the **MLX** framework. Its primary purpose is to provide high-performance, compiled versions of common activation and gating functions used in modern transformer architectures (like LLaMA or Mamba).
+
+Here’s a breakdown of its components:
+
+1.  **Feature Flag (`enabled`)**:
+    *   Checks

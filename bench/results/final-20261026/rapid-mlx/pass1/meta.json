@@ -1,0 +1,56 @@
+{
+ "engine": "rapid-mlx",
+ "pass": 1,
+ "cmd": [
+  "rapid-mlx",
+  "--no-telemetry",
+  "serve",
+  "models/qwen38-4bit",
+  "--port",
+  "8651",
+  "--max-num-seqs",
+  "4",
+  "--speculative-config",
+  "{\"method\":\"mtp\",\"model\":\"models/qwen38-mtp-4bit\"}"
+ ],
+ "env": {},
+ "cache": "default on",
+ "quant": "MLX 4-bit + MTP head",
+ "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+ "started": {
+  "t": "2026-10-27T07:14:40+0100",
+  "uptime": "7:14  up 3 days, 48 mins, 3 users, load averages: 1.62 1.71 1.85",
+  "loadavg": "{ 1.62 1.71 1.85 }",
+  "top_cpu": [
+   "10.6 165312 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "6.5 115968 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "3.7 800416 /Users/user/.local/bin/claude",
+   "2.5 165408 /Applications/Stats.app/Contents/MacOS/Stats",
+   "2.1 23984 /usr/sbin/coreaudiod"
+  ]
+ },
+ "status": "done",
+ "ready_s": 6.1,
+ "model_id": "models/qwen38-4bit",
+ "pids": [
+  51551,
+  51553
+ ],
+ "warmup_s": 4.8,
+ "ended": {
+  "t": "2026-10-27T07:25:41+0100",
+  "uptime": "7:25  up 3 days, 59 mins, 3 users, load averages: 1.96 1.59 1.67",
+  "loadavg": "{ 1.96 1.59 1.67 }",
+  "top_cpu": [
+   "13.1 153712 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "11.4 116992 /Applications/Stats.app/Contents/MacOS/Stats",
+   "9.7 80896 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "1.8 15280 /System/Library/Frameworks/VideoToolbox.framework/Versions/A/XPCServices/VTDecod",
+   "1.8 16560 /usr/sbin/coreaudiod"
+  ]
+ },
+ "killed_pids": [
+  51551,
+  51553
+ ]
+}

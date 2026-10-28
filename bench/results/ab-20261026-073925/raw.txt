@@ -1,0 +1,33 @@
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchprefill /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit 1024 3
+n=1024  1.30 s  787 tok/s  (rep 0)
+n=1024  1.25 s  822 tok/s  (rep 1)
+n=1024  1.25 s  820 tok/s  (rep 2)
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchprefill /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit 4096 3
+n=4096  5.26 s  778 tok/s  (rep 0)
+n=4096  5.13 s  798 tok/s  (rep 1)
+n=4096  5.14 s  797 tok/s  (rep 2)
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 0 760,1328,310,4778,2136,42903,369,5122,1754,4528,6681,2957,791,3817,13,357,41163,23776,369,4779,6608,506,6937,1331,799,11,748,279,2790,3296,369,524,1204,1599,18484,1406,7289,279,21966,628,4125,11,694,1204,1575,279,9705,22327,9966,1452,13914,494,4779,1345,9976,1396,6007,12655,13
+spec: passes 64  emitted 64  1.00 tok/pass  25.8 tok/s  accept 0% (0/0)  38.7 ms/pass  2.48s
+parity: EXACT (123 tokens)
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 64 2 760,1328,310,4778,2136,42903,369,5122,1754,4528,6681,2957,791,3817,13,357,41163,23776,369,4779,6608,506,6937,1331,799,11,748,279,2790,3296,369,524,1204,1599,18484,1406,7289,279,21966,628,4125,11,694,1204,1575,279,9705,22327,9966,1452,13914,494,4779,1345,9976,1396,6007,12655,13
+spec: passes 32  emitted 65  2.03 tok/pass  41.1 tok/s  accept 52% (33/64)  49.5 ms/pass  1.58s
+parity: EXACT (123 tokens)
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim benchpathspec /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit /Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit 48 2 760,1328,310,4778,2136,42903,369,5122,1754,4528,6681,2957,791,3817,13,357,41163,23776,369,4779,6608,506,6937,1331,799,11,748,279,2790,3296,369,524,1204,1599,18484,1406,7289,279,21966,628,4125,11,694,1204,1575,279,9705,22327,9966,1452,13914,494,4779,1345,9976,1396,6007,12655,13 5
+  rep 0 tensor   62.86 ms/pass   30.5 tok/s  accept 23/50
+  rep 0 kernel   49.94 ms/pass   38.4 tok/s  accept 23/50
+  rep 1 kernel   50.24 ms/pass   38.2 tok/s  accept 23/50
+  rep 1 tensor   62.67 ms/pass   30.6 tok/s  accept 23/50
+  rep 2 tensor   63.07 ms/pass   30.4 tok/s  accept 23/50
+  rep 2 kernel   50.25 ms/pass   38.2 tok/s  accept 23/50
+  rep 3 kernel   50.38 ms/pass   38.1 tok/s  accept 23/50
+  rep 3 tensor   63.14 ms/pass   30.4 tok/s  accept 23/50
+  rep 4 tensor   62.72 ms/pass   30.6 tok/s  accept 23/50
+  rep 4 kernel   50.18 ms/pass   38.3 tok/s  accept 23/50
+tensor min  62.67 ms/pass   30.6 tok/s  accept 46%
+kernel min  49.94 ms/pass   38.4 tok/s  accept 46%
+delta -12.74 ms/pass (-20.3%)
+determinism: tensor stable kernel stable | cross-path: identical | acceptance counts: identical
+=== /Users/user/Desktop/Freelance/strim-engine/.build/release/strim gen /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit 16
+ids: [9707, 1234, 5678, 198, 2, 220, 17, 15, 17, 18, 95859, 16, 17, 96212, 17, 17, 95971, 9616, 96012]
+elapsed: 1.1 s for 16 tokens -> 14.15 tok/s
+raw logs: /Users/user/Desktop/Freelance/strim-engine/bench/results/ab-20261026-073925

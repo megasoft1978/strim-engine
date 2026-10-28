@@ -1,0 +1,51 @@
+{
+  "answer_env" : "ANSWER_FILE",
+  "archive_excludes" : [
+    "docs",
+    "doc",
+    ".github",
+    "changelog.d",
+    "examples",
+    "perf",
+    "extra",
+    "scripts",
+    "bin",
+    "*.png",
+    "*.jpg",
+    "*.svg",
+    "*.gif",
+    "*.ico",
+    "*.pdf",
+    "*.lock",
+    "*.sum"
+  ],
+  "base_commit" : "d26a4dcd30a3c17923a2083b48bd6233aada9d47",
+  "class" : "repo-qa",
+  "est_solo_turns" : 2,
+  "expected_answer" : {
+    "all_of" : [
+      "flag\\.go",
+      "parseSingleShortArg"
+    ]
+  },
+  "id" : "qa-01",
+  "known_answer" : "It is parseSingleShortArg in flag.go (called from parseShortArg).",
+  "language" : "go",
+  "license" : "BSD-3-Clause",
+  "no_edit" : true,
+  "note" : "",
+  "prompt" : "Answer a question about the repository in the current directory. Do NOT modify any file. Reply with the repo-relative file path(s) and the exact symbol name(s) (function, class, method or variable) that answer it; add line numbers if you have them. Keep the answer short.\n\nQuestion: When a command line contains a cluster of single-letter flags such as `-abc`, which function handles exactly one letter of the cluster at a time (looks the flag up by its shorthand), and in which file?",
+  "repo" : "https:\/\/github.com\/spf13\/pflag",
+  "repo_key" : "pflag",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 70302,
+  "test_paths" : [
+
+  ],
+  "test_sha256" : {
+
+  },
+  "tree_sha256" : "6c328b023fd05dc2e4660ede347eace8bbe0826d015b0828c33ed7cdb48f4d23",
+  "verify_cmd" : "grep -Eq 'flag\\.go' \"$ANSWER_FILE\" && grep -Eq 'parseSingleShortArg' \"$ANSWER_FILE\"",
+  "wrong_answer" : "parseShortArg in flag.go loops over the cluster."
+}

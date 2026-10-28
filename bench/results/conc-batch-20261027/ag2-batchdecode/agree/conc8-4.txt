@@ -1,0 +1,8 @@
+### Explanation of the Code
+
+This Swift code implements a lightweight parser for the **Safetensors** file format, which is commonly used for storing machine learning model weights. It avoids loading the entire weight data into memory, focusing instead on metadata and file structure.
+
+The code consists of three main components:
+
+1.  **`TensorInfo`**: A simple struct representing metadata for a single tensor (name, data type, shape, and byte offsets).
+2.  **`SafetensorsError`**: An error enum for handling various parsing failures (e.g., file too short, invalid JSON, malformed tensor entries

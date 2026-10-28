@@ -1,0 +1,25 @@
+strim soak summary  20261026T212306Z
+usage: soak.py --duration 5.0 --clients both --task-timeout 240 --concurrent-every 6 --poll 15.0
+started 2026-10-26T21:23:06+00:00  elapsed 0.6 min
+
+Tasks: 2 total, 2 passed (100.0%)
+  claude: 1/1 passed (100.0%)
+  codex: 1/1 passed (100.0%)
+  phase seq: 2/2 passed
+  timeouts: 0
+  longest task: claude explain_stats 18.3s (seq 0)
+
+Server:
+  crashes: 0  restarts: 0  restart_failures: 0
+  pids seen: 1  polls: 3
+  http 5xx events: 0  unhealthy samples: 0
+  log hits (first 20/poll kept): {'error': 0, 'unhealthy': 0, 'insufficient_memory': 0}
+  server requests_total last: 6  failed: 0
+RSS MB: min 8687.9  max 8702.2  first-quartile median 8687.9  last-quartile median 8702.2  slope None MB/h
+TTFT ms (n=8): first-quartile median 2669.0  last-quartile median 167.5  p90 7274
+
+Failures (0):
+
+Server error events (0):
+
+Files: tasks.jsonl server.jsonl server.log summary.txt

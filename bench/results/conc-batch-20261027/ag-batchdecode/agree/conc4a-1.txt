@@ -1,0 +1,7 @@
+### Explanation of the Code
+
+This Swift file defines a `Compute` enum that acts as a **thin abstraction layer** over the MLX library (Apple’s machine learning framework). Its primary purpose is to isolate the rest of the application from direct dependencies on MLX’s C-based API (`Cmlx`), making the code easier to test and maintain.
+
+Key components:
+
+1. **`deviceName`**: A computed property that returns the name of the default MLX

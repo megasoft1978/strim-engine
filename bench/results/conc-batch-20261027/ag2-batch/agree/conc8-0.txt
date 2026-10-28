@@ -1,0 +1,6 @@
+### Code Explanation
+
+This Swift code implements a **batched inference engine** for a hybrid neural network model (likely a Mamba/SSM-based architecture like Jamba or Falcon-Mamba) using the MLX framework. It manages two types of state caches to support efficient batch processing:
+
+1.  **`BatchedAttentionCache`**: Manages standard Transformer attention states. It stores a separate `AttentionCache` for each sequence in the batch. This allows each sequence to have a different length (variable-length decoding) without padding, as keys/values are appended in-place per sequence.
+2.  **`BatchedModel

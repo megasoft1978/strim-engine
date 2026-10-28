@@ -1,0 +1,1 @@
+{"jsonrpc": "2.0", "id": 3, "result": {"content": [{"type": "text", "text": "strim job j_dkedimrc5v: running turn 0/40 0s (poll strim_job)"}], "structuredContent": {"job_id": "j_dkedimrc5v", "status": "running", "progress": {"turn": 0, "max_turns": 40, "elapsed_s": 0}}, "isError": false}}

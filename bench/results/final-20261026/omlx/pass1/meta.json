@@ -1,0 +1,52 @@
+{
+ "engine": "omlx",
+ "pass": 1,
+ "cmd": [
+  "omlx",
+  "serve",
+  "--model-dir",
+  "/private/tmp/claude-501/final-20261026-scratch/omlx-models",
+  "--port",
+  "8651"
+ ],
+ "env": {
+  "HOME": "/private/tmp/claude-501/final-20261026-scratch/omlx-home"
+ },
+ "cache": "default on",
+ "quant": "MLX 4-bit (qwen38-4bit linked into omlx model dir)",
+ "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+ "started": {
+  "t": "2026-10-27T08:24:11+0100",
+  "uptime": "8:24  up 3 days,  1:58, 1 user, load averages: 2.68 3.00 2.78",
+  "loadavg": "{ 2.68 3.00 2.78 }",
+  "top_cpu": [
+   "7.4 58736 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "5.8 76416 /Applications/Stats.app/Contents/MacOS/Stats",
+   "5.6 26928 /Library/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents",
+   "5.4 124896 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "4.0 100576 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.fra"
+  ]
+ },
+ "status": "done",
+ "ready_s": 1.6,
+ "model_id": "qwen38-4bit",
+ "pids": [
+  209
+ ],
+ "warmup_s": 8.5,
+ "ended": {
+  "t": "2026-10-27T08:37:58+0100",
+  "uptime": "8:37  up 3 days,  2:12, 1 user, load averages: 2.83 3.59 3.55",
+  "loadavg": "{ 2.83 3.59 3.55 }",
+  "top_cpu": [
+   "12.1 25216 /System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+   "7.5 10208 /sbin/launchd",
+   "6.4 97328 /Users/user/.local/bin/claude",
+   "5.2 340336 /Users/user/.local/bin/claude",
+   "4.9 63568 /Applications/Stats.app/Contents/MacOS/Stats"
+  ]
+ },
+ "killed_pids": [
+  209
+ ]
+}

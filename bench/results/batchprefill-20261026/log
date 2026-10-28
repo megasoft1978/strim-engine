@@ -1,0 +1,4 @@
+seqs 2  n 1024  serial 2.65 s (772 tok/s)  batched 2.33 s (880 tok/s)  speedup 1.14x  next-token match no
+seqs 4  n 1024  serial 4.88 s (839 tok/s)  batched 4.69 s (874 tok/s)  speedup 1.04x  next-token match no
+seqs 2  n 4096  serial 9.56 s (857 tok/s)  batched 9.95 s (823 tok/s)  speedup 0.96x  next-token match no
+seqs 4  n 4096  serial 18.89 s (867 tok/s)  batched 19.93 s (822 tok/s)  speedup 0.95x  next-token match no

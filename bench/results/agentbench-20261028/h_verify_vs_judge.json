@@ -1,0 +1,402 @@
+[
+ {
+  "run": "me-01-H-1",
+  "verify": "missing",
+  "judge": true
+ },
+ {
+  "run": "qa-01-H-1",
+  "verify": "missing",
+  "judge": true
+ },
+ {
+  "run": "tf-01-H-1",
+  "verify": "missing",
+  "judge": false
+ },
+ {
+  "run": "me-01-H-2",
+  "verify": "missing",
+  "judge": true
+ },
+ {
+  "run": "me-02-H-1",
+  "verify": "missing",
+  "judge": true
+ },
+ {
+  "run": "me-02-H-2",
+  "verify": "missing",
+  "judge": true
+ },
+ {
+  "run": "me-03-H-1",
+  "verify": "missing",
+  "judge": false
+ },
+ {
+  "run": "me-03-H-2",
+  "verify": "missing",
+  "judge": true
+ },
+ {
+  "run": "me-04-H-1",
+  "verify": "missing",
+  "judge": true
+ },
+ {
+  "run": "me-04-H-2",
+  "verify": "missing",
+  "judge": true
+ },
+ {
+  "run": "me-05-H-1",
+  "class": "mechanical-edit",
+  "job_status": "done",
+  "verify": "failed",
+  "judge": true
+ },
+ {
+  "run": "me-05-H-2",
+  "class": "mechanical-edit",
+  "job_status": "done",
+  "verify": "failed",
+  "judge": true
+ },
+ {
+  "run": "me-06-H-1",
+  "class": "mechanical-edit",
+  "job_status": "done",
+  "verify": "verified",
+  "judge": true
+ },
+ {
+  "run": "me-06-H-2",
+  "class": "mechanical-edit",
+  "job_status": "done",
+  "verify": "verified",
+  "judge": true
+ },
+ {
+  "run": "me-07-H-1",
+  "class": "mechanical-edit",
+  "job_status": "done",
+  "verify": "verified",
+  "judge": true
+ },
+ {
+  "run": "me-07-H-2",
+  "class": "mechanical-edit",
+  "job_status": "done",
+  "verify": "verified",
+  "judge": true
+ },
+ {
+  "run": "me-08-H-1",
+  "class": "mechanical-edit",
+  "job_status": "done",
+  "verify": "verified",
+  "judge": true
+ },
+ {
+  "run": "me-08-H-2",
+  "class": "mechanical-edit",
+  "job_status": "done",
+  "verify": "verified",
+  "judge": true
+ },
+ {
+  "run": "me-09-H-1",
+  "class": "mechanical-edit",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "me-09-H-2",
+  "class": "mechanical-edit",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "me-10-H-1",
+  "class": "mechanical-edit",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "me-10-H-2",
+  "class": "mechanical-edit",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "qa-01-H-2",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-02-H-1",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-02-H-2",
+  "class": "repo-qa",
+  "job_status": "limit",
+  "verify": "limit/unverified",
+  "judge": false
+ },
+ {
+  "run": "qa-03-H-1",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-03-H-2",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-04-H-1",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-04-H-2",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-05-H-1",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-05-H-2",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-06-H-1",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-06-H-2",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-07-H-1",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-07-H-2",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-08-H-1",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-08-H-2",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": false
+ },
+ {
+  "run": "qa-09-H-1",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-09-H-2",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-10-H-1",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "qa-10-H-2",
+  "class": "repo-qa",
+  "job_status": "done",
+  "verify": "unverified",
+  "judge": true
+ },
+ {
+  "run": "tf-01-H-2",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-02-H-1",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-02-H-2",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-03-H-1",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-03-H-2",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-04-H-1",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-04-H-2",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-05-H-1",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-05-H-2",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-06-H-1",
+  "class": "test-fix",
+  "job_status": "done",
+  "verify": "failed",
+  "judge": true
+ },
+ {
+  "run": "tf-06-H-2",
+  "class": "test-fix",
+  "job_status": "done",
+  "verify": "failed",
+  "judge": true
+ },
+ {
+  "run": "tf-07-H-1",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-07-H-2",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-08-H-1",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-08-H-2",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-09-H-1",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-09-H-2",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-10-H-1",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ },
+ {
+  "run": "tf-10-H-2",
+  "class": "test-fix",
+  "job_status": "limit",
+  "verify": "limit/failed",
+  "judge": false
+ }
+]

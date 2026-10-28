@@ -1,0 +1,21 @@
+# Scoreboard 20261027-230757
+
+- reps: 2; value = median over reps of per-rep median; cv = stdev/mean over reps
+- tokens: tokenizer (strim tokenizer: /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit/tokenizer.json)
+- skipped (pending): none
+- cache info: usage.prompt_tokens_details.cached_tokens, else server log, else unknown
+- thinking: disabled (chat_template_kwargs.enable_thinking=false)
+- excluded rows (no_usage, short) have no decode tok/s and void their concurrent batch's aggregate; ttft kept
+
+| workload | variant | metric | strim |
+|---|---|---|---|
+| W4 | distinct-c4 | aggregate_tps | 12.59 cv 0.4% (n=2) |
+| W4 | distinct-c4 | decode_tps | 7.052 cv 0.4% (n=2) |
+| W4 | distinct-c4 | ttft_s | 10.71 cv 0.4% (n=2) |
+| W4 | distinct-c8 | aggregate_tps | 12.86 cv 0.6% (n=2) |
+| W4 | distinct-c8 | decode_tps | 3.229 cv 0.8% (n=2) |
+| W4 | distinct-c8 | ttft_s | 19.44 cv 0.3% (n=2) |
+
+## Flags per arm
+
+- strim: requests 24, errors 0, tokens mismatch 0, short 0, no usage 0, retokenized 0, excluded rows 0 (decode/aggregate dropped), cache_info {'usage': 24}, W4 rows not zero-hit/verified 0

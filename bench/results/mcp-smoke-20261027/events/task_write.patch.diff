@@ -1,0 +1,12 @@
+diff --git a/mathkit/text.py b/mathkit/text.py
+index 0dbdb0f..6106cdd 100644
+--- a/mathkit/text.py
++++ b/mathkit/text.py
+@@ -3,6 +3,7 @@ import re
+ 
+ def slugify(text):
+     text = text.strip().lower()
++    text = re.sub(r"[^a-z0-9\s]", "", text)
+     return re.sub(r"\s+", "-", text)
+ 
+ 

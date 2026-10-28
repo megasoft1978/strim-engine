@@ -1,0 +1,52 @@
+{
+ "engine": "tensorfold",
+ "pass": 1,
+ "cmd": [
+  "tensorfold",
+  "serve",
+  "models/qwen38-4bit",
+  "--port",
+  "8651",
+  "--parallel",
+  "4",
+  "--no-update-check"
+ ],
+ "env": {},
+ "cache": "default on",
+ "quant": "MLX 4-bit",
+ "git_head": "8cebe08f5fbd50bf0d1cb906841be1aed50cba29",
+ "started": {
+  "t": "2026-10-27T08:07:38+0100",
+  "uptime": "8:07  up 3 days,  1:41, 1 user, load averages: 2.74 2.47 2.50",
+  "loadavg": "{ 2.74 2.47 2.50 }",
+  "top_cpu": [
+   "8.3 77840 /Applications/Stats.app/Contents/MacOS/Stats",
+   "8.1 26512 /Library/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents",
+   "6.3 144208 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "6.3 66496 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "3.9 27280 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata"
+  ]
+ },
+ "status": "done",
+ "ready_s": 5.1,
+ "model_id": "qwen38-4bit",
+ "pids": [
+  74198
+ ],
+ "warmup_s": 4.8,
+ "ended": {
+  "t": "2026-10-27T08:24:11+0100",
+  "uptime": "8:24  up 3 days,  1:58, 1 user, load averages: 2.68 3.00 2.78",
+  "loadavg": "{ 2.68 3.00 2.78 }",
+  "top_cpu": [
+   "9.3 76416 /Applications/Stats.app/Contents/MacOS/Stats",
+   "8.5 124880 /Applications/RustDesk.app/Contents/MacOS/RustDesk",
+   "6.8 58736 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+   "4.7 100576 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.fra",
+   "2.2 478624 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.fra"
+  ]
+ },
+ "killed_pids": [
+  74198
+ ]
+}

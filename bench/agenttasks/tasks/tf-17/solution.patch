@@ -1,0 +1,18 @@
+diff --git a/Sources/CSV/CSV.swift b/Sources/CSV/CSV.swift
+index 31d0a90..95abcdc 100644
+--- a/Sources/CSV/CSV.swift
++++ b/Sources/CSV/CSV.swift
+@@ -10,7 +10,12 @@ public enum CSV {
+             let c = chars[i]
+             if inQuotes {
+                 if c == "\"" {
+-                    inQuotes = false
++                    if i + 1 < chars.count && chars[i + 1] == "\"" {
++                        current.append("\"")
++                        i += 1
++                    } else {
++                        inQuotes = false
++                    }
+                 } else {
+                     current.append(c)
+                 }

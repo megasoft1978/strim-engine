@@ -1,0 +1,62 @@
+# fingerprint: omlx
+
+- checkpoint: NOT same (qwen38-oq4e-mtp)
+- features claimed: oMLX serve (oQ quant, MTP, paged/prefix cache per vendor docs)
+- engine version: 0.4.5.dev1
+- checkpoint quantization (config.json): {"group_size": 64, "bits": 4, "mode": "affine"}
+- vendor source: vendor/omlx-src/omlx; keyword-hit files: 182
+- launch [default]: `env HOME=/private/tmp/claude-501/-Users-user-Desktop-Freelance-strim-engine/6df0dc83-1ce6-455e-8d6d-9354559af0eb/scratchpad/omlx-home omlx serve --model-dir /private/tmp/claude-501/-Users-user-Desktop-Freelance-strim-engine/6df0dc83-1ce6-455e-8d6d-9354559af0eb/scratchpad/omlx-models --port 8651`
+  - time-to-ready: 1.4 s; RSS idle 136688 kB, peak 19070976 kB; model id: qwen38-oq4e-mtp
+  - startup log hits: 2026-10-26 16:57:16,785 - omlx.scheduler - INFO - ChunkedKVCache patch: methods already present upstream, skipped: size
+  - startup log hits: 2026-10-26 16:57:16,823 - omlx.model_discovery - INFO - Discovered model: qwen38-oq4e-mtp (type: vlm, engine: vlm, size: 16.60GB)
+  - startup log hits: 2026-10-26 16:57:16,823 - omlx.server - INFO - Default model: qwen38-oq4e-mtp
+  - startup log hits: 2026-10-26 16:57:16,840 - omlx.server - INFO - oQ Quantizer initialized
+  - startup log hits: 2026-10-26 16:57:18,938 - omlx.engine_pool - INFO - Loading model: qwen38-oq4e-mtp
+  - startup log hits: 2026-10-26 16:57:18,954 - omlx.patches.mlx_lm_mtp.qwen35_model - INFO - Qwen3.5/3.6 MTP model patch applied (PR 990)
+  - startup log hits: 2026-10-26 16:57:18,956 - omlx.patches.mlx_vlm_mtp.qwen35_vlm_model - INFO - Patched mlx_vlm.models.qwen3_5.Model.sanitize for MTP
+  - startup log hits: 2026-10-26 16:57:18,956 - omlx.patches.mlx_vlm_mtp.qwen35_moe_vlm_model - INFO - Patched mlx_vlm.models.qwen3_5_moe.Model.sanitize for MTP
+  - startup log hits: 2026-10-26 16:57:18,957 - omlx.patches.mlx_vlm_mtp.qwen35_moe_vlm_runtime - INFO - mlx-vlm Qwen3.5-MoE runtime MTP patch applied
+  - startup log hits: 2026-10-26 16:57:18,957 - omlx.patches.mlx_vlm_mtp.qwen35_vlm_runtime - INFO - mlx-vlm Qwen3.5 (dense) runtime MTP patch applied
+  - startup log hits: 2026-10-26 16:57:20,665 - omlx.engine.vlm - INFO - Vision feature cache enabled (SSD: /private/tmp/claude-501/-Users-user-Desktop-Freelance-strim-engine/6df0dc83-1c
+  - startup log hits: 2026-10-26 16:57:21,449 - omlx.scheduler - INFO - Enlarging paged cache block_size=256 to 2048 for ArraysCache hybrid model (reduces boundary snapshot overhead)
+  - startup log hits: 2026-10-26 16:57:21,455 - omlx.memory_monitor - INFO - Model info set: 64 layers (16 KVCache), 4 KV heads, 24 Q heads, 256 head_dim. Estimated memory per 64-token block: 
+  - startup log hits: 2026-10-26 16:57:21,455 - omlx.cache.paged_cache - INFO - PagedCacheManager initialized: block_size=2048, initial_blocks=256, max_blocks=100000, max_tokens=204800000
+  - startup log hits: 2026-10-26 16:57:21,455 - omlx.cache.paged_ssd_cache - INFO - Scanning SSD cache directory: /private/tmp/claude-501/-Users-user-Desktop-Freelance-strim-engine/6df0d
+  - startup log hits: 2026-10-26 16:57:21,466 - omlx.cache.paged_ssd_cache - INFO - SSD cache scan complete: scanned=28, indexed=28, errors=0, total_size=7.51 GB
+  - startup log hits: 2026-10-26 16:57:21,466 - omlx.cache.paged_ssd_cache - INFO - PagedSSDCacheManager initialized: dir=/private/tmp/claude-501/-Users-user-Desktop-Freelance-strim-engi
+  - startup log hits: 2026-10-26 16:57:21,466 - omlx.cache.paged_cache - INFO - paged SSD cache manager connected to PagedCacheManager
+  - startup log hits: 2026-10-26 16:57:21,466 - omlx.cache.prefix_cache - INFO - PagedSSDCacheManager connected to BlockAwarePrefixCache
+  - startup log hits: 2026-10-26 16:57:21,467 - omlx.scheduler - INFO - paged SSD cache enabled: cache_dir=/private/tmp/claude-501/-Users-user-Desktop-Freelance-strim-engine/6df0dc83-1ce
+  - startup log hits: 2026-10-26 16:57:21,467 - omlx.scheduler - INFO - paged SSD cache enabled: /private/tmp/claude-501/-Users-user-Desktop-Freelance-strim-engine/6df0dc83-1ce6-455e-8d6
+  - startup log hits: 2026-10-26 16:57:21,469 - omlx.cache.paged_ssd_cache - INFO - PagedSSDCacheManager updated layer cache signature (64 layers, 2 unique types)
+  - startup log hits: 2026-10-26 16:57:21,513 - omlx.engine.vlm - INFO - VLMBatchedEngine loaded: /private/tmp/claude-501/-Users-user-Desktop-Freelance-strim-engine/6df0dc83-1ce6-455e-8d
+  - startup log hits: 2026-10-26 16:57:21,515 - omlx.engine_pool - INFO - Loaded model: qwen38-oq4e-mtp (actual: 16.20GB, estimated: 16.60GB, total: 16.60GB)
+  - startup log hits: 2026-10-26 16:57:21,817 - omlx.engine.vlm - INFO - GrammarCompiler initialized for /private/tmp/claude-501/-Users-user-Desktop-Freelance-strim-engine/6df0dc83-1ce6-
+
+## --help keyword lines (speculative/MTP/cache/batching/quant)
+- [--max-concurrent-requests MAX_CONCURRENT_REQUESTS]
+- [--embedding-batch-size EMBEDDING_BATCH_SIZE]
+- [--paged-ssd-cache-dir PAGED_SSD_CACHE_DIR]
+- [--paged-ssd-cache-max-size PAGED_SSD_CACHE_MAX_SIZE]
+- [--hot-cache-max-size HOT_CACHE_MAX_SIZE] [--no-cache]
+- [--initial-cache-blocks INITIAL_CACHE_BLOCKS]
+- [--hf-cache | --no-hf-cache] [--ms-endpoint MS_ENDPOINT]
+- --max-concurrent-requests MAX_CONCURRENT_REQUESTS
+- --embedding-batch-size EMBEDDING_BATCH_SIZE
+- --paged-ssd-cache-dir PAGED_SSD_CACHE_DIR
+- Directory for paged SSD cache storage (enables oMLX
+- prefix cache)
+- --paged-ssd-cache-max-size PAGED_SSD_CACHE_MAX_SIZE
+- Maximum paged SSD cache size (e.g., '100GB', '50GB').
+- --hot-cache-max-size HOT_CACHE_MAX_SIZE
+- Maximum in-memory hot cache size (e.g., '8GB', '4GB').
+- --no-cache            Disable oMLX paged SSD cache. mlx-lm BatchGenerator
+- --initial-cache-blocks INITIAL_CACHE_BLOCKS
+- Number of cache blocks to pre-allocate at startup
+- --hf-cache, --no-hf-cache
+- local cache (default: enabled)
+
+## notes
+- [default] stopped: port free after = True
+- ANE/NAX use: unknown unless listed in log hits or help lines above.
+- batching/prefix-cache behavior: see help lines and cache columns in summary.md.
