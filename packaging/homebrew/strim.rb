@@ -2,7 +2,7 @@ class Strim < Formula
   desc "Swift-only local inference engine for Qwen3.8-27B on Apple Silicon"
   homepage "https://github.com/megasoft1978/strim-engine"
   url "https://github.com/megasoft1978/strim-engine/releases/download/v0.1.0/strim-0.1.0-arm64-macos.tar.gz"
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 "3e54351aa4e1558b3c248ac28a928de9e58cde4352d7712e63c85e107a37ca28"
   license "MIT"
 
   depends_on arch: :arm64
