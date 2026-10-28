@@ -27,7 +27,7 @@ import Testing
             dir + "/summary.txt": summaryText,
             dir + "/run.json": runJSON,
             run2: disabledRun2,
-            "site/index.html": "stale", "README.md": "stale",
+            "site/index.html": "stale", "site/benchmarks.html": "stale", "README.md": "stale",
             "site/data/results.json": readString(repoRoot + "/site/data/results.json"),
         ])
     }
@@ -57,13 +57,12 @@ import Testing
         #expect(try val("soak.rss_slope") == .double(21.1))
         #expect(try val("soak.claude_passed") == .int(38))
         #expect(try val("soak.codex_tasks") == .int(47))
-        #expect(readString(o.path + "/site/index.html").contains("pass rates below"))
-        #expect(readString(o.path + "/README.md").contains("tasks passed 77 of 93"))
+        #expect(readString(o.path + "/site/benchmarks.html").contains("pass rates below"))
     }
 
     @Test func realThirtyMinuteRunFillsEveryFigure() throws {
         let o = try OverlayRoot(replacing: [
-            "site/index.html": "stale", "README.md": "stale",
+            "site/index.html": "stale", "site/benchmarks.html": "stale", "README.md": "stale",
             "site/data/results.json": readString(repoRoot + "/site/data/results.json"),
         ])
         let (lines, r) = try Self.refresh(o)
@@ -88,7 +87,7 @@ import Testing
         #expect(try val("soak.ttft_p90") == .int(1334))
         #expect(try val("soak.crashes") == .int(0))
         #expect(try val("soak.http5xx") == .int(0))
-        #expect(readString(o.path + "/README.md").contains("tasks passed 116 of 120"))
+        #expect(readString(o.path + "/site/benchmarks.html").contains("title=\"soak.tasks_passed\">116"))
     }
 
     @Test func soakRuleAcceptsThirtyMinutesAndSkipsAbortedRunningAndInvalidRuns() throws {

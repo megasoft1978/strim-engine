@@ -1,0 +1,1 @@
+[{"role":"user","content":"Fix the bug: def avg(xs): return sum(xs)/len(xs)  # crashes on empty list. Show the corrected code only."}]

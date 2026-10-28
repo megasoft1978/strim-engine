@@ -176,7 +176,23 @@ enum ResponsesAdapter {
                 guard ["auto", "none", "required"].contains(s) else { throw APIError.badRequest("tool_choice: unsupported value '\(s)'") }
                 chat.append(("tool_choice", .string(s)))
             } else if tc["type"]?.stringValue == "function" {
-                chat.append(("tool_choice", .string("required")))   // not enforced (no constrained decoding)
+                guard let n = (tc["name"] ?? tc["function"]?["name"])?.stringValue, !n.isEmpty else { throw APIError.badRequest("tool_choice.name: Field required") }
+                chat.append(("tool_choice", .ordered([("type", .string("function")), ("function", .ordered([("name", .string(n))]))])))
+            } else {
+                throw APIError.badRequest("tool_choice: unsupported value (use auto, none, required or {\"type\":\"function\",\"name\":...})")
+            }
+        }
+        if let p = root["parallel_tool_calls"], !p.isNull { chat.append(("parallel_tool_calls", p)) }
+        for k in ["thinking_budget", "thinking_token_budget"] { if let v = root[k], !v.isNull { chat.append((k, v)) } }
+        if let f = root["text"]?["format"], !f.isNull {
+            switch f["type"]?.stringValue {
+            case "text"?: break
+            case "json_object"?: chat.append(("response_format", .ordered([("type", .string("json_object"))])))
+            case "json_schema"?:
+                guard let schema = f["schema"], case .object = schema else { throw APIError.badRequest("text.format.schema: Field required") }
+                chat.append(("response_format", .ordered([("type", .string("json_schema")), ("json_schema", .ordered([
+                    ("name", .string(f["name"]?.stringValue ?? "output")), ("schema", schema)]))])))
+            default: throw APIError.badRequest("text.format.type: unsupported value '\(f["type"]?.stringValue ?? "?")'")
             }
         }
 

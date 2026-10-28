@@ -1,0 +1,27 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 6,
+  "id" : "jv-01",
+  "language" : "java",
+  "license" : "MIT",
+  "note" : "Java: word wrapper off-by-one on the line width",
+  "prompt" : "The automated tests of this Java project currently fail. Run `.\/scripts\/javatest.sh` from the repository root (it compiles src\/ with javac and runs the tests with a tiny built-in runner; there is no Maven, no JUnit and no network). Change the non-test source under src\/main so that the whole suite passes. The tests, the runner under src\/test and scripts\/ are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-java",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2742,
+  "test_paths" : [
+    "src\/test",
+    "scripts"
+  ],
+  "test_sha256" : {
+    "scripts\/javatest.sh" : "94490e91298ff5a65dea2bcaf1bbf8ad811c45923cafb3e15a5e8c21195b1940",
+    "src\/test\/java\/mini\/Assert.java" : "441a7d4ac4a59de647380b4da83d7f7f224ae2c1a817c10b3ecd1befff84777a",
+    "src\/test\/java\/mini\/MiniTest.java" : "2c71975c8f66cf1e93df78e39786f940f267f9857fe3de9e3fa102b04132fa6f",
+    "src\/test\/java\/tests\/AllTests.java" : "c21aea022f1c94dcf6845cc92388308a40c8c0c0b785895353a5d9183d00004a",
+    "src\/test\/java\/tests\/WrapperTest.java" : "bb08deee916b536686cc40be88a78a3637242803338c4691791c405c6f6263b4"
+  },
+  "tree_sha256" : "cb0c9455c82d44b20227b6c0a958fd850b054627eecd12b307516a8135c587c6",
+  "verify_cmd" : ".\/scripts\/javatest.sh"
+}

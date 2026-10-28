@@ -1,0 +1,21 @@
+captures: L0_c0.safetensors L0_c3.safetensors L21_c0.safetensors L21_c3.safetensors L44_c0.safetensors L44_c3.safetensors  S=1024
+ACC f32 L0_c0.safetensors y rel 1.62e-03 max 3.125e-02 neq 0.203 | state rel 7.72e-04 | layer-out rel 8.74e-04 max 1.250e-01
+ACC f32 L0_c3.safetensors y rel 1.65e-03 max 3.125e-02 neq 0.197 | state rel 7.29e-04 | layer-out rel 7.91e-04 max 1.250e-01
+ACC f32 L21_c0.safetensors y rel 1.70e-03 max 4.883e-04 neq 0.241 | state rel 8.58e-04 | layer-out rel 2.82e-03 max 6.250e-02
+ACC f32 L21_c3.safetensors y rel 1.66e-03 max 9.766e-04 neq 0.226 | state rel 6.24e-04 | layer-out rel 3.13e-03 max 3.125e-02
+ACC f32 L44_c0.safetensors y rel 2.00e-03 max 2.518e-04 neq 0.233 | state rel 7.74e-04 | layer-out rel 3.50e-03 max 3.125e-02
+ACC f32 L44_c3.safetensors y rel 2.07e-03 max 3.128e-04 neq 0.231 | state rel 7.16e-04 | layer-out rel 3.58e-03 max 3.125e-02
+ACC bf16mm L0_c0.safetensors y rel 1.63e-03 max 3.125e-02 neq 0.262 | state rel 7.87e-04 | layer-out rel 8.78e-04 max 1.250e-01
+ACC bf16mm L0_c3.safetensors y rel 1.67e-03 max 3.125e-02 neq 0.254 | state rel 7.44e-04 | layer-out rel 7.57e-04 max 1.250e-01
+ACC bf16mm L21_c0.safetensors y rel 1.91e-03 max 4.883e-04 neq 0.339 | state rel 9.90e-04 | layer-out rel 3.06e-03 max 6.250e-02
+ACC bf16mm L21_c3.safetensors y rel 1.83e-03 max 9.766e-04 neq 0.318 | state rel 7.54e-04 | layer-out rel 3.43e-03 max 6.250e-02
+ACC bf16mm L44_c0.safetensors y rel 2.17e-03 max 2.594e-04 neq 0.312 | state rel 7.74e-04 | layer-out rel 3.83e-03 max 3.125e-02
+ACC bf16mm L44_c3.safetensors y rel 2.20e-03 max 2.823e-04 neq 0.300 | state rel 8.40e-04 | layer-out rel 3.83e-03 max 3.125e-02
+(bf16 output rounding floor: rel ~ 1.1e-3)
+TIMING S=1024 chained-serial layers=24 reps=2 (min)
+  kernel (shipped) 0.868 ms/layer
+  chunk64 f32 plain 4.112 ms/layer
+  chunk64 f32 compiled-step 4.061 ms/layer
+  chunk64 bf16-mm plain 4.312 ms/layer
+  chunk64 intra-chunk part only (no state loop) 3.154 ms/layer
+  chunk8 f32 plain (only C that is accurate) 7.389 ms/layer

@@ -1,0 +1,44 @@
+=== speed qwen38-8bit head qwen38-mtp-8bit
+n=1024 chunk=1024 1.15 s  894 tok/s  (rep 1)
+n=1024 chunk=1024 1.05 s  971 tok/s  (rep 2)
+rep 1 spec: passes 64  emitted 64  1.00 tok/pass  7.8 tok/s  16.1 decode  accept 0% (0/0)  128.3 ms/pass  8.21s
+parity: EXACT (4160 tokens)
+rep 2 spec: passes 64  emitted 64  1.00 tok/pass  7.9 tok/s  16.5 decode  accept 0% (0/0)  126.4 ms/pass  8.09s
+parity: EXACT (4160 tokens)
+rep 1 spec: passes 26  emitted 64  2.46 tok/pass  10.2 tok/s  32.0 decode  accept 63% (38/60)  241.8 ms/pass  6.29s
+parity: EXACT (4160 tokens)
+rep 2 spec: passes 26  emitted 64  2.46 tok/pass  10.3 tok/s  33.5 decode  accept 63% (38/60)  238.5 ms/pass  6.20s
+parity: EXACT (4160 tokens)
+=== speed qwen38-4bit head qwen38-mtp-4bit
+n=1024 chunk=1024 0.99 s  1034 tok/s  (rep 1)
+n=1024 chunk=1024 0.99 s  1034 tok/s  (rep 2)
+rep 1 spec: passes 64  emitted 64  1.00 tok/pass  10.6 tok/s  30.1 decode  accept 0% (0/0)  94.7 ms/pass  6.06s
+parity: EXACT (4160 tokens)
+rep 2 spec: passes 64  emitted 64  1.00 tok/pass  10.5 tok/s  29.9 decode  accept 0% (0/0)  95.0 ms/pass  6.08s
+parity: EXACT (4160 tokens)
+rep 1 spec: passes 28  emitted 64  2.29 tok/pass  12.1 tok/s  51.2 decode  accept 57% (36/63)  188.7 ms/pass  5.28s
+parity: MISMATCH (spec 4160 tokens, greedy 4160)
+rep 2 spec: passes 28  emitted 64  2.29 tok/pass  12.2 tok/s  52.0 decode  accept 57% (36/63)  188.1 ms/pass  5.27s
+parity: MISMATCH (spec 4160 tokens, greedy 4160)
+=== speed qwen38-oq4e-mtp head qwen38-oq4e-mtp
+n=1024 chunk=1024 1.03 s  998 tok/s  (rep 1)
+n=1024 chunk=1024 1.01 s  1009 tok/s  (rep 2)
+rep 1 spec: passes 64  emitted 64  1.00 tok/pass  10.2 tok/s  28.3 decode  accept 0% (0/0)  97.7 ms/pass  6.26s
+parity: EXACT (4160 tokens)
+rep 2 spec: passes 64  emitted 64  1.00 tok/pass  10.2 tok/s  28.0 decode  accept 0% (0/0)  98.5 ms/pass  6.30s
+parity: EXACT (4160 tokens)
+rep 1 spec: passes 26  emitted 64  2.46 tok/pass  11.3 tok/s  40.8 decode  accept 58% (38/65)  217.4 ms/pass  5.65s
+parity: EXACT (4160 tokens)
+rep 2 spec: passes 26  emitted 64  2.46 tok/pass  11.9 tok/s  48.2 decode  accept 58% (38/65)  207.5 ms/pass  5.39s
+parity: EXACT (4160 tokens)
+=== speed qwen38-6bit head qwen38-mtp-4bit
+n=1024 chunk=1024 1.05 s  974 tok/s  (rep 1)
+n=1024 chunk=1024 1.05 s  972 tok/s  (rep 2)
+rep 1 spec: passes 64  emitted 64  1.00 tok/pass  8.8 tok/s  21.1 decode  accept 0% (0/0)  113.2 ms/pass  7.24s
+parity: EXACT (4160 tokens)
+rep 2 spec: passes 64  emitted 64  1.00 tok/pass  8.9 tok/s  21.4 decode  accept 0% (0/0)  112.7 ms/pass  7.21s
+parity: EXACT (4160 tokens)
+rep 1 spec: passes 26  emitted 64  2.46 tok/pass  10.8 tok/s  40.9 decode  accept 67% (38/57)  227.6 ms/pass  5.92s
+parity: MISMATCH (spec 4160 tokens, greedy 4160)
+rep 2 spec: passes 26  emitted 64  2.46 tok/pass  11.0 tok/s  43.1 decode  accept 67% (38/57)  223.7 ms/pass  5.82s
+parity: MISMATCH (spec 4160 tokens, greedy 4160)

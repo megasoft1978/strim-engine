@@ -13,6 +13,10 @@ public enum GDN {
         return MLXArray(idx)
     }()
     nonisolated(unsafe) static let onesBf16 = MLXArray.ones([Dk], dtype: .bfloat16)
+    /// q/k scales folded into the RMS-norm weight: `rmsNorm(x, w)` rounds `x * rsqrt(..)` to bf16 and then
+    /// multiplies by `w`, which is bit-identical to `rmsNorm(x, ones) * scale` and saves two passes per layer.
+    nonisolated(unsafe) static let qScaleBf16 = onesBf16 * (pow(Float(Dk), -0.5) * pow(Float(Dk), -0.5))
+    nonisolated(unsafe) static let kScaleBf16 = onesBf16 * pow(Float(Dk), -0.5)
     static let keyDim = Hk * Dk          // 2048
     static let valDim = Hv * Dv          // 6144
     static let convDim = 2 * keyDim + valDim  // 10240
@@ -263,41 +267,59 @@ nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["ST
         let B = x.shape[0], S = x.shape[1]
         let dtype = x.dtype
 
-        let qkv = try store.linear(p + "in_proj_qkv", x)
-        let z = try store.linear(p + "in_proj_z", x).reshaped([B, S, Hv, Dv])
-        let bProj = try ChunkInvariantLinear.linear(store, p + "in_proj_b", x)
-        let aProj = try ChunkInvariantLinear.linear(store, p + "in_proj_a", x)
+        let qkv = try OpTimer.linear(store, "gdn.proj", p + "in_proj_qkv", x)
+        let z = try OpTimer.linear(store, "gdn.proj", p + "in_proj_z", x).reshaped([B, S, Hv, Dv])
+        let ba = try OpTimer.timeMany("gdn.proj_ba", flops: Double(4 * B * S * Hv * 5120),
+                                      bytes: Double(x.nbytes + 2 * Hv * 5120 * 2), inputs: [x]) {
+            [try ChunkInvariantLinear.linear(store, p + "in_proj_b", x),
+             try ChunkInvariantLinear.linear(store, p + "in_proj_a", x)]
+        }
+        let bProj = ba[0], aProj = ba[1]
 
         let convW = try store.tensor(p + "conv1d.weight")
         let convState = state?.conv ?? MLXArray.zeros([B, 3, convDim], dtype: dtype)
         let convIn = concatenated([convState, qkv], axis: 1)
-        if let state {
-            let n = convIn.shape[1]
-            // Long chunks: a slice (or contiguous() of a B=1 slice) shares convIn's buffer and
-            // would pin the whole [B,S+3,convDim] array. A gather writes a fresh 3-row buffer
-            // with the same bits. Decode/verify (small S) keeps the free view.
-            state.conv = S >= 64
-                ? convIn.take(MLXArray([Int32(n - 3), Int32(n - 2), Int32(n - 1)]), axis: 1)
-                : convIn[0..., (n - 3) ..< n, 0...]
+        let convOut = OpTimer.time("gdn.conv", flops: Double(B * S * convDim) * 10,
+                                   bytes: Double(qkv.nbytes * 2), inputs: [qkv]) {
+            if let state {
+                let n = convIn.shape[1]
+                // Long chunks: a slice (or contiguous() of a B=1 slice) shares convIn's buffer and
+                // would pin the whole [B,S+3,convDim] array. A gather writes a fresh 3-row buffer
+                // with the same bits. Decode/verify (small S) keeps the free view.
+                state.conv = S >= 64
+                    ? convIn.take(MLXArray([Int32(n - 3), Int32(n - 2), Int32(n - 1)]), axis: 1)
+                    : convIn[0..., (n - 3) ..< n, 0...]
+            }
+            return (B > 1 && GDN.batchDecode && GDN.useMetal && S < 512)
+                ? GDNMetal.convSiluBatch(convIn: convIn, weight: convW)
+                : (B > 1 || ProcessInfo.processInfo.environment["STRIM_CONV_TENSOR"] != nil)
+                ? silence(depthwise(convIn, convW, S))
+                : GDNMetal.convSilu(convIn: convIn, weight: convW)
         }
-        let convOut = (B > 1 && GDN.batchDecode && GDN.useMetal && S < 512)
-            ? GDNMetal.convSiluBatch(convIn: convIn, weight: convW)
-            : (B > 1 || ProcessInfo.processInfo.environment["STRIM_CONV_TENSOR"] != nil)
-            ? silence(depthwise(convIn, convW, S))
-            : GDNMetal.convSilu(convIn: convIn, weight: convW)
 
-        let qRaw = convOut[0..., 0..., 0 ..< keyDim].reshaped([B, S, Hk, Dk])
-        let kRaw = convOut[0..., 0..., keyDim ..< (2 * keyDim)].reshaped([B, S, Hk, Dk])
-        let v = convOut[0..., 0..., (2 * keyDim) ..< convDim].reshaped([B, S, Hv, Dv])
-
-        let ones = dtype == .bfloat16 ? GDN.onesBf16 : MLXArray.ones([Dk], dtype: dtype)
         let inv = pow(Float(Dk), -0.5)
-        let q = MLXFast.rmsNorm(qRaw, weight: ones, eps: 1e-6) * (inv * inv)
-        let k = MLXFast.rmsNorm(kRaw, weight: ones, eps: 1e-6) * inv
+        let qkbg = try OpTimer.timeMany("gdn.qknorm_bg", flops: Double(B * S * (2 * keyDim)) * 4,
+                                        bytes: Double(B * S * 2 * keyDim * 2 * 2),
+                                        inputs: [convOut, bProj, aProj]) {
+            let qRaw = convOut[0..., 0..., 0 ..< keyDim].reshaped([B, S, Hk, Dk])
+            let kRaw = convOut[0..., 0..., keyDim ..< (2 * keyDim)].reshaped([B, S, Hk, Dk])
+            let q: MLXArray, k: MLXArray
+            if dtype == .bfloat16 {
+                q = MLXFast.rmsNorm(qRaw, weight: GDN.qScaleBf16, eps: 1e-6)
+                k = MLXFast.rmsNorm(kRaw, weight: GDN.kScaleBf16, eps: 1e-6)
+            } else {
+                let ones = MLXArray.ones([Dk], dtype: dtype)
+                q = MLXFast.rmsNorm(qRaw, weight: ones, eps: 1e-6) * (inv * inv)
+                k = MLXFast.rmsNorm(kRaw, weight: ones, eps: 1e-6) * inv
+            }
 
-        let aLog = try store.tensor(p + "A_log").asType(.float32)
-        let dtBias = try store.tensor(p + "dt_bias").asType(.float32)
-        let (beta, g) = Fused.betaG(bProj, aProj, aLog: aLog, dtBias: dtBias)   // g: [B,S,Hv]
+            let aLog = try store.tensor(p + "A_log").asType(.float32)
+            let dtBias = try store.tensor(p + "dt_bias").asType(.float32)
+            let (beta, g) = Fused.betaG(bProj, aProj, aLog: aLog, dtBias: dtBias)   // g: [B,S,Hv]
+            return [q, k, beta, g]
+        }
+        let q = qkbg[0], k = qkbg[1], beta = qkbg[2], g = qkbg[3]
+        let v = convOut[0..., 0..., (2 * keyDim) ..< convDim].reshaped([B, S, Hv, Dv])
 
         let rep = GDN.repIndex
         let qr = q.take(rep, axis: 2)                // [B,S,Hv,Dk]
@@ -311,13 +333,28 @@ nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["ST
         // decode (S<=4) and wrong for prefill; use the tensor recurrence for long chunks.
         if GDN.useMetal && S >= 512 && !recording && S <= GDN.metalMaxS
             && ProcessInfo.processInfo.environment["STRIM_GDN_BLOCKED"] != "0" {
-            let r = GDNMetal.runBlocked(q: q, k: k, v: v, g: g, beta: beta, ssm: recurrent0)
-            let yAllM = r.y
-            state?.ssm = r.ssm
+            func recBytes() -> Double {
+                var t: Int = q.nbytes + k.nbytes + v.nbytes
+                t += g.nbytes + beta.nbytes
+                t += recurrent0.nbytes * 2
+                t += B * S * Hv * Dv * 2
+                return Double(t)
+            }
+            let rec = OpTimer.timeMany("gdn.rec", flops: Double(6 * B * S * Hv * Dk * Dv),
+                                       bytes: recBytes(),
+                                       inputs: [q, k, v, g, beta, recurrent0]) {
+                let r = GDNMetal.runBlocked(q: q, k: k, v: v, g: g, beta: beta, ssm: recurrent0)
+                return [r.y, r.ssm]
+            }
+            let yAllM = rec[0]
+            state?.ssm = rec[1]
             let normWM = try store.tensor(p + "norm.weight")
-            let normedM = MLXFast.rmsNorm(yAllM, weight: normWM, eps: 1e-6)
-            let gatedM = Fused.gatedNorm(z, normedM)
-            return try store.linear(p + "out_proj", gatedM.reshaped([B, S, valDim]))
+            let gatedM = OpTimer.time("gdn.norm_gate", flops: Double(B * S * valDim) * 10,
+                                      bytes: Double(yAllM.nbytes * 3 + z.nbytes), inputs: [yAllM, z]) {
+                let normedM = MLXFast.rmsNorm(yAllM, weight: normWM, eps: 1e-6)
+                return Fused.gatedNorm(z, normedM)
+            }
+            return try OpTimer.linear(store, "gdn.out", p + "out_proj", gatedM.reshaped([B, S, valDim]))
         }
         if GDN.useMetal && B == 1 && S <= GDN.metalMaxS {
             let r = GDNMetal.run(q: qr, k: kr, v: v, g: g, beta: beta, ssm: recurrent0,

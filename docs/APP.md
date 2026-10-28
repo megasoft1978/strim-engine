@@ -27,10 +27,25 @@ Menu bar item is always an SF Symbol plus text, never blank:
 
 Offline: orange banner with the exact reason (connection refused, timeout, 401 with or without token file, 403, stream closed), "Start host" and "Retry now". "Start host" runs `strim serve <model_path> [mtp_path] --port N` as a detached child logging to `~/.strim/host.log` (binary from `strim_binary`, else `~/.strim/bin`, `/opt/homebrew/bin`, `/usr/local/bin`). If the binary is missing the command is copied to the clipboard with a notice to paste it in Terminal; if `model_path` is unset the notice says so. No login is required.
 
-Connected: stats block (state, model, MTP head, stacked memory bar weights/prefix trie/MLX cache/headroom, decode and prefill tok/s, MTP acceptance and depth, prefix-cache hit rate, prefill seconds saved, active/queued jobs with per-source rows, tokens today, parent tokens saved tagged "estimate", uptime, last crash), Load/Unload (disabled with a reason shown in the tooltip and a caption), "Pause jobs" (always disabled: no route exists yet), Copy MCP registration commands, Launch at login (SMAppService.mainApp), Open Window, Quit.
+Connected: stats block (state, model, MTP head, stacked memory bar weights/prefix trie/MLX cache/headroom, decode and prefill tok/s, MTP acceptance and depth, prefix-cache hit rate, prefill seconds saved, active/queued jobs with per-source rows, tokens today, parent tokens saved tagged "estimate", uptime, last crash), Load/Unload (disabled with a reason shown in the tooltip and a caption), "Pause jobs" / "Resume jobs" (`POST pause|resume`: background jobs are not admitted while paused, running ones finish, chat is never blocked; the state comes from `status.jobs_paused` and a caption says when paused), Copy MCP registration commands, Launch at login (SMAppService.mainApp), Open Window, Quit.
 
 ## Window
-Tabs: Status (same stats, larger), Jobs (list, detail, verify badge, diff view with line numbers, Apply/Reject calling `POST /jobs/approve`; enabled only for an `awaiting_approval` job with a patch), Chat (skeleton: opens a session; a 501 shows "Chat not available yet"), Settings (host URL, binary, model path, MTP path; token path read-only; saved to `~/.strim/app.json`).
+Tabs: Status (same stats, larger), Jobs (list, detail, verify badge, diff view with line numbers, Apply/Reject calling `POST /jobs/approve`; enabled only for an `awaiting_approval` job with a patch; "Cancel job" calls `POST jobs/cancel` and is disabled for finished jobs), Chat, Settings.
+
+### Chat
+Opens a session in the project folder (`ProjectFolder.resolve`: never home or a parent of it; a 501 shows "Chat not available yet").
+- Tool calls are cards: status icon, tool name and a one-line args summary, collapsed by default; expanding shows the args and the result (errors in red). A `tool_result` delta is paired with the oldest unfinished card of the same name.
+- Reasoning is a collapsed "Reasoning" disclosure group per block, separate from the answer.
+- Per-turn token ledger under the last message of a turn: prompt (cached), completion, local tokens (what the local model generated) and tok/s over the turn, from the `harness_event` `usage` frames (`prompt/cached/completion`, summed over the turn's steps) and the client clock. tok/s includes tool time, so it understates decode speed.
+- Thinking switch (default on): sent as `enable_thinking` on open and on every append. The harness chat backend must implement `ChatBackend.setThinking` for it to take effect; until then hosts ignore it.
+- Stop button (Cmd-.) replaces Send while a turn runs (`chat/cancel`); a second message is not sent while a turn runs; a dropped connection ends the turn. Copy button on every message (tool cards copy name, args and result).
+- Smooth streaming: text and reasoning deltas are coalesced and applied about 30 times a second, the transcript is a lazy stack scrolled without animation.
+
+### Settings
+Host URL, binary, then the pickers; token path read-only; saved to `~/.strim/app.json`.
+- Model picker: lists `GET models` (directories with a `config.json` under the host's model roots); on a host without the route the app scans `~/.strim/models` and `~/models`. Choosing a model or MTP head only writes `model_path` / `mtp_path`; nothing loads until the Load button (Status tab or here). With another model loaded the note says to Unload, then Load.
+- Project picker: "Choose..." (NSOpenPanel, folders only) and a "Recent" menu (last 8, newest first, stale ones hidden), both validated by `ProjectFolder.resolve`; a rejected folder leaves the settings untouched and shows the reason. Choosing one starts a new chat.
+- About: active pack fingerprint, packs on disk and the last `strim evolve` record (candidate fingerprint, round, validation gain in pp, dry run flag, time) from `GET pack`, read-only.
 
 ### Approval safety
 `DiffParser.analyze` keeps every line of a patch: header lines (index, modes, rename/copy, similarity, `---`/`+++`, binary) become tagged rows, unknown lines become visible "UNEXPECTED" rows, and hunk bodies are counted against their `@@` headers. The file list with change kinds (modified, added, deleted, renamed, copied, mode change, symlink, binary), totals from the parsed data and the patch byte size sit above the hunks.
@@ -47,7 +62,7 @@ TEST BANNER at the top of the window when `STRIM_APP_TEST=1` or when connected t
 ```json
 {"host_url":"http://127.0.0.1:8203","strim_binary":"/opt/homebrew/bin/strim","model_path":"/path/to/model","mtp_path":"/path/to/mtp","token_path":"~/.strim/token"}
 ```
-All keys optional; `app.json` is written 0600 in a 0700 `~/.strim`. Also `control_token_path` (default `~/.strim/control-token`; must be inside the home folder, a regular non-symlink file owned by you; a banner warns when group/world readable or missing) and `project_path` (the folder chats work in; chat is not offered without one and never uses `$HOME`). The control token is read per request and is never displayed or logged; the MCP token `~/.strim/token` is not used by the app (MCP commands only reference `$(cat ~/.strim/token)`).
+All keys optional; `app.json` is written 0600 in a 0700 `~/.strim`. Also `control_token_path` (default `~/.strim/control-token`; must be inside the home folder, a regular non-symlink file owned by you; a banner warns when group/world readable or missing), `project_path` (the folder chats work in; chat is not offered without one and never uses `$HOME`) and `recent_projects` (the picker's recents). The control token is read per request and is never displayed or logged; the MCP token `~/.strim/token` is not used by the app (MCP commands only reference `$(cat ~/.strim/token)`).
 `host_url` must be `http://127.0.0.1:<port>`, `http://localhost:<port>` or `http://[::1]:<port>` (no userinfo, path, query, fragment); anything else makes every call fail closed with a banner. The client uses an ephemeral session with no proxies, cache or cookies, and refuses redirects. `strim_binary` must be an absolute, normalised path to an existing executable regular file that is not world-writable; otherwise it is not run and the command is shown/copied. `host.log` and patches under `~/.strim/patches` are 0600 in 0700 directories.
 
 ## Build and run
@@ -57,3 +72,16 @@ CONFIG=debug SCRATCH=/tmp/x SMOKE=1 scripts/make_app.sh   # debug build, 2 s hea
 swift test --filter StrimAppCoreTests
 ```
 Not verified without a screen: layout, menu-bar width with the text label, popover sizing, window auto-open in test mode, SMAppService behavior for an ad-hoc signed app.
+
+## Screenshots
+Rendered headlessly from sample data (a scripted `FakeControlClient`, no host or network; paths are placeholders) by the app itself: `STRIM_APP_SNAPSHOT_DIR=docs/img .build/debug/StrimApp` writes `app-*.png` and exits. They show real AppKit controls but an inactive window (switches look grey) and no tab bar or menu bar.
+
+| | |
+|---|---|
+| Chat, cards collapsed: `docs/img/app-chat.png` | Chat, cards expanded: `docs/img/app-chat-expanded.png` |
+| Status with jobs paused: `docs/img/app-status.png` | Settings (model and project pickers, pack info): `docs/img/app-settings.png` |
+
+![Chat](img/app-chat.png)
+![Chat expanded](img/app-chat-expanded.png)
+![Status](img/app-status.png)
+![Settings](img/app-settings.png)

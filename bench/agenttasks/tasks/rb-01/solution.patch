@@ -1,0 +1,47 @@
+diff --git a/lib/numwords.rb b/lib/numwords.rb
+index 6946ba9..3f2b5f9 100644
+--- a/lib/numwords.rb
++++ b/lib/numwords.rb
+@@ -17,7 +17,11 @@ module NumWords
+     parts = []
+     thousands, rest = n.divmod(1000)
+     parts << "#{below_thousand(thousands)} thousand" if thousands.positive?
+-    parts << below_thousand(rest) if rest.positive?
++    if rest.positive?
++      w = below_thousand(rest)
++      w = "and #{w}" if thousands.positive? && rest < 100
++      parts << w
++    end
+     parts.join(' ')
+   end
+ 
+@@ -25,9 +29,10 @@ module NumWords
+     words = []
+     hundreds, rest = n.divmod(100)
+     words << "#{ONES[hundreds]} hundred" if hundreds.positive?
++    words << "and" if hundreds.positive? && rest.positive?
+     if rest >= 20
+       tens, ones = rest.divmod(10)
+-      words << (ones.zero? ? TENS[tens] : "#{TENS[tens]} #{ONES[ones]}")
++      words << (ones.zero? ? TENS[tens] : "#{TENS[tens]}-#{ONES[ones]}")
+     elsif rest.positive?
+       words << ONES[rest]
+     end
+@@ -36,12 +41,11 @@ module NumWords
+ 
+   # Ordinal suffix: 1 => "1st", 12 => "12th", 23 => "23rd".
+   def ordinal(n)
+-    suffix = case n % 10
+-             when 1 then 'st'
+-             when 2 then 'nd'
+-             when 3 then 'rd'
+-             else 'th'
+-             end
++    suffix = if (11..13).cover?(n % 100)
++             "th"
++           else
++             { 1 => "st", 2 => "nd", 3 => "rd" }.fetch(n % 10, "th")
++           end
+     "#{n}#{suffix}"
+   end
+ end

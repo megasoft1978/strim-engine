@@ -1,0 +1,27 @@
+[16:49:36] start kl_bonsai load={ 9.00 5.67 4.39 } swap=total = 9216.00M  used = 7808.31M  free = 1407.69M  (encrypted)
+cmp window 1/20
+cmp window 2/20
+cmp window 3/20
+cmp window 4/20
+cmp window 5/20
+cmp window 6/20
+cmp window 7/20
+cmp window 8/20
+cmp window 9/20
+cmp window 10/20
+cmp window 11/20
+cmp window 12/20
+cmp window 13/20
+cmp window 14/20
+cmp window 15/20
+cmp window 16/20
+cmp window 17/20
+cmp window 18/20
+cmp window 19/20
+cmp window 20/20
+set | positions | meanKL | maxKL | top1 | ppl_ref | ppl_cand | tailmass | max|dlogp|
+code gen64 | 256 | 0.13575 | 3.015 | 0.8984 | 1.3241 | 1.4556 | 0.00683 | 15.593
+code text | 12282 | 0.22937 | 8.130 | 0.8659 | 2.3497 | 2.8173 | 0.00775 | 19.740
+prose gen64 | 256 | 0.17401 | 3.274 | 0.8398 | 1.5392 | 1.9595 | 0.00823 | 11.812
+prose text | 12282 | 0.32254 | 12.408 | 0.7734 | 5.1304 | 6.5151 | 0.01855 | 20.193
+[16:50:08] end rc=0 aborted=0

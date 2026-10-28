@@ -1,14 +1,139 @@
 {
+  "balance" : {
+    "go" : {
+      "mechanical-edit" : 3,
+      "repo-qa" : 2,
+      "test-fix" : 7
+    },
+    "java" : {
+      "feature-impl" : 1,
+      "repo-qa" : 1,
+      "test-fix" : 2
+    },
+    "javascript" : {
+      "feature-impl" : 1,
+      "repo-qa" : 1,
+      "test-fix" : 2
+    },
+    "python" : {
+      "feature-impl" : 1,
+      "repo-qa" : 1,
+      "test-fix" : 2
+    },
+    "react" : {
+      "feature-impl" : 1,
+      "repo-qa" : 1,
+      "test-fix" : 2
+    },
+    "ruby" : {
+      "feature-impl" : 1,
+      "repo-qa" : 1,
+      "test-fix" : 2
+    },
+    "rust" : {
+      "feature-impl" : 1,
+      "repo-qa" : 1,
+      "test-fix" : 2
+    },
+    "swift" : {
+      "test-fix" : 11
+    },
+    "typescript" : {
+      "feature-impl" : 1,
+      "repo-qa" : 1,
+      "test-fix" : 2
+    }
+  },
   "counts" : {
+    "feature-impl" : 7,
     "mechanical-edit" : 3,
-    "repo-qa" : 2,
-    "test-fix" : 12
+    "repo-qa" : 9,
+    "test-fix" : 32
   },
   "languages" : {
-    "go" : 9,
-    "swift" : 8
+    "go" : 12,
+    "java" : 4,
+    "javascript" : 4,
+    "python" : 4,
+    "react" : 4,
+    "ruby" : 4,
+    "rust" : 4,
+    "swift" : 11,
+    "typescript" : 4
   },
   "tasks" : [
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "js-01",
+      "language" : "javascript",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "3bb8c8aa575180664b496985f8788b02081db09e060b70c9250955557fd5e7b1"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "js-02",
+      "language" : "javascript",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "1bd667f2dcf38b44ec794c90d7c0ed93097ab22100b82fdd4bba1656d50b4415"
+    },
+    {
+      "base_commit" : "",
+      "class" : "feature-impl",
+      "id" : "js-03",
+      "language" : "javascript",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "df142769e9b035ae2d5aacdc25a285b49f67f66a4b6a385e1a1e3b00aad0cf34"
+    },
+    {
+      "base_commit" : "",
+      "class" : "repo-qa",
+      "id" : "js-04",
+      "language" : "javascript",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "1b8ad109c1d6ae06e0b6f2dd6d92290d6a2a23a91ab21b4fe1558e3de646bcdf"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "jv-01",
+      "language" : "java",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "cb0c9455c82d44b20227b6c0a958fd850b054627eecd12b307516a8135c587c6"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "jv-02",
+      "language" : "java",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "711652c18eaa028ecfbf7a7e03d56799cb73525886993ea5a1c7e63780b46594"
+    },
+    {
+      "base_commit" : "",
+      "class" : "feature-impl",
+      "id" : "jv-03",
+      "language" : "java",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "e7b1f115612980d22e82a3a919a3ca531f1b4c129d9b2cb30b9566b8d9bb6a9b"
+    },
+    {
+      "base_commit" : "",
+      "class" : "repo-qa",
+      "id" : "jv-04",
+      "language" : "java",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "6b1fca8154d79f780aeae21f1263782c70cc28d6ffc1362d8cee04e40b572ab1"
+    },
     {
       "base_commit" : "2d3c2a9cc518326daf99a383f07c4d3c44317e4d",
       "class" : "mechanical-edit",
@@ -37,6 +162,42 @@
       "tree_sha256" : "7457cf97de66c10cf59d655c4b3eb8a5ba0ede58872e292401b3b943077bac96"
     },
     {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "py-01",
+      "language" : "python",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "9f932d0de39d858c215296321fe821fa5dba3a5ac6d5a5e1d03fd995f65b4022"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "py-02",
+      "language" : "python",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "6492eb87879e16c354edce0618886c8c9e9eec8eb9183d8b82f18012b39684b2"
+    },
+    {
+      "base_commit" : "",
+      "class" : "feature-impl",
+      "id" : "py-03",
+      "language" : "python",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "34fcc4387bb0de679d98c63906cebe0add63d18e548161720a86ffd7f124cd09"
+    },
+    {
+      "base_commit" : "",
+      "class" : "repo-qa",
+      "id" : "py-04",
+      "language" : "python",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "7360c7857d1fd7d3c6758dac9efa9de9ff799b7d97c98b68def5d9df66c6a428"
+    },
+    {
       "base_commit" : "d26a4dcd30a3c17923a2083b48bd6233aada9d47",
       "class" : "repo-qa",
       "id" : "qa-01",
@@ -53,6 +214,114 @@
       "license" : "MIT",
       "repo" : "https:\/\/github.com\/dustin\/go-humanize",
       "tree_sha256" : "23f9c1bbbb39e720451561afd5c9ae36f9b3410b6721e27808e12caf50a21b13"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "rb-01",
+      "language" : "ruby",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "d18b66b085e724de9d2ee30bb14917146c2a31c670c5d6b523e36b43c7f73d8b"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "rb-02",
+      "language" : "ruby",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "75b30322509bdefffcf8c6315583640a0344c8b2d4cf9ea052e8476d225a1e4a"
+    },
+    {
+      "base_commit" : "",
+      "class" : "feature-impl",
+      "id" : "rb-03",
+      "language" : "ruby",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "0cdf01f635a362fd717d01baf34ead04dd2acf1d73fd29753720f244d4269c5a"
+    },
+    {
+      "base_commit" : "",
+      "class" : "repo-qa",
+      "id" : "rb-04",
+      "language" : "ruby",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "0ae254b20bb551c57156c869c8d92031e60ddbb37b2637f8468dbbc888fd99bb"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "rs-01",
+      "language" : "rust",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "ed46782f4019c7026b76336a169c264b3100c22b0c498ed18e4c830a0989483a"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "rs-02",
+      "language" : "rust",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "908edff687945522a4675e857194502c52e3b8d1e2d5c22af7bc399038f7d8c1"
+    },
+    {
+      "base_commit" : "",
+      "class" : "feature-impl",
+      "id" : "rs-03",
+      "language" : "rust",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "8540e3b2f74148b9bdfd37513f87c299951af743c86141d703908ab227d79a10"
+    },
+    {
+      "base_commit" : "",
+      "class" : "repo-qa",
+      "id" : "rs-04",
+      "language" : "rust",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "fe5fbc16c3551e9c7315a270d37d98e7d7485bf00650dcc391b39fb46320a762"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "rx-01",
+      "language" : "react",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "ee18d122bf2bf82babbf3a33a31a52d4b6586bcc08486aa163cf5199023c1648"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "rx-02",
+      "language" : "react",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "f1446c38578fd3c14609cd90cb8822510bed8e1778281b7f5cec99f9bfebeec2"
+    },
+    {
+      "base_commit" : "",
+      "class" : "feature-impl",
+      "id" : "rx-03",
+      "language" : "react",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "e381495e096a37adf7dcb8055d6034bca348e7681eb23f204fb9ded0d0feb91c"
+    },
+    {
+      "base_commit" : "",
+      "class" : "repo-qa",
+      "id" : "rx-04",
+      "language" : "react",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "f0f7b6cbe9383c7899a3f8d811f25a0dbaad2a062c3790faaea70d0031ed8e73"
     },
     {
       "base_commit" : "212246793da0a95873d1f3be675529f7ab7dc799",
@@ -161,6 +430,96 @@
       "license" : "MIT",
       "repo" : "original (written for this benchmark)",
       "tree_sha256" : "d3b4105b93b68a16a6509c93c68b5397cf2da44fdbfbb35a8e594e6cb7dc333b"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-19",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "1b7fc151f8cc718039d861856869ad7863eaea9761871de47e8484a327cbdb2d"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-20",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "f2388cea60112181c31865c95d420f2dd47af22aa561ec26577901ea215e9c10"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-21",
+      "language" : "go",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "999de25d1f2a9b27f477fd3b44202efed9af87fb683c8cc377d78f0cdb4e869b"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-22",
+      "language" : "go",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "3399036c91f3aae1c3373163227f453a13ffbc32f69e337f6b01bd46aac4f89e"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-23",
+      "language" : "swift",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "f824e52b1835722afb429eb5b161aac3b300235139eeb912b8c68fbdad7f811d"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "tf-24",
+      "language" : "go",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "33e4ba7f2c190e4e1cb9ec5624f3a3373866a3af225efd5c6dd7f633cfe4a6df"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "ts-01",
+      "language" : "typescript",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "5eaa9a6f6872d5ebb96d50ab118f6ab9ee0430d5f97dba0b779e82185f19cd20"
+    },
+    {
+      "base_commit" : "",
+      "class" : "test-fix",
+      "id" : "ts-02",
+      "language" : "typescript",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "8ce46359920a9676f51df42dfb6431a10464ee2b23dcfe29c2ca2c5440fdce0c"
+    },
+    {
+      "base_commit" : "",
+      "class" : "feature-impl",
+      "id" : "ts-03",
+      "language" : "typescript",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "687753373ea9d49c96657e8c825088822bdb8fe765d27606d861d52b63739a00"
+    },
+    {
+      "base_commit" : "",
+      "class" : "repo-qa",
+      "id" : "ts-04",
+      "language" : "typescript",
+      "license" : "MIT",
+      "repo" : "original (written for this benchmark)",
+      "tree_sha256" : "26ee3f78fac5d60a2eb58be2b6fa574acf30d03e20304fb9602bcfeca9f3915b"
     }
   ],
   "version" : 2

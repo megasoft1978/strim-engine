@@ -132,6 +132,33 @@ extension SiteBuilder {
         return (errs, p.hrefs.count)
     }
 
+    /// Links between the two pages must land on an existing id (checkHTML only resolves same-page anchors).
+    func checkCrossAnchors(landing: String, benchmarks: String) -> [String] {
+        var a = LinkScan(), b = LinkScan()
+        a.feed(landing); b.feed(benchmarks)
+        var errs: [String] = []
+        for h in a.hrefs where h.hasPrefix("benchmarks.html#") && !b.ids.contains(String(h.dropFirst("benchmarks.html#".count))) { errs.append("index.html: missing anchor \(h)") }
+        for h in b.hrefs where h.hasPrefix("index.html#") && !a.ids.contains(String(h.dropFirst("index.html#".count))) { errs.append("benchmarks.html: missing anchor \(h)") }
+        return errs
+    }
+
+    /// README invariants of the redesign: short, one hero chart, install order, the not-faster line, loss rows visible.
+    func checkReadmeShape(_ readme: String) -> [String] {
+        var errs: [String] = []
+        let lines = readme.split(separator: "\n", omittingEmptySubsequences: false).count
+        if lines > README_MAX_LINES { errs.append("README has \(lines) lines, limit is \(README_MAX_LINES)") }
+        let imgs = readme.components(separatedBy: "](site/assets/").count - 1 + readme.components(separatedBy: "](docs/img/").count - 1
+        if imgs != 1 { errs.append("README must embed exactly one chart image, found \(imgs)") }
+        guard let brew = readme.range(of: "brew install megasoft1978/strim/strim"), let pull = readme.range(of: "strim pull"), let serve = readme.range(of: "strim serve ~/.strim/models") else {
+            return errs + ["README install block lacks brew, strim pull or strim serve"]
+        }
+        if !(brew.lowerBound < pull.lowerBound && pull.lowerBound < serve.lowerBound) { errs.append("README install order must be brew install, strim pull, strim serve") }
+        if !readme.contains("LOSS") && (H["cells"]?.arr ?? []).contains(where: { c in README_GLANCE.contains(c["id"]?.str ?? "") && RIVALS.contains { c["verdict"]?[$0]?.str == "LOSS" } }) {
+            errs.append("README results table hides a LOSS row")
+        }
+        return errs
+    }
+
     /// re.match(r"^[a-z]+://", h) or h.startswith("//")
     private func isExternal(_ h: String) -> Bool {
         if h.hasPrefix("//") { return true }
@@ -178,7 +205,7 @@ extension SiteBuilder {
             _ = missing
             let rawValue = f.raw["value"] ?? .null
             if rawValue.isNull && !f.isDerived { continue }
-            if f.isDerived { continue }
+            if f.isDerived || (f.raw["computed"]?.truthy ?? false) { continue }
             let src = f.sourcePath
             if !(src.hasPrefix("bench/results/") || src.hasPrefix("bench/soak/") || src.hasPrefix("docs/")) {
                 errs.append("\(i): source_path outside bench/results, bench/soak, docs: \(src)"); continue

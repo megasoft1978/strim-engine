@@ -1,0 +1,21 @@
+captures: L0_c0.safetensors L0_c3.safetensors L21_c0.safetensors L21_c3.safetensors L44_c0.safetensors L44_c3.safetensors  S=1024
+ACC f32 L0_c0.safetensors y rel nan max nan neq 0.411 | state rel nan | layer-out rel nan max nan
+ACC f32 L0_c3.safetensors y rel nan max nan neq 0.480 | state rel nan | layer-out rel nan max nan
+ACC f32 L21_c0.safetensors y rel nan max nan neq 0.765 | state rel nan | layer-out rel nan max nan
+ACC f32 L21_c3.safetensors y rel nan max nan neq 0.682 | state rel nan | layer-out rel nan max nan
+ACC f32 L44_c0.safetensors y rel nan max nan neq 0.526 | state rel nan | layer-out rel nan max nan
+ACC f32 L44_c3.safetensors y rel nan max nan neq 0.431 | state rel nan | layer-out rel nan max nan
+ACC bf16mm L0_c0.safetensors y rel nan max nan neq 0.474 | state rel nan | layer-out rel nan max nan
+ACC bf16mm L0_c3.safetensors y rel nan max nan neq 0.534 | state rel nan | layer-out rel nan max nan
+ACC bf16mm L21_c0.safetensors y rel nan max nan neq 0.800 | state rel nan | layer-out rel nan max nan
+ACC bf16mm L21_c3.safetensors y rel nan max nan neq 0.719 | state rel nan | layer-out rel nan max nan
+ACC bf16mm L44_c0.safetensors y rel nan max nan neq 0.598 | state rel nan | layer-out rel nan max nan
+ACC bf16mm L44_c3.safetensors y rel nan max nan neq 0.500 | state rel nan | layer-out rel nan max nan
+(bf16 output rounding floor: rel ~ 1.1e-3)
+TIMING S=1024 chained-serial layers=24 reps=8 (min)
+  kernel (shipped) 0.877 ms/layer
+  chunk64 f32 plain 4.266 ms/layer
+  chunk64 f32 compiled-step 4.136 ms/layer
+  chunk64 bf16-mm plain 4.428 ms/layer
+  chunk64 intra-chunk part only (no state loop) 3.247 ms/layer
+  chunk8 f32 plain (only C that is accurate) 7.644 ms/layer

@@ -10,12 +10,26 @@ public final class MTPState {
     public var seedTokenIndex: MLXArray?
     public var seedHidden: MLXArray?
 
-    public init() {}
-    public var position: Int { attention.offset }
+    /// Windowed head prefill: logical index of cache entry 0. A head that only saw the last W
+    /// prompt tokens holds entries `base ..< base + attention.offset`; everything that talks
+    /// about head positions (`position`, `trim`, SpecStream.reseed) uses the logical index, so
+    /// it stays aligned with the target cache. 0 for a head that covers the whole stream.
+    public var base = 0
 
-    /// Drop MTP cache entries above `n` (speculative entries that were not verified).
+    public init() {}
+    /// Logical head length: the index one past the last entry.
+    public var position: Int { base + attention.offset }
+
+    /// Drop MTP entries at logical index >= `n` (speculative entries that were not verified).
+    /// Trimming below the window start empties the head and moves the window to `n`.
     public func trim(to n: Int) {
-        let drop = attention.offset - n
+        let keep = n - base
+        if keep <= 0 {
+            if attention.offset > 0 { attention.rollback(attention.offset) }
+            base = max(n, 0)
+            return
+        }
+        let drop = attention.offset - keep
         if drop > 0 { attention.rollback(drop) }
     }
 }
@@ -82,7 +96,7 @@ public enum MTP {
         guard let dv = target.draftVocab else {
             return (try logits(for: hidden, target: target, head: head), nil)
         }
-        return (target.qmm(try head.rmsNorm("norm", hidden), dv.w, dv.s, dv.b), dv)
+        return (target.qmm(try head.rmsNorm("norm", hidden), dv.w, dv.s, dv.b, spec: dv.spec), dv)
     }
 
     /// `argMax` of the last position's logits as an `MLXArray` (`[1,1]`), for feeding

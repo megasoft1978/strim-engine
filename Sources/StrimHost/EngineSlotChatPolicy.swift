@@ -28,4 +28,5 @@ public struct PolicyCheckedChatBackend: ChatBackend {
     }
     public func cancelTurn(sessionID: String) async { await inner.cancelTurn(sessionID: sessionID) }
     public func closeSession(sessionID: String) async -> HarnessJobResult? { await inner.closeSession(sessionID: sessionID) }
+    public func setThinking(sessionID: String, enabled: Bool?) async { await inner.setThinking(sessionID: sessionID, enabled: enabled) }
 }

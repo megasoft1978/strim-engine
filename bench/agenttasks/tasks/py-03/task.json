@@ -1,0 +1,23 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 10,
+  "id" : "py-03",
+  "language" : "python",
+  "license" : "MIT",
+  "note" : "Python feature: Money str, operators, rounding multiply, allocate",
+  "prompt" : "This Python package is a small money type. tests\/test_money.py already contains tests for behaviour that is not implemented yet: `__str__`, arithmetic and ordering operators, scalar multiplication with round-half-even, `allocate`, `allocate_ratios`, `is_zero` and `abs`. Run `python3 -I -B -m unittest discover -s tests -t .` from the repository root (standard library unittest only; there is no pip and no network). Implement the feature in the package source so the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what you changed.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-python",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1258,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/__init__.py" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests\/test_money.py" : "325d453c5ab0f07ffd7da1207d3ff0b99c1a6b7e7a73106fae22543ca9edd47d"
+  },
+  "tree_sha256" : "34fcc4387bb0de679d98c63906cebe0add63d18e548161720a86ffd7f124cd09",
+  "verify_cmd" : "python3 -I -B -m unittest discover -s tests -t ."
+}

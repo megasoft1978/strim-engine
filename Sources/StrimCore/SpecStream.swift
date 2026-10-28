@@ -54,14 +54,33 @@ public final class SpecStream {
     /// `nextIndex - 1` (normally 0, so nextIndex = 1).
     public func enableSampling(_ cfg: SamplingConfig, nextIndex: Int = 1) { sampling = cfg; sampleIndex = nextIndex }
     public func disableSampling() { sampling = nil }
+    /// Optional token constraint (grammar / forced tokens). nil: no masking and no extra work per round.
+    public var constraint: VerifyConstraint?
 
     private var d: Int
+    /// Ceiling of the cost-per-token policy: 3 unless STRIM_MTP_MAX_DEPTH is set (depth 4 lost to fixed 3 on low-acceptance agent prompts, L16).
+    private var policyMax: Int { SpecStream.envMaxDepth ? maxDepth : min(maxDepth, 3) }
+    private static let envMaxDepth = ProcessInfo.processInfo.environment["STRIM_MTP_MAX_DEPTH"] != nil
     private let minD: Int
     private var acceptEWMA = 0.5
     private var roundsSinceChange = 0
-    private let timing = ProcessInfo.processInfo.environment["STRIM_TIMING"] != nil
+    /// EWMA of P(accepted prefix >= i), i = 1...4 (prior: measured 4K/16K/32K code, STRIM_MTP_FIXED=4 traces, L16).
+    private var survival: [Double] = [0.88, 0.75, 0.60, 0.45]
+    private let timing: Bool = { let v = ProcessInfo.processInfo.environment["STRIM_TIMING"]; return v != nil && v != "trace" }()
+    /// `STRIM_TIMING=trace` (trace only, no timing syncs): one stderr line per speculative round (context, depth used, accepted prefix, round ms).
+    private let trace = ProcessInfo.processInfo.environment["STRIM_TIMING"] == "trace"
     private var tDraft = 0.0, tVerify = 0.0, tReseed = 0.0
     private var syncs = 0, draftRounds = 0, depthSum = 0
+    /// STRIM_TIMING only: seconds the host spent blocked in a device read (`tWait`) and the
+    /// rest of the round, i.e. building graphs and host logic (`tHost`).
+    private var tWait = 0.0
+    /// Greedy rounds keep the draft tokens on the device and read drafts + target predictions
+    /// in ONE host read after the verify pass is queued (opt-in: `STRIM_SPEC_DEVICEFEED=1`; default off, measured below the 1.5 ms/pass gate; unset keeps the
+    /// extra read between the draft chain and the verify pass). Same ids, same arithmetic.
+    /// `STRIM_MTP_POLICY=legacy` restores the threshold controller (A/B); default is the cost-per-token policy.
+    static let ewmaPolicy = ProcessInfo.processInfo.environment["STRIM_MTP_POLICY"] != "legacy"
+    static let envDepth: Int? = Int(ProcessInfo.processInfo.environment["STRIM_MTP_DEPTH"] ?? "")
+    public static let deviceFeed = ProcessInfo.processInfo.environment["STRIM_SPEC_DEVICEFEED"] != nil
 
     private let lock = NSLock()
     private var cancelled = false
@@ -76,9 +95,13 @@ public final class SpecStream {
                 maxDepth: Int = QwenModel.defaultMaxDepth, maintainHead: Bool = true) {
         self.store = store; self.head = head; self.cache = cache; self.mtp = mtp
         self.pending = seedToken; self.lastHidden = lastHidden
+        // Bench knob: STRIM_MTP_DEPTH=N overrides the starting (or, with STRIM_MTP_FIXED=1, the fixed) draft depth.
+        let depth = depth > 0 ? (SpecStream.envDepth ?? depth) : depth
         self.depth = depth; self.layers = layers; self.chain = chain
         self.adaptive = adaptive; self.maxDepth = maxDepth; self.maintainHead = maintainHead
         self.d = min(max(depth, 0), maxDepth)
+        // Fixed depth 3 beat every other fixed depth and the threshold controller (L16), so start there.
+        if adaptive, SpecStream.ewmaPolicy, depth >= 2 { self.d = min(max(self.d, 3), SpecStream.envMaxDepth ? maxDepth : min(maxDepth, 3)) }
         // Depth 1 is never better than 2 on the measured prompts (depth sweep, 2026-10-25),
         // so adaptive only climbs to 3 and falls back to 2.
         self.minD = min(2, maxDepth)
@@ -132,8 +155,8 @@ public final class SpecStream {
         guard timing, stats.passes > 0 else { return }
         let n = Double(stats.passes)
         FileHandle.standardError.write(Data(String(
-            format: "ms/pass: mtp_draft %.1f, verify %.1f, reseed %.1f, rounds %d, depth avg %.2f, syncs/round %.2f\n",
-            tDraft / n * 1000, tVerify / n * 1000, tReseed / n * 1000,
+            format: "ms/pass: mtp_draft %.1f, verify %.1f, reseed %.1f, host_wait %.1f, rounds %d, depth avg %.2f, syncs/round %.2f\n",
+            tDraft / n * 1000, tVerify / n * 1000, tReseed / n * 1000, tWait / n * 1000,
             stats.passes, Double(depthSum) / Double(max(draftRounds, 1)), Double(syncs) / n).utf8))
     }
 
@@ -141,9 +164,13 @@ public final class SpecStream {
         let b = pending
         var drafts: [Int32] = []
         var feed: [Int32] = []
+        var feedDev: MLXArray? = nil
         var h = mtp.seedHidden
         let tA = Date()
-        if adaptive && depth > 0 && roundsSinceChange >= 2 {
+        if adaptive && depth > 0 && roundsSinceChange >= DepthPolicy.holdRounds && SpecStream.ewmaPolicy {
+            let nd = DepthPolicy.best(survival: survival, ctx: cache.position, current: d, minD: minD, maxD: policyMax)
+            if nd != d { d = nd; roundsSinceChange = 0 }
+        } else if adaptive && depth > 0 && !SpecStream.ewmaPolicy && roundsSinceChange >= 2 {
             // Hysteresis: move after two rounds at the current depth. Depth 4
             // costs a longer verify pass, so require higher acceptance to try it.
             let climb = d >= 3 ? 0.84 : 0.82
@@ -169,14 +196,23 @@ public final class SpecStream {
                     tokenIndex.append(try MTP.nextTokenIndex(o, target: store, head: head))
                     h = on
                 }
-                // Timing only: materialise the lazy draft chain before tDraft is read.
-                if timing { eval(tokenIndex) }
-                // The single host read in the draft chain: verify needs Swift ints.
                 var pieces: [MLXArray] = [MLXArray([b])]
-                pieces.append(contentsOf: tokenIndex.map { $0.reshaped([1]) })
-                feed = concatenated(pieces, axis: 0).asArray(Int32.self)
-                syncs += 1
-                drafts = Array(feed.dropFirst())
+                pieces.append(contentsOf: tokenIndex.map { $0.reshaped([1]).asType(.int32) })
+                let fd = concatenated(pieces, axis: 0)
+                if SpecStream.deviceFeed && sampling == nil && constraint == nil {
+                    // Verify consumes the device ids directly; the host reads them together
+                    // with the target predictions after the verify pass is queued.
+                    feedDev = fd
+                } else {
+                    // Timing only: materialise the lazy draft chain before tDraft is read.
+                    if timing { eval(tokenIndex) }
+                    // The host read in the draft chain: sampled verify needs Swift ints.
+                    let tW = Date()
+                    feed = fd.asArray(Int32.self)
+                    tWait += Date().timeIntervalSince(tW)
+                    syncs += 1
+                    drafts = Array(feed.dropFirst())
+                }
             case .host:
                 drafts.append(mtp.seedToken)
                 for _ in 1 ..< roundDepth {
@@ -195,18 +231,37 @@ public final class SpecStream {
 
             let tB = Date()
             cache.beginVerify()
-            let v = try QwenModel.forwardAll(tokens: feed, store: store, cache: cache, layers: layers)
+            let v: (hidden: MLXArray, logits: MLXArray)
+            if let fd = feedDev {
+                v = try QwenModel.forwardAll(indices: fd, store: store, cache: cache, layers: layers)
+            } else {
+                v = try QwenModel.forwardAll(tokens: feed, store: store, cache: cache, layers: layers)
+            }
             var preds: [Int32] = []
             var accepted = 0
             var nextTok: Int32 = 0
+            let vmask = constraint?.verifyMask(drafts: drafts)
             if let sc = sampling {
-                let (n, t) = SpecSampling.verify(logits: v.logits[0], drafts: drafts, config: sc, firstIndex: sampleIndex)
+                let (n, t) = SpecSampling.verify(logits: v.logits[0], drafts: drafts, config: sc, firstIndex: sampleIndex, mask: vmask)
+                let tW = Date()
                 let r = concatenated([n.reshaped([1]), t.reshaped([1])], axis: 0).asArray(Int32.self)
+                tWait += Date().timeIntervalSince(tW)
                 syncs += 1
                 accepted = Int(r[0]); nextTok = r[1]
                 sampleIndex += accepted + 1
             } else {
-                preds = argMax(v.logits, axis: -1).asArray(Int32.self)
+                let tW = Date()
+                if let fd = feedDev {
+                    let pd = argMax(v.logits, axis: -1).reshaped([-1]).asType(.int32)
+                    let all = concatenated([fd, pd], axis: 0).asArray(Int32.self)
+                    let m = roundDepth + 1
+                    feed = Array(all.prefix(m))
+                    drafts = Array(feed.dropFirst())
+                    preds = Array(all.dropFirst(m))
+                } else {
+                    preds = argMax(vmask.map { maskLogits(v.logits, $0) } ?? v.logits, axis: -1).asArray(Int32.self)
+                }
+                tWait += Date().timeIntervalSince(tW)
                 syncs += 1
                 for i in 0 ..< roundDepth {
                     if preds[i] == drafts[i] { accepted += 1 } else { break }
@@ -214,6 +269,9 @@ public final class SpecStream {
                 nextTok = preds[accepted]
             }
             if adaptive {
+                for i in 0 ..< min(roundDepth, survival.count) {
+                    survival[i] += DepthPolicy.alpha * ((accepted > i ? 1.0 : 0.0) - survival[i])
+                }
                 acceptEWMA = 0.7 * acceptEWMA + 0.3 * (Double(accepted) / Double(roundDepth))
             }
             roundsSinceChange += 1
@@ -239,16 +297,20 @@ public final class SpecStream {
                            hidden: vNorm[0..., 0 ..< (accepted + 1), 0...])
             lastHidden = vNorm[0..., accepted ..< (accepted + 1), 0...]
             tReseed += Date().timeIntervalSince(tC)
+            if trace {
+                FileHandle.standardError.write(Data(String(format: "TRACE ctx=%d d=%d acc=%d ms=%.2f\n", cache.position, roundDepth, accepted, Date().timeIntervalSince(tA) * 1000).utf8))
+            }
             return Array(feed.prefix(keep))
         } else {
             cache.beginVerify()
             let v = try QwenModel.forwardAll(tokens: [b], store: store, cache: cache, layers: layers)
             cache.endVerify()
+            let m0 = constraint?.verifyMask(drafts: [])
             if let sc = sampling {
-                pending = SpecSampling.sample(logits: v.logits[0, 0], config: sc, index: sampleIndex).item(Int32.self)
+                pending = SpecSampling.sample(logits: v.logits[0, 0], config: sc, index: sampleIndex, mask: m0.map { $0.reshaped([-1]) }).item(Int32.self)
                 sampleIndex += 1
             } else {
-                pending = argMax(v.logits, axis: -1).asArray(Int32.self)[0]
+                pending = argMax(m0.map { maskLogits(v.logits, $0) } ?? v.logits, axis: -1).asArray(Int32.self)[0]
             }
             syncs += 1
             stats.emitted += 1
@@ -348,5 +410,40 @@ public final class SpecStream {
         }
         try replayHead(tokens: tokens, hidden: hid)
         lastHidden = hn[0..., (m - 1) ..< m, 0...]
+    }
+}
+
+/// Adaptive draft-depth policy: pick the depth with the best expected emitted tokens per ms.
+/// Q(d) = 1 + sum_{i<=d} P(accepted prefix >= i); cost(d, ctx) is a fitted pass-time model
+/// (4K/16K/32K fixed-depth traces, L16: d2 43.9/46.3/54.2 ms, +3.5/5.8/6.6 ms per extra draft).
+/// Pure and timing-free, so the choice depends only on acceptance history and context.
+enum DepthPolicy {
+    static let alpha = 0.1
+    /// Rounds to stay at a depth before the policy may move (switching is not free).
+    static let holdRounds = 8
+    /// Relative rate gain needed to leave the current depth (hysteresis).
+    static let margin = 0.05
+
+    static func cost(depth: Int, ctx: Int) -> Double {
+        let k = Double(min(max(ctx, 0), 32768)) / 1024.0
+        return 42.5 + 0.35 * k + (3.3 + 3.3 * k / 32.0) * Double(depth - 2)
+    }
+
+    static func rate(depth: Int, survival: [Double], ctx: Int) -> Double {
+        var q = 1.0
+        for i in 0 ..< min(depth, survival.count) { q += survival[i] }
+        return q / cost(depth: depth, ctx: ctx)
+    }
+
+    static func best(survival: [Double], ctx: Int, current: Int, minD: Int, maxD: Int) -> Int {
+        let hi = min(maxD, survival.count)
+        guard hi >= minD else { return current }
+        var bestD = current, bestR = rate(depth: current, survival: survival, ctx: ctx)
+        let curR = bestR
+        for d in minD ... hi where d != current {
+            let r = rate(depth: d, survival: survival, ctx: ctx)
+            if r > bestR { bestR = r; bestD = d }
+        }
+        return bestR > curR * (1 + margin) ? bestD : current
     }
 }

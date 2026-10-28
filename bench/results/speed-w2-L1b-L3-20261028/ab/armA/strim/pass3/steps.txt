@@ -1,0 +1,15 @@
+session 08:19:16 cells=w4s1,w4s,w3,w5,replay load={ 5.56 5.66 6.31 } swap=total = 3072.00M  used = 1953.44M  free = 1118.56M  (encrypted)
+[08:19:19] engine pid 32453 ready after 4s
+[08:19:19] CELL warmup load={ 10.56 6.70 6.67 }
+[08:19:24] CELL warmup rc=0 5s memory_aborted=no
+[08:19:24] CELL w3 load={ 10.28 6.70 6.67 }
+[08:19:55] CELL w3 rc=0 31s memory_aborted=no
+[08:19:55] CELL w4s load={ 7.94 6.46 6.58 }
+[08:20:19] CELL w4s rc=0 24s memory_aborted=no
+[08:20:19] CELL w4s1 load={ 6.68 6.28 6.51 }
+[08:20:34] CELL w4s1 rc=0 15s memory_aborted=no
+[08:20:34] CELL w5 load={ 5.93 6.13 6.46 }
+[08:21:02] CELL w5 rc=0 28s memory_aborted=no
+[08:21:02] CELL replay load={ 4.89 5.87 6.35 }
+[08:21:58] CELL replay rc=0 56s memory_aborted=no
+end 08:21:58 load={ 3.86 5.35 6.12 } swap=total = 3072.00M  used = 1953.44M  free = 1118.56M  (encrypted)

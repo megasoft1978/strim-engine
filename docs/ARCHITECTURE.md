@@ -109,7 +109,7 @@ Routes (`StrimOpenAIServer.swift`):
 - Auth: `Authorization: Bearer <token>` or `x-api-key: <token>` (Anthropic SDKs). Comparison is constant-time. Failure is 401 with `WWW-Authenticate: Bearer`.
 - Priority: header `x-strim-priority: interactive|background`, else body `priority` or `strim_priority`. Default interactive. Other values are 400.
 - Unsupported input: image, video and document content blocks are rejected with 400 in every adapter.
-- `tool_choice`: `auto`, `none` (drops tools) and `required` are passed to the template. `required` is **not enforced** (no constrained decoding).
+- `tool_choice`: `auto`, `none` (drops tools), `required` and a named function. `required`/named are enforced by constrained decoding, see `docs/STRUCTURED-OUTPUT.md` (also `response_format`, `thinking_budget`).
 - Thinking: when tools are declared and `tool_choice != none`, `enable_thinking` is forced off (prompt ends `<think>\n\n</think>\n\n`), exposed as a `ReasoningPolicy`.
 
 Server defaults (`strim serve`): port 8203, 127.0.0.1 only, token from `~/.strim/token`, `--no-auth` for loopback dev only.
@@ -127,7 +127,7 @@ Server defaults (`strim serve`): port 8203, 127.0.0.1 only, token from `~/.strim
 - Budget: `STRIM_PREFIX_CACHE_MB`, default 12288 (`defaultBudgetMB`). LRU leaves are evicted when the accounted size exceeds budget.
   Accounting is about 215 MiB per node (`MemoryModel`). `STRIM_PREFIX_CACHE=0` disables the trie.
 - `Node.parent` is weak (children hold nodes strongly), so dropping a store frees it. Before this fix (`3321082`) the trie leaked.
-- In memory only. No disk persistence. No LCP or radix matching beyond aligned chunk prefixes.
+- In memory by default; opt-in disk spill and restore (`STRIM_PREFIX_DISK=1`, `docs/PREFIX-DISK-2026-10-28.md`). No LCP or radix matching beyond aligned chunk prefixes.
 - Check: `strim checkprefix <model> [N=4096] [sharedBlocks=3] [mtpHead]` asserts hit == miss, eviction parity, unrelated-prompt miss, and reports TTFT and cost.
 
 ---
@@ -222,8 +222,7 @@ Near-ties (bf16 rounding in differently ordered reductions) are the expected cau
 
 - SwiftUI chat app. `StrimApp` is an AppKit menu-bar status item only.
 - MCP endpoint (no MCP code in `Sources/`).
-- Disk-persisted prefix cache; LCP or radix matching.
-- Forced `tool_choice` (constrained decoding).
+- LCP or radix matching (the disk-persisted prefix cache shipped as opt-in, see `docs/PREFIX-DISK-2026-10-28.md`).
 - Image, video and document input.
 - Crash-recovery journal. `EngineStats.lastHeartbeat` is set; nothing reads it.
 - Swift-native Qwen3.6-35B-A3B (`qwen3_5_moe`, MoE). No MoE, router or expert code in `Sources/`. Weights are on disk in `models/qwen36-a3b-4bit`. Unsupported.
@@ -301,3 +300,11 @@ Dispatch: `Sources/StrimCLI/main.swift` (`args[1]`) and `Commands.swift` (`runEx
 - Benchmarks: `benchserve <model> <requests> <maxTokens> [slots] [mix] [ctx] [prefixMode]`; `benchprefill <model> <n> [reps]`; `benchbatch`; `benchbatchprefill`; `benchbatchsplit`; `benchbatchverify <model> <ctx> <B> [reps]`; `benchctx`; `benchppl`; `benchpass`; `benchpassS`; `benchpathS`; `benchlayer`; `benchmlp`; `benchops`; `benchfuse`; `benchcompile`; `benchgvS`; `benchqmm`; `benchqmmS`; `benchqmmM`; `benchsplit`; `benchsplitS`; `benchbuild`; `qgemv`; `probesplit`.
 
 Commands registered but unverified in behaviour: most `bench*` and `check*` commands are research tools; only the ones named in HANDOFF section 1 were exercised by the recorded logs.
+
+## Quantization config (L15)
+
+- Bits, group size and mode come from `config.json` `quantization` (else `quantization_config`) of the model dir and of the MTP head dir: global values plus mlx_lm per-module overrides (`"<module>": {"bits": 8, "group_size": 64}`; `false` = unquantized). Parser: `QuantConfig.swift`; per-tensor lookup `WeightStore.quantSpec`, used by every `linear`, `embedding`, `mlpFused`, draft-vocab and lm_head path.
+- Supported: affine, bits 2/3/4/5/6/8, group 32/64/128. Other modes (mxfp4/mxfp8/nvfp4) are refused with an error: the loaders need `.biases`.
+- Shapes are only a cross-check: K from the packed columns (`packed*32/bits`) must equal `scaleCols*groupSize`, else the load throws `quantization mismatch for <tensor>` naming the config spec and the shape-consistent alternatives. No silent fallback; a quantized tensor with no config block is an error.
+- gate_proj/up_proj fuse into one matmul only when their specs are equal; otherwise the unfused MLP path runs.
+- `PrefixDisk.fingerprint` includes the quant-config hash (`engineRev` r2); `/v1/strim/status` reports `quant_fingerprint` (`<model>/<head>`). The in-memory trie lives per loaded engine, so it never crosses quants.

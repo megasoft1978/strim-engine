@@ -1,0 +1,2 @@
+strim: mcp.allowedRoots is not set; delegated jobs are limited to /Users/user (credential directories such as ~/.strim, ~/.aws, ~/.ssh stay refused). Set mcp.allowedRoots in ~/.strim/config.json to narrow it.
+serve failed: another strim host is already running (pid 31727); lock: /Users/user/.strim/host.lock. Stop it first (two engines do not fit in memory).

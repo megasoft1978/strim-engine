@@ -1,0 +1,7 @@
+session 08:43:41 cells=replay load={ 5.36 6.65 6.98 } swap=total = 5120.00M  used = 3875.88M  free = 1244.12M  (encrypted)
+[08:43:43] engine pid 94214 ready after 3s
+[08:43:43] CELL warmup load={ 5.36 6.65 6.98 }
+[08:43:48] CELL warmup rc=0 5s memory_aborted=no
+[08:43:48] CELL replay load={ 5.41 6.64 6.98 }
+[08:43:57] CELL replay rc=0 9s memory_aborted=no
+end 08:43:57 load={ 4.97 6.51 6.92 } swap=total = 5120.00M  used = 3875.88M  free = 1244.12M  (encrypted)

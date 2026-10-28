@@ -1,0 +1,31 @@
+diff --git a/src/pricing.ts b/src/pricing.ts
+index dec7b77..4b3007f 100644
+--- a/src/pricing.ts
++++ b/src/pricing.ts
+@@ -18,8 +18,7 @@ export function subtotal(o: Order): Cents {
+ 
+ /** Tax on the discounted subtotal, rounded to whole cents. */
+ export function tax(o: Order): Cents {
+-  const gross = o.lines.reduce((sum, l) => sum + l.unitPrice * l.qty, 0);
+-  return roundCents((gross * o.taxBp) / 10000);
++  return roundCents((subtotal(o) * o.taxBp) / 10000);
+ }
+ 
+ export function total(o: Order): Cents {
+diff --git a/src/report.ts b/src/report.ts
+index d62299f..a0efc63 100644
+--- a/src/report.ts
++++ b/src/report.ts
+@@ -21,10 +21,10 @@ export function summarize(orders: Order[]): Summary[] {
+   for (const o of orders) {
+     const s = by.get(o.customer) ?? { customer: o.customer, orders: 0, spent: 0 };
+     s.orders += 1;
+-    s.spent += subtotal(o);
++    s.spent += total(o);
+     by.set(o.customer, s);
+   }
+-  return [...by.values()].sort((a, b) => a.spent - b.spent || a.customer.localeCompare(b.customer));
++  return [...by.values()].sort((a, b) => b.spent - a.spent || a.customer.localeCompare(b.customer));
+ }
+ 
+ export function receipt(o: Order): string {

@@ -1,0 +1,7 @@
+session 07:43:24 cells=w3 load={ 13.40 9.38 6.51 } swap=total = 4096.00M  used = 2593.00M  free = 1503.00M  (encrypted)
+[07:43:27] engine pid 31267 ready after 4s
+[07:43:27] CELL warmup load={ 14.17 9.61 6.61 }
+[07:43:33] CELL warmup rc=0 6s memory_aborted=no
+[07:43:33] CELL w3 load={ 15.76 10.01 6.77 }
+[07:44:07] CELL w3 rc=0 34s memory_aborted=no
+end 07:44:07 load={ 21.82 12.43 7.80 } swap=total = 4096.00M  used = 2585.00M  free = 1511.00M  (encrypted)

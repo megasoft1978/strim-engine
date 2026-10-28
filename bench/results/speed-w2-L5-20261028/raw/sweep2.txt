@@ -1,0 +1,37 @@
+IDENT rand S=1024 B=1: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+IDENT rand S=1000 B=1: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+IDENT rand S=2048 B=1: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+IDENT rand S=512 B=1: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+IDENT rand S=47 B=1: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+IDENT rand S=49 B=1: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+IDENT rand S=1 B=1: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+IDENT rand S=3 B=1: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+IDENT rand S=777 B=2: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+IDENT rand S=4096 B=1: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+IDENT captured cap78.safetensors: 48_32_b=OK 48_32_b_v=OK 48_32_b_x=OK 40_32_b_y=OK 40_32_b_vy=OK 40_32_b_vyx=OK 48_32_b_vx=OK 48_32_b_p=OK 48_32_b_px=OK 40_32_b_pyx=OK 32_32_b_pyx=OK 32_64_b_vyx=OK
+TIME S=1024 shipped 0.8518 ms
+TIME S=1024 48_32_b 0.8493 ms (1.000x vs first)
+TIME S=1024 48_32_b_v 0.8096 ms (1.049x vs first)
+TIME S=1024 48_32_b_x 0.8095 ms (1.049x vs first)
+TIME S=1024 40_32_b_y 0.7844 ms (1.083x vs first)
+TIME S=1024 40_32_b_vy 0.8028 ms (1.058x vs first)
+TIME S=1024 40_32_b_vyx 0.7450 ms (1.140x vs first)
+TIME S=1024 48_32_b_vx 0.7617 ms (1.115x vs first)
+TIME S=1024 48_32_b_p 0.8341 ms (1.018x vs first)
+TIME S=1024 48_32_b_px 0.7882 ms (1.078x vs first)
+TIME S=1024 40_32_b_pyx 0.7855 ms (1.081x vs first)
+TIME S=1024 32_32_b_pyx 0.7500 ms (1.132x vs first)
+TIME S=1024 32_64_b_vyx 0.8496 ms (1.000x vs first)
+TIME S=4096 shipped 3.4381 ms
+TIME S=4096 48_32_b 3.4391 ms (1.000x vs first)
+TIME S=4096 48_32_b_v 3.2234 ms (1.067x vs first)
+TIME S=4096 48_32_b_x 3.2835 ms (1.047x vs first)
+TIME S=4096 40_32_b_y 3.1198 ms (1.102x vs first)
+TIME S=4096 40_32_b_vy 3.1848 ms (1.080x vs first)
+TIME S=4096 40_32_b_vyx 2.9585 ms (1.162x vs first)
+TIME S=4096 48_32_b_vx 3.0327 ms (1.134x vs first)
+TIME S=4096 48_32_b_p 3.2872 ms (1.046x vs first)
+TIME S=4096 48_32_b_px 3.0983 ms (1.110x vs first)
+TIME S=4096 40_32_b_pyx 3.0260 ms (1.137x vs first)
+TIME S=4096 32_32_b_pyx 2.9417 ms (1.169x vs first)
+TIME S=4096 32_64_b_vyx 3.3496 ms (1.027x vs first)

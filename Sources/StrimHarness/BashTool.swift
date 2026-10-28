@@ -11,8 +11,10 @@ public struct BashTool: HarnessTool {
     public static let outputCap = 64 * 1024
 
     private let runner: CommandRunner
+    /// Refuse language-runner command lines the paid arms' `runtests` grammar would refuse (`ToolchainGuard`).
+    private let guardToolchains: Bool
 
-    public init(runner: CommandRunner) { self.runner = runner }
+    public init(runner: CommandRunner, guardToolchains: Bool = true) { self.runner = runner; self.guardToolchains = guardToolchains }
 
     public var name: String { "bash" }
 
@@ -34,10 +36,18 @@ public struct BashTool: HarnessTool {
     /// Sandboxed runner for one job: `.write` makes the workspace root writable, `.read` only the job tmp.
     public static func makeRunner(workspaceRoot: String, access: AccessLevel, jobTmp: String,
                                   gitWritable: [String] = [], gitControlDirs: [String] = [],
-                                  sandboxed: Bool = true) -> ProcessRunner {
-        let profile = SandboxProfile(access: access, writableRoots: access == .write ? [workspaceRoot] : [],
-                                     jobTmp: jobTmp, gitWritable: gitWritable, gitControlDirs: gitControlDirs)
-        return ProcessRunner(profile: profile, sandboxed: sandboxed)
+                                  sandboxed: Bool = true, home: String = NSHomeDirectory()) -> ProcessRunner {
+        let profile = jobProfile(workspaceRoot: workspaceRoot, access: access, jobTmp: jobTmp, gitWritable: gitWritable,
+                                 gitControlDirs: gitControlDirs, home: home)
+        return ProcessRunner(profile: profile, sandboxed: sandboxed, toolchains: true)
+    }
+
+    /// The job sandbox profile: default-deny reads of the home, plus read-only access to the three version roots the language
+    /// runners live in (`Toolchains.readable`: .nvm/versions, .rustup/toolchains, .rbenv/versions; never ~/.cargo, ~/.npmrc, caches or config).
+    public static func jobProfile(workspaceRoot: String, access: AccessLevel, jobTmp: String, gitWritable: [String] = [],
+                                  gitControlDirs: [String] = [], home: String = NSHomeDirectory()) -> SandboxProfile {
+        SandboxProfile(access: access, writableRoots: access == .write ? [workspaceRoot] : [], jobTmp: jobTmp, home: home,
+                       gitWritable: gitWritable, gitControlDirs: gitControlDirs, extraReadable: Toolchains.readable(home: home))
     }
 
     static func timeout(from v: OrderedJSON?) -> TimeInterval {
@@ -57,6 +67,9 @@ public struct BashTool: HarnessTool {
             return ToolResult(output: "error: 'command' must be a non-empty string", isError: true)
         }
         let command = Redactor.redact(raw)
+        if guardToolchains, let why = ToolchainGuard.check(command) {
+            return ToolResult(output: "bash: refused: \(why)\n[exit code: 64]", isError: true)
+        }
         let timeout = Self.timeout(from: args["timeout_s"])
         let out: CommandOutput
         do {

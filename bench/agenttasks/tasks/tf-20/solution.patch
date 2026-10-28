@@ -1,0 +1,53 @@
+diff --git a/Sources/Intervals/Gaps.swift b/Sources/Intervals/Gaps.swift
+index e75bdef..dc09687 100644
+--- a/Sources/Intervals/Gaps.swift
++++ b/Sources/Intervals/Gaps.swift
+@@ -7,9 +7,9 @@ public enum Gaps {
+             if b.end <= window.start { continue }
+             if b.start >= window.end { break }
+             if b.start > cursor { out.append(Interval(cursor, b.start)!) }
+-            cursor = b.end
++            cursor = max(cursor, b.end)
+         }
+-        if cursor <= window.end { out.append(Interval(cursor, window.end)!) }
++        if cursor < window.end { out.append(Interval(cursor, window.end)!) }
+         return out
+     }
+ }
+diff --git a/Sources/Intervals/Interval.swift b/Sources/Intervals/Interval.swift
+index 221d5d8..5203fb7 100644
+--- a/Sources/Intervals/Interval.swift
++++ b/Sources/Intervals/Interval.swift
+@@ -4,14 +4,14 @@ public struct Interval: Equatable {
+ 
+     /// Half-open [start, end). Empty intervals (start == end) are allowed; start > end is not.
+     public init?(_ start: Int, _ end: Int) {
+-        guard start < end else { return nil }
++        guard start <= end else { return nil }
+         self.start = start; self.end = end
+     }
+ 
+     public var length: Int { end - start }
+ 
+     /// Share at least one point of positive length.
+-    public func overlaps(_ o: Interval) -> Bool { start <= o.end && o.start <= end }
++    public func overlaps(_ o: Interval) -> Bool { start < o.end && o.start < end }
+ 
+     /// Overlap or are adjacent (end of one == start of the other).
+     public func touches(_ o: Interval) -> Bool { start <= o.end && o.start <= end }
+diff --git a/Sources/Intervals/Merge.swift b/Sources/Intervals/Merge.swift
+index e6df332..a1102e8 100644
+--- a/Sources/Intervals/Merge.swift
++++ b/Sources/Intervals/Merge.swift
+@@ -2,9 +2,9 @@ public enum Merge {
+     /// Sorted, non-touching union of the input.
+     public static func merge(_ xs: [Interval]) -> [Interval] {
+         var out: [Interval] = []
+-        for x in xs {
++        for x in xs.sorted(by: { $0.start < $1.start }) {
+             if let last = out.last, last.touches(x) {
+-                out[out.count - 1] = Interval(last.start, x.end)!
++                out[out.count - 1] = Interval(last.start, max(last.end, x.end))!
+             } else {
+                 out.append(x)
+             }

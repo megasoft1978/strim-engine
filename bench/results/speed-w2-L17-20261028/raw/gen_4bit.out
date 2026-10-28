@@ -1,0 +1,130 @@
+=== bench/results/speed-w2-L17-20261028/prompts/p01.json promptTokens=70 gen=249
+We need answer user's request: "Explain in three short paragraphs why the sky is blue and why sunsets are red." Need produce final with three short paragraphs. Need likely concise. Ensure three paragraphs. Could be: 1 sunlight scattering Rayleigh, shorter blue wavelengths scatter more, sky blue. 2 at sunset light travels longer path, blue scattered out, remaining red/orange. 3 maybe mention dust/aerosols enhance red, and direct sun appears red. Need exactly three short paragraphs. No need more.
+</think>
+
+Sunlight contains all colors of the rainbow. When it enters Earth’s atmosphere, shorter blue wavelengths scatter off air molecules more strongly than longer red wavelengths, so the scattered light we see from the sky is blue.
+
+At sunrise and sunset, sunlight travels through a much thicker layer of atmosphere to reach our eyes. Along that long path, most of the blue light is scattered away, leaving the remaining direct light richer in orange and red hues.
+
+Dust, smoke, and water droplets can make sunsets even redder by scattering and absorbing light in different ways. The result is a warm glow near the horizon, while the rest of the sky often fades into deeper blues and purples.<|im_end|>
+=== prefill 0.61s (114 tok/s) decode 31.25 tok/s peakFootprint=14.72 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p02.json promptTokens=77 gen=300
+We need to respond to user: "Write a short story (about 150 words) about a lighthouse keeper who finds a message in a bottle." Need produce final only story. Need about 150 words. Let's craft around 150 words. Count carefully. Need short story. Let's draft and count.
+
+Draft:
+"The lamp had guided ships for thirty years, but Elias had never expected the sea to answer.
+At dawn, a bottle lay on the black sand, green and swollen with salt. He carried it to the keeper’s cottage, where it rolled across the table and stopped near his cold tea.
+Inside, a folded paper bore a single line: If you are reading this, I am already home.
+Elias knew the handwriting. It belonged to his brother, lost in a storm the night the lighthouse went dark. He had mourned him for a decade, yet the words made no sense. Home? Which home?
+He climbed the tower, lit the lamp, and watched the horizon. All evening, no ship appeared. At midnight, a light blinked from the mainland—steady, patient, impossible.
+Elias smiled, and for the first time in years, the lighthouse felt less like a prison and more like a promise."
+
+Count words. Let's count manually.
+The(1) lamp2 had3 guided4 ships5 for6 thirty7 years8 but9 Elias10 had
+=== prefill 0.76s (102 tok/s) decode 27.76 tok/s peakFootprint=14.69 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p03.json promptTokens=69 gen=192
+We need answer user asks: "What are the main differences between TCP and UDP? Answer with a concise bullet list." Need produce final concise bullet list. Need ensure accurate. Include connection-oriented vs connectionless, reliability, ordering, flow control, congestion control, overhead, speed, use cases maybe. Keep concise.
+</think>
+
+- **Connection**: TCP is connection-oriented; UDP is connectionless.
+- **Reliability**: TCP guarantees delivery; UDP does not.
+- **Ordering**: TCP preserves message order; UDP may deliver out of order.
+- **Flow/Congestion Control**: TCP includes both; UDP does not.
+- **Overhead**: TCP has more overhead; UDP is lighter.
+- **Speed**: UDP is generally faster; TCP can be slower due to reliability features.
+- **Use Cases**: TCP for reliable data (web, email); UDP for speed-sensitive data (video, gaming, VoIP).<|im_end|>
+=== prefill 0.61s (113 tok/s) decode 16.10 tok/s peakFootprint=14.73 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p04.json promptTokens=65 gen=300
+We need to answer user: "Summarize the causes of the French Revolution in five sentences." Need produce exactly five sentences? Likely yes. Need concise. Ensure five sentences. Need maybe count. Let's craft 5 sentences.
+
+1. The French Revolution was caused by deep social inequality, as the privileged First and Second Estates were largely exempt from taxes while the Third Estate bore the fiscal burden.
+2. Financial crisis from costly wars, government debt, and inefficient tax collection forced King Louis XVI to seek new taxes, exposing the weakness of the monarchy.
+3. Enlightenment ideas about liberty, equality, and popular sovereignty inspired criticism of absolute monarchy and the old feudal order.
+4. Economic hardship, including poor harvests, bread shortages, and inflation, intensified popular anger and made the existing system seem untenable.
+5. The failure of the Estates-General to reform representation and taxation led to the Third Estate declaring itself the National Assembly, turning political grievance into revolutionary action.
+
+Count: 5. Good.
+</think>
+
+The French Revolution was caused by deep social inequality, as the privileged First and Second Estates were largely exempt from taxes while the Third Estate bore the fiscal burden.  
+Financial crisis from costly wars, government debt, and inefficient tax collection forced King Louis XVI to seek new taxes, exposing the weakness of the monarchy.  
+Enlightenment ideas about liberty, equality, and popular sovereignty inspired criticism of absolute monarchy and the old feudal order.  
+Economic hardship,
+=== prefill 1.98s (33 tok/s) decode 26.47 tok/s peakFootprint=14.70 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p05.json promptTokens=75 gen=300
+We need answer user: "Write a Python function that returns the n-th Fibonacci number iteratively, with a docstring and two example calls." Need provide code likely. Need final concise. Include function fib(n) iterative, docstring, two example calls. Need maybe handle n? Could define F(0)=0, F(1)=1. Include examples in docstring? User says with a docstring and two example calls. Could include examples in docstring and also actual calls? "two example calls" likely show calls. We can provide code block with function and examples. Ensure iterative. Maybe include if n<0 raise ValueError. Let's craft.
+</think>
+
+```python
+def fibonacci(n: int) -> int:
+    """
+    Return the n-th Fibonacci number using an iterative approach.
+
+    The sequence is defined as:
+        F(0) = 0
+        F(1) = 1
+        F(n) = F(n - 1) + F(n - 2) for n > 1
+
+    Examples:
+        >>> fibonacci(0)
+        0
+        >>> fibonacci(6)
+        8
+    """
+    if n < 0:
+        raise ValueError("n must be a non-negative integer")
+
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+
+    return a
+
+
+
+=== prefill 1.13s (67 tok/s) decode 30.23 tok/s peakFootprint=14.72 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p06.json promptTokens=71 gen=300
+We need answer user: "Write a Swift function that reverses the words in a string, and explain its time complexity." Need provide Swift code and complexity. Need think about what "reverses the words in a string" means. Could mean reverse order of words: "hello world" -> "world hello". Or reverse each word? Usually "reverses the words in a string" ambiguous. Could be reverse the order of words. Need maybe mention if you mean reverse each word, provide variant? The prompt likely expects function that reverses words in a string. We can implement reverse order of words, preserving single spaces? Need robust. Swift. Time complexity O(n) where n length of string, because split, reverse, join. But Swift String is UTF-8 view, characters. Need be careful with Unicode. Use components(separatedBy: " ") maybe multiple spaces? If want preserve spaces? Simpler: func reverseWords(_ s: String) -> String { s.split(separator: " ").reversed().joined(separator: " ") } But split omits empty subsequences, collapses multiple spaces. If need preserve spaces, more complex. Could use components(separatedBy: " ") and reverse, but multiple spaces produce empty strings and reversed may change spacing. Maybe acceptable. Need explain time complexity: O(n) time, O(n) space. If using split and reversed, O(n) to split, O(n) to reverse/join. If in-place?
+=== prefill 0.80s (89 tok/s) decode 28.79 tok/s peakFootprint=14.70 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p07.json promptTokens=75 gen=300
+We need answer user: "Write a bash one-liner that counts the number of lines in all .txt files under the current directory recursively." Need provide one-liner. Need think about robust options. Could use find . -type f -name '*.txt' -print0 | xargs -0 wc -l. But if no files, wc -l with no args reads stdin? xargs -0 wc -l with no input? Actually xargs -0 wc -l with no input will run wc -l once with no file args? Let's check: xargs command with no input: GNU xargs runs command once with no arguments unless -r. So wc -l with no args reads stdin, which is xargs stdin? It may hang? In pipeline, xargs stdin is empty, wc reads stdin from xargs? If no args, wc -l reads stdin, which is empty? It might output 0. But safer: find ... -print0 | xargs -0 -r wc -l. But if want total only, can use awk sum: find . -type f -name '*.txt' -print0 | xargs -0 -r wc -l | awk 'END {print $1}'? But wc output includes per-file and total if multiple files. If one file, no total line? Actually wc -l file1 file2 outputs per file and total. If one file, only per file. If no files
+=== prefill 0.66s (114 tok/s) decode 18.14 tok/s peakFootprint=14.73 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p08.json promptTokens=80 gen=220
+We need answer user: "Fix the bug: def avg(xs): return sum(xs)/len(xs)  # crashes on empty list. Show the corrected code only."
+Need provide corrected code only. Need likely handle empty list. What should return? Could return 0? Or None? The bug crashes on empty list. Need fix. Usually average of empty list undefined; can return 0 or None. User asks show corrected code only. Need choose robust. Maybe:
+def avg(xs):
+    return sum(xs) / len(xs) if xs else 0
+Or if not xs: return 0. But if empty, average maybe 0. Could also raise ValueError? But "crashes on empty list" fix likely avoid crash. Return 0 for empty. Need only code. Ensure syntax. Could be one-liner: def avg(xs): return sum(xs)/len(xs) if xs else 0
+Need final only code. No explanation.
+</think>
+
+def avg(xs):
+    return sum(xs) / len(xs) if xs else 0<|im_end|>
+=== prefill 0.97s (83 tok/s) decode 29.45 tok/s peakFootprint=14.71 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p09.json promptTokens=347 gen=92
+The user is asking for the current weather in Rome. I should use the get_weather tool. The unit parameter is optional, so I can either omit it or specify celsius. Let's just call it with the city name "Rome".
+</think>
+
+<tool_call>
+<function=get_weather>
+<parameter=city>
+Rome
+</parameter>
+<parameter=unit>
+celsius
+</parameter>
+</function>
+</tool_call><|im_end|>
+=== prefill 0.91s (380 tok/s) decode 30.97 tok/s peakFootprint=15.56 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p10.json promptTokens=377 gen=55
+The user wants to read the file src/main.rs and tell them how many lines it has. Let's read the file.
+</think>
+
+<tool_call>
+<function=read_file>
+<parameter=path>
+src/main.rs
+</parameter>
+</function>
+</tool_call><|im_end|>
+=== prefill 1.08s (348 tok/s) decode 31.25 tok/s peakFootprint=15.57 GiB

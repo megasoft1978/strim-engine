@@ -1,0 +1,7 @@
+[14:25:22] start A3b_sdpa load={ 9.67 8.46 6.28 } swap=total = 6144.00M  used = 4902.38M  free = 1241.62M  (encrypted)
+sdpa qL= 1024 kL= 32768: 19.345 ms/layer, 0.59 ns per (q,k) pair per layer, 16-layer call 309.5 ms
+sdpa qL= 1536 kL= 32768: 30.265 ms/layer, 0.62 ns per (q,k) pair per layer, 16-layer call 484.2 ms
+sdpa qL=  523 kL= 32779: 16.140 ms/layer, 0.95 ns per (q,k) pair per layer, 16-layer call 258.2 ms
+sdpa qL=   11 kL= 32779: 2.594 ms/layer, 7.20 ns per (q,k) pair per layer, 16-layer call 41.5 ms
+sdpa qL= 1035 kL= 16395: 12.023 ms/layer, 0.73 ns per (q,k) pair per layer, 16-layer call 192.4 ms
+[14:25:26] end rc=0 aborted=0

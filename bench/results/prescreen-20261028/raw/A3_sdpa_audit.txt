@@ -1,0 +1,12 @@
+fixed1024    prompt  4107:  5 calls/layer-group: 4 fused, 1 fallback | sdpa fused 79 ms, fallback(1x..4x) 0.4..1.7 ms => fallback share of SDPA 0.53%..2.11%
+   qL=1024/kL=1024/fused-NAX  qL=1024/kL=2048/fused-NAX  qL=1024/kL=3072/fused-NAX  qL=1024/kL=4096/fused-NAX  qL=11/kL=4107/fallback (last calls)
+fixed1024    prompt 16395: 17 calls/layer-group: 16 fused, 1 fallback | sdpa fused 1266 ms, fallback(1x..4x) 1.7..6.8 ms => fallback share of SDPA 0.13%..0.53%
+   qL=1024/kL=14336/fused-NAX  qL=1024/kL=15360/fused-NAX  qL=1024/kL=16384/fused-NAX  qL=11/kL=16395/fallback (last calls)
+fixed1024    prompt 32779: 33 calls/layer-group: 32 fused, 1 fallback | sdpa fused 5063 ms, fallback(1x..4x) 3.4..13.6 ms => fallback share of SDPA 0.07%..0.27%
+   qL=1024/kL=30720/fused-NAX  qL=1024/kL=31744/fused-NAX  qL=1024/kL=32768/fused-NAX  qL=11/kL=32779/fallback (last calls)
+prod-cap1536 prompt  4107:  3 calls/layer-group: 3 fused, 0 fallback | sdpa fused 80 ms, fallback(1x..4x) 0.0..0.0 ms => fallback share of SDPA 0.00%..0.00%
+   qL=1536/kL=1536/fused-NAX  qL=1536/kL=3072/fused-NAX  qL=1035/kL=4107/fused-NAX (last calls)
+prod-cap1536 prompt 16395: 11 calls/layer-group: 11 fused, 0 fallback | sdpa fused 1267 ms, fallback(1x..4x) 0.0..0.0 ms => fallback share of SDPA 0.00%..0.00%
+   qL=1536/kL=12288/fused-NAX  qL=1536/kL=13824/fused-NAX  qL=1536/kL=15360/fused-NAX  qL=1035/kL=16395/fused-NAX (last calls)
+prod-cap1536 prompt 32779: 22 calls/layer-group: 21 fused, 1 fallback | sdpa fused 4906 ms, fallback(1x..4x) 160.4..641.5 ms => fallback share of SDPA 3.17%..11.56%
+   qL=1536/kL=29184/fused-NAX  qL=1536/kL=30720/fused-NAX  qL=1536/kL=32256/fused-NAX  qL=523/kL=32779/fallback (last calls)

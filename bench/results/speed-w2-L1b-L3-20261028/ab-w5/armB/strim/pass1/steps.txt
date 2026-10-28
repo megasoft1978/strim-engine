@@ -1,0 +1,7 @@
+session 09:15:00 cells=w5 load={ 2.79 3.02 3.59 } swap=total = 5120.00M  used = 3723.81M  free = 1396.19M  (encrypted)
+[09:15:02] engine pid 26825 ready after 3s
+[09:15:02] CELL warmup load={ 3.21 3.11 3.61 }
+[09:15:07] CELL warmup rc=0 5s memory_aborted=no
+[09:15:07] CELL w5 load={ 3.11 3.09 3.60 }
+[09:15:35] CELL w5 rc=0 28s memory_aborted=no
+end 09:15:35 load={ 3.02 3.06 3.58 } swap=total = 5120.00M  used = 3723.81M  free = 1396.19M  (encrypted)

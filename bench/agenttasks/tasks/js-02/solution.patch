@@ -1,0 +1,29 @@
+diff --git a/lib/parse.js b/lib/parse.js
+index 6c94fad..6a5f0e5 100644
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -1,7 +1,7 @@
+ 'use strict';
+ 
+ const PREC = { '+': 1, '-': 1, '*': 2, '/': 2, '^': 3 };
+-const RIGHT = new Set([]);
++const RIGHT = new Set(['^']);
+ 
+ /** Recursive precedence-climbing parser. Returns an AST: {num}, {op, left, right} or {neg}. */
+ function parse(tokens) {
+diff --git a/lib/tokenize.js b/lib/tokenize.js
+index f012024..3fc4de6 100644
+--- a/lib/tokenize.js
++++ b/lib/tokenize.js
+@@ -7,9 +7,9 @@ function tokenize(src) {
+   while (i < src.length) {
+     const c = src[i];
+     if (c === ' ' || c === '\t') { i++; continue; }
+-    if (/[0-9]/.test(c)) {
++    if (/[0-9.]/.test(c)) {
+       let j = i;
+-      while (j < src.length && /[0-9]/.test(src[j])) j++;
++      while (j < src.length && /[0-9.]/.test(src[j])) j++;
+       out.push({ type: 'num', value: Number(src.slice(i, j)) });
+       i = j;
+       continue;

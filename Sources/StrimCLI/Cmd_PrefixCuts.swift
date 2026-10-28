@@ -132,6 +132,32 @@ func runPrefixCuts(_ args: [String]) {
             let sameTop = argMax(a.logits).item(Int32.self) == argMax(b.logits).item(Int32.self)
             print("NUMERICS fixed1024 vs policy \(policy.minBlock)/\(policy.maxBlock) on 16K: max|dlogit| \(d) argmax \(sameTop ? "same" : "DIFFERENT")")
         }
+        // (f) tail merge: a short chat prompt (body + generation prompt) is one chunk; numerics vs the old 512 + tail split.
+        if env["STRIM_CUTS_SKIP_NUMERICS"] == nil {
+            print("(f) tail merge (floor \(policy.tailFloor), max \(policy.tailMergeMax))")
+            let oldPolicy = CutPolicy(maxBlock: policy.maxBlock, minBlock: policy.minBlock, boundary: policy.boundary,
+                                      assistant: policy.assistant, assistantMin: policy.assistantMin)
+            for n in [300, 512, 700] {
+                let short = msgTokens(n, seed: 9) + gen + [151_667]       // + one more tail token (think)
+                let t0 = Date()
+                let m = try PrefixPrefill.run(tokens: short, store: model, cache: nil); eval(m.logits)
+                let tm = Date().timeIntervalSince(t0)
+                let t1 = Date()
+                let o = try PrefixPrefill.run(tokens: short, store: model, cache: PrefixStore(budgetBytes: 64 << 30, policy: oldPolicy)); eval(o.logits)
+                let to = Date().timeIntervalSince(t1)
+                let d = abs(m.logits.asType(.float32) - o.logits.asType(.float32)).max().item(Float.self)
+                let same = argMax(m.logits).item(Int32.self) == argMax(o.logits).item(Int32.self)
+                print(String(format: "NUMERICS tailmerge n=%d: max|dlogit| %.4f argmax %@ (merged %.3fs, split %.3fs)", short.count, d, same ? "same" : "DIFFERENT", tm, to))
+                check("tail-merged argmax unchanged n=\(short.count)", same)
+                // hit == miss on the merged policy: a longer follow-up prompt through a store that saw the short one
+                let longer = short + msgTokens(900, seed: 11) + gen
+                let st = PrefixStore(budgetBytes: 64 << 30)
+                _ = try PrefixPrefill.run(tokens: short, store: model, cache: st)
+                let miss = try PrefixPrefill.run(tokens: longer, store: model, cache: nil)
+                let hit = try PrefixPrefill.run(tokens: longer, store: model, cache: st)
+                check("tail-merged store: follow-up hit == miss n=\(short.count)", hashArray(hit.logits) == hashArray(miss.logits), "matched \(hit.matchedTokens)")
+            }
+        }
     } catch {
         print("checkprefixcuts failed: \(error)"); exit(1)
     }

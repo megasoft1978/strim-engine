@@ -1,0 +1,39 @@
+diff --git a/src/Cart.jsx b/src/Cart.jsx
+index 18d67c2..18d1c34 100644
+--- a/src/Cart.jsx
++++ b/src/Cart.jsx
+@@ -10,7 +10,7 @@ export function Cart({ items }) {
+   return (
+     <section className="cart">
+       <h2>Cart ({itemCount(count)})</h2>
+-      {items.length && (
++      {items.length > 0 && (
+         <table>
+           <tbody>
+             {items.map((it) => (
+diff --git a/src/CartRow.jsx b/src/CartRow.jsx
+index 09af864..068eeb4 100644
+--- a/src/CartRow.jsx
++++ b/src/CartRow.jsx
+@@ -1,7 +1,7 @@
+ import { formatPrice } from './format.js';
+ 
+ export function CartRow({ item }) {
+-  const lineTotal = item.price + item.qty;
++  const lineTotal = item.price * item.qty;
+   return (
+     <tr data-sku={item.sku}>
+       <td className="name">{item.name}</td>
+diff --git a/src/format.js b/src/format.js
+index f22b81c..5e9d59e 100644
+--- a/src/format.js
++++ b/src/format.js
+@@ -4,7 +4,7 @@ export function formatPrice(cents) {
+   const abs = Math.abs(cents);
+   const dollars = Math.floor(abs / 100);
+   const rest = abs % 100;
+-  return `${sign}$${dollars}.${rest}`;
++  return `${sign}$${dollars}.${String(rest).padStart(2, "0")}`;
+ }
+ 
+ /** "3 items", "1 item", "no items". */

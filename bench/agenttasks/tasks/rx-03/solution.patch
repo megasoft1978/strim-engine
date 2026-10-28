@@ -1,0 +1,85 @@
+diff --git a/src/Field.jsx b/src/Field.jsx
+index 7c5d074..b5e33c2 100644
+--- a/src/Field.jsx
++++ b/src/Field.jsx
+@@ -1,8 +1,19 @@
+-export function Field({ name, label, type = 'text', value = '' }) {
++export function Field({ name, label, type = 'text', value = '', error }) {
++  const errorId = `${name}-error`;
+   return (
+     <div className="field">
+       <label htmlFor={name}>{label}</label>
+-      <input id={name} name={name} type={type} defaultValue={value} />
++      <input
++        id={name}
++        name={name}
++        type={type}
++        defaultValue={value}
++        aria-invalid={error ? 'true' : undefined}
++        aria-describedby={error ? errorId : undefined}
++      />
++      {error ? (
++        <p id={errorId} role="alert" className="error">{error}</p>
++      ) : null}
+     </div>
+   );
+ }
+diff --git a/src/SignupForm.jsx b/src/SignupForm.jsx
+index a92bbb4..2ad0bb9 100644
+--- a/src/SignupForm.jsx
++++ b/src/SignupForm.jsx
+@@ -1,10 +1,21 @@
+ import { Field } from './Field.jsx';
+ 
+-export function SignupForm({ values = {} }) {
++export function SignupForm({ values = {}, errors = {} }) {
++  const entries = Object.entries(errors);
+   return (
+     <form className="signup" noValidate>
+-      <Field name="email" label="Email" type="email" value={values.email} />
+-      <Field name="password" label="Password" type="password" />
++      {entries.length > 0 && (
++        <div className="summary" role="alert">
++          <p>{entries.length === 1 ? '1 problem' : `${entries.length} problems`}</p>
++          <ul>
++            {entries.map(([name, message]) => (
++              <li key={name}><a href={`#${name}`}>{message}</a></li>
++            ))}
++          </ul>
++        </div>
++      )}
++      <Field name="email" label="Email" type="email" value={values.email} error={errors.email} />
++      <Field name="password" label="Password" type="password" error={errors.password} />
+       <button type="submit">Create account</button>
+     </form>
+   );
+diff --git b/src/validate.js b/src/validate.js
+new file mode 100644
+index 0000000..783ff71
+--- /dev/null
++++ b/src/validate.js
+@@ -0,0 +1,24 @@
++const titleCase = (s) => s.charAt(0).toUpperCase() + s.slice(1);
++
++/**
++ * rules: { field: { required?, minLength?, pattern?, message? } }.
++ * Returns { field: message } for the first failing rule of each field; {} when valid.
++ */
++export function validate(values, rules) {
++  const errors = {};
++  for (const [name, rule] of Object.entries(rules)) {
++    const label = titleCase(name);
++    const raw = values[name];
++    const value = typeof raw === 'string' ? raw.trim() : raw;
++    if (value === undefined || value === null || value === '') {
++      if (rule.required) errors[name] = `${label} is required`;
++      continue;
++    }
++    if (rule.minLength !== undefined && String(value).length < rule.minLength) {
++      errors[name] = `${label} must be at least ${rule.minLength} characters`;
++    } else if (rule.pattern && !rule.pattern.test(String(value))) {
++      errors[name] = rule.message || `${label} is invalid`;
++    }
++  }
++  return errors;
++}

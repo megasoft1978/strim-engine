@@ -197,3 +197,31 @@ private let statusJSON = #"{"state":"ready","model":"m","memory":{"weights_gb":1
         #expect(p.feed(line: "") == SSEParser.Frame(event: nil, data: "x"))
     }
 }
+
+extension HTTPControlClientTests {   // same serialized suite: the stub handler is global
+    fileprivate func run<T: Sendable>(_ body: String, _ f: (HTTPControlClient) async throws -> T) async throws -> (T, URLRequest, Data) {
+        let (c, p) = try makeClient(); defer { try? FileManager.default.removeItem(atPath: p) }
+        StubProtocol.handler = { _ in .response(status: 200, body: body, headers: [:]) }
+        let v = try await f(c)
+        return (v, StubProtocol.seen[0], StubProtocol.seenBodies[0])
+    }
+    @Test func pauseResumeCancel() async throws {
+        let (s, r, b) = try await run(#"{"cancelled":1,"paused":true,"queued":2,"running":0}"#) { try await $0.pauseJobs(PauseRequest(cancelRunning: true)) }
+        #expect(s.paused && s.cancelled == 1 && r.url?.path == "/v1/strim/pause" && r.httpMethod == "POST")
+        #expect(String(decoding: b, as: UTF8.self) == #"{"cancel_running":true}"#)
+        let (s2, r2, _) = try await run(#"{"cancelled":0,"paused":false,"queued":0,"running":0}"#) { try await $0.resumeJobs() }
+        #expect(!s2.paused && r2.url?.path == "/v1/strim/resume" && r2.httpMethod == "POST")
+        let (c, r3, b3) = try await run(#"{"cancelled":true,"job_id":"j_a","status":"cancelled"}"#) { try await $0.cancelJob(JobCancelRequest(jobID: "j_a")) }
+        #expect(c.cancelled && r3.url?.path == "/v1/strim/jobs/cancel" && String(decoding: b3, as: UTF8.self) == #"{"job_id":"j_a"}"#)
+    }
+    @Test func modelsAndPack() async throws {
+        let (m, r, _) = try await run(#"{"models":[{"kind":"model","name":"Q","path":"/m/Q"}]}"#) { try await $0.models() }
+        #expect(m.models.first?.name == "Q" && r.url?.path == "/v1/strim/models" && r.httpMethod == "GET")
+        let (p, r2, _) = try await run(#"{"active_fingerprint":"aaaaaaaaaaaaaaaa","pack_count":1}"#) { try await $0.pack() }
+        #expect(p.activeFingerprint == "aaaaaaaaaaaaaaaa" && r2.url?.path == "/v1/strim/pack")
+    }
+    @Test func chatAppendCarriesThinking() async throws {
+        let (_, _, b) = try await run("{}") { try await $0.chatAppend(ChatAppendRequest(sessionID: "s", text: "t", enableThinking: false)) }
+        #expect(String(decoding: b, as: UTF8.self).contains(#""enable_thinking":false"#))
+    }
+}

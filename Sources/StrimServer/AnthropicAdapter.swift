@@ -68,22 +68,41 @@ enum AnthropicAdapter {
         if let tc = root["tool_choice"], let ty = tc["type"]?.stringValue {
             switch ty {
             case "auto": chat.append(("tool_choice", .string("auto")))
-            case "any", "tool": chat.append(("tool_choice", .string("required")))   // not enforced (no constrained decoding)
+            case "any": chat.append(("tool_choice", .string("required")))
+            case "tool":
+                guard let n = tc["name"]?.stringValue, !n.isEmpty else { throw APIError.badRequest("tool_choice.name: Field required") }
+                chat.append(("tool_choice", .ordered([("type", .string("function")), ("function", .ordered([("name", .string(n))]))])))
             case "none": chat.append(("tool_choice", .string("none")))
             default: throw APIError.badRequest("tool_choice.type: unsupported value '\(ty)'")
             }
+            if tc["disable_parallel_tool_use"]?.boolValue == true { chat.append(("parallel_tool_calls", .bool(false))) }
         }
 
         // thinking
         var enable = false
         if let th = root["thinking"], let ty = th["type"]?.stringValue {
             switch ty {
-            case "enabled", "adaptive": enable = true
+            case "enabled", "adaptive":
+                enable = true
+                if let b = th["budget_tokens"], !b.isNull {
+                    guard let n = b.intValue, n >= 0 else { throw APIError.badRequest("thinking.budget_tokens: must be a non-negative integer") }
+                    chat.append(("thinking_budget", .int(n)))
+                }
             case "disabled": enable = false
             default: throw APIError.badRequest("thinking.type: unsupported value '\(ty)'")
             }
         }
         chat.append(("chat_template_kwargs", .ordered([("enable_thinking", .bool(enable))])))
+
+        // structured output (Messages API `output_config.format`, legacy `output_format`)
+        if let f = root["output_config"]?["format"] ?? root["output_format"], !f.isNull {
+            switch f["type"]?.stringValue {
+            case "json_schema"?:
+                guard let schema = f["schema"], case .object = schema else { throw APIError.badRequest("output_config.format.schema: Field required") }
+                chat.append(("response_format", .ordered([("type", .string("json_schema")), ("json_schema", .ordered([("name", .string("output")), ("schema", schema)]))])))
+            default: throw APIError.badRequest("output_config.format.type: unsupported value (use json_schema)")
+            }
+        }
 
         // sampling
         if let mt = root["max_tokens"], !mt.isNull {

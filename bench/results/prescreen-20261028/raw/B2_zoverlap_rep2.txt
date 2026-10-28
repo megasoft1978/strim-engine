@@ -1,0 +1,8 @@
+[14:19:15] start B2_zoverlap_rep2 load={ 5.38 5.00 4.50 } swap=total = 7168.00M  used = 6209.56M  free = 958.44M  (encrypted)
+zoverlap M=1024 layers=48 reps=12 (min of reps; chained, rotated weights over 12 real GDN layers)
+  indep total 157.08 ms  3.273 ms/layer
+  dep total 162.19 ms  3.379 ms/layer
+  indep_swapped_operands total 168.98 ms  3.520 ms/layer
+  dep_swapped_operands total 166.07 ms  3.460 ms/layer
+RESULT overlap saving dep-indep = 0.106 ms/layer (operand order A), -0.061 ms/layer (order B); kill if < 0.3
+[14:19:24] end rc=0 aborted=0

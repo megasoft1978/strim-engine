@@ -1,13 +1,13 @@
 import Foundation
 import StrimAgentBench
 
-// strim agentbench run    [--arms H,C | H,C,P,M] [--tasks N|all  (N = tasks PER CLASS, first N sorted ids of each class)] [--task-ids a,b] [--classes c1,c2] [--reps N=1]
+// strim agentbench run    [--arms H,C | H,C,P,M] [--tasks N|all  (N = tasks PER CLASS, first N sorted ids of each class)] [--task-ids a,b] [--classes c1,c2] [--languages go,rust,...] [--pilot-per-language N] [--reps N=1]
 //                         [--seed S] [--out DIR] [--ledger FILE] [--tasks-dir DIR] [--model DIR] [--head DIR]
 //                         [--port N=8231] [--attach] [--token-file FILE] [--strim-bin PATH] [--claude-bin PATH]
 //                         [--parent-model sonnet] [--timeout-s 900] [--verify-timeout-s 300]
 //                         [--allow-paid --max-parent-runs N] [--dry-run] [--lock-held] [--lock-path P] [--lock-wait-s S]
 //                         [--keep-workdirs]
-// strim agentbench validate [--tasks-dir D] [--task-ids a,b]   offline: verify fails on each snapshot, passes with solution.patch
+// strim agentbench validate [--tasks-dir D] [--task-ids a,b] [--languages l1,l2] [--pilot-per-language N]   offline: verify fails on each snapshot, passes with solution.patch
 // strim agentbench prepare  [--tasks-dir D] [--write]           check (or rewrite) tree/test hashes and manifest.json
 // strim agentbench report <ledger> [--out results.json] [--include-dry-run]
 //
@@ -59,7 +59,8 @@ func runAgentBench(_ args: [String]) {
     case "validate", "prepare":
         let root = URL(fileURLWithPath: PathArgs.absolute(opts["tasks-dir"] ?? "bench/agenttasks"))
         let ids = (opts["task-ids"] ?? "").split(separator: ",").map(String.init)
-        let tasks = TaskLoader.select(TaskLoader.load(root: root), limit: nil, ids: ids, classes: [])
+        let langs = (opts["languages"] ?? "").split(separator: ",").map(String.init)
+        let tasks = TaskLoader.select(TaskLoader.load(root: root), limit: nil, ids: ids, classes: [], languages: langs, pilotPerLanguage: opts["pilot-per-language"].flatMap(Int.init))
         if tasks.isEmpty { fail("no tasks found under \(root.path)") }
         let scratch = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("agentbench-\(args[2])-\(getpid())")
         try? FileManager.default.createDirectory(at: scratch, withIntermediateDirectories: true)
@@ -105,7 +106,8 @@ private func runAgentBenchRun(opts: [String: String], flags: Set<String>, fail: 
     let limit: Int? = opts["tasks"].flatMap { $0 == "all" ? nil : Int($0) }
     let ids = (opts["task-ids"] ?? "").split(separator: ",").map(String.init)
     let classes = (opts["classes"] ?? "").split(separator: ",").map(String.init)
-    tasks = TaskLoader.select(tasks, limit: limit, ids: ids, classes: classes)
+    let languages = (opts["languages"] ?? "").split(separator: ",").map(String.init)
+    tasks = TaskLoader.select(tasks, limit: limit, ids: ids, classes: classes, languages: languages, pilotPerLanguage: opts["pilot-per-language"].flatMap(Int.init))
     if tasks.isEmpty { fail("no tasks found under \(tasksDir.path)") }
 
     let stamp: String = {
@@ -174,6 +176,12 @@ private func runAgentBenchRun(opts: [String: String], flags: Set<String>, fail: 
     let srv = server
     let runner = BenchRunner(config: cfg, tasks: tasks, executors: executors, healthCheck: srv.map { s in { s.isAlive } }) { print($0); fflush(stdout) }
     if !dry { runner.selfCheck = { SelfCheck.check(language: $0, scratch: $1) } }
+    if !dry, arms.contains(where: { $0 == .P || $0 == .M }) {
+        let scratch = workRoot.appendingPathComponent("preflight")
+        try? fm.createDirectory(at: scratch, withIntermediateDirectories: true)
+        if let why = SelfCheck.checkPaidBash(scratch: scratch, claudeBin: opts["claude-bin"] ?? NSHomeDirectory() + "/.local/bin/claude") { fail("infra: \(why)") }
+        print("preflight: paid Bash sandbox ok")
+    }
     do {
         let s = try runner.run()
         print("planned \(s.planned), skipped (already in ledger) \(s.skipped), executed \(s.executed), passed \(s.passed)"

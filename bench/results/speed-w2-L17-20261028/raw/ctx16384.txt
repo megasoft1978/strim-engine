@@ -1,0 +1,5 @@
+[16:55:10] start ctx16384 load={ 4.70 4.59 4.23 } swap=total = 9216.00M  used = 7672.31M  free = 1543.69M  (encrypted)
+[mem] loaded (lazy) footprint=0.01 GiB mlxActive=0.00 GiB mlxPeak=0.00 GiB mlxCache=0.00 GiB
+[mem] after ctx 16384 footprint=11.35 GiB mlxActive=7.09 GiB mlxPeak=11.16 GiB mlxCache=4.10 GiB
+ctx=16384 prefill 19.73s (830 tok/s) decode 39.84 tok/s peakFootprint=12.07 GiB
+[16:55:30] end rc=0 aborted=0

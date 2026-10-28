@@ -1,0 +1,2 @@
+[17:03:07] start gen_4bit load={ 4.42 4.41 4.27 } swap=total = 11264.00M  used = 9856.44M  free = 1407.56M  (encrypted)
+[17:04:57] end rc=0 aborted=0

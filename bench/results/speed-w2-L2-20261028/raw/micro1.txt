@@ -1,0 +1,8 @@
+gdn qkv+z M=   1 sep 0.106 ms/layer fused 0.105 saved 0.002 ms/layer (x48 layers = 0.08 ms/pass) pad8 - bitident=YES
+gdn qkv+z M=   4 sep 0.119 ms/layer fused 0.111 saved 0.008 ms/layer (x48 layers = 0.38 ms/pass) pad8 0.260 bitident=YES
+gdn qkv+z M=   8 sep 0.262 ms/layer fused 0.266 saved -0.004 ms/layer (x48 layers = -0.18 ms/pass) pad8 - bitident=YES
+gdn qkv+z M=1024 sep 2.985 ms/layer fused 2.990 saved -0.006 ms/layer (x48 layers = -0.29 ms/pass) pad8 - bitident=YES
+attn q+k+v M=   1 sep 0.095 ms/layer fused 0.092 saved 0.003 ms/layer (x16 layers = 0.05 ms/pass) pad8 - bitident=YES
+attn q+k+v M=   4 sep 0.108 ms/layer fused 0.097 saved 0.011 ms/layer (x16 layers = 0.17 ms/pass) pad8 0.228 bitident=YES
+attn q+k+v M=   8 sep 0.222 ms/layer fused 0.223 saved -0.002 ms/layer (x16 layers = -0.02 ms/pass) pad8 - bitident=YES
+attn q+k+v M=1024 sep 2.635 ms/layer fused 2.625 saved 0.010 ms/layer (x16 layers = 0.16 ms/pass) pad8 - bitident=YES

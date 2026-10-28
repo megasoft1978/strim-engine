@@ -1,0 +1,2 @@
+[16:46:02] start gen_bonsai load={ 2.59 3.38 3.39 } swap=total = 11264.00M  used = 9824.38M  free = 1439.62M  (encrypted)
+[16:47:08] end rc=0 aborted=0

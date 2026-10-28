@@ -352,3 +352,114 @@ private let IM: Int32 = 9000
     #expect(store.shrink(to: before / 2))
     #expect(store.totalBytes <= before / 2)
 }
+
+// MARK: tail merge (L1b)
+
+@Test func tailMergeRunsShortPromptAsOneChunk() {
+    let b: Int32 = 900, a: Int32 = 901
+    let off = CutPolicy(maxBlock: 64, minBlock: 32, boundary: b, assistant: a, assistantMin: 16)
+    let on = CutPolicy(maxBlock: 64, minBlock: 32, boundary: b, assistant: a, assistantMin: 16, tailFloor: 8, tailMergeMax: 48)
+    // 40-token prompt whose generation prompt (`<|im_start|>assistant\n`, 3 tokens) starts at 37.
+    let t = (0 ..< 37).map { Int32($0 + 1) } + [b, a, 5]
+    #expect(off.blockEnd(t, from: 0, limit: t.count) == 37)          // old: 37 + 3 tail chunk
+    #expect(on.blockEnd(t, from: 0, limit: t.count) == nil)          // new: single chunk
+    // tail at or above the floor still cuts
+    let u = (0 ..< 30).map { Int32($0 + 1) } + [b, a, 5, 6, 7, 8, 9, 10, 11, 12]
+    #expect(on.blockEnd(u, from: 0, limit: u.count) == 30)
+    // prompts above tailMergeMax keep the cut the next turn reuses
+    let v = (0 ..< 57).map { Int32($0 + 1) } + [b, a, 5]
+    #expect(on.blockEnd(v, from: 0, limit: v.count) == 57)
+    // later blocks (pos > 0) are never merged
+    #expect(on.blockEnd(v, from: 20, limit: v.count) == 57)
+    // max chunk invariant: tailMergeMax is clamped to maxBlock
+    #expect(CutPolicy(maxBlock: 16, tailFloor: 8, tailMergeMax: 99).tailMergeMax == 16)
+    // lookup (limit = count - 1) never keeps a cut that the chunk loop (limit = count) merges
+    for n in 30 ... 48 {
+        let w = (0 ..< n - 3).map { Int32($0 + 1) } + [b, a, 5]
+        let full = on.blockEnd(w, from: 0, limit: w.count), look = on.blockEnd(w, from: 0, limit: w.count - 1)
+        if full == nil { #expect(look == nil) }
+    }
+}
+
+@Test func tailMergeDefaultsAndOptOut() {
+    let p = PrefixPrefill.defaultPolicy
+    #expect(p.tailFloor == PrefixPrefill.defaultTailFloor && p.tailMergeMax == PrefixPrefill.defaultTailMergeMax)
+    #expect(CutPolicy.fixed(1024).tailFloor == 0)
+    let b = p.boundary!, a = p.assistant!
+    // 523-token chat prompt: 512 body, then `<|im_start|>assistant\n<think>\n` style 11-token tail
+    let t: [Int32] = (0 ..< 512).map { Int32($0 % 1000 + 1) } + [b, a] + (0 ..< 9).map { Int32($0 + 3) }
+    #expect(p.blockEnd(t, from: 0, limit: t.count) == nil)
+}
+
+// MARK: windowed MTP head (speed wave 2 L3b)
+
+private func windowBlock(start: Int, entries: Int, fill: Float) -> MTPBlock {
+    MTPBlock(k: MLXArray.ones([1, 2, entries, 8]) * fill, v: MLXArray.ones([1, 2, entries, 8]) * (fill + 1),
+             hidden: MLXArray.ones([1, 1, 16]) * fill, start: start)
+}
+
+@Test func mtpStateBaseKeepsLogicalPositionsAligned() {
+    let m = MTPState()
+    m.base = 10
+    _ = m.attention.append(MLXArray.ones([1, 2, 6, 8]), MLXArray.ones([1, 2, 6, 8]))
+    #expect(m.position == 16)
+    m.trim(to: 13)                       // drop logical entries >= 13
+    #expect(m.position == 13 && m.attention.offset == 3)
+    m.trim(to: 20)                       // beyond the end: nothing to drop
+    #expect(m.position == 13)
+    m.trim(to: 4)                        // before the window: empty head moved to 4
+    #expect(m.position == 4 && m.attention.offset == 0 && m.base == 4)
+    let full = MTPState()                // base 0 behaves like the old offset-based trim
+    _ = full.attention.append(MLXArray.ones([1, 2, 5, 8]), MLXArray.ones([1, 2, 5, 8]))
+    full.trim(to: 2)
+    #expect(full.position == 2 && full.attention.offset == 2)
+    full.trim(to: 0)
+    #expect(full.position == 0 && full.base == 0)
+}
+
+@Test func windowedMTPBlocksSkipEarlyNodesAndRestoreFromTheWindow() throws {
+    let store = PrefixStore(budgetBytes: 1 << 30, chunk: C)
+    let t = toks(3 * C, 0)
+    let n1 = try store.insert(parent: nil, tokens: Array(t[0 ..< C]), cache: fakeCache(blocks: 1, fill: 1))!
+    // window starts at entry C+1 (inside block 1): its block has no parent block; legacy insert refuses it
+    let refused = try store.insert(parent: n1, tokens: Array(t[0 ..< 2 * C]), cache: fakeCache(blocks: 2, fill: 1),
+                                   mtp: windowBlock(start: C + 1, entries: C - 2, fill: 5))!
+    #expect(refused.mtp == nil)
+    let store2 = PrefixStore(budgetBytes: 1 << 30, chunk: C)
+    let m1 = try store2.insert(parent: nil, tokens: Array(t[0 ..< C]), cache: fakeCache(blocks: 1, fill: 1))!
+    let m2 = try store2.insert(parent: m1, tokens: Array(t[0 ..< 2 * C]), cache: fakeCache(blocks: 2, fill: 1),
+                               mtp: windowBlock(start: C + 1, entries: C - 2, fill: 5), windowedHead: true)!
+    let m3 = try store2.insert(parent: m2, tokens: t, cache: fakeCache(blocks: 3, fill: 1),
+                               mtp: windowBlock(start: 2 * C - 1, entries: C, fill: 7), windowedHead: true)!
+    #expect(m2.mtp != nil && m3.mtp != nil)
+    // whole-chain lookups (non-windowed requests) stop at the headless first node
+    #expect(store2.lookup(t, maxTokens: 3 * C, requireMTP: true) == nil)
+    #expect(store2.lookup(t, maxTokens: 3 * C)?.depth == 3)
+    // restore from the start of the stored run
+    let r = store2.restoreMTPWindow(m3, from: 0)
+    #expect(r.state.base == C + 1 && r.state.position == 3 * C - 1)
+    #expect(r.carry!.asArray(Float.self).allSatisfy { $0 == 7 })
+    // restore with a later window start drops the leading entries
+    let r2 = store2.restoreMTPWindow(m3, from: 2 * C)
+    #expect(r2.state.base == 2 * C && r2.state.position == 3 * C - 1)
+    #expect(r2.state.attention.keys!.shape == [1, 2, C - 1, 8])
+    // window starting past the stored entries: empty head at the end of the run, carry kept
+    let r3 = store2.restoreMTPWindow(m3, from: 10 * C)
+    #expect(r3.state.base == 3 * C - 1 && r3.state.attention.keys == nil && r3.carry != nil)
+    // headless node: empty head at the node end, no carry
+    let r4 = store2.restoreMTPWindow(m1, from: 0)
+    #expect(r4.state.base == C && r4.state.position == C && r4.carry == nil)
+}
+
+@Test func nonContiguousMTPBlocksNeverJoin() throws {
+    let store = PrefixStore(budgetBytes: 1 << 30, chunk: C)
+    let t = toks(3 * C, 0)
+    let a = try store.insert(parent: nil, tokens: Array(t[0 ..< C]), cache: fakeCache(blocks: 1, fill: 1),
+                             mtp: windowBlock(start: 0, entries: C - 1, fill: 3))!
+    // a gap: next block starts at 2C instead of C-1
+    let b = try store.insert(parent: a, tokens: Array(t[0 ..< 2 * C]), cache: fakeCache(blocks: 2, fill: 1),
+                             mtp: windowBlock(start: 2 * C, entries: C - 1, fill: 5))!
+    #expect(store.lookup(t, maxTokens: 2 * C, requireMTP: true)?.depth == 1)
+    let r = store.restoreMTPWindow(b, from: 0)
+    #expect(r.state.base == 2 * C && r.state.attention.offset == C - 1)
+}

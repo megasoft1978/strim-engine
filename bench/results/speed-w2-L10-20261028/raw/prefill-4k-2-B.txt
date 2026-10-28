@@ -1,0 +1,2 @@
+n=4096 chunk=2048 3.92 s  1045 tok/s  (rep 0)
+n=4096 chunk=2048 3.91 s  1046 tok/s  (rep 1)

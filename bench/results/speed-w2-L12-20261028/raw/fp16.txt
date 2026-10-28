@@ -1,0 +1,173 @@
+device: Apple M5 Max os: Version 27.0.1 (Build 26A434) apple10=true
+RES gate+up M=8 MLX_fp16 1.4506 ms 2.0 TF/s 246 GB/s
+RES gate+up M=8 TENSOR mt=8 nt=32 sg=4 0.8834 ms 3.2 TF/s 404 GB/s x1.64_vs_MLX
+RES gate+up M=8 TENSOR mt=16 nt=32 sg=4 0.8860 ms 3.2 TF/s 402 GB/s x1.64_vs_MLX
+RES gate+up M=8 TENSOR mt=16 nt=64 sg=4 0.8906 ms 3.2 TF/s 400 GB/s x1.63_vs_MLX
+RES gate+up M=8 TENSOR mt=32 nt=32 sg=4 0.9531 ms 3.0 TF/s 374 GB/s x1.52_vs_MLX
+RES gate+up M=8 TENSOR mt=32 nt=64 sg=4 0.9209 ms 3.1 TF/s 387 GB/s x1.58_vs_MLX
+RES gate+up M=8 TENSOR mt=64 nt=32 sg=4 0.9580 ms 3.0 TF/s 372 GB/s x1.51_vs_MLX
+RES gate+up M=8 TENSOR mt=64 nt=64 sg=4 0.9263 ms 3.1 TF/s 385 GB/s x1.57_vs_MLX
+RES gate+up M=8 TENSOR mt=64 nt=128 sg=4 0.8946 ms 3.2 TF/s 399 GB/s x1.62_vs_MLX
+RES gate+up M=8 TENSOR mt=64 nt=64 sg=2 0.8975 ms 3.2 TF/s 397 GB/s x1.62_vs_MLX
+RES gate+up M=16 MLX_fp16 0.8978 ms 6.4 TF/s 397 GB/s
+RES gate+up M=16 TENSOR mt=8 nt=32 sg=4 0.9658 ms 5.9 TF/s 369 GB/s x0.93_vs_MLX
+RES gate+up M=16 TENSOR mt=16 nt=32 sg=4 0.8917 ms 6.4 TF/s 400 GB/s x1.01_vs_MLX
+RES gate+up M=16 TENSOR mt=16 nt=64 sg=4 0.9071 ms 6.3 TF/s 393 GB/s x0.99_vs_MLX
+RES gate+up M=16 TENSOR mt=32 nt=32 sg=4 0.9627 ms 5.9 TF/s 370 GB/s x0.93_vs_MLX
+RES gate+up M=16 TENSOR mt=32 nt=64 sg=4 0.9229 ms 6.2 TF/s 386 GB/s x0.97_vs_MLX
+RES gate+up M=16 TENSOR mt=64 nt=32 sg=4 0.9555 ms 6.0 TF/s 373 GB/s x0.94_vs_MLX
+RES gate+up M=16 TENSOR mt=64 nt=64 sg=4 0.9220 ms 6.2 TF/s 387 GB/s x0.97_vs_MLX
+RES gate+up M=16 TENSOR mt=64 nt=128 sg=4 0.9079 ms 6.3 TF/s 393 GB/s x0.99_vs_MLX
+RES gate+up M=16 TENSOR mt=64 nt=64 sg=2 0.8810 ms 6.5 TF/s 405 GB/s x1.02_vs_MLX
+RES gate+up M=32 MLX_fp16 0.9057 ms 12.6 TF/s 394 GB/s
+RES gate+up M=32 TENSOR mt=8 nt=32 sg=4 1.2269 ms 9.3 TF/s 291 GB/s x0.74_vs_MLX
+RES gate+up M=32 TENSOR mt=16 nt=32 sg=4 0.9833 ms 11.6 TF/s 363 GB/s x0.92_vs_MLX
+RES gate+up M=32 TENSOR mt=16 nt=64 sg=4 0.9938 ms 11.5 TF/s 359 GB/s x0.91_vs_MLX
+RES gate+up M=32 TENSOR mt=32 nt=32 sg=4 0.9572 ms 11.9 TF/s 372 GB/s x0.95_vs_MLX
+RES gate+up M=32 TENSOR mt=32 nt=64 sg=4 0.9357 ms 12.2 TF/s 381 GB/s x0.97_vs_MLX
+RES gate+up M=32 TENSOR mt=64 nt=32 sg=4 0.9670 ms 11.8 TF/s 369 GB/s x0.94_vs_MLX
+RES gate+up M=32 TENSOR mt=64 nt=64 sg=4 0.9395 ms 12.1 TF/s 379 GB/s x0.96_vs_MLX
+RES gate+up M=32 TENSOR mt=64 nt=128 sg=4 0.9091 ms 12.5 TF/s 392 GB/s x1.00_vs_MLX
+RES gate+up M=32 TENSOR mt=64 nt=64 sg=2 0.8895 ms 12.8 TF/s 401 GB/s x1.02_vs_MLX
+RES gate+up M=1024 MLX_fp16 6.4899 ms 56.3 TF/s 55 GB/s
+RES gate+up M=1024 TENSOR mt=8 nt=32 sg=4 17.2006 ms 21.2 TF/s 21 GB/s x0.38_vs_MLX
+RES gate+up M=1024 TENSOR mt=16 nt=32 sg=4 11.3672 ms 32.1 TF/s 31 GB/s x0.57_vs_MLX
+RES gate+up M=1024 TENSOR mt=16 nt=64 sg=4 10.7175 ms 34.1 TF/s 33 GB/s x0.61_vs_MLX
+RES gate+up M=1024 TENSOR mt=32 nt=32 sg=4 22.1247 ms 16.5 TF/s 16 GB/s x0.29_vs_MLX
+RES gate+up M=1024 TENSOR mt=32 nt=64 sg=4 11.1944 ms 32.6 TF/s 32 GB/s x0.58_vs_MLX
+RES gate+up M=1024 TENSOR mt=64 nt=32 sg=4 11.2597 ms 32.4 TF/s 32 GB/s x0.58_vs_MLX
+RES gate+up M=1024 TENSOR mt=64 nt=64 sg=4 6.2786 ms 58.1 TF/s 57 GB/s x1.03_vs_MLX
+RES gate+up M=1024 TENSOR mt=64 nt=128 sg=4 5.6096 ms 65.1 TF/s 64 GB/s x1.16_vs_MLX
+RES gate+up M=1024 TENSOR mt=128 nt=64 sg=4 5.6397 ms 64.7 TF/s 63 GB/s x1.15_vs_MLX
+RES gate+up M=1024 TENSOR mt=128 nt=128 sg=4 9.1455 ms 39.9 TF/s 39 GB/s x0.71_vs_MLX
+RES gate+up M=1024 TENSOR mt=64 nt=64 sg=2 5.6069 ms 65.1 TF/s 64 GB/s x1.16_vs_MLX
+RES gate+up M=1024 TENSOR mt=128 nt=64 sg=8 6.4336 ms 56.7 TF/s 55 GB/s x1.01_vs_MLX
+RES down M=8 MLX_fp16 0.4609 ms 3.1 TF/s 387 GB/s
+RES down M=8 TENSOR mt=8 nt=32 sg=4 0.5470 ms 2.6 TF/s 326 GB/s x0.84_vs_MLX
+RES down M=8 TENSOR mt=16 nt=32 sg=4 0.5510 ms 2.6 TF/s 324 GB/s x0.84_vs_MLX
+RES down M=8 TENSOR mt=16 nt=64 sg=4 0.5529 ms 2.6 TF/s 322 GB/s x0.83_vs_MLX
+RES down M=8 TENSOR mt=32 nt=32 sg=4 0.5837 ms 2.4 TF/s 305 GB/s x0.79_vs_MLX
+RES down M=8 TENSOR mt=32 nt=64 sg=4 0.5992 ms 2.4 TF/s 298 GB/s x0.77_vs_MLX
+RES down M=8 TENSOR mt=64 nt=32 sg=4 0.5897 ms 2.4 TF/s 302 GB/s x0.78_vs_MLX
+RES down M=8 TENSOR mt=64 nt=64 sg=4 0.5978 ms 2.4 TF/s 298 GB/s x0.77_vs_MLX
+RES down M=8 TENSOR mt=64 nt=128 sg=4 0.6552 ms 2.2 TF/s 272 GB/s x0.70_vs_MLX
+RES down M=8 TENSOR mt=64 nt=64 sg=2 0.6339 ms 2.2 TF/s 281 GB/s x0.73_vs_MLX
+RES down M=16 MLX_fp16 0.5378 ms 5.3 TF/s 331 GB/s
+RES down M=16 TENSOR mt=8 nt=32 sg=4 0.5492 ms 5.2 TF/s 325 GB/s x0.98_vs_MLX
+RES down M=16 TENSOR mt=16 nt=32 sg=4 0.5508 ms 5.2 TF/s 324 GB/s x0.98_vs_MLX
+RES down M=16 TENSOR mt=16 nt=64 sg=4 0.5366 ms 5.3 TF/s 332 GB/s x1.00_vs_MLX
+RES down M=16 TENSOR mt=32 nt=32 sg=4 0.5727 ms 5.0 TF/s 311 GB/s x0.94_vs_MLX
+RES down M=16 TENSOR mt=32 nt=64 sg=4 0.5827 ms 4.9 TF/s 306 GB/s x0.92_vs_MLX
+RES down M=16 TENSOR mt=64 nt=32 sg=4 0.5891 ms 4.8 TF/s 303 GB/s x0.91_vs_MLX
+RES down M=16 TENSOR mt=64 nt=64 sg=4 0.6019 ms 4.7 TF/s 296 GB/s x0.89_vs_MLX
+RES down M=16 TENSOR mt=64 nt=128 sg=4 0.6477 ms 4.4 TF/s 275 GB/s x0.83_vs_MLX
+RES down M=16 TENSOR mt=64 nt=64 sg=2 0.6416 ms 4.4 TF/s 278 GB/s x0.84_vs_MLX
+RES down M=32 MLX_fp16 0.6150 ms 9.3 TF/s 290 GB/s
+RES down M=32 TENSOR mt=8 nt=32 sg=4 0.7236 ms 7.9 TF/s 246 GB/s x0.85_vs_MLX
+RES down M=32 TENSOR mt=16 nt=32 sg=4 0.5491 ms 10.4 TF/s 325 GB/s x1.12_vs_MLX
+RES down M=32 TENSOR mt=16 nt=64 sg=4 0.5569 ms 10.2 TF/s 320 GB/s x1.10_vs_MLX
+RES down M=32 TENSOR mt=32 nt=32 sg=4 0.5947 ms 9.6 TF/s 300 GB/s x1.03_vs_MLX
+RES down M=32 TENSOR mt=32 nt=64 sg=4 0.5971 ms 9.6 TF/s 299 GB/s x1.03_vs_MLX
+RES down M=32 TENSOR mt=64 nt=32 sg=4 0.5796 ms 9.8 TF/s 308 GB/s x1.06_vs_MLX
+RES down M=32 TENSOR mt=64 nt=64 sg=4 0.6109 ms 9.3 TF/s 292 GB/s x1.01_vs_MLX
+RES down M=32 TENSOR mt=64 nt=128 sg=4 0.6699 ms 8.5 TF/s 266 GB/s x0.92_vs_MLX
+RES down M=32 TENSOR mt=64 nt=64 sg=2 0.6434 ms 8.9 TF/s 277 GB/s x0.96_vs_MLX
+RES down M=1024 MLX_fp16 3.7432 ms 48.8 TF/s 48 GB/s
+RES down M=1024 TENSOR mt=8 nt=32 sg=4 10.6924 ms 17.1 TF/s 17 GB/s x0.35_vs_MLX
+RES down M=1024 TENSOR mt=16 nt=32 sg=4 7.0935 ms 25.7 TF/s 25 GB/s x0.53_vs_MLX
+RES down M=1024 TENSOR mt=16 nt=64 sg=4 6.7280 ms 27.1 TF/s 26 GB/s x0.56_vs_MLX
+RES down M=1024 TENSOR mt=32 nt=32 sg=4 11.1156 ms 16.4 TF/s 16 GB/s x0.34_vs_MLX
+RES down M=1024 TENSOR mt=32 nt=64 sg=4 5.8751 ms 31.1 TF/s 30 GB/s x0.64_vs_MLX
+RES down M=1024 TENSOR mt=64 nt=32 sg=4 5.9538 ms 30.7 TF/s 30 GB/s x0.63_vs_MLX
+RES down M=1024 TENSOR mt=64 nt=64 sg=4 3.1520 ms 57.9 TF/s 57 GB/s x1.19_vs_MLX
+RES down M=1024 TENSOR mt=64 nt=128 sg=4 2.7852 ms 65.5 TF/s 64 GB/s x1.34_vs_MLX
+RES down M=1024 TENSOR mt=128 nt=64 sg=4 2.7717 ms 65.9 TF/s 64 GB/s x1.35_vs_MLX
+RES down M=1024 TENSOR mt=128 nt=128 sg=4 3.1839 ms 57.3 TF/s 56 GB/s x1.18_vs_MLX
+RES down M=1024 TENSOR mt=64 nt=64 sg=2 2.7745 ms 65.8 TF/s 64 GB/s x1.35_vs_MLX
+RES down M=1024 TENSOR mt=128 nt=64 sg=8 5.2301 ms 34.9 TF/s 34 GB/s x0.72_vs_MLX
+RES attn14336 M=8 MLX_fp16 0.6006 ms 2.0 TF/s 244 GB/s
+RES attn14336 M=8 TENSOR mt=8 nt=32 sg=4 0.4218 ms 2.8 TF/s 348 GB/s x1.42_vs_MLX
+RES attn14336 M=8 TENSOR mt=16 nt=32 sg=4 0.4216 ms 2.8 TF/s 348 GB/s x1.42_vs_MLX
+RES attn14336 M=8 TENSOR mt=16 nt=64 sg=4 0.4262 ms 2.8 TF/s 344 GB/s x1.41_vs_MLX
+RES attn14336 M=8 TENSOR mt=32 nt=32 sg=4 0.4481 ms 2.6 TF/s 328 GB/s x1.34_vs_MLX
+RES attn14336 M=8 TENSOR mt=32 nt=64 sg=4 0.4051 ms 2.9 TF/s 362 GB/s x1.48_vs_MLX
+RES attn14336 M=8 TENSOR mt=64 nt=32 sg=4 0.4648 ms 2.5 TF/s 316 GB/s x1.29_vs_MLX
+RES attn14336 M=8 TENSOR mt=64 nt=64 sg=4 0.4080 ms 2.9 TF/s 360 GB/s x1.47_vs_MLX
+RES attn14336 M=8 TENSOR mt=64 nt=128 sg=4 0.4081 ms 2.9 TF/s 360 GB/s x1.47_vs_MLX
+RES attn14336 M=8 TENSOR mt=64 nt=64 sg=2 0.4078 ms 2.9 TF/s 360 GB/s x1.47_vs_MLX
+RES attn14336 M=16 MLX_fp16 0.4479 ms 5.2 TF/s 328 GB/s
+RES attn14336 M=16 TENSOR mt=8 nt=32 sg=4 0.4596 ms 5.1 TF/s 319 GB/s x0.97_vs_MLX
+RES attn14336 M=16 TENSOR mt=16 nt=32 sg=4 0.4230 ms 5.6 TF/s 347 GB/s x1.06_vs_MLX
+RES attn14336 M=16 TENSOR mt=16 nt=64 sg=4 0.4223 ms 5.6 TF/s 348 GB/s x1.06_vs_MLX
+RES attn14336 M=16 TENSOR mt=32 nt=32 sg=4 0.4584 ms 5.1 TF/s 320 GB/s x0.98_vs_MLX
+RES attn14336 M=16 TENSOR mt=32 nt=64 sg=4 0.4202 ms 5.6 TF/s 349 GB/s x1.07_vs_MLX
+RES attn14336 M=16 TENSOR mt=64 nt=32 sg=4 0.4554 ms 5.2 TF/s 322 GB/s x0.98_vs_MLX
+RES attn14336 M=16 TENSOR mt=64 nt=64 sg=4 0.4120 ms 5.7 TF/s 356 GB/s x1.09_vs_MLX
+RES attn14336 M=16 TENSOR mt=64 nt=128 sg=4 0.4058 ms 5.8 TF/s 362 GB/s x1.10_vs_MLX
+RES attn14336 M=16 TENSOR mt=64 nt=64 sg=2 0.4035 ms 5.8 TF/s 364 GB/s x1.11_vs_MLX
+RES attn14336 M=32 MLX_fp16 0.4496 ms 10.4 TF/s 327 GB/s
+RES attn14336 M=32 TENSOR mt=8 nt=32 sg=4 0.5934 ms 7.9 TF/s 247 GB/s x0.76_vs_MLX
+RES attn14336 M=32 TENSOR mt=16 nt=32 sg=4 0.4601 ms 10.2 TF/s 319 GB/s x0.98_vs_MLX
+RES attn14336 M=32 TENSOR mt=16 nt=64 sg=4 0.4672 ms 10.1 TF/s 314 GB/s x0.96_vs_MLX
+RES attn14336 M=32 TENSOR mt=32 nt=32 sg=4 0.4586 ms 10.2 TF/s 320 GB/s x0.98_vs_MLX
+RES attn14336 M=32 TENSOR mt=32 nt=64 sg=4 0.4329 ms 10.9 TF/s 339 GB/s x1.04_vs_MLX
+RES attn14336 M=32 TENSOR mt=64 nt=32 sg=4 0.4593 ms 10.2 TF/s 320 GB/s x0.98_vs_MLX
+RES attn14336 M=32 TENSOR mt=64 nt=64 sg=4 0.4305 ms 10.9 TF/s 341 GB/s x1.04_vs_MLX
+RES attn14336 M=32 TENSOR mt=64 nt=128 sg=4 0.4105 ms 11.4 TF/s 358 GB/s x1.10_vs_MLX
+RES attn14336 M=32 TENSOR mt=64 nt=64 sg=2 0.4095 ms 11.5 TF/s 358 GB/s x1.10_vs_MLX
+RES attn14336 M=1024 MLX_fp16 2.6802 ms 56.1 TF/s 55 GB/s
+RES attn14336 M=1024 TENSOR mt=8 nt=32 sg=4 7.1135 ms 21.1 TF/s 21 GB/s x0.38_vs_MLX
+RES attn14336 M=1024 TENSOR mt=16 nt=32 sg=4 4.7070 ms 31.9 TF/s 31 GB/s x0.57_vs_MLX
+RES attn14336 M=1024 TENSOR mt=16 nt=64 sg=4 4.4894 ms 33.5 TF/s 33 GB/s x0.60_vs_MLX
+RES attn14336 M=1024 TENSOR mt=32 nt=32 sg=4 9.1206 ms 16.5 TF/s 16 GB/s x0.29_vs_MLX
+RES attn14336 M=1024 TENSOR mt=32 nt=64 sg=4 4.6316 ms 32.5 TF/s 32 GB/s x0.58_vs_MLX
+RES attn14336 M=1024 TENSOR mt=64 nt=32 sg=4 4.6348 ms 32.4 TF/s 32 GB/s x0.58_vs_MLX
+RES attn14336 M=1024 TENSOR mt=64 nt=64 sg=4 2.5844 ms 58.2 TF/s 57 GB/s x1.04_vs_MLX
+RES attn14336 M=1024 TENSOR mt=64 nt=128 sg=4 2.3625 ms 63.6 TF/s 62 GB/s x1.13_vs_MLX
+RES attn14336 M=1024 TENSOR mt=128 nt=64 sg=4 2.3518 ms 63.9 TF/s 62 GB/s x1.14_vs_MLX
+RES attn14336 M=1024 TENSOR mt=128 nt=128 sg=4 2.9841 ms 50.4 TF/s 49 GB/s x0.90_vs_MLX
+RES attn14336 M=1024 TENSOR mt=64 nt=64 sg=2 2.3464 ms 64.1 TF/s 63 GB/s x1.14_vs_MLX
+RES attn14336 M=1024 TENSOR mt=128 nt=64 sg=8 2.6584 ms 56.5 TF/s 55 GB/s x1.01_vs_MLX
+RES proj16384 M=8 MLX_fp16 0.5588 ms 2.4 TF/s 300 GB/s
+RES proj16384 M=8 TENSOR mt=8 nt=32 sg=4 0.4690 ms 2.9 TF/s 358 GB/s x1.19_vs_MLX
+RES proj16384 M=8 TENSOR mt=16 nt=32 sg=4 0.4663 ms 2.9 TF/s 360 GB/s x1.20_vs_MLX
+RES proj16384 M=8 TENSOR mt=16 nt=64 sg=4 0.4647 ms 2.9 TF/s 361 GB/s x1.20_vs_MLX
+RES proj16384 M=8 TENSOR mt=32 nt=32 sg=4 0.4918 ms 2.7 TF/s 341 GB/s x1.14_vs_MLX
+RES proj16384 M=8 TENSOR mt=32 nt=64 sg=4 0.4965 ms 2.7 TF/s 338 GB/s x1.13_vs_MLX
+RES proj16384 M=8 TENSOR mt=64 nt=32 sg=4 0.4913 ms 2.7 TF/s 341 GB/s x1.14_vs_MLX
+RES proj16384 M=8 TENSOR mt=64 nt=64 sg=4 0.4952 ms 2.7 TF/s 339 GB/s x1.13_vs_MLX
+RES proj16384 M=8 TENSOR mt=64 nt=128 sg=4 0.4495 ms 3.0 TF/s 373 GB/s x1.24_vs_MLX
+RES proj16384 M=8 TENSOR mt=64 nt=64 sg=2 0.4479 ms 3.0 TF/s 375 GB/s x1.25_vs_MLX
+RES proj16384 M=16 MLX_fp16 0.4836 ms 5.6 TF/s 347 GB/s
+RES proj16384 M=16 TENSOR mt=8 nt=32 sg=4 0.5013 ms 5.4 TF/s 335 GB/s x0.96_vs_MLX
+RES proj16384 M=16 TENSOR mt=16 nt=32 sg=4 0.4617 ms 5.8 TF/s 363 GB/s x1.05_vs_MLX
+RES proj16384 M=16 TENSOR mt=16 nt=64 sg=4 0.4663 ms 5.8 TF/s 360 GB/s x1.04_vs_MLX
+RES proj16384 M=16 TENSOR mt=32 nt=32 sg=4 0.4968 ms 5.4 TF/s 338 GB/s x0.97_vs_MLX
+RES proj16384 M=16 TENSOR mt=32 nt=64 sg=4 0.4995 ms 5.4 TF/s 336 GB/s x0.97_vs_MLX
+RES proj16384 M=16 TENSOR mt=64 nt=32 sg=4 0.4946 ms 5.4 TF/s 339 GB/s x0.98_vs_MLX
+RES proj16384 M=16 TENSOR mt=64 nt=64 sg=4 0.4994 ms 5.4 TF/s 336 GB/s x0.97_vs_MLX
+RES proj16384 M=16 TENSOR mt=64 nt=128 sg=4 0.4489 ms 6.0 TF/s 374 GB/s x1.08_vs_MLX
+RES proj16384 M=16 TENSOR mt=64 nt=64 sg=2 0.4549 ms 5.9 TF/s 369 GB/s x1.06_vs_MLX
+RES proj16384 M=32 MLX_fp16 0.5057 ms 10.6 TF/s 332 GB/s
+RES proj16384 M=32 TENSOR mt=8 nt=32 sg=4 0.6652 ms 8.1 TF/s 252 GB/s x0.76_vs_MLX
+RES proj16384 M=32 TENSOR mt=16 nt=32 sg=4 0.5109 ms 10.5 TF/s 328 GB/s x0.99_vs_MLX
+RES proj16384 M=32 TENSOR mt=16 nt=64 sg=4 0.5176 ms 10.4 TF/s 324 GB/s x0.98_vs_MLX
+RES proj16384 M=32 TENSOR mt=32 nt=32 sg=4 0.4989 ms 10.8 TF/s 336 GB/s x1.01_vs_MLX
+RES proj16384 M=32 TENSOR mt=32 nt=64 sg=4 0.5003 ms 10.7 TF/s 335 GB/s x1.01_vs_MLX
+RES proj16384 M=32 TENSOR mt=64 nt=32 sg=4 0.5035 ms 10.7 TF/s 333 GB/s x1.00_vs_MLX
+RES proj16384 M=32 TENSOR mt=64 nt=64 sg=4 0.5050 ms 10.6 TF/s 332 GB/s x1.00_vs_MLX
+RES proj16384 M=32 TENSOR mt=64 nt=128 sg=4 0.4605 ms 11.7 TF/s 364 GB/s x1.10_vs_MLX
+RES proj16384 M=32 TENSOR mt=64 nt=64 sg=2 0.4540 ms 11.8 TF/s 370 GB/s x1.11_vs_MLX
+RES proj16384 M=1024 MLX_fp16 3.0350 ms 56.6 TF/s 55 GB/s
+RES proj16384 M=1024 TENSOR mt=8 nt=32 sg=4 8.1273 ms 21.1 TF/s 21 GB/s x0.37_vs_MLX
+RES proj16384 M=1024 TENSOR mt=16 nt=32 sg=4 5.3975 ms 31.8 TF/s 31 GB/s x0.56_vs_MLX
+RES proj16384 M=1024 TENSOR mt=16 nt=64 sg=4 5.1430 ms 33.4 TF/s 33 GB/s x0.59_vs_MLX
+RES proj16384 M=1024 TENSOR mt=32 nt=32 sg=4 10.4192 ms 16.5 TF/s 16 GB/s x0.29_vs_MLX
+RES proj16384 M=1024 TENSOR mt=32 nt=64 sg=4 5.2765 ms 32.6 TF/s 32 GB/s x0.58_vs_MLX
+RES proj16384 M=1024 TENSOR mt=64 nt=32 sg=4 5.3185 ms 32.3 TF/s 32 GB/s x0.57_vs_MLX
+RES proj16384 M=1024 TENSOR mt=64 nt=64 sg=4 2.9857 ms 57.5 TF/s 56 GB/s x1.02_vs_MLX
+RES proj16384 M=1024 TENSOR mt=64 nt=128 sg=4 2.6887 ms 63.9 TF/s 62 GB/s x1.13_vs_MLX
+RES proj16384 M=1024 TENSOR mt=128 nt=64 sg=4 2.6519 ms 64.8 TF/s 63 GB/s x1.14_vs_MLX
+RES proj16384 M=1024 TENSOR mt=128 nt=128 sg=4 4.2110 ms 40.8 TF/s 40 GB/s x0.72_vs_MLX
+RES proj16384 M=1024 TENSOR mt=64 nt=64 sg=2 2.7106 ms 63.4 TF/s 62 GB/s x1.12_vs_MLX
+RES proj16384 M=1024 TENSOR mt=128 nt=64 sg=8 3.0105 ms 57.1 TF/s 56 GB/s x1.01_vs_MLX

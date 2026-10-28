@@ -72,15 +72,37 @@ public enum TaskLoader {
 
     /// `limit` is a count PER CLASS (stratified): the first `limit` ids in sorted order within each class.
     /// `ids` and `classes` filter first. The result is sorted by id.
-    public static func select(_ all: [LoadedTask], limit: Int?, ids: [String], classes: [String]) -> [LoadedTask] {
+    public static func select(_ all: [LoadedTask], limit: Int?, ids: [String], classes: [String], languages: [String] = [], pilotPerLanguage: Int? = nil) -> [LoadedTask] {
         var t = all
+        if !languages.isEmpty { t = t.filter { languages.contains($0.language ?? "") } }
         if !ids.isEmpty { t = t.filter { ids.contains($0.id) } }
         if !classes.isEmpty { t = t.filter { classes.contains($0.spec.taskClass) } }
+        if let n = pilotPerLanguage { t = pilot(t, perLanguage: n) }
         if let l = limit {
             let byClass = Dictionary(grouping: t.sorted { $0.spec.id < $1.spec.id }, by: { $0.spec.taskClass })
             t = byClass.values.flatMap { $0.prefix(max(0, l)) }
         }
         return t.sorted { $0.spec.id < $1.spec.id }
+    }
+}
+
+/// Balanced pilot set: per language the first `perLanguage` tasks, taking one task per class in turn (test-fix, feature-impl, repo-qa, mechanical-edit) so each language mixes test-fix / feature / QA tasks. Deterministic.
+extension TaskLoader {
+    public static func pilot(_ all: [LoadedTask], perLanguage n: Int) -> [LoadedTask] {
+        var out: [LoadedTask] = []
+        let byLang = Dictionary(grouping: all, by: { $0.language ?? "?" })
+        for lang in byLang.keys.sorted() {
+            let byClass = Dictionary(grouping: byLang[lang]!.sorted { $0.spec.id < $1.spec.id }, by: { $0.spec.taskClass })
+            let order = ["test-fix", "feature-impl", "repo-qa", "mechanical-edit"]
+            let classes = byClass.keys.sorted { (order.firstIndex(of: $0) ?? 99, $0) < (order.firstIndex(of: $1) ?? 99, $1) }
+            var queues = classes.map { byClass[$0]! }
+            var picked: [LoadedTask] = []
+            while picked.count < n, queues.contains(where: { !$0.isEmpty }) {
+                for i in queues.indices where picked.count < n && !queues[i].isEmpty { picked.append(queues[i].removeFirst()) }
+            }
+            out += picked
+        }
+        return out.sorted { $0.spec.id < $1.spec.id }
     }
 }
 

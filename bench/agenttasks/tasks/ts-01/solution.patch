@@ -1,0 +1,28 @@
+diff --git a/src/result.ts b/src/result.ts
+index 9448b70..240eb86 100644
+--- a/src/result.ts
++++ b/src/result.ts
+@@ -8,7 +8,7 @@ export const err = <E>(error: E): Err<E> => ({ ok: false, error });
+ /** Applies f to the value of an Ok; an Err passes through unchanged. */
+ export function map<T, U, E>(r: Result<T, E>, f: (t: T) => U): Result<U, E> {
+   if (r.ok) return ok(f(r.value));
+-  return err(r);
++  return r;
+ }
+ 
+ /** Chains a fallible step after a successful one. */
+@@ -22,12 +22,12 @@ export function collect<T, E>(rs: Result<T, E>[]): Result<T[], E> {
+   let failure: Err<E> | undefined;
+   for (const r of rs) {
+     if (r.ok) values.push(r.value);
+-    else failure = r;
++    else if (!failure) failure = r;
+   }
+   return failure ?? ok(values);
+ }
+ 
+ /** The value of an Ok, otherwise the fallback (a falsy value such as 0 or "" is still a value). */
+ export function unwrapOr<T, E>(r: Result<T, E>, fallback: T): T {
+-  return r.ok && r.value ? r.value : fallback;
++  return r.ok ? r.value : fallback;
+ }

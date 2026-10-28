@@ -1,0 +1,33 @@
+{
+  "answer_env" : "ANSWER_FILE",
+  "base_commit" : "",
+  "class" : "repo-qa",
+  "est_solo_turns" : 5,
+  "expected_answer" : {
+    "all_of" : [
+      "Cart\\.jsx[^0-9]{1,12}(2[6-9]|30)([^0-9]|$)",
+      "format\\.js[^0-9]{1,12}[1-3]([^0-9]|$)",
+      "formatPrice"
+    ]
+  },
+  "id" : "rx-04",
+  "known_answer" : "src\/Cart.jsx:28 renders the empty message in Cart; formatPrice is defined at src\/format.js:2.",
+  "language" : "react",
+  "license" : "MIT",
+  "no_edit" : true,
+  "note" : "React repo-QA: empty-cart message and price formatter",
+  "prompt" : "Answer a question about the repository in the current directory. Do NOT modify any file. Reply with the repo-relative file path(s) and the exact symbol name(s) (function, class, method or variable) that answer it, each as path:line (the line where the symbol or the relevant statement is). Keep the answer short.\n\nQuestion: In which component file and on which line is the 'Your cart is empty.' message rendered, and in which file and at which line is the function defined that turns a cent amount into the displayed price string?",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-react",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 168478,
+  "test_paths" : [
+
+  ],
+  "test_sha256" : {
+
+  },
+  "tree_sha256" : "f0f7b6cbe9383c7899a3f8d811f25a0dbaad2a062c3790faaea70d0031ed8e73",
+  "verify_cmd" : "grep -Eq 'Cart\\.jsx[^0-9]{1,12}(2[6-9]|30)([^0-9]|$)' \"$ANSWER_FILE\" && grep -Eq 'format\\.js[^0-9]{1,12}[1-3]([^0-9]|$)' \"$ANSWER_FILE\" && grep -Eq 'formatPrice' \"$ANSWER_FILE\"",
+  "wrong_answer" : "src\/CartRow.jsx:4 renders it and src\/Cart.jsx:4 formats prices."
+}

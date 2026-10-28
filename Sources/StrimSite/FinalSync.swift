@@ -122,18 +122,28 @@ extension SiteBuilder {
         let secs = mdSections(text)
         var figs: [PyJSON] = []
 
+        let passCount = (res["cells"]?.arr ?? []).compactMap { $0["per_pass"]?["strim"]?.arr?.count }.min() ?? 0
+        let meta = parseRunMeta(summary: text, passes: passCount)
+        let runWord = meta.clean ? "" : " Part of the run was load-polluted (see the validity note)."
         let caveats: [String: String] = [
-            "strim": "Strim build 2df65e7 (serve defaults: MTP head, admission, batched decode, prefix cache); it predates the server hardening commits, HEAD was not re-benchmarked.",
-            "rapid-mlx": "rapid-mlx 0.15.7 with MTP on and --max-num-seqs 4 (c=8 queues); rival tuning was not explored.",
-            "mlx-vlm": "mlx-vlm 0.7.10 server defaults: no MTP, no cross-request prefix cache. Rival pass 1 ran under higher system load.",
+            "strim": "Strim build \(meta.build) (serve defaults: MTP head, admission, batched decode, prefix cache); later commits were not benchmarked.\(runWord)",
+            "rapid-mlx": "rapid-mlx\(meta.rapid.map { " " + $0 } ?? "") with MTP on and --max-num-seqs 4 (c=8 queues); rival tuning was not explored.\(runWord)",
+            "mlx-vlm": "mlx-vlm\(meta.vlm.map { " " + $0 } ?? "") server defaults: no MTP, no cross-request prefix cache.\(runWord)",
         ]
         func add(_ id: String, _ value: PyJSON, _ unit: String, dp: Int?, method: String, caveat: String, n: String? = nil,
-                 md: [(String, String)]? = nil, verify: String? = nil, section: String? = nil) {
+                 md: [(String, String)]? = nil, verify: String? = nil, section: String? = nil, computed: Bool = false,
+                 verify_count: (String, String, [String])? = nil) {
             var f = JObject()
             f["id"] = .string(id); f["value"] = value; f["unit"] = .string(unit); f["source_path"] = .string(FINAL_SRC)
             f["method_note"] = .string(method); f["caveat"] = .string(caveat); f["dataset"] = .string("final")
             if let dp { f["dp"] = .int(dp) }
             if let n { f["n"] = .string(n) }
+            if computed { f["computed"] = .bool(true) }
+            if let vc = verify_count {
+                var o = JObject()
+                o["section"] = .string(vc.0); o["contains"] = .string(vc.1); o["line_prefix"] = .array(vc.2.map { .string($0) })
+                f["verify_count"] = .object(o)
+            }
             if let md {
                 var m = JObject()
                 for (k, v) in md { m[k] = .string(v) }
@@ -174,7 +184,7 @@ extension SiteBuilder {
                 if pyRound(jv, p.dp) != p.value { throw SiteError("\(c.label)/\(e): summary.md says \(pyReprString(r[ci])), results.json says \(pyRepr(jv))") }
                 let shown = isFrac ? pyRound(p.value * 100, max(p.dp - 2, 0)) : p.value
                 add(fid(c.id, e), .double(shown), unit, dp: isFrac ? max(p.dp - 2, 0) : p.dp,
-                    method: "Final head-to-head 2026-10-28: \(c.label), \(e). Median of \(c.passes[e] ?? 0) passes (1 rep each); HTTP, one engine at a time, Qwen3.8-27B 4-bit, thinking off, greedy.",
+                    method: "Head-to-head \(meta.date) (\(meta.id)): \(c.label), \(e). Median of \(c.passes[e] ?? 0) passes (1 rep each); HTTP, one engine at a time, Qwen3.8-27B 4-bit, thinking off, greedy.",
                     caveat: caveats[e] ?? "", n: String(c.passes[e] ?? 0),
                     md: [("section", "Results"), ("row", c.label), ("col", e), ("cell", r[ci].replacingOccurrences(of: "**", with: ""))])
             }
@@ -208,17 +218,21 @@ extension SiteBuilder {
                 caveat: "phys_footprint includes Metal buffers. Whole-run maximum, not steady state; abort limit was 42 GB.",
                 md: [("section", "Peak memory"), ("row", "**whole run**"), ("col", "\(e) footprint / RSS"), ("contains", String(mbText))])
         }
-        // ---- greedy agreement
-        let agree: [(String, String, String, String)] = [
-            ("self", "8/8", "strim pass1 vs pass2 (self): 8/8 identical", "Strim pass 1 against Strim pass 2, 8 fixed prompts, 64 greedy tokens."),
-            ("rapid-mlx", "7/8", "strim vs rapid-mlx (pass1): 7/8 identical", "Strim against rapid-mlx, 8 fixed prompts, 64 greedy tokens (same in pass 2)."),
-            ("mlx-vlm", "6/8", "strim vs mlx-vlm (pass1): 6/8 identical", "Strim against mlx-vlm, 8 fixed prompts, 64 greedy tokens (same in pass 2)."),
+        // ---- greedy agreement (parsed from the summary)
+        let agreeLines = try mdSec(secs, "Greedy agreement")
+        let agree: [(String, String, String)] = [
+            ("self", "(self)", "Strim pass 1 against Strim pass 2, 8 fixed prompts, 64 greedy tokens."),
+            ("rapid-mlx", "strim vs rapid-mlx", "Strim against rapid-mlx, 8 fixed prompts, 64 greedy tokens."),
+            ("mlx-vlm", "strim vs mlx-vlm", "Strim against mlx-vlm, 8 fixed prompts, 64 greedy tokens."),
         ]
-        for (k, v, needle, what) in agree {
-            add("final.agree.\(k)", .string(v), "prompts identical", dp: nil, method: what,
-                caveat: "Sanity check only: near-ties diverge, one divergence flips every later token.", verify: needle, section: "Greedy agreement")
+        for (k, key, what) in agree {
+            guard let line = agreeLines.first(where: { pyContains($0, key) }), let m = firstMatch(#"(\d+/\d+) identical"#, in: line) else {
+                throw SiteError("summary.md: no greedy agreement line for \(k)")
+            }
+            add("final.agree.\(k)", .string(m[1]), "prompts identical", dp: nil, method: what,
+                caveat: "Sanity check only: near-ties diverge, one divergence flips every later token.", verify: m[0], section: "Greedy agreement")
         }
-        // ---- claim ranges: recomputed from the displayed ratios and compared with the quoted wording
+        // ---- claim ranges: recomputed from the displayed ratios (no hand-typed wording to match)
         func rng(_ ids: [String], _ rivals: [String], pct: Bool, lower: Bool = false) throws -> String {
             var v: [Double] = []
             for i in ids { for rv in rivals {
@@ -228,57 +242,69 @@ extension SiteBuilder {
             let lo = v.min() ?? 0, hi = v.max() ?? 0
             return pct ? "\(fmtFixed(lo, 0))-\(fmtFixed(hi, 0))%" : "\(fmtFixed(lo, 1))-\(fmtFixed(hi, 1))x"
         }
-        func bestRivalGap(_ ids: [String]) throws -> String {
-            var v: [Double] = []
+        /// Cells where Strim is worse than the best rival by more than the 2% tie band: (gap range text, count). lowerBetter cells compare against the smallest rival value.
+        func lossGap(_ ids: [String]) throws -> (String, Int) {
+            var gaps: [Int] = []
             for i in ids {
                 guard let c = cells.first(where: { $0.id == i }) else { throw SiteError("claim range: no cell \(i)") }
-                let best = RIVALS.map { c.median[$0] ?? 0 }.max() ?? 1
-                v.append(100 - pyRound((c.median["strim"] ?? 0) / best, 2) * 100)
+                let rivalVals = RIVALS.map { c.median[$0] ?? 0 }
+                let s = c.median["strim"] ?? 0
+                let low = c.better == "lower"
+                let best = low ? (rivalVals.min() ?? 1) : (rivalVals.max() ?? 1)
+                guard best > 0 else { continue }
+                let r = s / best
+                if low ? r > 1.02 : r < 0.98 {
+                    let rr = pyRound(r, 2)
+                    gaps.append(Int((low ? rr * 100 - 100 : 100 - rr * 100).rounded()))
+                }
             }
-            return "\(fmtFixed(v.min() ?? 0, 0))-\(fmtFixed(v.max() ?? 0, 0))%"
+            guard let lo = gaps.min(), let hi = gaps.max() else { return ("none", 0) }
+            return (lo == hi ? "\(lo)%" : "\(lo)-\(hi)%", gaps.count)
         }
-        func worstP95(_ ids: [String]) throws -> String {
-            var v: [Double] = []
-            for i in ids {
-                guard let c = cells.first(where: { $0.id == i }) else { throw SiteError("claim range: no cell \(i)") }
-                let best = RIVALS.map { c.median[$0] ?? 0 }.min() ?? 1
-                v.append(pyRound((c.median["strim"] ?? 0) / best, 2) * 100 - 100)
-            }
-            return "\(fmtFixed(v.min() ?? 0, 0))-\(fmtFixed(v.max() ?? 0, 0))%"
+        func sizes(_ pairs: [(String, String)], loss: Bool) throws -> String {
+            let hit = try pairs.filter { (_, id) in try lossGap([id]).1 > 0 }.map { $0.0 }
+            let pick = loss ? hit : pairs.map { $0.0 }.filter { !hit.contains($0) }
+            if pick.isEmpty { return "none" }
+            return pick.count == 1 ? pick[0] : pick.dropLast().joined(separator: ", ") + " and " + pick[pick.count - 1]
         }
         let p50 = ["p50_512c4", "p50_512c8", "p50_agc4", "p50_agc8", "p50_4kc4", "p50_4kc8"]
         let aggs = ["a512c4", "a512c8", "aagc4", "aagc8", "a4kc4", "a4kc8"]
-        let claims: [(String, String, String, String, String)] = [
-            ("decode_vs_rapid", try rng(["d4k", "d16k", "d32k"], ["rapid-mlx"], pct: true), "24-41% faster than rapid-mlx", "Decode speed gain over rapid-mlx (MTP on) at 4K, 16K and 32K context: range of strim/rapid-mlx - 1 over the three decode cells.", "%"),
-            ("decode_vs_vlm", try rng(["d4k", "d16k", "d32k"], ["mlx-vlm"], pct: false), "1.9-2.3x faster than mlx-vlm", "Decode speed ratio over mlx-vlm at 4K, 16K and 32K context: range of strim/mlx-vlm over the three decode cells.", "x"),
-            ("w5_speedup", try rng(["aw5"], RIVALS, pct: false), "2.7-2.9x faster", "Aggregate throughput of 4 clients sharing a 16K prefix: range of strim/rival over both rivals.", "x"),
-            ("ttft_p50_lower", try rng(p50, RIVALS, pct: true, lower: true), "(21-44% lower)", "Median first-token latency at 4 and 8 concurrent requests (512-token, agent and 4K prompts): range of 1 - strim/rival over six cells and both rivals.", "%"),
-            ("agg_lower", try bestRivalGap(aggs), "4-14% lower on aggregate", "Aggregate throughput gap to the best rival at c=4 and c=8 (512-token, agent and 4K prompts): range of 1 - strim/best rival over six cells.", "%"),
-            ("p95_worse", try worstP95(["p95_512c4", "p95_512c8"]), "22-31% worse p95", "p95 first-token latency gap to the best rival at c=4 and c=8 with 512-token prompts: strim/best rival - 1.", "%"),
-        ]
-        var claimIds: [String] = []
-        for (k, v, needle, what, _) in claims {
-            let quoted = needle.replacingOccurrences(of: "(", with: "").replacingOccurrences(of: ")", with: "")
-            guard pyContains(text, needle) || pyContains(text, quoted) else { throw SiteError("summary.md claim wording lacks \(pyReprString(needle)); recomputed range is \(v)") }
-            guard pyContains(needle, v) else { throw SiteError("claim \(k): recomputed \(v) is not what summary.md quotes (\(pyReprString(needle)))") }
-            add("final.claim.\(k)", .string(v), "", dp: nil, method: what, caveat: "Recomputed from the displayed ratios by strim site build and matched against the claim wording in summary.md.",
-                verify: needle, section: "Supported claim wording")
-            claimIds.append("final.claim.\(k)")
+        let p95s = ["p95_512c4", "p95_512c8", "p95_agc4", "p95_agc8", "p95_4kc4", "p95_4kc8"]
+        let pfs = [("4K", "c4k_pf"), ("16K", "c16k_pf"), ("32K", "c32k_pf")]
+        let note = "Recomputed from the displayed ratios by strim site build; there is no hand-typed claim wording."
+        func claim(_ k: String, _ v: PyJSON, _ what: String, unit: String = "") {
+            add("final.claim.\(k)", v, unit, dp: nil, method: what, caveat: note, computed: true)
         }
-        add("final.claim.prefill_slower", .string("2-3%"), "", dp: nil,
-            method: "Cold prefill at 16K and 32K: Strim is slower than the best rival (16K and 32K TTFT ratios 1.03; prefill ratios 0.97 against mlx-vlm).",
-            caveat: "Quoted from summary.md; the gap sits at the edge of the 2% TIE band and was consistent in both passes.", verify: "slightly slower (2-3%)", section: "Supported claim wording")
-        add("final.claim.passes", .int(2), "passes", dp: nil, method: "Passes per engine (pass 1 order strim, rapid-mlx, mlx-vlm; pass 2 reversed).",
-            caveat: "One rep per pass, so a median over two values is their mean.", verify: "2 passes", section: "Completeness and validity")
-        add("final.claim.build", .string("2df65e7"), "", dp: nil, method: "Strim commit that was benchmarked.", caveat: "Predates the server hardening commits; engine hot paths are otherwise unchanged at HEAD.",
-            verify: "exactly commit 2df65e7", section: "Completeness and validity")
-        add("final.claim.swap", .int(0), "MB", dp: nil, method: "Swap growth in every benchmark session.", caveat: "Baseline swap (about 5.7 GB of 7 GB) was pre-existing and constant.",
-            verify: "Swap growth 0 MB in every session", section: "Completeness and validity")
-        add("final.claim.cells", .int(48), "cells", dp: nil, method: "Cells run: 3 engines x 2 passes x 8 cells; all present, rc=0.", caveat: "Nothing had to be rerun.",
-            verify: "all 48 cells present", section: "Completeness and validity")
-        let flips = "only 6 of 33 cells change verdict"
-        add("final.claim.flips", .int(6), "cells", dp: nil, method: "Cells whose verdict changes between pass 1 and pass 2 (of 33).", caveat: "All sit in the 2-4% band; concurrency and decode conclusions do not change.",
-            verify: flips, section: "Completeness and validity")
+        claim("decode_vs_rapid", .string(try rng(["d4k", "d16k", "d32k"], ["rapid-mlx"], pct: true)), "Decode speed gain over rapid-mlx (MTP on) at 4K, 16K and 32K context: range of strim/rapid-mlx - 1 over the three decode cells.")
+        claim("decode_vs_vlm", .string(try rng(["d4k", "d16k", "d32k"], ["mlx-vlm"], pct: false)), "Decode speed ratio over mlx-vlm at 4K, 16K and 32K context: range of strim/mlx-vlm over the three decode cells.")
+        claim("w5_speedup", .string(try rng(["aw5"], RIVALS, pct: false)), "Aggregate throughput of 4 clients sharing a 16K prefix: range of strim/rival over both rivals.")
+        claim("ttft_p50_lower", .string(try rng(p50, RIVALS, pct: true, lower: true)), "Median first-token latency at 4 and 8 concurrent requests (512-token, agent and 4K prompts): range of 1 - strim/rival over six cells and both rivals.")
+        let agg = try lossGap(aggs), p95 = try lossGap(p95s)
+        claim("agg_lower", .string(agg.0), "Aggregate throughput gap to the best rival at c=4 and c=8 over the six concurrency cells, counting only cells where Strim is more than 2% behind.")
+        claim("agg_lower_n", .int(agg.1), "Number of the six aggregate-throughput cells where Strim is more than 2% behind the best rival.", unit: "cells")
+        claim("p95_worse", .string(p95.0), "p95 first-token gap to the best rival over the six c=4/c=8 cells, counting only cells where Strim is more than 2% slower.")
+        claim("p95_worse_n", .int(p95.1), "Number of the six p95 cells where Strim is more than 2% slower than the best rival.", unit: "cells")
+        claim("prefill_gap", .string(try lossGap(pfs.map { $0.1 }).0), "Cold prefill (tok/s) gap to the best rival over 4K, 16K and 32K, counting only sizes where Strim is more than 2% behind.")
+        claim("prefill_loss", .string(try sizes(pfs, loss: true)), "Cold prompt sizes where Strim prefill is more than 2% behind the best rival.")
+        claim("prefill_tie", .string(try sizes(pfs, loss: false)), "Cold prompt sizes where Strim prefill is within 2% of, or ahead of, the best rival.")
+        claim("passes", .int(passCount), "Passes per engine (pass 1 order strim, rapid-mlx, mlx-vlm; pass 2 reversed).", unit: "passes")
+        add("final.claim.build", .string(meta.build), "", dp: nil, method: "Strim commit that was benchmarked (from the summary title).",
+            caveat: "Commits after this one were not benchmarked.", verify: meta.build)
+        // ---- run validity: load and swap, parsed from the summary
+        if let ns = meta.sessions, let np = meta.polluted {
+            add("final.val.sessions", .int(ns), "sessions", dp: nil, method: "Engine sessions (engine x pass x cell group) listed in the per-session load table.",
+                caveat: "", verify_count: ("Completeness", " pass ", ["| "]))
+            add("final.val.polluted", .int(np), "sessions", dp: nil, method: "Sessions the summary marks POLLUTED (foreign CPU load above the protocol limit of 3).",
+                caveat: "A polluted session is not a clean measurement; rerun before treating the numbers as final.", verify_count: ("Completeness", "POLLUTED", ["| "]))
+        }
+        if let ml = meta.maxLoad {
+            add("final.val.load_max", .double(ml), "", dp: 1, method: "Highest 1-minute load average recorded at a cell start, over all sessions (per-session table).",
+                caveat: "Includes the engine's own load; the protocol limit for a clean session is 3 from non-engine work.", verify: fmtFixed(ml, 1), section: "Completeness")
+        }
+        if let sw = meta.maxSwapMB {
+            add("final.claim.swap", .int(sw), "MB", dp: nil, method: "Largest swap growth in any benchmark session.", caveat: "Baseline swap was pre-existing.",
+                verify: "swap growth max \(sw) MB", section: "Run conditions")
+        }
 
         var ci = JObject()
         ci["source"] = .string(FINAL_SRC)
@@ -290,7 +316,40 @@ extension SiteBuilder {
         })
         let ids = figs.compactMap { $0["id"]?.str }
         if ids.count != Set(ids).count { throw SiteError("duplicate final figure ids") }
+        // retarget the hand-entered head-to-head figures and the dataset/meta pointers at the current run directory
+        var retargeted: [PyJSON] = []
+        for f in figList {
+            guard let id = f["id"]?.str, ["ver.rapid", "ver.mlxvlm", "ver.strim_h2h", "ver.hw"].contains(id), var o = f.obj else { retargeted.append(f); continue }
+            var value = o["value"]?.pyStr ?? ""
+            switch id {
+            case "ver.rapid": if let v = meta.rapid { value = "rapid-mlx " + v }
+            case "ver.mlxvlm": if let v = meta.vlm { value = "mlx-vlm " + v }
+            case "ver.strim_h2h": value = "Strim 0.1.0 (\(meta.build))"; o["caveat"] = .string("Commits after this build were not benchmarked.")
+            default: break
+            }
+            o["value"] = .string(value)
+            o["verify"] = .string(id == "ver.strim_h2h" ? meta.build : value)
+            o["source_path"] = .string(FINAL_SRC)
+            retargeted.append(.object(o))
+        }
+        figList = retargeted
+        if var ds = top["datasets"]?.arr {
+            for k in ds.indices where ds[k]["id"]?.str == "final" {
+                if var o = ds[k].obj { o["path"] = .string(FINAL_REL); ds[k] = .object(o) }
+            }
+            top["datasets"] = .array(ds)
+        }
+        if var m = top["meta"]?.obj, let g = m["generated"]?.str {
+            m["generated"] = .string(g.replacingOccurrences(of: #"bench/results/h2h-[a-z0-9-]+"#, with: FINAL_REL, options: .regularExpression))
+            top["meta"] = .object(m)
+        }
         top["figures"] = .array(figList + figs)
+        ci["validity"] = .object({
+            var v = JObject()
+            v["run"] = .string(meta.id); v["date"] = .string(meta.date); v["build"] = .string(meta.build)
+            v["clean"] = .bool(meta.clean)
+            return v
+        }())
         top["final"] = .object(ci)
         return .object(top)
     }

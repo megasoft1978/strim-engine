@@ -1,6 +1,6 @@
 # Site and README generator (`strim site`)
 
-Swift-only generator for `site/index.html`, `README.md` and `site/data/results.json` (it replaced `scripts/build_site.py`, removed). Library: `Sources/StrimSite`; CLI glue: `Sources/StrimCLI/Cmd_Site.swift`. No third-party dependencies.
+Swift-only generator for `site/index.html` (landing), `site/benchmarks.html` (full results, method, engineering notes), `README.md` and `site/data/results.json` (it replaced `scripts/build_site.py`, removed). Library: `Sources/StrimSite`; CLI glue: `Sources/StrimCLI/Cmd_Site.swift`. No third-party dependencies.
 
 ## Commands
 
@@ -26,3 +26,7 @@ Flags: `--check`, `--list-figures`, `--refresh-soak` (they work with or without 
 The output was verified byte-identical to the Python generator on the committed inputs (including with a synthetic complete soak and after `--refresh-soak`) before the Python was deleted. Python float `repr`, `json.dumps(indent=1, ensure_ascii=False)`, `html.escape` and `%g` / `.Nf` formatting are reimplemented in `PyJSON.swift` / `Text.swift`. The committed `site/index.html`, `README.md` and `site/data/results.json` are the frozen reference: the test regenerates them and requires byte equality. Page text that named the Python script now names `strim site build` / `strim site check`; the committed outputs were regenerated once for that change and are otherwise the Python generator's output.
 
 Tests (`Tests/StrimSiteTests`): equivalence against the committed files, `check` failing on a corrupted value / dropped figure id / desynced winners table / bad scoreboard cell / missing source / bad template, build-mode writes, soak refresh, unit tests for the number and JSON formatting.
+
+## Redesign (2026-10-28)
+
+README (<= 60 lines, one hero chart `site/assets/h2h-hero.svg`) and the landing page are short front pages; everything cut moved to `site/benchmarks.html` and `docs/CLIENTS.md`. The head-to-head run is ONE constant, `FINAL_REL` in `Sources/StrimSite/Builder.swift`; date, build, rival versions, validity text (sessions polluted, highest load) and the raw-results link are parsed from that run's `summary.md`, so swapping in a clean rerun is a one-line change plus `strim site build`. The terminal transcript on the landing page is captured output in `site/data/demo.json` (not generated; re-capture when CLI output changes). `strim site check` also enforces the README line limit, one chart, install order and visible loss rows.

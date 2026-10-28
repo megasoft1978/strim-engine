@@ -246,6 +246,28 @@ private func writeSpec(_ f: Fixture, limits: HarnessLimits = HarnessLimits()) ->
         #expect(FileManager.default.fileExists(atPath: f.jobs.path + "/chat1/result.json"))
     }
 
+    @Test func thinkingRequestReachesTheFirstEngineSession() async throws {
+        let f = try makeFixture(); defer { f.remove() }
+        let e = FakeEngine()
+        e.script(say("thinking"))   // session "think-on", turn 1
+        e.script(say("default"))    // session "think-default", turn 1
+        let hr = runner(e, f)
+        try await hr.openSession(spec: writeSpec(f), sessionID: "think-on")
+        await hr.setThinking(sessionID: "think-on", enabled: true)
+        _ = await drain(try await hr.appendUserTurn(sessionID: "think-on", text: "hi"))
+        try await hr.openSession(spec: writeSpec(f), sessionID: "think-default")
+        _ = await drain(try await hr.appendUserTurn(sessionID: "think-default", text: "hi"))
+        e.snapshot { f in
+            #expect(f.opened.count == 2)
+            // Requested on: the template default with thinking enabled, as the thinking turns of the agent loop.
+            #expect(f.opened[0].1.enableThinking == true && f.opened[0].1.reasoningPolicy == .templateDefault)
+            // Never set: unchanged default, no enable_thinking sent.
+            #expect(f.opened[1].1.enableThinking == nil && f.opened[1].1.reasoningPolicy == .disableWhenTools)
+        }
+        _ = await hr.closeSession(sessionID: "think-on")
+        _ = await hr.closeSession(sessionID: "think-default")
+    }
+
     @Test func secondTurnWhileRunningIsRejected() async throws {
         let f = try makeFixture(); defer { f.remove() }
         let e = FakeEngine(); e.script([.hang])

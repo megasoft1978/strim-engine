@@ -1,0 +1,3 @@
+rep 1 spec: passes 64  emitted 64  1.00 tok/pass  26.3 tok/s  27.5 decode  accept 0% (0/0)  38.0 ms/pass  2.43s
+parity: EXACT (123 tokens)
+aggregate: emitted=64 requested=64 seconds=2.43 decode_seconds=2.32 e2e_tok_s=26.29 decode_tok_s=27.54

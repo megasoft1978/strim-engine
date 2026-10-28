@@ -65,7 +65,7 @@ extension SiteBuilder {
         var o = "<h3 id=\"r-final\">Final head-to-head: Strim, rapid-mlx and mlx-vlm</h3>"
         o += "<p>Qwen3.8-27B 4-bit served alone over HTTP by each engine, one engine on the GPU at a time, thinking off, greedy decoding, on one Apple M5 Max with 64&nbsp;GB. "
             + "\(n("final.claim.passes")) passes (pass 1 Strim, rapid-mlx, mlx-vlm; pass 2 reversed), one rep per pass, so each value is the median of two runs, which is their mean. "
-            + "All \(n("final.claim.cells")) cells ran to completion, swap growth was \(n("final.claim.swap"))&nbsp;MB in every session, and only \(n("final.claim.flips")) of the 33 cells change verdict if a single pass is used (all within 2 to 4%). "
+            + "The largest swap growth in any session was \(n("final.claim.swap"))&nbsp;MB. "
             + "Strim is build \(n("final.claim.build")); rapid-mlx runs with its MTP speculative head on and <code>--max-num-seqs 4</code>; mlx-vlm runs its server defaults, which means no MTP and no cross-request prefix cache. "
             + "Verdict: WIN / LOSS when the ratio is outside a 2% band, otherwise TIE. Raw files, launch lines and the full per-rival tables: <a href=\"../\(FINAL_REL)/summary.md\">summary.md</a>.</p>"
         o += chart("Decode speed, tok/s (higher is better)", "Greedy, after a cold prompt of each size: 256 tokens at 4K and 16K, 128 tokens at 32K.", [
@@ -76,7 +76,7 @@ extension SiteBuilder {
         o += chart("Cold prompt time to first token, s (lower is better)", "One distinct prompt at a time, no cache hit possible.", [
             ("4K prompt", bars("c4k_tt")), ("16K prompt", bars("c16k_tt")), ("32K prompt", bars("c32k_tt")),
         ], "s")
-        o += "<p class=\"note\">Cold prefill is a tie at 4K and about \(n("final.claim.prefill_slower")) slower than the best rival at 16K and 32K. Treat it as a small, real gap, not a win.</p>"
+        o += "<p class=\"note\">Cold prefill (tok/s): within the 2% band of the best rival at \(n("final.claim.prefill_tie")), \(n("final.claim.prefill_gap")) behind it at \(n("final.claim.prefill_loss")). A tie is not a win.</p>"
         o += chart("Median first-token latency under concurrency, s (lower is better)", "c = number of simultaneous requests. 512-token, agent-style (about 2.8K tokens) and distinct 4K prompts.", [
             ("c=4, 512-token prompts", bars("p50_512c4")), ("c=8, 512-token prompts", bars("p50_512c8")),
             ("c=4, agent prompts", bars("p50_agc4")), ("c=8, agent prompts", bars("p50_agc8")),
@@ -89,13 +89,14 @@ extension SiteBuilder {
             ("c=4, agent prompts", bars("aagc4")), ("c=8, agent prompts", bars("aagc8")),
             ("c=4, 4K prompts", bars("a4kc4")), ("c=8, 4K prompts", bars("a4kc8")),
         ], "tok/s")
-        o += "<p class=\"note\">Strim is behind on aggregate throughput: \(n("final.claim.agg_lower")) lower than the best rival across these six cells (rapid-mlx at c=4 with 512-token prompts, mlx-vlm in most others). "
+        o += "<p class=\"note\">Strim is more than 2% behind the best rival in \(n("final.claim.agg_lower_n")) of these six cells, by \(n("final.claim.agg_lower")). "
             + "Batched decode narrows the gap but the remaining cost is the quantized matmul at 4 to 8 rows (<a href=\"#how-batch\">below</a>).</p>"
         o += chart("Tail first-token latency (p95), s (lower is better)", "With 4 or 8 requests per cell, p95 is the slowest request.", [
             ("c=4, 512-token prompts", bars("p95_512c4")), ("c=8, 512-token prompts", bars("p95_512c8")),
+            ("c=4, agent prompts", bars("p95_agc4")), ("c=8, agent prompts", bars("p95_agc8")),
+            ("c=4, 4K prompts", bars("p95_4kc4")), ("c=8, 4K prompts", bars("p95_4kc8")),
         ], "s")
-        o += "<p class=\"note\">Strim's p95 is \(n("final.claim.p95_worse")) worse than the best rival at 512-token concurrency. The same staggering that gives a low median pushes the last request out. "
-            + "On agent and 4K prompts at c=4 and c=8 the p95 is within a few percent (see the table).</p>"
+        o += "<p class=\"note\">Strim's p95 is more than 2% worse than the best rival in \(n("final.claim.p95_worse_n")) of these six cells, by \(n("final.claim.p95_worse")). The same staggering that gives a low median pushes the last request out.</p>"
         o += chart("Four agents sharing a 16K prefix: median first-token latency, s (lower is better)", "Four clients send the same 16K prefix with different suffixes at once.", [
             (nil, bars("p50_w5")),
         ], "s")
@@ -106,7 +107,7 @@ extension SiteBuilder {
         o += chart("Agent replay: summed prefill over 8 turns, s (lower is better)", "Synthetic session, prompts 4.1K to 40.8K tokens, each turn resends the history. Prefill sum is the sum of per-turn first-token latency.", [
             ("Turns 1 to 8", bars("rp8")), ("Turns 1 to 6", bars("rp6")),
         ], "s")
-        o += "<p>Strim ties rapid-mlx on the 8-turn replay (\(n(fid("rp8", "strim")))&nbsp;s vs \(n(fid("rp8", "rapid-mlx")))&nbsp;s) and on cold 4K prefill; both reuse about \(n(fid("rpc8", "strim")))% of the turn-8 prompt from cache. mlx-vlm has no cross-request prefix cache (\(n(fid("rp8", "mlx-vlm")))&nbsp;s). "
+        o += "<p>8-turn replay, summed prefill: Strim \(n(fid("rp8", "strim")))&nbsp;s, rapid-mlx \(n(fid("rp8", "rapid-mlx")))&nbsp;s (verdict against rapid-mlx: \(n(fverdict("rp8", "rapid-mlx")))), mlx-vlm \(n(fid("rp8", "mlx-vlm")))&nbsp;s. Strim and rapid-mlx reuse about \(n(fid("rpc8", "strim")))% of the turn-8 prompt from cache; mlx-vlm has no cross-request prefix cache. "
             + "Replay resends recorded assistant turns, so Strim's token ledger and hot-session reuse do not apply: a lower bound for Strim on a live agent.</p>"
         // full table
         var rows: [[String]] = []
@@ -118,26 +119,25 @@ extension SiteBuilder {
             for rv in RIVALS { r.append(verdictCell(fverdict(c.id, rv))) }
             rows.append(r)
         }
-        o += table("All 33 cells: median of 2 passes; ratio = Strim / rival; bold = best of the three",
+        o += table("All \(finalCells().count) cells: median of \(num("final.claim.passes").map { String(Int($0)) } ?? "?") passes; ratio = Strim / rival; bold = best of the three",
                    ["Cell", "Unit", "Strim", "rapid-mlx (MTP)", "mlx-vlm (no MTP)", "Strim / rapid-mlx", "Strim / mlx-vlm", "vs rapid-mlx", "vs mlx-vlm"], rows, numcols: [2, 3, 4, 5, 6],
                    foot: "Verdicts: WIN means Strim is better by more than 2%, LOSS worse by more than 2%, TIE within 2%. Lower-is-better cells (TTFT, time) win with a ratio below 1.")
         // memory
         let mrows: [[String]] = [["Peak physical footprint, whole run", td("final.mem.strim"), td("final.mem.rapid-mlx"), td("final.mem.mlx-vlm")]]
         o += table("Peak memory over the whole run (engine process tree, includes Metal buffers), GB", ["Measure", "Strim", "rapid-mlx", "mlx-vlm"], mrows, numcols: [1, 2, 3],
-                   foot: "Whole-run maximum over passes and sessions, not steady state. All were under the 42&nbsp;GB abort limit and no engine swapped (swap growth \(n("final.claim.swap"))&nbsp;MB).")
+                   foot: "Whole-run maximum over passes and sessions, not steady state. Largest swap growth in any session: \(n("final.claim.swap"))&nbsp;MB.")
         // agreement
         o += "<h4 id=\"r-agree\">Greedy agreement (sanity check only)</h4><p>8 fixed prompts, 64 greedy tokens. Strim against itself across the two passes: \(n("final.agree.self")) identical. Strim against rapid-mlx: \(n("final.agree.rapid-mlx")); against mlx-vlm: \(n("final.agree.mlx-vlm")). "
             + "The divergences are bf16 near-ties, where a single flipped token changes every later one; it is a sanity check, not a quality measurement.</p>"
         // honest list
         o += "<h4 id=\"r-caveats\">Caveats that change how to read the table</h4><ul>"
         for c in [
-            "<strong>Two passes, one rep each.</strong> Pass-to-pass spread is small (median under 1%) but decode at 16K and 32K can swing by a few percent for Strim and up to about a quarter for rapid-mlx and mlx-vlm; the decode wins are larger than that. Prefill gaps of 2 to 3% sit at the edge of the 2% tie band.",
-            "<strong>Rival pass 1 ran under more system load</strong> (other CPU work; the GPU was not shared). Pass 2 was clean. Conclusions hold in both passes except the borderline cells counted above.",
+            "<strong>Validity.</strong> " + validityHTML(),
+            "<strong>Two passes, one rep each.</strong> Pass-to-pass spread is listed in the raw summary; prefill gaps of a few percent sit near the edge of the 2% tie band, so a single flipped pass can change a verdict.",
             "<strong>Rival configuration.</strong> rapid-mlx used MTP and <code>--max-num-seqs 4</code> (so c=8 queues); mlx-vlm had no MTP and no prefix cache. Defaults were used otherwise; rival tuning was not explored.",
             "<strong>TTFT definitions differ in practice.</strong> Rivals report batch-synchronous first tokens, so aggregate throughput is the only fully comparable concurrency number.",
-            "<strong>The Strim build predates the final server hardening commits.</strong> Engine hot paths are otherwise unchanged at HEAD, but HEAD was not re-benchmarked.",
+            "<strong>Later commits are not included.</strong> Only the build named above was measured.",
             "<strong>One model, one machine, thinking off,</strong> synthetic agent prompts and a synthetic 8-turn fixture.",
-            "<strong>Earlier 8-engine run (2026-10-26) not repeated for the final build.</strong> That run also measured mlx-lm, TensorFold, oMLX, llama.cpp and Ollama on a different configuration; it is no longer shown, and none of its numbers describe this build.",
         ] { o += "<li>\(c)</li>" }
         o += "</ul>"
         return o

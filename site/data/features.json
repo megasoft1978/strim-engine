@@ -1,0 +1,431 @@
+{
+ "schema": "strim-features/1",
+ "comment": "Hand-filled from docs/COMPARISON-FEATURES-2026-10-28.md (each cell there was verified from the installed package, its --help, its README or this repo). Status: yes, partial, no, notfound (no evidence found, not proof of absence), unknown (not verified), info (plain fact, no verdict). Schema in site/data/headline.schema.md.",
+ "date": "2026-10-28",
+ "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+ "versions": {
+  "strim": "0.1.0 (repo HEAD)",
+  "rapid-mlx": "0.15.7",
+  "mlx-vlm": "0.7.10"
+ },
+ "rows": [
+  {
+   "id": "runtime",
+   "group": "Runtime",
+   "label": "Single binary, no Python runtime",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "Swift, one process, one binary"
+   },
+   "rapid-mlx": {
+    "s": "no",
+    "n": "Python package (fastapi/uvicorn)"
+   },
+   "mlx-vlm": {
+    "s": "no",
+    "n": "Python package (uvicorn server)"
+   }
+  },
+  {
+   "id": "install",
+   "group": "Runtime",
+   "label": "Install footprint",
+   "readme": false,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "info",
+    "n": "34 MB binary + weights"
+   },
+   "rapid-mlx": {
+    "s": "info",
+    "n": "159 MB keg + Python deps"
+   },
+   "mlx-vlm": {
+    "s": "info",
+    "n": "256 MB venv"
+   }
+  },
+  {
+   "id": "breadth",
+   "group": "Models",
+   "label": "Runs many models",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "no",
+    "n": "One model only (Qwen3.8-27B 4-bit)"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": "Many models, vision, audio, embeddings"
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": "Many models, vision, audio, embeddings"
+   }
+  },
+  {
+   "id": "mtp",
+   "group": "Decoding",
+   "label": "MTP speculative decoding",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "Default, adaptive depth 2-4"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": "--speculative-config mtp (used in h2h)"
+   },
+   "mlx-vlm": {
+    "s": "partial",
+    "n": "--draft-kind mtp exists; off in h2h"
+   }
+  },
+  {
+   "id": "batching",
+   "group": "Decoding",
+   "label": "Continuous batching",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "Batched decode, join/leave"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": "--max-num-seqs"
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": "--max-num-seqs"
+   }
+  },
+  {
+   "id": "chunked",
+   "group": "Decoding",
+   "label": "Chunked prefill",
+   "readme": false,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "1,024-token chunks interleaved with decode"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": "--prefill-step-size"
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": "--prefill-step-size"
+   }
+  },
+  {
+   "id": "structured",
+   "group": "Decoding",
+   "label": "Structured output (json_schema)",
+   "readme": true,
+   "source": "docs/STRUCTURED-OUTPUT.md",
+   "strim": {
+    "s": "yes",
+    "n": "json_object, json_schema, tool_choice (constrained decoding)"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": "llguidance, json_schema (not exercised by us)"
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": "response_format (not exercised by us)"
+   }
+  },
+  {
+   "id": "reasoning",
+   "group": "Decoding",
+   "label": "Reasoning / thinking separation",
+   "readme": false,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "partial",
+    "n": "Template renders thinking; separate output not verified"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": "--reasoning-parser"
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": "reasoning_content, --thinking-budget"
+   }
+  },
+  {
+   "id": "tools",
+   "group": "Decoding",
+   "label": "Tool calling",
+   "readme": false,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "Streaming Qwen parser; tool_choice=required enforced"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": "Many tool parsers"
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": "Parser inferred from processor"
+   }
+  },
+  {
+   "id": "prefix",
+   "group": "Cache",
+   "label": "Cross-request prefix cache",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "Exact trie: a hit equals a miss bitwise"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": "Radix or hash index; exactness Unknown"
+   },
+   "mlx-vlm": {
+    "s": "partial",
+    "n": "In code; cached=0 with h2h server defaults"
+   }
+  },
+  {
+   "id": "diskcache",
+   "group": "Cache",
+   "label": "Disk-persisted prefix cache",
+   "readme": true,
+   "source": "docs/PREFIX-DISK-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "Opt-in (STRIM_PREFIX_DISK=1), per-model directory"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": "Saved on shutdown"
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": "SSD tier"
+   }
+  },
+  {
+   "id": "admission",
+   "group": "Serving",
+   "label": "Priority and memory-based admission",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "Interactive vs background classes, memory budget"
+   },
+   "rapid-mlx": {
+    "s": "partial",
+    "n": "fcfs or shortest_validated_tail; no priority classes"
+   },
+   "mlx-vlm": {
+    "s": "notfound",
+    "n": "No evidence found"
+   }
+  },
+  {
+   "id": "membudget",
+   "group": "Serving",
+   "label": "Memory budget / swap protection",
+   "readme": false,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "partial",
+    "n": "Admission by memory budget; no OS swap guard"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": "--gpu-memory-utilization and more knobs"
+   },
+   "mlx-vlm": {
+    "s": "partial",
+    "n": "--max-kv-size, --expert-cache-gb"
+   }
+  },
+  {
+   "id": "auth",
+   "group": "Serving",
+   "label": "Server auth",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "Bearer token on by default, separate control token"
+   },
+   "rapid-mlx": {
+    "s": "partial",
+    "n": "Opt-in --api-key"
+   },
+   "mlx-vlm": {
+    "s": "partial",
+    "n": "Opt-in --api-key; default host 0.0.0.0"
+   }
+  },
+  {
+   "id": "chat",
+   "group": "API",
+   "label": "OpenAI Chat Completions",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": ""
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": ""
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": ""
+   }
+  },
+  {
+   "id": "responses",
+   "group": "API",
+   "label": "OpenAI Responses",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "With response store"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": ""
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": ""
+   }
+  },
+  {
+   "id": "messages",
+   "group": "API",
+   "label": "Anthropic Messages",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "With count_tokens"
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": ""
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": "With count_tokens"
+   }
+  },
+  {
+   "id": "stream",
+   "group": "API",
+   "label": "Streaming (SSE)",
+   "readme": false,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": ""
+   },
+   "rapid-mlx": {
+    "s": "yes",
+    "n": ""
+   },
+   "mlx-vlm": {
+    "s": "yes",
+    "n": ""
+   }
+  },
+  {
+   "id": "harness",
+   "group": "Agents",
+   "label": "Sandboxed local-model job harness",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "Worktree jobs, harness-run verify, SHA-256 patch approval"
+   },
+   "rapid-mlx": {
+    "s": "partial",
+    "n": "Configures external agents; no local job runner found"
+   },
+   "mlx-vlm": {
+    "s": "notfound",
+    "n": "No evidence found"
+   }
+  },
+  {
+   "id": "mcp",
+   "group": "Agents",
+   "label": "MCP",
+   "readme": true,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "yes",
+    "n": "MCP server at /mcp, 4 tools"
+   },
+   "rapid-mlx": {
+    "s": "partial",
+    "n": "MCP client side; acting as server Unknown"
+   },
+   "mlx-vlm": {
+    "s": "notfound",
+    "n": "No evidence found"
+   }
+  },
+  {
+   "id": "app",
+   "group": "Product",
+   "label": "Menu-bar app",
+   "readme": false,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "partial",
+    "n": "SwiftUI shell, builds"
+   },
+   "rapid-mlx": {
+    "s": "partial",
+    "n": "Desktop app; menu-bar form Unknown"
+   },
+   "mlx-vlm": {
+    "s": "no",
+    "n": "No"
+   }
+  },
+  {
+   "id": "license",
+   "group": "Product",
+   "label": "License",
+   "readme": false,
+   "source": "docs/COMPARISON-FEATURES-2026-10-28.md",
+   "strim": {
+    "s": "info",
+    "n": "MIT"
+   },
+   "rapid-mlx": {
+    "s": "info",
+    "n": "Apache-2.0"
+   },
+   "mlx-vlm": {
+    "s": "info",
+    "n": "MIT"
+   }
+  }
+ ]
+}

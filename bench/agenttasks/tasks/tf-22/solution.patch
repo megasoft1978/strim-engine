@@ -1,0 +1,69 @@
+diff --git a/order.go b/order.go
+index 4b9592e..446dbce 100644
+--- a/order.go
++++ b/order.go
+@@ -12,7 +12,7 @@ type Line struct {
+ func Total(lines []Line, pct, bps int) int {
+ 	sum := 0
+ 	for _, l := range lines {
+-		sum += l.UnitCents
++		sum += l.Qty * l.UnitCents
+ 	}
+ 	return WithTax(Discount(sum, pct), bps)
+ }
+@@ -20,9 +20,14 @@ func Total(lines []Line, pct, bps int) int {
+ // Fulfil removes every line from the stock or none of them. A shortage is
+ // reported as an error wrapping ErrInsufficient and names the SKU.
+ func Fulfil(s *Stock, lines []Line) error {
++	for _, l := range lines {
++		if s.Count(l.SKU) < l.Qty {
++			return fmt.Errorf("sku %s: %w", l.SKU, ErrInsufficient)
++		}
++	}
+ 	for _, l := range lines {
+ 		if err := s.Remove(l.SKU, l.Qty); err != nil {
+-			return fmt.Errorf("sku %s: %v", l.SKU, err)
++			return err
+ 		}
+ 	}
+ 	return nil
+diff --git a/price.go b/price.go
+index 302192e..af9086d 100644
+--- a/price.go
++++ b/price.go
+@@ -1,7 +1,7 @@
+ package shop
+ 
+ // Discount returns cents after a percent discount, rounded half up.
+-func Discount(cents, pct int) int { return cents * (100 - pct) / 100 }
++func Discount(cents, pct int) int { return (cents*(100-pct) + 50) / 100 }
+ 
+ // WithTax adds tax given in basis points (1 bp = 0.01%), rounded half up.
+-func WithTax(cents, bps int) int { return cents + cents*bps/10000 }
++func WithTax(cents, bps int) int { return (cents*(10000+bps) + 5000) / 10000 }
+diff --git a/stock.go b/stock.go
+index 869e926..8231c99 100644
+--- a/stock.go
++++ b/stock.go
+@@ -15,10 +15,13 @@ func (s *Stock) Add(sku string, n int) { s.items[sku] += n }
+ 
+ // Remove takes n units of sku. Removing exactly what is there is fine and drops the SKU.
+ func (s *Stock) Remove(sku string, n int) error {
+-	if s.items[sku] <= n {
++	if s.items[sku] < n {
+ 		return ErrInsufficient
+ 	}
+ 	s.items[sku] -= n
++	if s.items[sku] == 0 {
++		delete(s.items, sku)
++	}
+ 	return nil
+ }
+ 
+@@ -30,5 +33,6 @@ func (s *Stock) SKUs() []string {
+ 	for k := range s.items {
+ 		out = append(out, k)
+ 	}
++	sort.Strings(out)
+ 	return out
+ }

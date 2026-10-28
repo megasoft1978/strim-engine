@@ -1,0 +1,11 @@
+session 12:44:27 cells=w3,w3_32k,w4s load={ 11.32 8.75 8.32 } swap=total = 7168.00M  used = 5505.81M  free = 1662.19M  (encrypted)
+[12:44:31] engine pid 33947 ready after 4s
+[12:44:31] CELL warmup load={ 10.81 8.69 8.30 }
+[12:44:35] CELL warmup rc=0 4s memory_aborted=no
+[12:44:35] CELL w3 load={ 10.35 8.62 8.28 }
+[12:45:05] CELL w3 rc=0 30s memory_aborted=no
+[12:45:05] CELL w3_32k load={ 11.16 9.01 8.43 }
+[12:45:45] CELL w3_32k rc=0 40s memory_aborted=no
+[12:45:45] CELL w4s load={ 13.88 9.83 8.75 }
+[12:46:08] CELL w4s rc=0 23s memory_aborted=no
+end 12:46:08 load={ 12.91 9.88 8.79 } swap=total = 7168.00M  used = 5497.81M  free = 1670.19M  (encrypted)

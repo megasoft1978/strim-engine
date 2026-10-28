@@ -1,0 +1,33 @@
+{
+  "answer_env" : "ANSWER_FILE",
+  "base_commit" : "",
+  "class" : "repo-qa",
+  "est_solo_turns" : 5,
+  "expected_answer" : {
+    "all_of" : [
+      "Bank\\.java[^0-9]{1,12}30([^0-9]|$)",
+      "Account\\.java[^0-9]{1,12}4[6-9]([^0-9]|$)",
+      "applyMonthlyInterest"
+    ]
+  },
+  "id" : "jv-04",
+  "known_answer" : "src\/main\/java\/bank\/Bank.java:30 throws IllegalStateException for insufficient funds; Account.applyMonthlyInterest is declared at src\/main\/java\/bank\/Account.java:48.",
+  "language" : "java",
+  "license" : "MIT",
+  "no_edit" : true,
+  "note" : "Java repo-QA: overdraft check and monthly interest",
+  "prompt" : "Answer a question about the repository in the current directory. Do NOT modify any file. Reply with the repo-relative file path(s) and the exact symbol name(s) (function, class, method or variable) that answer it, each as path:line (the line where the symbol or the relevant statement is). Keep the answer short.\n\nQuestion: In which file and on which line is the insufficient-funds check performed when money is transferred, and in which file and line is the method that adds monthly interest declared?",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-java",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 3231,
+  "test_paths" : [
+
+  ],
+  "test_sha256" : {
+
+  },
+  "tree_sha256" : "6b1fca8154d79f780aeae21f1263782c70cc28d6ffc1362d8cee04e40b572ab1",
+  "verify_cmd" : "grep -Eq 'Bank\\.java[^0-9]{1,12}30([^0-9]|$)' \"$ANSWER_FILE\" && grep -Eq 'Account\\.java[^0-9]{1,12}4[6-9]([^0-9]|$)' \"$ANSWER_FILE\" && grep -Eq 'applyMonthlyInterest' \"$ANSWER_FILE\"",
+  "wrong_answer" : "Account.java:40 checks funds and Bank.java:11 applies interest."
+}

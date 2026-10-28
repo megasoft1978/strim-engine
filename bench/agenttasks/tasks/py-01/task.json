@@ -1,0 +1,23 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 6,
+  "id" : "py-01",
+  "language" : "python",
+  "license" : "MIT",
+  "note" : "Python: page range parser treats A-B as exclusive of B",
+  "prompt" : "The automated tests of this Python package currently fail. Run `python3 -I -B -m unittest discover -s tests -t .` from the repository root to see the failures (standard library unittest only; there is no pip and no network). Change the package non-test source so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-python",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1361,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/__init__.py" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests\/test_parse.py" : "7885c23acf2aeffd8c955e95b3b4b51ffba8b1fa27a697416723f2ef1a90bc01"
+  },
+  "tree_sha256" : "9f932d0de39d858c215296321fe821fa5dba3a5ac6d5a5e1d03fd995f65b4022",
+  "verify_cmd" : "python3 -I -B -m unittest discover -s tests -t ."
+}

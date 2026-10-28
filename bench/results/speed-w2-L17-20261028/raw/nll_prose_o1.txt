@@ -1,0 +1,3 @@
+[16:40:52] start nll_prose_o1 load={ 5.35 4.14 3.58 } swap=total = 9216.00M  used = 7997.31M  free = 1218.69M  (encrypted)
+order=1 n=512 nll=13.3112 ppl=603910.368 top1=0.000
+[16:40:53] end rc=0 aborted=0

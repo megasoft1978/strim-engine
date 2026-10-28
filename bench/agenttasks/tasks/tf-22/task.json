@@ -1,0 +1,26 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 14,
+  "id" : "tf-22",
+  "language" : "go",
+  "license" : "MIT",
+  "note" : "multi-file Go: stock, rounding, order fulfilment (7 injected bugs in 3 files)",
+  "prompt" : "The automated tests of this project currently fail. Run `go test -count=1 .\/...` from the repository root to see the failures. Change the project's non-test source code so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-go",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1871,
+  "test_paths" : [
+    "order_test.go",
+    "price_test.go",
+    "stock_test.go"
+  ],
+  "test_sha256" : {
+    "order_test.go" : "514adee4e3ea70ec36da55ba85f70669e9d2c6b548eaf7ebabe883d81290266e",
+    "price_test.go" : "58996a19e91763b288415b51fc2644f7f8c2702c98b9612c1fafcaf21aeb5a52",
+    "stock_test.go" : "bcd791c2a5f9642c3a418a2cf18992405d40967617c2ac7fd6c5cc578a046012"
+  },
+  "tree_sha256" : "3399036c91f3aae1c3373163227f453a13ffbc32f69e337f6b01bd46aac4f89e",
+  "verify_cmd" : "go test -count=1 .\/..."
+}

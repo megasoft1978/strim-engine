@@ -1,0 +1,41 @@
+IDENT rand S=1024 B=1: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT rand S=1000 B=1: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT rand S=2048 B=1: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT rand S=512 B=1: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT rand S=47 B=1: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT rand S=49 B=1: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT rand S=1 B=1: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT rand S=3 B=1: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT rand S=777 B=2: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT rand S=4096 B=1: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT captured cap0.safetensors: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT captured cap78.safetensors: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+IDENT captured cap189.safetensors: 48_32_b=OK 48_16_b=OK 32_64_b=OK 32_32_b=OK 24_32_b=OK 16_32_b=OK 24_32_f=OK 28_32_f=OK 20_32_f=OK 16_32_f=OK 24_16_f=OK 24_64_f=OK 12_32_f=OK
+TIME S=1024 shipped 0.8478 ms
+TIME S=1024 48_32_b 0.8479 ms (1.000x vs first)
+TIME S=1024 48_16_b 1.4961 ms (0.567x vs first)
+TIME S=1024 32_64_b 0.9068 ms (0.935x vs first)
+TIME S=1024 32_32_b 0.8473 ms (1.001x vs first)
+TIME S=1024 24_32_b 0.8724 ms (0.972x vs first)
+TIME S=1024 16_32_b 0.8688 ms (0.976x vs first)
+TIME S=1024 24_32_f 0.8840 ms (0.959x vs first)
+TIME S=1024 28_32_f 0.9442 ms (0.898x vs first)
+TIME S=1024 20_32_f 0.8934 ms (0.949x vs first)
+TIME S=1024 16_32_f 0.9031 ms (0.939x vs first)
+TIME S=1024 24_16_f 1.6193 ms (0.524x vs first)
+TIME S=1024 24_64_f 0.9496 ms (0.893x vs first)
+TIME S=1024 12_32_f 0.9119 ms (0.930x vs first)
+TIME S=4096 shipped 3.4292 ms
+TIME S=4096 48_32_b 3.4217 ms (1.000x vs first)
+TIME S=4096 48_16_b 6.7596 ms (0.506x vs first)
+TIME S=4096 32_64_b 3.6274 ms (0.943x vs first)
+TIME S=4096 32_32_b 3.5099 ms (0.975x vs first)
+TIME S=4096 24_32_b 3.6724 ms (0.932x vs first)
+TIME S=4096 16_32_b 3.5324 ms (0.969x vs first)
+TIME S=4096 24_32_f 3.5802 ms (0.956x vs first)
+TIME S=4096 28_32_f 3.8857 ms (0.881x vs first)
+TIME S=4096 20_32_f 3.5207 ms (0.972x vs first)
+TIME S=4096 16_32_f 3.6199 ms (0.945x vs first)
+TIME S=4096 24_16_f 7.5919 ms (0.451x vs first)
+TIME S=4096 24_64_f 3.7582 ms (0.910x vs first)
+TIME S=4096 12_32_f 3.6548 ms (0.936x vs first)

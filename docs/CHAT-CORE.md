@@ -58,4 +58,4 @@ StrimHarness does not import StrimAPI. The control lane maps `ChatEvent` (neutra
 
 Typed errors to API errors: `ChatError.code` is the stable `snake_case` name (`turn_in_progress` and `max_sessions` -> 409 `conflict`, `session_not_found` -> 404, `session_closed` / `idle_timeout` -> 409, `empty_text` / `text_too_long` / `unknown_profile` -> 400 `bad_request`, `open_failed` -> 500 or 503).
 
-Applying a patch is not part of the core: the control lane runs `git apply --3way` on the parent only after an explicit UI approval.
+Applying a patch is not part of the core: the control lane runs plain `git apply` (after `git apply --check`, never `--3way`) on the parent only after an explicit UI approval of the exact patch bytes (`patch_sha256`).

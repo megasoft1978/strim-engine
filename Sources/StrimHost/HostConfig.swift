@@ -111,7 +111,7 @@ public struct HostPolicy: Sendable {
                 let r = Self.canonical(root)
                 return real == r || real.hasPrefix(r.hasSuffix("/") ? r : r + "/")
             }
-            if !ok { return "cwd \(cwd) is outside the allowed roots (mcp.allowedRoots in ~/.strim/config.json)." }
+            if !ok { return "cwd \(cwd) is outside the allowed roots (mcp.allowedRoots in ~/.strim/config.json); canonical path: \(real)." }
         }
         return nil
     }

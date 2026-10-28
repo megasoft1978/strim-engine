@@ -148,6 +148,8 @@ public struct LedgerRow: Codable, Sendable, Equatable {
     public var turns: Int?
     public var delegations: Int = 0
     public var polls: Int = 0
+    /// Delegations the host refused for a cwd/path/root reason: infrastructure, not a delegation outcome (not in `delegations`).
+    public var pathRefusals: Int?
     public var patchApplied: Bool?
     public var wallS: Double = 0
     public var claimedDone: Bool = false
@@ -195,6 +197,7 @@ public struct ArmOutcome: Sendable {
     public var turns: Int?
     public var delegations = 0
     public var polls = 0
+    public var pathRefusals = 0
     public var patchApplied: Bool?
     public var claimedDone = false
     public var redo = false

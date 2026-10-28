@@ -1,0 +1,6 @@
+VAR=1
+W4A8 gate+up tile=64x64 sg=4 matmul 38.075 ms  total(quant+mm) 36.130 ms  = 5.71x MLX  | relRMS vs qmm 2.769 (
+VAR=2
+W4A8 gate+up tile=64x64 sg=4 matmul 4.983 ms  total(quant+mm) 4.961 ms  = 0.78x MLX  | relRMS vs qmm inf (max 
+VAR=3
+W4A8 gate+up tile=64x64 sg=4 matmul 3.709 ms  total(quant+mm) 3.687 ms  = 0.58x MLX  | relRMS vs qmm 1 (max 39

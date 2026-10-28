@@ -1,7 +1,7 @@
 import Foundation
 import StrimHarness
 
-/// Applies a job's patch to the parent tree: `git apply --3way` run from the repo top, only after every path the
+/// Applies a job's patch to the parent tree: plain `git apply` (never `--3way`) run from the repo top, only after every path the
 /// patch names has been validated twice (own header parse and git's own `--numstat -z`) to stay inside the
 /// recorded cwd, avoid `.git`, symlinks and submodules. Git runs with the same hardening as `GitWorktreeIsolation`.
 struct PatchApplier: Sendable {

@@ -1,0 +1,6 @@
+[14:21:27] start B3_head load={ 6.58 5.30 4.67 } swap=total = 7168.00M  used = 6201.56M  free = 966.44M  (encrypted)
+lm_head vocab rows 248320, spec affine 4-bit g64, norm weight [5120]
+head M=1: logits_only 1.426 ms, full_argmax 1.464 ms (argmax cost 0.038), chunked(16) 1.413 ms (0.051 vs full), max_then_eq 1.505 ms (-0.041 vs full), ids_equal=NO
+head M=3: logits_only 1.674 ms, full_argmax 1.667 ms (argmax cost -0.007), chunked(16) 1.670 ms (-0.003 vs full), max_then_eq 1.713 ms (-0.046 vs full), ids_equal=NO
+RESULT upper bound of any fused argmax gain = argmax cost (full_argmax - logits_only); kill if < 0.15 ms/round
+[14:21:28] end rc=0 aborted=0

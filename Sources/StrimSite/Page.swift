@@ -1,7 +1,8 @@
 import Foundation
 
 extension SiteBuilder {
-    func buildHTML() -> String {
+    /// site/benchmarks.html: the detailed results, method and engineering notes behind the landing page.
+    func buildBenchmarksHTML() -> String {
         let soakDone = soakComplete() != nil
         var page = ""
         func A(_ s: String) { page += s }
@@ -13,17 +14,17 @@ extension SiteBuilder {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Strim results</title>
-<meta name="description" content="Measured results for Strim, a Swift/MLX inference engine and local server for Qwen3.8-27B 4-bit with MTP on Apple Silicon.">
+<title>Strim benchmarks</title>
+<meta name="description" content="Strim benchmarks: every head-to-head cell against rapid-mlx and mlx-vlm on Qwen3.8-27B 4-bit, with method, caveats and engineering notes.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap">
-<a class="brand" href="#top">Strim</a>
+<a class="brand" href="index.html">Strim</a>
 <nav aria-label="Sections"><ul>
-<li><a href="#claims">Claims</a></li><li><a href="#quickstart">Quickstart</a></li><li><a href="#results">Results</a></li><li><a href="#how">How it works</a></li>
+<li><a href="index.html">Home</a></li><li><a href="#claims">Claims</a></li><li><a href="#compare">Compare</a></li><li><a href="#features">Features</a></li><li><a href="#results">Results</a></li><li><a href="#how">How it works</a></li>
 <li><a href="#exact">Quality</a></li><li><a href="#agents">Agents</a></li><li><a href="#security">Security</a></li><li><a href="#scope">Scope</a></li>
 <li><a href="#limits">Limits</a></li><li><a href="#roadmap">Roadmap</a></li><li><a href="#reproduce">Reproduce</a></li><li><a href="#method">Method</a></li><li><a href="#license">License</a></li><li><a href="#figures">Figures</a></li>
 </ul></nav></div></header>
@@ -31,99 +32,14 @@ extension SiteBuilder {
 
 """)
 
-        A("""
-<section class="hero" id="top" aria-labelledby="h-hero">
-<h1 id="h-hero">Strim</h1>
-<p class="lede">A Swift-only inference engine and local server for one model: Qwen3.8-27B (dense), 4-bit affine g64 with its multi-token-prediction (MTP) head, on Apple Silicon.
-One process and one binary, no interpreter or other runtime. One loopback port speaks OpenAI Chat Completions, OpenAI Responses and Anthropic Messages, so Claude Code and Codex can use it as a local backend,
-and an MCP endpoint lets them hand bounded tasks to the local model.</p>
-<dl class="facts">
-<div><dt>Machine</dt><dd>\(esc(D.meta["machine"]?.pyStr ?? "None"))</dd></div>
-<div><dt>Model</dt><dd>\(esc(D.meta["model"]?.pyStr ?? "None"))</dd></div>
-<div><dt>Measured</dt><dd>Final head-to-head, 2026-10-28, build \(n("final.claim.build")), \(n("final.claim.passes")) passes, one machine</dd></div>
-<div><dt>License</dt><dd>MIT, public repository. Links to repository files on this page work from a checkout.</dd></div>
-</dl>
-</section>
-
-<section id="claims" aria-labelledby="h-claims">
-<h2 id="h-claims">What the data supports, and what it does not</h2>
-<p>Source: the final head-to-head of Strim, rapid-mlx (MTP on) and mlx-vlm on Qwen3.8-27B 4-bit, on a 64&nbsp;GB M5 Max. Strim decodes faster than both and has lower median first-token latency under concurrency. It is not faster at cold prefill, aggregate throughput under concurrency or tail latency. Details and every cell in <a href="#r-final">Results</a>.</p>
-<ul class="claims">
-<li class="claim"><h3>Faster decode</h3>
-<p class="big">\(n("final.claim.decode_vs_rapid")) <span class="vs">faster than rapid-mlx</span></p>
-<p>and \(n("final.claim.decode_vs_vlm")) faster than mlx-vlm, at 4K to 32K context. At 4K: \(F("d4k", "strim")) vs \(F("d4k", "rapid-mlx")) vs \(F("d4k", "mlx-vlm"))&nbsp;tok/s.</p>
-<p class="cav">rapid-mlx also uses MTP; mlx-vlm does not. 2 passes, 1 rep each. <a href="#r-final">Details</a></p></li>
-<li class="claim"><h3>Four agents, one 16K prefix</h3>
-<p class="big">\(n("final.claim.w5_speedup")) <span class="vs">faster aggregate</span></p>
-<p>Median first token \(F("p50_w5", "strim"))&nbsp;s vs \(F("p50_w5", "rapid-mlx"))&nbsp;s (rapid-mlx) and \(F("p50_w5", "mlx-vlm"))&nbsp;s (mlx-vlm).</p>
-<p class="cav">Exact prefix cache plus shared admission. Neither rival shared the prefix in this setup. <a href="#r-final">Details</a></p></li>
-<li class="claim"><h3>Lower median first-token latency</h3>
-<p class="big">\(n("final.claim.ttft_p50_lower")) <span class="vs">lower, 4 to 8 concurrent</span></p>
-<p>Against each rival, over 512-token, agent-style and 4K prompts.</p>
-<p class="cav">Rivals report first tokens batch-synchronously, so their median is a weaker number. <a href="#r-final">Details</a></p></li>
-<li class="claim"><h3>Ties on agent replay and cold 4K prefill</h3>
-<p class="big">\(F("rp8", "strim"))&nbsp;s <span class="vs">vs \(F("rp8", "rapid-mlx"))&nbsp;s (rapid-mlx)</span></p>
-<p>8-turn replay, summed prefill. Cold 4K first token: \(F("c4k_tt", "strim")) vs \(F("c4k_tt", "rapid-mlx"))&nbsp;s.</p>
-<p class="cav">A tie within 2%, not a win. mlx-vlm has no prefix reuse: \(F("rp8", "mlx-vlm"))&nbsp;s. <a href="#r-final">Details</a></p></li>
-</ul>
-
-<div class="notahead" role="note" aria-labelledby="h-notahead">
-<h3 id="h-notahead">Where Strim is not faster</h3>
-<ul>
-<li><strong>Cold prefill is \(n("final.claim.prefill_slower")) slower</strong> than the best rival at 16K and 32K (32K first token \(F("c32k_tt", "strim")) vs \(F("c32k_tt", "mlx-vlm"))&nbsp;s for mlx-vlm).</li>
-<li><strong>Aggregate throughput under concurrency is \(n("final.claim.agg_lower")) lower</strong> than the best rival at c=4 and c=8 (c=4 with 512-token prompts: \(F("a512c4", "strim")) vs \(F("a512c4", "rapid-mlx"))&nbsp;tok/s for rapid-mlx).</li>
-<li><strong>Tail latency is worse at 512-token concurrency:</strong> p95 first token is \(n("final.claim.p95_worse")) above the best rival at c=4 and c=8.</li>
-<li><strong>Not "fastest overall".</strong> The comparison covers two rivals, one model, one machine, thinking off. The earlier 8-engine run (2026-10-26) was not repeated for the final build and is not shown.</li>
-</ul></div>
-</section>
-
-<section id="quickstart" aria-labelledby="h-qs">
-<h2 id="h-qs">Install and quickstart</h2>
-<pre><code>swift build -c release --disable-sandbox
-.build/release/strim serve models/qwen38-4bit models/qwen38-mtp-4bit --port 8203</code></pre>
-<p>Weights are not in the repository. Fetch the 4-bit checkpoint and the MTP head into <code>models/</code> with <code>aria2c -x 4 -s 4 -k 1M -c -d models -o &lt;file&gt; &lt;url&gt;</code> (direct Hugging Face resolve URLs; see <a href="../bench/README.md">bench/README.md</a>). The model id is the directory name (<code>qwen38-4bit</code>).</p>
-<p><code>strim serve</code> binds to 127.0.0.1 only and requires a bearer token, created on first start at <code>~/.strim/token</code> (mode 0600). Options: <code>--port N</code> (default 8203), <code>--token-file PATH</code>, <code>--no-auth</code> (loopback development only), <code>--max-inflight N</code>, <code>--max-background N</code>, <code>--no-admission</code>.</p>
-<h3>The three endpoints</h3>
-<pre><code>TOKEN="$(cat ~/.strim/token)"
-curl -s http://127.0.0.1:8203/health
-
-# OpenAI Chat Completions
-curl -s http://127.0.0.1:8203/v1/chat/completions -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' \\
-  -d '{"model":"qwen38-4bit","messages":[{"role":"user","content":"hi"}],"max_tokens":32}'
-
-# Anthropic Messages
-curl -s http://127.0.0.1:8203/v1/messages -H "Authorization: Bearer $TOKEN" -H 'anthropic-version: 2023-06-01' -H 'content-type: application/json' \\
-  -d '{"model":"qwen38-4bit","max_tokens":32,"messages":[{"role":"user","content":"hi"}]}'
-
-# OpenAI Responses
-curl -s http://127.0.0.1:8203/v1/responses -H "Authorization: Bearer $TOKEN" -H 'content-type: application/json' \\
-  -d '{"model":"qwen38-4bit","input":"hi","max_output_tokens":32}'</code></pre>
-<h3>Claude Code and Codex as clients</h3>
-<pre><code># Claude Code
-export ANTHROPIC_BASE_URL=http://127.0.0.1:8203
-export ANTHROPIC_AUTH_TOKEN="$(cat ~/.strim/token)"
-claude --model qwen38-4bit
-
-# Codex: custom Responses provider (flags as in Sources/StrimSoak/SoakClients.swift codexArgv)
-export STRIM_SOAK_TOKEN="$(cat ~/.strim/token)"
-codex exec --json --ephemeral --ignore-user-config --skip-git-repo-check -C "$PWD" -s workspace-write -m qwen38-4bit \\
-  -c 'model_provider="strim"' \\
-  -c 'model_providers.strim={name="strim", base_url="http://127.0.0.1:8203/v1", env_key="STRIM_SOAK_TOKEN", wire_api="responses"}' \\
-  -c 'approval_policy="never"' -- "your prompt"</code></pre>
-<p>Claude Code prints an <code>unrecognized_model</code> warning on stderr for the local id; requests are served normally. Send <code>x-strim-priority: background</code> to let interactive requests go first.</p>
-<h3>MCP and the agent harness</h3>
-<p><code>strim serve</code> also hosts an MCP endpoint at <code>http://127.0.0.1:8203/mcp</code> with \(n("harness.tools")) tools: <code>strim_task</code>, <code>strim_job</code>, <code>strim_cancel</code>, <code>strim_ask</code>. A parent agent hands a bounded task to the local model, which works in a sandboxed git worktree; the harness runs the <code>verify</code> command itself and returns a summary and a patch that you review and apply.</p>
-<pre><code>strim mcp-config --claude     # prints the claude mcp add command
-strim mcp-config --codex      # prints the codex mcp add command
-strim jobs list               # jobs on disk, no server needed
-strim jobs show &lt;id&gt;</code></pre>
-<p>See <a href="../docs/MCP.md">MCP.md</a>. Whether delegation saves parent tokens is not proven (<a href="#agents">Agents</a>).</p>
-</section>
-
-""")
-
+        A("<section class=\"hero\" id=\"top\" aria-labelledby=\"h-hero\"><h1 id=\"h-hero\">Strim benchmarks</h1>"
+            + "<p class=\"lede\">Every head-to-head cell of Strim against rapid-mlx and mlx-vlm on Qwen3.8-27B 4-bit, plus the method, the caveats and the engineering notes behind the <a href=\"index.html\">landing page</a>. Wins and losses are drawn the same way.</p>"
+            + runBannerHTML() + "</section>\n\n")
+        A(claimsSection())
+        A(compareSection())
         A("<section id=\"results\" aria-labelledby=\"h-results\"><h2 id=\"h-results\">Results</h2>")
-        A("<p>Bars always start at zero. Every number carries its figure id as a hover title and appears in the <a href=\"#figures\">figure index</a>.</p>")
+        A("<p>The eight headline rows first, then every cell. Bars always start at zero. Every number carries its figure id as a hover title and appears in the <a href=\"#figures\">figure index</a>.</p>")
+        A(glanceTableHTML())
         A(finalSection())
         A("<h3 id=\"r-cache\">Prefix cache and memory</h3>")
         A("<p>Coding agents resend the same system prompt, tool schemas and history every turn. The cache stores engine state at chunk boundaries and restores the longest match, so only the new tail is prefilled. "
@@ -263,9 +179,9 @@ strim jobs show &lt;id&gt;</code></pre>
 <section id="limits" aria-labelledby="h-limits"><h2 id="h-limits">Limitations</h2>
 <ul>
 <li>One model, one quantization, one machine class (64&nbsp;GB Apple Silicon), one user. All measurements come from a single M5 Max.</li>
-<li>Two passes with one rep each. Treat differences of a few percent as noise; prefill gaps of 2 to 3% sit at the edge of the 2% tie band.</li>
-<li>Not faster: cold prefill at 16K and 32K, aggregate throughput at c=4 and c=8, p95 first-token latency at 512-token concurrency.</li>
-<li>The benchmarked build predates the final server hardening commits; HEAD was not re-benchmarked.</li>
+<li>Two passes with one rep each. Treat differences of a few percent as noise; gaps of a few percent sit at the edge of the 2% tie band.</li>
+<li>Not faster: \(notFasterSentence())</li>
+<li>Only the build named in the run summary at the top was benchmarked; later commits were not.</li>
 <li>The prefix cache is in memory only. Speculative decoding and batching can differ from greedy at bf16 near-ties.</li>
 <li>Not yet validated: live soak on the current build and harness, the paid agent-benchmark pilot, token savings from delegation, multi-step quality of batched decode and the cache cuts, other Mac memory tiers (see <a href="#agents">Agents</a> and <a href="#scope">Scope</a>).</li>
 <li>The shipped <code>StrimApp</code> is a menu-bar shell over an older service and does not drive <code>strim serve</code>.</li>
@@ -278,7 +194,7 @@ strim jobs show &lt;id&gt;</code></pre>
 <li><strong>Mixed quantization per memory tier</strong> &mdash; <span class="tag">planned</span>. Other bit widths for other Macs, with a quality gate (<a href="../docs/RESEARCH-QUANT-TIERS-2026-10-27.md">research note</a>).</li>
 <li><strong>GPU-index decode</strong> &mdash; <span class="tag">planned</span>.</li>
 <li><strong>Batched-matmul tuning for c=4</strong> &mdash; <span class="tag">planned</span>: the quantized matmul at 4 to 8 rows is the remaining aggregate-throughput gap.</li>
-<li><strong>Cold-prefill kernels</strong> &mdash; <span class="tag">planned</span>: the 2 to 3% gap at 16K and 32K.</li>
+<li><strong>Cold-prefill kernels</strong> &mdash; <span class="tag">planned</span>: the cold-prefill gap at long prompts.</li>
 <li><strong>Paid agent-benchmark pilot</strong> &mdash; <span class="tag">planned</span>: the test that decides whether delegation saves parent tokens.</li>
 <li>Menu-bar app and a disk-backed prefix cache, after the benchmark gate.</li>
 </ul>
@@ -320,7 +236,7 @@ lockf -k /tmp/strim-bench.lock .build/release/strim soak --duration 30 --arms bo
 
 """)
         A(versionRows())
-        A("<p class=\"note\">Raw data: <a href=\"../\(FINAL_REL)/summary.md\">h2h-final-20261028</a>, <a href=\"../bench/results/cache-footprint-20261027/NOTES.md\">cache-footprint</a>, <a href=\"../docs/PLAN-CONCURRENCY-2026-10-27.md\">concurrency plan</a>, <a href=\"../bench/results/soak-20261027/run2/summary.txt\">soak run</a>.</p></section>\n\n")
+        A("<p class=\"note\">Raw data: <a href=\"../\(FINAL_REL)/summary.md\">\(esc(FINAL_REL.split(separator: "/").last.map(String.init) ?? FINAL_REL))</a>, <a href=\"../bench/results/cache-footprint-20261027/NOTES.md\">cache-footprint</a>, <a href=\"../docs/PLAN-CONCURRENCY-2026-10-27.md\">concurrency plan</a>, <a href=\"../bench/results/soak-20261027/run2/summary.txt\">soak run</a>.</p></section>\n\n")
 
         A("""
 <section id="license" aria-labelledby="h-license"><h2 id="h-license">License and credits</h2>
@@ -333,7 +249,7 @@ lockf -k /tmp/strim-bench.lock .build/release/strim soak --duration 30 --arms bo
 <details><summary>Show all figures</summary>\(figureIndex())</details>
 </section>
 </div></main>
-<footer><div class="wrap"><p>Strim results, generated by <code>strim site build</code> from <code>site/data/results.json</code>. Links to repository files are relative and work from a checkout. License: MIT.</p></div></footer>
+<footer><div class="wrap"><p><a href="index.html">Home</a>. Strim benchmarks, generated by <code>strim site build</code> from <code>site/data/results.json</code>. Links to repository files are relative and work from a checkout. License: MIT.</p></div></footer>
 </body>
 </html>
 

@@ -180,7 +180,7 @@ public final class BenchRunner {
         }
         r.localPromptTokens = o.localPromptTokens; r.localCachedTokens = o.localCachedTokens
         r.localCompletionTokens = o.localCompletionTokens; r.localTurns = o.localTurns
-        r.turns = o.turns; r.delegations = o.delegations; r.polls = o.polls
+        r.turns = o.turns; r.delegations = o.delegations; r.polls = o.polls; r.pathRefusals = o.pathRefusals > 0 ? o.pathRefusals : nil
         r.patchApplied = o.patchApplied; r.claimedDone = o.claimedDone; r.redo = o.redo
         r.timedOut = o.timedOut; r.error = o.error
         r.harnessVerifyStatus = o.harnessVerifyStatus; r.harnessVerifyExit = o.harnessVerifyExit; r.harnessStatus = o.harnessStatus

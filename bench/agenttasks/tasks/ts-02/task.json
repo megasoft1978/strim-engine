@@ -1,0 +1,24 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 12,
+  "id" : "ts-02",
+  "language" : "typescript",
+  "license" : "MIT",
+  "note" : "multi-file TypeScript: order pricing (tax base in pricing.ts) and report summaries (tax-inclusive spend, sort order in report.ts)",
+  "prompt" : "The automated tests of this TypeScript package currently fail. Run `node --test` from the repository root (Node runs the .ts files directly with type stripping; there is no build step and no npm install; `tsc --noEmit -p .` must keep passing). Change the non-test source so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-ts",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2175,
+  "test_paths" : [
+    "test",
+    "tsconfig.json"
+  ],
+  "test_sha256" : {
+    "test\/orders.test.ts" : "2008c2906175f0dfb4c13809cf9f9b65966d38d3808a3e878bd08f198c13b742",
+    "tsconfig.json" : "9a03d1d4babf888555353a2cf2c9124dfb921998a089c555cd168690bcf6ec6d"
+  },
+  "tree_sha256" : "8ce46359920a9676f51df42dfb6431a10464ee2b23dcfe29c2ca2c5440fdce0c",
+  "verify_cmd" : "tsc --noEmit -p . && node --test"
+}

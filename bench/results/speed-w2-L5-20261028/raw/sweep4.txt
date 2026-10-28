@@ -1,0 +1,31 @@
+IDENT rand S=1024 B=1: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+IDENT rand S=1000 B=1: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+IDENT rand S=2048 B=1: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+IDENT rand S=512 B=1: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+IDENT rand S=47 B=1: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+IDENT rand S=49 B=1: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+IDENT rand S=1 B=1: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+IDENT rand S=3 B=1: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+IDENT rand S=777 B=2: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+IDENT rand S=4096 B=1: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+IDENT captured cap78.safetensors: 48_32_b=OK 32_32_b_vyx=OK 32_32_b_vyx2=OK 32_32_b_vyx4=OK 24_32_b_vyx2=OK 40_32_b_vyx2=OK 32_64_b_vyx2=OK 32_64_b_vyx4=OK 16_32_b_vyx2=OK
+TIME S=1024 shipped 0.8488 ms
+TIME S=1024 48_32_b 0.8499 ms (1.000x vs first)
+TIME S=1024 32_32_b_vyx 0.7393 ms (1.150x vs first)
+TIME S=1024 32_32_b_vyx2 0.7403 ms (1.148x vs first)
+TIME S=1024 32_32_b_vyx4 3.1160 ms (0.273x vs first)
+TIME S=1024 24_32_b_vyx2 0.7696 ms (1.104x vs first)
+TIME S=1024 40_32_b_vyx2 0.6748 ms (1.260x vs first)
+TIME S=1024 32_64_b_vyx2 0.7989 ms (1.064x vs first)
+TIME S=1024 32_64_b_vyx4 3.5099 ms (0.242x vs first)
+TIME S=1024 16_32_b_vyx2 0.7188 ms (1.182x vs first)
+TIME S=4096 shipped 3.4333 ms
+TIME S=4096 48_32_b 3.4310 ms (1.000x vs first)
+TIME S=4096 32_32_b_vyx 2.9700 ms (1.155x vs first)
+TIME S=4096 32_32_b_vyx2 2.7348 ms (1.255x vs first)
+TIME S=4096 32_32_b_vyx4 14.3352 ms (0.239x vs first)
+TIME S=4096 24_32_b_vyx2 2.7312 ms (1.256x vs first)
+TIME S=4096 40_32_b_vyx2 2.6748 ms (1.283x vs first)
+TIME S=4096 32_64_b_vyx2 3.3028 ms (1.039x vs first)
+TIME S=4096 32_64_b_vyx4 18.7064 ms (0.183x vs first)
+TIME S=4096 16_32_b_vyx2 2.7777 ms (1.235x vs first)

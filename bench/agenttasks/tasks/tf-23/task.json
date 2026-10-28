@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 25,
+  "id" : "tf-23",
+  "language" : "swift",
+  "license" : "MIT",
+  "note" : "long loop Swift: expression calculator lexer\/parser\/eval\/format (9 injected bugs in 5 files, several only visible after earlier ones are fixed)",
+  "prompt" : "The automated tests of this Swift package currently fail. Run `swift test --build-system native --disable-sandbox` from the repository root to see the failures. Change the package non-test source code so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-swift",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2594,
+  "test_paths" : [
+    "Tests"
+  ],
+  "test_sha256" : {
+    "Tests\/CalcTests\/CalcTests.swift" : "10e5553bdd67128ed7e0ece91aefcf5089cb846bbc962f71ff036d52a8165bd1"
+  },
+  "tree_sha256" : "f824e52b1835722afb429eb5b161aac3b300235139eeb912b8c68fbdad7f811d",
+  "verify_cmd" : "swift test --build-system native --disable-sandbox"
+}

@@ -1,0 +1,480 @@
+device: Apple M5 Max os: Version 27.0.1 (Build 26A434) apple10=true
+COMPILE_FAIL mt=64 nt=32 sg=4: Error Domain=MTLLibraryErrorDomain Code=3 "program_source:9:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto A = tensor<device half, dextents<int32_t, 2>>(Ap, dextents<int32_t, 2>((int)K, (int)M));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const constant  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4614:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const thread  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4626:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4639:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device coherent(device) tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4652:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const constant  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4491:14: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  METAL_FUNC tensor() thread : _t(__metal_get_null_tensor())
+             ^
+program_source:10:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto W = tensor<device half, dextents<int32_t, 2>>(Wp, dextents<int32_t, 2>((int)K, (int)N));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const constant  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4614:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const thread  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4626:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4639:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device coherent(device) tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4652:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const constant  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4491:14: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  METAL_FUNC tensor() thread : _t(__metal_get_null_tensor())
+             ^
+program_source:11:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto C = tensor<device half, dextents<int32_t, 2>>(Cp, dextents<int32_t, 2>((int)N, (int)M));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const constant  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4614:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const thread  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4626:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4639:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device coherent(device) tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4652:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const constant  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4491:14: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  METAL_FUNC tensor() thread : _t(__metal_get_null_tensor())
+             ^
+" UserInfo={NSLocalizedDescription=program_source:9:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto A = tensor<device half, dextents<int32_t, 2>>(Ap, dextents<int32_t, 2>((int)K, (int)M));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const constant  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4614:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const thread  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4626:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4639:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device coherent(device) tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4652:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const constant  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4491:14: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  METAL_FUNC tensor() thread : _t(__metal_get_null_tensor())
+             ^
+program_source:10:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto W = tensor<device half, dextents<int32_t, 2>>(Wp, dextents<int32_t, 2>((int)K, (int)N));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const constant  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4614:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const thread  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4626:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4639:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device coherent(device) tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4652:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const constant  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4491:14: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  METAL_FUNC tensor() thread : _t(__metal_get_null_tensor())
+             ^
+program_source:11:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto C = tensor<device half, dextents<int32_t, 2>>(Cp, dextents<int32_t, 2>((int)N, (int)M));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const constant  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4614:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const thread  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4626:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4639:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device coherent(device) tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4652:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const constant  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4491:14: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  METAL_FUNC tensor() thread : _t(__metal_get_null_tensor())
+             ^
+}
+COMPILE_FAIL mt=32 nt=32 sg=4: Error Domain=MTLLibraryErrorDomain Code=3 "program_source:9:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto A = tensor<device half, dextents<int32_t, 2>>(Ap, dextents<int32_t, 2>((int)K, (int)M));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const constant  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4614:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const thread  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4626:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4639:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device coherent(device) tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4652:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const constant  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4491:14: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  METAL_FUNC tensor() thread : _t(__metal_get_null_tensor())
+             ^
+program_source:10:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto W = tensor<device half, dextents<int32_t, 2>>(Wp, dextents<int32_t, 2>((int)K, (int)N));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const constant  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4614:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const thread  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4626:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4639:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device coherent(device) tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4652:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const constant  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4491:14: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  METAL_FUNC tensor() thread : _t(__metal_get_null_tensor())
+             ^
+program_source:11:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto C = tensor<device half, dextents<int32_t, 2>>(Cp, dextents<int32_t, 2>((int)N, (int)M));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const constant  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4614:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const thread  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4626:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4639:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device coherent(device) tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4652:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const constant  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4491:14: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  METAL_FUNC tensor() thread : _t(__metal_get_null_tensor())
+             ^
+" UserInfo={NSLocalizedDescription=program_source:9:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto A = tensor<device half, dextents<int32_t, 2>>(Ap, dextents<int32_t, 2>((int)K, (int)M));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const constant  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4614:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const thread  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4626:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4639:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const device coherent(device) tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4652:14: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC tensor(const constant  tensor<OtherElementType, extents_type, tensor_handle, OtherTags...> &other) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4491:14: note: candidate constructor not viable: requires 0 arguments, but 2 were provided
+  METAL_FUNC tensor() thread : _t(__metal_get_null_tensor())
+             ^
+program_source:10:14: error: no matching constructor for initialization of 'tensor<device half, dextents<int32_t, 2>>' (aka 'tensor<device half, extents<int, 18446744073709551615UL, 18446744073709551615UL>>')
+    auto W = tensor<device half, dextents<int32_t, 2>>(Wp, dextents<int32_t, 2>((int)K, (int)N));
+             ^                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4484:14: note: candidate constructor not viable: no known conversion from 'device half *' to '__metal_tensor_t' for 1st argument
+  METAL_FUNC tensor(__metal_tensor_t other, const thread offsets_type &other_offsets) thread
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4496:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const thread  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4497:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4499:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const device coherent(device) tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4501:14: note: candidate constructor not viable: requires 1 argument, but 2 were provided
+  METAL_FUNC tensor(const constant  tensor &) thread = default;
+             ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4520:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const thread  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4534:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device  tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4549:23: note: candidate constructor template not viable: requires single argument 'other', but 2 arguments were provided
+  METAL_FUNC explicit tensor(const device coherent(device) tensor<OtherElementType, OtherExtents, tensor_handle, OtherTags...> &other) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023/include/metal/metal_tensor:4564:23: note: candidate constructor template not viable: requires single argument 'other', but 

@@ -1,0 +1,26 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 12,
+  "id" : "tf-21",
+  "language" : "go",
+  "license" : "MIT",
+  "note" : "multi-file Go: Slugify, Wrap, SplitCSV (6 injected bugs in 3 files)",
+  "prompt" : "The automated tests of this project currently fail. Run `go test -count=1 .\/...` from the repository root to see the failures. Change the project's non-test source code so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-go",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1584,
+  "test_paths" : [
+    "csvline_test.go",
+    "slug_test.go",
+    "wrap_test.go"
+  ],
+  "test_sha256" : {
+    "csvline_test.go" : "b430f06cbf0324cc80d902e664ae9cbf1a67c787a52c9a9b748fddf1fe3d18c9",
+    "slug_test.go" : "b213c0e5c058d9d5e636a7ee0f5aba3e1537fb7155032d143b96d94c08f9cab4",
+    "wrap_test.go" : "57cdd5d41fd44156c4c0d169c5eb2be6f970e61eeeac2528be093d7fe0257295"
+  },
+  "tree_sha256" : "999de25d1f2a9b27f477fd3b44202efed9af87fb683c8cc377d78f0cdb4e869b",
+  "verify_cmd" : "go test -count=1 .\/..."
+}

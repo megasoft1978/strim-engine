@@ -1,0 +1,26 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 10,
+  "id" : "ts-03",
+  "language" : "typescript",
+  "license" : "MIT",
+  "note" : "TypeScript feature: typed Emitter gains unsubscribe return, off, once, listenerCount and error isolation; runtime tests plus @ts-expect-error type tests",
+  "prompt" : "This TypeScript package is a small typed event emitter. The tests in test\/ and the type tests in types-test\/ already describe behaviour that is not implemented yet: `on` must return an unsubscribe function, and `off`, `once` (also cancellable) and `listenerCount` must exist with precise types; emit must isolate throwing listeners (all run, the first error is rethrown afterwards). Run `tsc --noEmit -p .` and `node --test` from the repository root (Node runs the .ts files directly with type stripping; no build step, no npm install). Implement the feature in src\/ so both pass. Tests, types-test\/ and tsconfig.json are the specification and are restored and hash-checked before grading. Keep the change focused. Report briefly what you changed.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-ts",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1858,
+  "test_paths" : [
+    "test",
+    "types-test",
+    "tsconfig.json"
+  ],
+  "test_sha256" : {
+    "test\/emitter.test.ts" : "c88ed5995e79c4c0162df1a7edbb3a5220c2e2bb229cdb524dee6566c1788842",
+    "tsconfig.json" : "9a03d1d4babf888555353a2cf2c9124dfb921998a089c555cd168690bcf6ec6d",
+    "types-test\/emitter.types.ts" : "9ff4fa73c7a254811c4d3d001652a5cfb610ff754276383f4ce1dd7598eae90a"
+  },
+  "tree_sha256" : "687753373ea9d49c96657e8c825088822bdb8fe765d27606d861d52b63739a00",
+  "verify_cmd" : "tsc --noEmit -p . && node --test"
+}

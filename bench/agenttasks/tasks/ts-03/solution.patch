@@ -1,0 +1,60 @@
+diff --git a/src/emitter.ts b/src/emitter.ts
+index 1b29c2c..08c2648 100644
+--- a/src/emitter.ts
++++ b/src/emitter.ts
+@@ -5,19 +5,53 @@ export type EventMap = Record<string, unknown[]>;
+ // deno-lint-ignore no-explicit-any
+ type AnyFn = (...args: any[]) => void;
+ 
++type Listener<A extends unknown[]> = (...args: A) => void;
++
+ export class Emitter<E extends EventMap> {
+   private listeners = new Map<keyof E, Array<AnyFn>>();
+ 
+-  on<K extends keyof E>(event: K, fn: (...args: E[K]) => void): void {
++  /** Registers a listener; the returned function removes it (safe to call repeatedly). */
++  on<K extends keyof E>(event: K, fn: Listener<E[K]>): () => void {
+     const list = this.listeners.get(event) ?? [];
+     list.push(fn);
+     this.listeners.set(event, list);
++    return () => this.off(event, fn);
++  }
++
++  /** Like on, but the listener is removed before its first call. */
++  once<K extends keyof E>(event: K, fn: Listener<E[K]>): () => void {
++    const wrapper: Listener<E[K]> = (...args) => {
++      off();
++      fn(...args);
++    };
++    const off = this.on(event, wrapper);
++    return off;
++  }
++
++  off<K extends keyof E>(event: K, fn: Listener<E[K]>): void {
++    const list = this.listeners.get(event);
++    if (!list) return;
++    const i = list.indexOf(fn);
++    if (i >= 0) list.splice(i, 1);
++    if (list.length === 0) this.listeners.delete(event);
++  }
++
++  listenerCount<K extends keyof E>(event: K): number {
++    return this.listeners.get(event)?.length ?? 0;
+   }
+ 
+   emit<K extends keyof E>(event: K, ...args: E[K]): boolean {
+     const list = this.listeners.get(event);
+     if (!list || list.length === 0) return false;
+-    for (const fn of [...list]) fn(...args);
++    let firstError: { e: unknown } | undefined;
++    for (const fn of [...list]) {
++      try {
++        fn(...args);
++      } catch (e) {
++        firstError ??= { e };
++      }
++    }
++    if (firstError) throw firstError.e;
+     return true;
+   }
+ }

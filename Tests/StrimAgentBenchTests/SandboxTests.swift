@@ -43,8 +43,8 @@ func listener() -> (fd: Int32, port: UInt16) {
         #expect(argv.contains("Bash(rm -rf:*)") && argv.contains("Bash(git push:*)") && argv.contains("Bash(sudo:*)"))
     }
 
-    /// M2 (security review 2026-10-28): paid arms hold the OAuth credential and open egress, so no shell tool at all.
-    @Test func paidArmsHaveNoBashToolOrAllowRules() {
+    /// M2 (security review 2026-10-28), superseded by owner decision: paid arms get a scoped Bash (see PaidBashTests), never a bare one.
+    @Test func paidArmsHaveOnlyScopedBash() {
         let task = TaskSpec(id: "x", taskClass: "test-fix", prompt: "p", verifyCmd: "go test -count=1 ./...")
         for mode in [ClaudeArm.Mode.paid, .paidWithMCP(ServerEndpoint(port: 8299, token: "t", modelId: "m"))] {
             let arm = ClaudeArm(mode: mode, claudeBin: "/bin/claude", model: "sonnet")
@@ -53,10 +53,9 @@ func listener() -> (fd: Int32, port: UInt16) {
                 guard let i = argv.firstIndex(of: flag) else { return [] }
                 return Array(argv[(i + 1)...].prefix { !$0.hasPrefix("--") })
             }
-            #expect(section("--tools").flatMap { $0.split(separator: ",").map(String.init) }.sorted() == ClaudeArm.allowedBuiltin.sorted())
-            #expect(!section("--allowedTools").contains { $0.hasPrefix("Bash") }, "\(section("--allowedTools"))")
-            #expect(section("--disallowedTools").contains("Bash"))
-            for runner in ["sed", "awk", "find", "cp", "mv", "go"] {
+            #expect(!section("--allowedTools").contains("Bash"), "\(section("--allowedTools"))")
+            #expect(section("--allowedTools").contains("Bash(runtests:*)"))
+            for runner in ["sed", "awk", "find", "cp", "mv", "go", "swift", "rg", "curl"] {
                 #expect(!section("--allowedTools").contains { $0.hasPrefix("Bash(\(runner)") }, "\(runner)")
             }
         }
@@ -72,7 +71,7 @@ func listener() -> (fd: Int32, port: UInt16) {
 
     @Test func prefixesDerivedFromSampleTask() throws {
         let tasks = TaskLoader.load(root: repoRoot().appendingPathComponent("bench/agenttasks"))
-        let tf = try #require(tasks.first { $0.spec.taskClass == "test-fix" })
+        let tf = try #require(tasks.first { $0.spec.taskClass == "test-fix" && ["go", "swift"].contains($0.language ?? "") })
         let allowed = BashAllow.allowedPrefixes(for: tf.spec, language: tf.language)
         #expect(allowed.contains("Bash(go:*)") || allowed.contains("Bash(swift:*)"))
         let qa = try #require(tasks.first { $0.spec.taskClass == "repo-qa" })

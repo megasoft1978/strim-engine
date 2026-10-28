@@ -1,0 +1,27 @@
+diff --git a/lib/ini/lexer.rb b/lib/ini/lexer.rb
+index cf8a1c4..d4a56dd 100644
+--- a/lib/ini/lexer.rb
++++ b/lib/ini/lexer.rb
+@@ -25,7 +25,7 @@ module Ini
+       in_quotes = false
+       s.each_char.with_index do |c, i|
+         in_quotes = !in_quotes if c == '"'
+-        return s[0...i] if (c == '#' || c == ';') && in_quotes
++        return s[0...i] if (c == "#" || c == ";") && !in_quotes
+       end
+       s
+     end
+diff --git a/lib/ini/parser.rb b/lib/ini/parser.rb
+index c68267a..8066543 100644
+--- a/lib/ini/parser.rb
++++ b/lib/ini/parser.rb
+@@ -11,8 +11,7 @@ module Ini
+       @tokens.each do |t|
+         case t.type
+         when :section
+-          result[t.a] = {}
+-          current = result[t.a]
++          current = (result[t.a] ||= {})
+         when :pair
+           current[t.a] = convert(t.b)
+         end

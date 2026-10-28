@@ -1,0 +1,33 @@
+{
+  "answer_env" : "ANSWER_FILE",
+  "base_commit" : "",
+  "class" : "repo-qa",
+  "est_solo_turns" : 5,
+  "expected_answer" : {
+    "all_of" : [
+      "lexer\\.rb[^0-9]{1,12}1[6-9]([^0-9]|$)",
+      "parser\\.rb[^0-9]{1,12}2[2-4]([^0-9]|$)",
+      "convert"
+    ]
+  },
+  "id" : "rb-04",
+  "known_answer" : "lib\/ini\/lexer.rb:18 raises Ini::ParseError; Parser#convert is defined at lib\/ini\/parser.rb:23.",
+  "language" : "ruby",
+  "license" : "MIT",
+  "no_edit" : true,
+  "note" : "Ruby repo-QA: where ParseError is raised and where values are typed",
+  "prompt" : "Answer a question about the repository in the current directory. Do NOT modify any file. Reply with the repo-relative file path(s) and the exact symbol name(s) (function, class, method or variable) that answer it, each as path:line (the line where the symbol or the relevant statement is). Keep the answer short.\n\nQuestion: In which file and on which line is Ini::ParseError raised for a line that is neither a section nor a key=value pair, and in which file and line is the method defined that converts a raw value string into true\/false\/Integer\/Float\/String?",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-ruby",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1928,
+  "test_paths" : [
+
+  ],
+  "test_sha256" : {
+
+  },
+  "tree_sha256" : "0ae254b20bb551c57156c869c8d92031e60ddbb37b2637f8468dbbc888fd99bb",
+  "verify_cmd" : "grep -Eq 'lexer\\.rb[^0-9]{1,12}1[6-9]([^0-9]|$)' \"$ANSWER_FILE\" && grep -Eq 'parser\\.rb[^0-9]{1,12}2[2-4]([^0-9]|$)' \"$ANSWER_FILE\" && grep -Eq 'convert' \"$ANSWER_FILE\"",
+  "wrong_answer" : "lib\/ini.rb:5 raises it and lib\/ini\/lexer.rb:24 converts values."
+}

@@ -33,6 +33,8 @@ public final class StrimControlPlane: Sendable {
         public var modelRoots: [String] = []
         /// How long a live chat diff is reused by detail reads (approve always reads fresh).
         public var patchCacheTTL: TimeInterval = 2
+        /// Pack store read by `GET pack` (default `~/.strim/packs`).
+        public var packsRoot: URL?
         public init() {}
     }
 
@@ -91,6 +93,7 @@ public final class StrimControlPlane: Sendable {
             let b = try ControlJSON.decode(ChatCancelRequest.self, from: req.body)
             return try await c.chatClose(b.sessionID)
         }
+        registerProduct(on: server)
         server.addOpenRoute("POST", StrimRoutes.chatAppend) { [self] req, r in try await chatAppend(req, r) }
         server.addOpenRoute("GET", StrimRoutes.jobs + "/", prefix: true) { [self] req, r in
             await respond(r) {
@@ -106,7 +109,7 @@ public final class StrimControlPlane: Sendable {
         }
     }
 
-    private func add(_ server: StrimOpenAIServer, _ method: String, _ path: String, write: Bool,
+    func add(_ server: StrimOpenAIServer, _ method: String, _ path: String, write: Bool,
                      _ h: @escaping @Sendable (StrimControlPlane, Request) async throws -> Reply) {
         let status = path == StrimRoutes.status && method == "GET"
         server.addOpenRoute(method, path) { [self] (req: Request, r: Responder) async throws -> Void in
@@ -179,6 +182,8 @@ public final class StrimControlPlane: Sendable {
             tokensToday: m.tokensToday, localTokensGenerated: m.completionTokens,
             uptimeSeconds: Date().timeIntervalSince(startedAt))
         if s.state == .error { st.lastCrash = s.errorMessage }
+        st.jobsPaused = await jobs.isBackgroundPaused
+        st.quantFingerprint = s.quantFingerprint
         return st
     }
 

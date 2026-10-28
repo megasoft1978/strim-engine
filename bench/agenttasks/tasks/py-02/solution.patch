@@ -1,0 +1,26 @@
+diff --git a/tpl/filters.py b/tpl/filters.py
+index de2f38a..ed8b795 100644
+--- a/tpl/filters.py
++++ b/tpl/filters.py
+@@ -3,7 +3,7 @@
+ 
+ def escape(value):
+     s = str(value)
+-    return s.replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("&", "&amp;")
++    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+ 
+ 
+ def upper(value):
+diff --git a/tpl/render.py b/tpl/render.py
+index 09e19fa..d5727d1 100644
+--- a/tpl/render.py
++++ b/tpl/render.py
+@@ -22,7 +22,7 @@ def _lookup(name, context):
+ def _evaluate(expr, context):
+     parts = [p.strip() for p in expr.split("|")]
+     value = _lookup(parts[0], context)
+-    for f in reversed(parts[1:]):
++    for f in parts[1:]:
+         name, _, arg = f.partition(":")
+         fn = FILTERS.get(name.strip())
+         if fn is None:

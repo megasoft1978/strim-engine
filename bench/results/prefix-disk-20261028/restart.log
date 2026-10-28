@@ -1,0 +1,11 @@
+draft vocab: loaded bench/draft_vocab_48k.json
+checkprefixdisk N=16384 phase=restart dir=/private/tmp/claude-501/-Users-user-Desktop-Freelance-strim-engine/6df0dc83-1ce6-455e-8d6d-9354559af0eb/scratchpad/pd/cache footprint 0.01 GB
+(c) restart: fresh trie, 10 files / 2.61 GB on disk, footprint 16.95 GB
+  TTFT (prefill) 3.13 s vs cold 17.30 s; matched 15360/16384
+  disk load: 10 nodes, 2.61 GB in 1895 ms = 726 ms/GB (1.38 GB/s incl. SHA-256 verify + MLX copy)
+  footprint 20.54 GB (trie 2.61 GB), peak 21.67 GB
+  PASS  restored run == miss reference (cache, MTP, seed, logits, token, 64 spec tokens)  cache true mtp true seed true logits true tok true
+  PASS  hit from disk
+  PASS  trie within budget
+ALL PASS
+exit 0

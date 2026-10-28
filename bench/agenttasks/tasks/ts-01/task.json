@@ -1,0 +1,24 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 8,
+  "id" : "ts-01",
+  "language" : "typescript",
+  "license" : "MIT",
+  "note" : "TypeScript: Result helpers with a type error (map) and two logic bugs (collect, unwrapOr)",
+  "prompt" : "This TypeScript package currently fails both its type check and its tests. Run `tsc --noEmit -p .` and `node --test` from the repository root (Node runs the .ts files directly with type stripping; there is no build step and no npm install). Change the non-test source so that both pass. The test files and tsconfig.json are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-ts",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1389,
+  "test_paths" : [
+    "test",
+    "tsconfig.json"
+  ],
+  "test_sha256" : {
+    "test\/result.test.ts" : "1c0cdd693a8e8469f373b6b52d8feb850583181c942ad2c62aade84659935c4b",
+    "tsconfig.json" : "9a03d1d4babf888555353a2cf2c9124dfb921998a089c555cd168690bcf6ec6d"
+  },
+  "tree_sha256" : "5eaa9a6f6872d5ebb96d50ab118f6ab9ee0430d5f97dba0b779e82185f19cd20",
+  "verify_cmd" : "tsc --noEmit -p . && node --test"
+}

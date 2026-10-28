@@ -48,6 +48,7 @@ import Testing
 
     @Test func newcomerPrefillInterleavesWithBatchedDecode() {
         var s = batchSched(1 ... 3)
+        s.burst = .legacy                                     // pins the 1:1 alternation (default is the gap cap)
         _ = s.pick()
         s.add(id: 9, priority: .interactive)                  // arrives mid-decode
         var trace: [String] = []

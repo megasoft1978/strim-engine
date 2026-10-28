@@ -1,0 +1,4 @@
+BYTES layer_weights=13.697 GB lm_head=0.715 GB total=14.412 GB -> roofline@530GB/s 27.19 ms
+draft vocab: loaded bench/draft_vocab_48k.json
+ROUND ctx=4096 depth=2 (synthetic cache, real SpecStream, timing_env=off) rounds=30 mean=45.02 median=44.59 min=42.42 ms/round tokens/round=2.27
+ROUND ctx=16384 depth=2 (synthetic cache, real SpecStream, timing_env=off) rounds=30 mean=49.39 median=48.91 min=46.42 ms/round tokens/round=1.07

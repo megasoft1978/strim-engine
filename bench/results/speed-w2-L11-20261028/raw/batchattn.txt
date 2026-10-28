@@ -1,0 +1,6 @@
+B=4 ctx= 1024 maxLen= 1024  looped 3.91 ms  batched(masked, padded) 2.79 ms  batched(equal,nomask) 2.33 ms  save(masked)=+1.12 ms  maxabsdiff=0.0002441
+B=8 ctx= 1024 maxLen= 1024  looped 6.96 ms  batched(masked, padded) 5.30 ms  batched(equal,nomask) 4.25 ms  save(masked)=+1.66 ms  maxabsdiff=0.0004883
+B=4 ctx= 4096 maxLen= 4096  looped 7.28 ms  batched(masked, padded) 6.55 ms  batched(equal,nomask) 6.29 ms  save(masked)=+0.74 ms  maxabsdiff=0
+B=8 ctx= 4096 maxLen= 4096  looped 14.14 ms  batched(masked, padded) 12.87 ms  batched(equal,nomask) 12.82 ms  save(masked)=+1.27 ms  maxabsdiff=0
+B=4 ctx=16384 maxLen=16384  looped 23.54 ms  batched(masked, padded) 23.38 ms  batched(equal,nomask) 24.45 ms  save(masked)=+0.16 ms  maxabsdiff=0
+B=8 ctx=16384 maxLen=16384  looped 46.89 ms  batched(masked, padded) 48.10 ms  batched(equal,nomask) 48.40 ms  save(masked)=-1.20 ms  maxabsdiff=0

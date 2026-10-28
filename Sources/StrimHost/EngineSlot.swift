@@ -41,6 +41,8 @@ public struct EngineSlotStatus: Sendable, Equatable {
     public var loadedAt: Date?
     /// MLX active bytes right after the load finished (weights + kernels, no sessions).
     public var weightsBytes: Int
+    /// Hash of the model's (and head's) config.json quantization specs; nil when nothing is loaded.
+    public var quantFingerprint: String? = nil
 }
 
 /// Owns the one resident engine. Everything that needs the engine goes through `client` (a proxy that
@@ -106,7 +108,8 @@ public actor EngineSlot {
         }
         return EngineSlotStatus(state: state, model: phase == .stopped ? nil : model, mtp: phase == .stopped ? nil : mtp,
                                 progress: phase == .loading ? progress : nil, errorMessage: errorMessage,
-                                loadedAt: phase == .ready ? loadedAt : nil, weightsBytes: phase == .ready ? weightsBytes : 0)
+                                loadedAt: phase == .ready ? loadedAt : nil, weightsBytes: phase == .ready ? weightsBytes : 0,
+                                quantFingerprint: phase == .ready ? model.map { QuantInfo.fingerprint(modelDir: $0, headDir: mtp) } : nil)
     }
 
     private func activeWork() async -> Int {

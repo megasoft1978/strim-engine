@@ -1,0 +1,22 @@
+draft vocab: none found; using full vocab
+checkprefixcuts policy max=1536 min=1024 boundary=248045
+(a) plain: turn-2 miss vs hit after turn 1; turn-1 cuts 3, expected reuse 3980 of 3983
+  PASS  cold-store == no-store
+  PASS  hit == miss logits  hit f6276330df0ceb25 miss f6276330df0ceb25
+  PASS  reuse reaches turn 1's last cut  matched 3980 expected 3980 (turn1 0)
+  PASS  second hit unchanged
+  PASS  16 greedy tokens identical
+  store: nodes 4 bytes 907 MB
+(b) MTP head path
+  PASS  spec hit logits == miss
+  PASS  spec seed token + hidden identical
+  PASS  spec head KV identical
+  PASS  spec reuse  matched 3980
+(e) thinning under budget pressure
+  PASS  thinning happened under the tight budget  thinned 1 nodes 3/3
+  PASS  thinned hit == miss logits  matched 3980
+  PASS  thinned spec hit == miss
+PERF cold_5K policy=1024/1536 tokens=5133 cuts=4 tok/s median 1010 best 1012
+PERF cold_16K policy=1024/1536 tokens=16723 cuts=12 tok/s median 969 best 969
+NUMERICS fixed1024 vs policy 1024/1536 on 16K: max|dlogit| 0.3779297 argmax same
+checkprefixcuts: ALL PASS

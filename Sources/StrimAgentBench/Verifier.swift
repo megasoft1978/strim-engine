@@ -25,7 +25,8 @@ public enum Verifier {
     /// Toolchain dirs under the home that verify commands may need to read (never writable).
     static func toolchainReadable(home: String) -> [String] {
         var out: [String] = []
-        for d in [".nvm", ".cargo", ".rustup", "go/pkg/mod", "Library/Caches/org.swift.swiftpm"] {
+        out += Toolchains.readable(home: home)
+        for d in ["go/pkg/mod", "Library/Caches/org.swift.swiftpm"] {
             let p = home + "/" + d
             if FileManager.default.fileExists(atPath: p) { out.append(p) }
         }
@@ -72,11 +73,7 @@ public enum Verifier {
     }
 
     /// Rejects absolute paths and `..` components.
-    public static func safeRel(_ p: String) -> String? {
-        let t = p.hasSuffix("/") ? String(p.dropLast()) : p
-        guard !t.isEmpty, !t.hasPrefix("/"), !t.split(separator: "/").contains("..") else { return nil }
-        return t
-    }
+    public static func safeRel(_ p: String) -> String? { RunTestsGrammar.safeRel(p) }
 
     /// sha256 of every file at or under each path (file or directory).
     public static func hashPaths(_ tree: URL, _ paths: [String]) -> [String: String] {
@@ -168,6 +165,7 @@ public enum Verifier {
         env["GOCACHE"] = scratch.appendingPathComponent("gocache").path
         env["GOPROXY"] = "off"
         env["CI"] = "1"
+        Toolchains.apply(to: &env, home: home, scratch: scratch.path)
         for (k, v) in extraEnv { env[k] = v }
         let answerFile = scratch.appendingPathComponent("answer.txt")
         if task.isAnswerTask {

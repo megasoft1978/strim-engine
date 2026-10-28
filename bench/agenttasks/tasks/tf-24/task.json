@@ -1,0 +1,28 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 25,
+  "id" : "tf-24",
+  "language" : "go",
+  "license" : "MIT",
+  "note" : "long loop Go: semver parse\/compare\/constraint\/bump (10 injected bugs in 4 files)",
+  "prompt" : "The automated tests of this project currently fail. Run `go test -count=1 .\/...` from the repository root to see the failures. Change the project's non-test source code so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-go",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2721,
+  "test_paths" : [
+    "bump_test.go",
+    "compare_test.go",
+    "constraint_test.go",
+    "parse_test.go"
+  ],
+  "test_sha256" : {
+    "bump_test.go" : "15ec323607165f2c543cdfdb10f93955322fbba06d3f6abca56e430c9dbd762c",
+    "compare_test.go" : "ddf5c1a14a794c70b3ffd617fdf22736f0a29035d646d88e5d646d900ac78295",
+    "constraint_test.go" : "842b45322440d0e27419a7381f580c2d4a6e20e0ff6a8c47003f15fff69c4140",
+    "parse_test.go" : "81e1cb7b8b35cdf6a50cf5c19cbfd0e952237ff900541c9129dd0417771ec57a"
+  },
+  "tree_sha256" : "33e4ba7f2c190e4e1cb9ec5624f3a3373866a3af225efd5c6dd7f633cfe4a6df",
+  "verify_cmd" : "go test -count=1 .\/..."
+}

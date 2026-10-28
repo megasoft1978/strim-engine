@@ -203,16 +203,27 @@ public enum GDNMetal {
 
     /// Blocked-sequential GDN prefill, ported from rapid-mlx's `gdn_prefill.py`
     /// (Apache-2.0), which adapted it from oMLX. Unlike the decode kernel above, one
-    /// threadgroup owns 32 value rows and stages k/q/v in 32-token blocks, so k/q rows
+    /// threadgroup owns 32 value rows and stages k/q/v in 40-token blocks, so k/q rows
     /// are read once per threadgroup instead of once per value row. The recurrence is
     /// still the exact sequential one; only the f32 reduction tree changes.
+    ///
+    /// Speed-wave-2 L5 layout (bit-identical to the ported kernel: same per-thread 16-wide
+    /// partition, same f32 reduction tree, same operations): each thread owns 2 value rows (the
+    /// k/q tgmem reads are shared by both and the two shuffle chains overlap), staging uses 16-byte
+    /// loads/stores, y is staged in tgmem and flushed with coalesced 16-byte stores per block, and
+    /// the kv reduction is a xor butterfly (the adds are commutative, so lane 0's tree is unchanged).
+    /// v is read through its own strides (no contiguous copy of the conv-output slice).
+    /// Requires Dk = Dv = 128, inner stride 1 on q/k/v, 16-byte aligned bases (true for the model).
     nonisolated(unsafe) static let blockedKernel = MLXFast.metalKernel(
-        name: "gdn_blocked_prefill",
+        name: "gdn_blocked_prefill_r2",
         inputNames: ["q", "k", "v", "g", "beta", "ssm", "dims"],
         outputNames: ["y", "ssmOut"],
         source: """
-            constexpr int TB = 48;
+            constexpr int TB = 40;
             constexpr int DB = 32;
+            constexpr int NT = 128;
+            constexpr int KQC = (TB * 16 + NT - 1) / NT;
+            constexpr int VC = (TB * (DB / 8) + NT - 1) / NT;
             uint T = dims[0], Hk = dims[1], Hv = dims[2], B = dims[3];
             uint tid = thread_position_in_threadgroup.x;
             uint blk = threadgroup_position_in_grid.x;
@@ -221,44 +232,55 @@ public enum GDNMetal {
             uint hk = hv / (Hv / Hk);
             uint dv0 = blk * DB;
 
-            uint dv = tid / 8;
+            uint dvb = tid / 8;
             uint seg = tid % 8;
             uint d0 = seg * 16;
 
             threadgroup bfloat16_t k_s[TB][128 + 8];
             threadgroup bfloat16_t q_s[TB][128 + 8];
             threadgroup bfloat16_t v_s[TB][DB + 8];
+            threadgroup bfloat16_t y_s[TB][DB + 8];
             threadgroup float g_s[TB];
             threadgroup float b_s[TB];
 
             const device bfloat16_t* k_base = k + ((size_t)b * T * Hk + hk) * 128;
             const device bfloat16_t* q_base = q + ((size_t)b * T * Hk + hk) * 128;
-            const device bfloat16_t* v_base = v + ((size_t)b * T * Hv + hv) * 128 + dv0;
             const size_t krow = (size_t)Hk * 128;
+            const device bfloat16_t* v_base = v + (size_t)b * v_strides[0] + (size_t)hv * v_strides[2] + dv0;
+            const size_t vrow = (size_t)v_strides[1];
 
-            float4 st[4];
-            {
+            float4 st[2][4];
+            for (int r = 0; r < 2; ++r) {
                 const device float4* S_in = (const device float4*)(
-                    ssm + (((size_t)b * Hv + hv) * 128 + dv0 + dv) * 128 + d0);
-                for (int i = 0; i < 4; ++i) st[i] = S_in[i];
+                    ssm + (((size_t)b * Hv + hv) * 128 + dv0 + dvb * 2 + r) * 128 + d0);
+                for (int i = 0; i < 4; ++i) st[r][i] = S_in[i];
             }
 
             device bfloat16_t* y_base = y + ((size_t)b * T * Hv + hv) * 128 + dv0;
 
             for (uint t0 = 0; t0 < T; t0 += TB) {
                 uint tt = min((uint)TB, T - t0);
-                for (uint p = tid; p < tt * 128; p += 256) {
-                    uint r = p / 128, d = p % 128;
-                    k_s[r][d] = k_base[(size_t)(t0 + r) * krow + d];
-                    q_s[r][d] = q_base[(size_t)(t0 + r) * krow + d];
+                for (int j = 0; j < KQC; ++j) {
+                    uint p = tid + j * NT;
+                    if (p < tt * 16) {
+                        uint r = p / 16, c = p % 16;
+                        *(threadgroup uint4*)&k_s[r][c * 8] =
+                            *(const device uint4*)(k_base + (size_t)(t0 + r) * krow + c * 8);
+                        *(threadgroup uint4*)&q_s[r][c * 8] =
+                            *(const device uint4*)(q_base + (size_t)(t0 + r) * krow + c * 8);
+                    }
                 }
-                for (uint p = tid; p < tt * DB; p += 256) {
-                    uint r = p / DB, d = p % DB;
-                    v_s[r][d] = v_base[(size_t)(t0 + r) * Hv * 128 + d];
+                for (int j = 0; j < VC; ++j) {
+                    uint p = tid + j * NT;
+                    if (p < tt * (DB / 8)) {
+                        uint r = p / (DB / 8), c = p % (DB / 8);
+                        *(threadgroup uint4*)&v_s[r][c * 8] =
+                            *(const device uint4*)(v_base + (size_t)(t0 + r) * vrow + c * 8);
+                    }
                 }
-                for (uint p = tid; p < tt; p += 256) {
-                    g_s[p] = g[((size_t)b * T + t0 + p) * Hv + hv];
-                    b_s[p] = beta[((size_t)b * T + t0 + p) * Hv + hv];
+                if (tid < tt) {
+                    g_s[tid] = g[((size_t)b * T + t0 + tid) * Hv + hv];
+                    b_s[tid] = beta[((size_t)b * T + t0 + tid) * Hv + hv];
                 }
                 threadgroup_barrier(mem_flags::mem_threadgroup);
 
@@ -271,51 +293,63 @@ public enum GDNMetal {
                         (const threadgroup vec<bfloat16_t,4>*)&q_s[t][d0];
                     float4 kf[4];
                     for (int i = 0; i < 4; ++i) kf[i] = float4(k4[i]);
-                    float4 p4 = 0.0f;
-                    for (int i = 0; i < 4; ++i) {
-                        st[i] = st[i] * gt;
-                        p4 += st[i] * kf[i];
+                    float kvm[2];
+                    for (int r = 0; r < 2; ++r) {
+                        float4 p4 = 0.0f;
+                        for (int i = 0; i < 4; ++i) {
+                            st[r][i] = st[r][i] * gt;
+                            p4 += st[r][i] * kf[i];
+                        }
+                        float part = p4.x + p4.y + p4.z + p4.w;
+                        part += simd_shuffle_xor(part, 4);
+                        part += simd_shuffle_xor(part, 2);
+                        part += simd_shuffle_xor(part, 1);
+                        kvm[r] = part;
                     }
-                    float part = p4.x + p4.y + p4.z + p4.w;
-                    part += simd_shuffle_down(part, 4);
-                    part += simd_shuffle_down(part, 2);
-                    part += simd_shuffle_down(part, 1);
-                    float kv_mem = simd_shuffle(part, (tid % 32) / 8 * 8);
-                    float delta = (float(v_s[t][dv]) - kv_mem) * bt;
-
-                    float4 o4 = 0.0f;
-                    for (int i = 0; i < 4; ++i) {
-                        st[i] += kf[i] * delta;
-                        o4 += st[i] * float4(q4[i]);
-                    }
-                    float out = o4.x + o4.y + o4.z + o4.w;
-                    out += simd_shuffle_down(out, 4);
-                    out += simd_shuffle_down(out, 2);
-                    out += simd_shuffle_down(out, 1);
-                    if (seg == 0) {
-                        y_base[(size_t)(t0 + t) * Hv * 128 + dv] = (bfloat16_t)out;
+                    for (int r = 0; r < 2; ++r) {
+                        uint dvr = dvb * 2 + r;
+                        float delta = (float(v_s[t][dvr]) - kvm[r]) * bt;
+                        float4 o4 = 0.0f;
+                        for (int i = 0; i < 4; ++i) {
+                            st[r][i] += kf[i] * delta;
+                            o4 += st[r][i] * float4(q4[i]);
+                        }
+                        float out = o4.x + o4.y + o4.z + o4.w;
+                        out += simd_shuffle_down(out, 4);
+                        out += simd_shuffle_down(out, 2);
+                        out += simd_shuffle_down(out, 1);
+                        if (seg == 0) {
+                            y_s[t][dvr] = (bfloat16_t)out;
+                        }
                     }
                 }
                 threadgroup_barrier(mem_flags::mem_threadgroup);
+                for (uint p = tid; p < tt * (DB / 8); p += NT) {
+                    uint r = p / (DB / 8), c = p % (DB / 8);
+                    *(device uint4*)(y_base + (size_t)(t0 + r) * Hv * 128 + c * 8) =
+                        *(threadgroup uint4*)&y_s[r][c * 8];
+                }
             }
 
-            {
+            for (int r = 0; r < 2; ++r) {
                 device float4* S_out = (device float4*)(
-                    ssmOut + (((size_t)b * Hv + hv) * 128 + dv0 + dv) * 128 + d0);
-                for (int i = 0; i < 4; ++i) S_out[i] = st[i];
+                    ssmOut + (((size_t)b * Hv + hv) * 128 + dv0 + dvb * 2 + r) * 128 + d0);
+                for (int i = 0; i < 4; ++i) S_out[i] = st[r][i];
             }
             """,
-        header: "")
+        header: "",
+        ensureRowContiguous: false)
 
-    /// Blocked prefill for B=1, bf16 q/k/v, Hk==Hv, Dk=Dv=128. Returns y/ssm.
+    /// Blocked prefill for bf16 q/k/v, Hk dividing Hv, Dk=Dv=128. `v` may be a strided view
+    /// (e.g. the value slice of the conv output); q/k must be row-contiguous. Returns y/ssm.
     public static func runBlocked(q: MLXArray, k: MLXArray, v: MLXArray,
                                   g: MLXArray, beta: MLXArray,
                                   ssm: MLXArray) -> (y: MLXArray, ssm: MLXArray) {
         let B = q.shape[0], S = q.shape[1], Hk = q.shape[2], Hv = v.shape[2]
         let dims = MLXArray([Int32(S), Int32(Hk), Int32(Hv), Int32(B)])
-        let out = blockedKernel([q, k, v, g.asType(.float32).contiguous(),
-                                 beta.asType(.float32).contiguous(), ssm, dims],
-                                grid: (4 * 256, Hv, B), threadGroup: (256, 1, 1),
+        let out = blockedKernel([q.contiguous(), k.contiguous(), v, g.asType(.float32).contiguous(),
+                                 beta.asType(.float32).contiguous(), ssm.contiguous(), dims],
+                                grid: (4 * 128, Hv, B), threadGroup: (128, 1, 1),
                                 outputShapes: [[B, S, Hv, Dv], [B, Hv, Dv, Dk]],
                                 outputDTypes: [.bfloat16, .float32])
         return (out[0], out[1])

@@ -1,0 +1,23 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 10,
+  "id" : "rb-03",
+  "language" : "ruby",
+  "license" : "MIT",
+  "note" : "Ruby feature: TableFmt gains widths, align, to_s, to_markdown, sort_by!, max_width truncation; tests already written",
+  "prompt" : "This Ruby library has a minimal TableFmt class. test\/tablefmt_test.rb already contains tests for behaviour that is not implemented yet: `widths`, `align`, `to_s` (with `max_width:`), `to_markdown` and `sort_by!`. Run `ruby -Ilib -Itest test\/all_test.rb` from the repository root to see the failures (minitest from the standard library; no gems to install, no network). Implement the feature in lib\/ so the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what you changed.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-ruby",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1242,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/all_test.rb" : "3ff59e43ff8c77bfaefc6df5100f2344cd4f26996c6e7c5459fd0833f379272d",
+    "test\/tablefmt_test.rb" : "f7e6b7e2825726cc9fc557100056f0d77b1ff0d9ce50be95e3b44ceea4e3d555"
+  },
+  "tree_sha256" : "0cdf01f635a362fd717d01baf34ead04dd2acf1d73fd29753720f244d4269c5a",
+  "verify_cmd" : "ruby -Ilib -Itest test\/all_test.rb"
+}

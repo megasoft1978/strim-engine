@@ -1,0 +1,57 @@
+diff --git a/csvline.go b/csvline.go
+index 3baafb2..6d16481 100644
+--- a/csvline.go
++++ b/csvline.go
+@@ -11,9 +11,12 @@ func SplitCSV(line string) []string {
+ 	for i := 0; i < len(line); i++ {
+ 		c := line[i]
+ 		switch {
++		case c == '"' && inQ && i+1 < len(line) && line[i+1] == '"':
++			cur.WriteByte('"')
++			i++
+ 		case c == '"':
+ 			inQ = !inQ
+-		case c == ',':
++		case c == ',' && !inQ:
+ 			out = append(out, cur.String())
+ 			cur.Reset()
+ 		default:
+diff --git a/slug.go b/slug.go
+index 4523564..2c50d75 100644
+--- a/slug.go
++++ b/slug.go
+@@ -14,10 +14,10 @@ func Slugify(s string) string {
+ 		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+ 			b.WriteRune(r)
+ 			dash = false
+-		} else if !dash {
++		} else if !dash && b.Len() > 0 {
+ 			b.WriteByte('-')
+ 			dash = true
+ 		}
+ 	}
+-	return b.String()
++	return strings.TrimRight(b.String(), "-")
+ }
+diff --git a/wrap.go b/wrap.go
+index a6114dc..c85e9b6 100644
+--- a/wrap.go
++++ b/wrap.go
+@@ -6,13 +6,16 @@ import "strings"
+ // width gets its own line. width <= 0 means no wrapping (one line).
+ func Wrap(s string, width int) []string {
+ 	words := strings.Fields(s)
++	if width <= 0 {
++		return []string{strings.Join(words, " ")}
++	}
+ 	var lines []string
+ 	cur := ""
+ 	for _, w := range words {
+ 		switch {
+ 		case cur == "":
+ 			cur = w
+-		case len(cur)+1+len(w) < width:
++		case len(cur)+1+len(w) <= width:
+ 			cur += " " + w
+ 		default:
+ 			lines = append(lines, cur)

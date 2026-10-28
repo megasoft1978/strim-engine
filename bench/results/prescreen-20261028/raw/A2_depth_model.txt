@@ -1,0 +1,28 @@
+shape   a(d2) | ctrl_rest_d  T_ctrl  best_fixed(d) T_best  gain%  | cost-per-token(d1..4 incl d1) T_best1  gain%
+decay    0.62 |    2      53.0       3      54.1   2.07 |    3      54.1   2.07
+decay    0.66 |    2      54.8       3      56.2   2.40 |    3      56.2   2.40
+decay    0.70 |    2      56.7       3      58.3   2.70 |    3      58.3   2.70
+decay    0.74 |    2      58.6       3      60.4   2.98 |    3      60.4   2.98
+decay    0.78 |    2      60.5       3      62.5   3.25 |    3      62.5   3.25
+decay    0.85 |    2      61.8       3      63.9   3.42 |    3      63.9   3.42
+decay    0.92 |    2      61.8       3      63.9   3.42 |    3      63.9   3.42
+decay    1.00 |    2      61.8       3      63.9   3.42 |    3      63.9   3.42
+iid      0.62 |    2      53.0       4      56.2   6.16 |    4      56.2   6.16
+iid      0.66 |    2      54.8       4      59.8   9.06 |    4      59.8   9.06
+iid      0.70 |    2      56.7       4      63.6  12.06 |    4      63.6  12.06
+iid      0.74 |    2      58.6       4      67.5  15.16 |    4      67.5  15.16
+iid      0.78 |    2      60.5       4      71.6  18.36 |    4      71.6  18.36
+iid      0.85 |    3      73.1       4      79.3   8.45 |    4      79.3   8.45
+iid      0.92 |    4      87.4       4      87.4  -0.00 |    4      87.4  -0.00
+iid      1.00 |    4      97.5       4      97.5  -0.00 |    4      97.5  -0.00
+sticky   0.62 |    2      53.0       3      55.4   4.68 |    3      55.4   4.68
+sticky   0.66 |    2      54.8       4      58.9   7.32 |    4      58.9   7.32
+sticky   0.70 |    2      56.7       4      62.5  10.24 |    4      62.5  10.24
+sticky   0.74 |    2      58.6       4      66.4  13.32 |    4      66.4  13.32
+sticky   0.78 |    2      60.5       4      70.5  16.57 |    4      70.5  16.57
+sticky   0.85 |    3      72.7       4      78.3   7.76 |    4      78.3   7.76
+sticky   0.92 |    4      86.8       4      86.8  -0.00 |    4      86.8  -0.00
+sticky   1.00 |    4      97.5       4      97.5  -0.00 |    4      97.5  -0.00
+weighted mean oracle-fixed-depth gain over controller (stationary): decay=2.87%
+weighted mean oracle-fixed-depth gain over controller (stationary): iid=9.54%
+weighted mean oracle-fixed-depth gain over controller (stationary): sticky=8.18%

@@ -1,0 +1,21 @@
+ref window 1/20 code
+ref window 2/20 code
+ref window 3/20 code
+ref window 4/20 code
+ref window 5/20 code
+ref window 6/20 code
+ref window 7/20 code gen
+ref window 8/20 code gen
+ref window 9/20 code gen
+ref window 10/20 code gen
+ref window 11/20 prose
+ref window 12/20 prose
+ref window 13/20 prose
+ref window 14/20 prose
+ref window 15/20 prose
+ref window 16/20 prose
+ref window 17/20 prose gen
+ref window 18/20 prose gen
+ref window 19/20 prose gen
+ref window 20/20 prose gen
+wrote bench/results/prescreen-20261028/raw/b5/ref8.bin: 20 windows

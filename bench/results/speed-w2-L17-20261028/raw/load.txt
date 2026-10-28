@@ -1,0 +1,6 @@
+[16:36:35] start load load={ 3.21 3.63 3.31 } swap=total = 9216.00M  used = 8373.31M  free = 842.69M  (encrypted)
+load: tensors=2057 quantizedModules=402 specs=["affine 2-bit g128": 402] signTensors=402 signMismatch=0
+hadamard.json weight_names=401 present=401 inverse=["language_model.model.embed_tokens.weight"] block=1024 widths=[5120, 6144, 17408]
+quantized-but-undeclared=0 [] declared-but-missing=0
+[mem] after first forward (resident weights) footprint=8.64 GiB mlxActive=7.10 GiB mlxPeak=7.14 GiB mlxCache=1.38 GiB load+fwd 1.2s
+[16:36:37] end rc=0 aborted=0

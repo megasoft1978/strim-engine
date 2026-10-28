@@ -20,6 +20,8 @@ public struct DraftVocab {
     public let w: MLXArray
     public let s: MLXArray
     public let b: MLXArray
+    /// Quantization of the lm_head rows kept here.
+    public let spec: QuantSpec
 }
 
 private struct DraftVocabFile: Decodable {
@@ -59,9 +61,17 @@ public final class WeightStore {
     /// Set for checkpoints that store the MTP head under `language_model.mtp.` in the
     /// main shards (oQ4e) instead of a separate prefixless head file.
     public var keyPrefix = ""
+    /// config.json `quantization` block of this directory (nil when absent).
+    public let quantConfig: QuantConfig?
+    private var specCache: [String: QuantSpec] = [:]
+    /// Activation rotation declared by `<dir>/hadamard.json` (Prism Bonsai); nil for ordinary checkpoints.
+    public let rotation: ActivationRotation?
 
     public init(dir: URL) throws {
+        WiredLimit.applyFromEnvOnce()
         self.dir = dir
+        self.quantConfig = try QuantConfig.load(dir: dir)
+        self.rotation = try ActivationRotation.load(dir: dir)
         self.index = try ModelIndex(url: dir.appendingPathComponent("model.safetensors.index.json"))
     }
 
@@ -83,16 +93,16 @@ public final class WeightStore {
                 throw WeightError.missingShard(shard)
             }
             shards[shard] = try loadArrays(url: url)
+            if rotation != nil { for k in shards[shard]!.keys where k.hasPrefix("vision_tower") { shards[shard]![k] = nil } }   // text-only; the tower is never used
+            if let rotation { for (k, v) in shards[shard]! where [.float32, .float16, .bfloat16].contains(v.dtype) && v.dtype != rotation.actDType && !k.hasSuffix(".signs") { shards[shard]![k] = v.asType(rotation.actDType); eval(shards[shard]![k]!) } }
             loadedShards.append(shard)
         }
         guard let t = shards[shard]?[name] else { throw WeightError.missingTensor(name) }
         return t
     }
 
-    /// MLX packs quantized weights into uint32, so the packed width and the number of
-    /// groups reveal the bit depth: bits = 32 * packedColumns / (groups * groupSize).
-    /// Uniform 4-bit checkpoints return 4; mixed 4/5-bit checkpoints (oQe) need this
-    /// per tensor. A tensor that does not fit the formula falls back to 4.
+    /// Shape-only bit-depth guess (benches and cross-checks; model paths use `quantSpec`).
+    /// MLX packs quantized weights into uint32, so bits = 32 * packedColumns / (groups * groupSize).
     public static func quantBits(_ w: MLXArray, _ s: MLXArray, groupSize: Int = 64) -> Int {
         guard let packed = w.shape.last, let groups = s.shape.last, groups > 0 else { return 4 }
         let k = groups * groupSize
@@ -100,6 +110,29 @@ public final class WeightStore {
         let bits = (32 * packed) / k
         return (2 ... 8).contains(bits) ? bits : 4
     }
+
+    /// Quantization of the module `prefix` (tensors `<prefix>.weight/.scales/.biases`) from
+    /// config.json, cross-checked against the shapes. Throws on any disagreement; never guesses.
+    public func quantSpec(_ prefix: String, w: MLXArray, s: MLXArray) throws -> QuantSpec {
+        if let c = specCache[prefix] { return c }
+        guard let cfg = quantConfig else { throw QuantError.noConfig(tensor: keyPrefix + prefix) }
+        guard let spec = cfg.spec(forPrefix: prefix, keyPrefix: keyPrefix) else {
+            if cfg.global == nil { throw QuantError.noConfig(tensor: keyPrefix + prefix) }
+            throw QuantError.unquantizedTensor(keyPrefix + prefix)
+        }
+        try spec.validate(tensor: keyPrefix + prefix, w: w, s: s)
+        specCache[prefix] = spec
+        return spec
+    }
+
+    /// Spec for a module by name (loads its weight and scales).
+    public func quantSpec(_ prefix: String) throws -> QuantSpec {
+        if let c = specCache[prefix] { return c }
+        return try quantSpec(prefix, w: try tensor(prefix + ".weight"), s: try tensor(prefix + ".scales"))
+    }
+
+    /// Hash of every quantization spec this store was configured with.
+    public var quantFingerprint: String { quantConfig?.fingerprint ?? "none" }
 
     private var draftVocabLoaded = false
     private var draftVocabStore: DraftVocab?
@@ -119,6 +152,7 @@ public final class WeightStore {
     }
 
     private func loadDraftVocab() -> DraftVocab? {
+        if rotation != nil { return nil }   // truncated lm_head rows would need the rotated hidden
         let fm = FileManager.default
         let env = ProcessInfo.processInfo.environment["STRIM_DRAFT_VOCAB"].flatMap { $0.isEmpty ? nil : $0 }
         if env == "off" {
@@ -154,6 +188,11 @@ public final class WeightStore {
         guard index.weightMap[ps + ".scales"] != nil,
               let w = try? tensor(ps + ".weight"), let s = try? tensor(ps + ".scales"),
               let b = try? tensor(ps + ".biases") else { return nil }
+        let spec: QuantSpec
+        do { spec = try quantSpec(ps, w: w, s: s) } catch {
+            stderrLine("draft vocab \(path): \(error); using full vocab")
+            return nil
+        }
         let rows = w.shape[0]
         let ids = file.ids
         guard ids.count == file.k, ids.count > 0, ids.last! < rows,
@@ -167,37 +206,37 @@ public final class WeightStore {
         let rb = b.take(idx, axis: 0)
         eval(idx, rw, rs, rb)
         draftVocabNotice("draft vocab: loaded \(path)")
-        return DraftVocab(idx: idx, w: rw, s: rs, b: rb)
+        return DraftVocab(idx: idx, w: rw, s: rs, b: rb, spec: spec)
     }
 
     /// dequantized embedding row(s)
-    public func embedding(_ prefix: String, tokens: [Int32], bits: Int? = nil, groupSize: Int = 64) throws -> MLXArray {
-        try embedding(prefix, indices: MLXArray(tokens), bits: bits, groupSize: groupSize)
+    public func embedding(_ prefix: String, tokens: [Int32]) throws -> MLXArray {
+        try embedding(prefix, indices: MLXArray(tokens))
     }
 
     /// dequantized embedding row(s) from an index tensor, so the lookup can run off a
     /// GPU-resident token id (e.g. a lazy `argMax`) with no host round-trip.
-    public func embedding(_ prefix: String, indices: MLXArray, bits: Int? = nil,
-                          groupSize: Int = 64) throws -> MLXArray {
+    public func embedding(_ prefix: String, indices: MLXArray) throws -> MLXArray {
         let w = try tensor(prefix + ".weight")
         let s = try tensor(prefix + ".scales")
         let b = try tensor(prefix + ".biases")
-        let depth = bits ?? WeightStore.quantBits(w, s, groupSize: groupSize)
+        let spec = try quantSpec(prefix, w: w, s: s)
         let rows = dequantized(w.take(indices, axis: 0), scales: s.take(indices, axis: 0),
-                               biases: b.take(indices, axis: 0), groupSize: groupSize, bits: depth)
+                           biases: b.take(indices, axis: 0), groupSize: spec.groupSize, bits: spec.bits)
+        if let rotation, rotation.inverseWeightNames.contains(keyPrefix + prefix + ".weight") {
+            return rotation.invert(rows).asType(rotation.actDType)
+        }
         return rows
     }
 
-    /// Quantized matmul with the bit depth inferred from these tensors unless supplied.
-    public func qmm(_ x: MLXArray, _ w: MLXArray, _ s: MLXArray, _ b: MLXArray,
-                    bits: Int? = nil, groupSize: Int = 64) -> MLXArray {
-        let depth = bits ?? WeightStore.quantBits(w, s, groupSize: groupSize)
-        return quantizedMatmul(x, w, scales: s, biases: b, transpose: true,
-                               groupSize: groupSize, bits: depth)
+    /// Quantized matmul with explicit (config-derived) quantization.
+    public func qmm(_ x: MLXArray, _ w: MLXArray, _ s: MLXArray, _ b: MLXArray, spec: QuantSpec) -> MLXArray {
+        quantizedMatmul(rotation?.apply(x) ?? x, w, scales: s, biases: b, transpose: true,
+                        groupSize: spec.groupSize, bits: spec.bits)
     }
 
     /// y = x @ W^T with W stored as packed uint32 + scales + biases
-    public func linear(_ prefix: String, _ x: MLXArray, bits: Int? = nil, groupSize: Int = 64) throws -> MLXArray {
+    public func linear(_ prefix: String, _ x: MLXArray) throws -> MLXArray {
         // oQ4e keeps the MTP fc projection unquantized (bf16) while the rest of the
         // head is quantized; fall back to a dense matmul when scales are absent.
         if index.weightMap[keyPrefix + prefix + ".scales"] == nil {
@@ -207,7 +246,7 @@ public final class WeightStore {
         let w = try tensor(prefix + ".weight")
         let s = try tensor(prefix + ".scales")
         let b = try tensor(prefix + ".biases")
-        return qmm(x, w, s, b, bits: bits, groupSize: groupSize)
+        return qmm(x, w, s, b, spec: try quantSpec(prefix, w: w, s: s))
     }
 
     /// Compiled single-token GDN step (weights captured as constants).
@@ -238,12 +277,24 @@ public final class WeightStore {
 
     private var mlpFusedCache: [Int: (w: MLXArray, s: MLXArray, b: MLXArray)] = [:]
 
+    /// True when gate_proj and up_proj share one quantization spec, so they can be fused into one matmul.
+    public func mlpFusable(_ layer: Int) throws -> Bool {
+        if mlpFusedCache[layer] != nil { return true }
+        let p = "language_model.model.layers.\(layer).mlp."
+        return try quantSpec(p + "gate_proj") == quantSpec(p + "up_proj")
+    }
+
     /// gate_proj and up_proj as one [2*intermediate, K] matrix: one qmv instead of two,
     /// with double the rows so it lands in MLX's wide-GEMV regime. Rows are independent,
     /// so the result is bit-identical; the originals are dropped to keep memory net-zero.
+    /// Requires `mlpFusable(layer)` (equal bits and group size); the shared spec stays in `quantSpec(<gate_proj>)`.
     public func mlpFused(_ layer: Int) throws -> (w: MLXArray, s: MLXArray, b: MLXArray) {
         if let f = mlpFusedCache[layer] { return f }
         let p = "language_model.model.layers.\(layer).mlp."
+        let spec = try quantSpec(p + "gate_proj")
+        guard try quantSpec(p + "up_proj") == spec else {
+            throw QuantError.badConfig("\(p)gate_proj and up_proj differ in quantization; cannot fuse")
+        }
         let w = concatenated([try tensor(p + "gate_proj.weight"), try tensor(p + "up_proj.weight")], axis: 0)
         let s = concatenated([try tensor(p + "gate_proj.scales"), try tensor(p + "up_proj.scales")], axis: 0)
         let b = concatenated([try tensor(p + "gate_proj.biases"), try tensor(p + "up_proj.biases")], axis: 0)

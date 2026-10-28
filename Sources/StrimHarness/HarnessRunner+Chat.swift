@@ -73,6 +73,13 @@ extension HarnessRunner {
 
     public func workspaceRoot(sessionID: String) -> String? { chats[sessionID]?.ws.root }
 
+    /// Thinking for the session's engine generation, sent like the server adapter's `enable_thinking` (true = thinking
+    /// template on with tools; nil = unchanged default). Read when the engine session opens, i.e. on the first turn;
+    /// a change after that is stored but does not reach the open engine session.
+    public func setThinking(sessionID: String, enabled: Bool?) async {
+        chats[sessionID]?.conversation.thinking = enabled
+    }
+
     /// Starts a user turn and returns its event stream. Throws `ChatError.turnInProgress` while another turn runs
     /// (turns are rejected, never queued). The stream ends after `.turnFinished`; dropping the stream cancels the turn.
     public func appendUserTurn(sessionID: String, text: String) throws -> AsyncStream<ChatEvent> {

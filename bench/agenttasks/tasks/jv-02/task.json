@@ -1,0 +1,27 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 10,
+  "id" : "jv-02",
+  "language" : "java",
+  "license" : "MIT",
+  "note" : "multi-file Java: interest rounding mode (Account) and transfer debit sign (Bank)",
+  "prompt" : "The automated tests of this Java project currently fail. Run `.\/scripts\/javatest.sh` from the repository root (it compiles src\/ with javac and runs the tests with a tiny built-in runner; there is no Maven, no JUnit and no network). Change the non-test source under src\/main so that the whole suite passes. The tests, the runner under src\/test and scripts\/ are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-java",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 3237,
+  "test_paths" : [
+    "src\/test",
+    "scripts"
+  ],
+  "test_sha256" : {
+    "scripts\/javatest.sh" : "94490e91298ff5a65dea2bcaf1bbf8ad811c45923cafb3e15a5e8c21195b1940",
+    "src\/test\/java\/mini\/Assert.java" : "441a7d4ac4a59de647380b4da83d7f7f224ae2c1a817c10b3ecd1befff84777a",
+    "src\/test\/java\/mini\/MiniTest.java" : "2c71975c8f66cf1e93df78e39786f940f267f9857fe3de9e3fa102b04132fa6f",
+    "src\/test\/java\/tests\/AllTests.java" : "1a431a82f6c278e706124a380e7bc3a8aaca013e5e243b17f23227b1317a3c13",
+    "src\/test\/java\/tests\/BankTest.java" : "3a83b96770c4bff7007890088cbbc0792bd77539aff8dc5ef09cb62da7d48ebc"
+  },
+  "tree_sha256" : "711652c18eaa028ecfbf7a7e03d56799cb73525886993ea5a1c7e63780b46594",
+  "verify_cmd" : ".\/scripts\/javatest.sh"
+}

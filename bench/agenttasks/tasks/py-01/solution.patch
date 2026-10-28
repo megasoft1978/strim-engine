@@ -1,0 +1,13 @@
+diff --git a/pageranges/parse.py b/pageranges/parse.py
+index bcb1382..875dd39 100644
+--- a/pageranges/parse.py
++++ b/pageranges/parse.py
+@@ -16,7 +16,7 @@ def parse_ranges(text, max_page=None):
+             lo, hi = _num(a), _num(b)
+             if lo > hi:
+                 raise ValueError(f"reversed range: {item}")
+-            pages.update(range(lo, hi))
++            pages.update(range(lo, hi + 1))
+         else:
+             pages.add(_num(item))
+     if max_page is not None and pages and max(pages) > max_page:

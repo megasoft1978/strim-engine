@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 12,
+  "id" : "rs-02",
+  "language" : "rust",
+  "license" : "MIT",
+  "note" : "multi-file Rust: CSV reader (escaped quotes in field.rs, CRLF in record.rs)",
+  "prompt" : "The automated tests of this Rust crate currently fail. Run `cargo test --offline` from the repository root to see the failures (the crate has no dependencies; there is no network). Change the crate's non-test source so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-rust",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2369,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/csv.rs" : "bcf5c6c8ac9500b606a2c08a713e06982f0a1142e33f5f4d19aa09189202e2f0"
+  },
+  "tree_sha256" : "908edff687945522a4675e857194502c52e3b8d1e2d5c22af7bc399038f7d8c1",
+  "verify_cmd" : "cargo test --offline --quiet"
+}

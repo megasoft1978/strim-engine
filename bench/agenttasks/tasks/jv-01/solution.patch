@@ -1,0 +1,13 @@
+diff --git a/src/main/java/textwrap/Wrapper.java b/src/main/java/textwrap/Wrapper.java
+index 22ad55e..39fa705 100644
+--- a/src/main/java/textwrap/Wrapper.java
++++ b/src/main/java/textwrap/Wrapper.java
+@@ -22,7 +22,7 @@ public final class Wrapper {
+                 if (word.isEmpty()) continue;
+                 if (cur.length() == 0) {
+                     cur.append(word);
+-                } else if (cur.length() + 1 + word.length() < width) {
++                } else if (cur.length() + 1 + word.length() <= width) {
+                     cur.append(' ').append(word);
+                 } else {
+                     lines.add(cur.toString());

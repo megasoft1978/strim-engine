@@ -1,0 +1,11 @@
+BYTES layer_weights=13.697 GB lm_head=0.715 GB total=14.412 GB -> roofline@530GB/s 27.19 ms
+TOP ctx=4096 cfg=B4 kind=full build=26.25 eval=15.59 total_min=42.16 ms | median eval=15.91 total=42.47
+TOP ctx=4096 cfg=B4 kind=gdn build=1.46 eval=28.63 total_min=30.13 ms | median eval=28.92 total=30.41
+TOP ctx=4096 cfg=B4 kind=attn build=0.75 eval=11.78 total_min=12.55 ms | median eval=11.92 total=12.69
+TOP ctx=4096 cfg=B4 kind=tail build=0.00 eval=1.51 total_min=1.51 ms | median eval=1.54 total=1.54
+TOP ctx=4096 cfg=B4 kind=embed build=0.01 eval=0.12 total_min=0.12 ms | median eval=0.12 total=0.13
+TOP ctx=4096 cfg=B8 kind=full build=47.75 eval=24.75 total_min=72.76 ms | median eval=24.99 total=73.02
+TOP ctx=4096 cfg=B8 kind=gdn build=3.86 eval=50.00 total_min=53.86 ms | median eval=50.62 total=55.62
+TOP ctx=4096 cfg=B8 kind=attn build=2.33 eval=21.95 total_min=24.49 ms | median eval=22.18 total=25.88
+TOP ctx=4096 cfg=B8 kind=tail build=0.01 eval=2.90 total_min=2.91 ms | median eval=2.99 total=3.01
+TOP ctx=4096 cfg=B8 kind=embed build=0.01 eval=0.11 total_min=0.12 ms | median eval=0.13 total=0.13

@@ -1,0 +1,27 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 10,
+  "id" : "jv-03",
+  "language" : "java",
+  "license" : "MIT",
+  "note" : "Java feature: Inventory remove\/restock\/take\/lowStock\/totalByCategory",
+  "prompt" : "This Java project is a small inventory tracker. src\/test\/java\/tests\/InventoryTest.java already tests behaviour that is not implemented yet: `remove`, `restock`, `take`, `lowStock` and `totalByCategory` on Inventory. Run `.\/scripts\/javatest.sh` from the repository root (it compiles src\/ with javac and runs the tests with a tiny built-in runner; there is no Maven, no JUnit and no network). Implement the feature in src\/main so the whole suite passes. The tests, the runner under src\/test and scripts\/ are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what you changed.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-java",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2737,
+  "test_paths" : [
+    "src\/test",
+    "scripts"
+  ],
+  "test_sha256" : {
+    "scripts\/javatest.sh" : "94490e91298ff5a65dea2bcaf1bbf8ad811c45923cafb3e15a5e8c21195b1940",
+    "src\/test\/java\/mini\/Assert.java" : "441a7d4ac4a59de647380b4da83d7f7f224ae2c1a817c10b3ecd1befff84777a",
+    "src\/test\/java\/mini\/MiniTest.java" : "2c71975c8f66cf1e93df78e39786f940f267f9857fe3de9e3fa102b04132fa6f",
+    "src\/test\/java\/tests\/AllTests.java" : "78028a79e2c1629ae65cb2cba0c820427a2f8921d47bf6c2aaad1f51cfa47289",
+    "src\/test\/java\/tests\/InventoryTest.java" : "222a617f6009b194d33f5420e256e8bcacbb45ac1bad24f71bb3ae22f06353ad"
+  },
+  "tree_sha256" : "e7b1f115612980d22e82a3a919a3ca531f1b4c129d9b2cb30b9566b8d9bb6a9b",
+  "verify_cmd" : ".\/scripts\/javatest.sh"
+}

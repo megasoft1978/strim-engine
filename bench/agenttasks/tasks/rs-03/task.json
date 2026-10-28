@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 10,
+  "id" : "rs-03",
+  "language" : "rust",
+  "license" : "MIT",
+  "note" : "Rust feature: Matrix gains from_rows\/identity\/transpose\/add\/mul with ShapeError and Display; tests already written",
+  "prompt" : "This Rust crate is a tiny dense matrix. tests\/matrix.rs already uses API that is not implemented yet: `Matrix::from_rows`, `Matrix::identity`, `transpose`, `add`, `mul`, a `ShapeError` enum (Empty, Ragged, Mismatch) and `Display` (right-aligned cells, one decimal). Run `cargo test --offline` from the repository root to see what is missing (the crate has no dependencies; there is no network). Implement the feature in src\/ so the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what you changed.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-rust",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1340,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/matrix.rs" : "dc3a21ce1b6a9ca40cfac72d2fab893a552f08de7598847142f2e95ac040801b"
+  },
+  "tree_sha256" : "8540e3b2f74148b9bdfd37513f87c299951af743c86141d703908ab227d79a10",
+  "verify_cmd" : "cargo test --offline --quiet"
+}

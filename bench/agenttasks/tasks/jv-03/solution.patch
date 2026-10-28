@@ -1,0 +1,57 @@
+diff --git a/src/main/java/inventory/Inventory.java b/src/main/java/inventory/Inventory.java
+index 1b5ebcb..431714a 100644
+--- a/src/main/java/inventory/Inventory.java
++++ b/src/main/java/inventory/Inventory.java
+@@ -1,6 +1,9 @@
+ package inventory;
+ 
++import java.util.ArrayList;
++import java.util.Comparator;
+ import java.util.LinkedHashMap;
++import java.util.List;
+ import java.util.Map;
+ import java.util.Optional;
+ 
+@@ -18,4 +21,42 @@ public final class Inventory {
+     public int size() {
+         return items.size();
+     }
++
++    public Optional<Item> remove(String sku) {
++        return Optional.ofNullable(items.remove(sku));
++    }
++
++    /** Adds {@code amount} (> 0) to an existing item and returns the updated item. */
++    public Item restock(String sku, int amount) {
++        if (amount <= 0) throw new IllegalArgumentException("amount must be positive");
++        Item cur = items.get(sku);
++        if (cur == null) throw new IllegalArgumentException("unknown sku " + sku);
++        Item next = cur.withQuantity(cur.quantity + amount);
++        items.put(sku, next);
++        return next;
++    }
++
++    /** Removes {@code amount} from stock; fails (changing nothing) when there is not enough. */
++    public Item take(String sku, int amount) {
++        Item cur = items.get(sku);
++        if (cur == null) throw new IllegalArgumentException("unknown sku " + sku);
++        if (amount > cur.quantity) throw new IllegalStateException("only " + cur.quantity + " of " + sku);
++        Item next = cur.withQuantity(cur.quantity - amount);
++        items.put(sku, next);
++        return next;
++    }
++
++    /** Items with quantity strictly below the threshold, ordered by sku. */
++    public List<Item> lowStock(int threshold) {
++        List<Item> out = new ArrayList<>();
++        for (Item i : items.values()) if (i.quantity < threshold) out.add(i);
++        out.sort(Comparator.comparing(i -> i.sku));
++        return out;
++    }
++
++    public Map<String, Integer> totalByCategory() {
++        Map<String, Integer> totals = new LinkedHashMap<>();
++        for (Item i : items.values()) totals.merge(i.category, i.quantity, Integer::sum);
++        return totals;
++    }
+ }

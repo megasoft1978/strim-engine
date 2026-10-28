@@ -938,18 +938,32 @@ if args.count >= 4, args[1] == "benchlayer" {
     }
 } else if args.count >= 3, args[1] == "benchprefill" {
     // Cold-cache prefill of one chunk; the Swift engine's prefill path, not the product's.
+    // STRIM_OPTIME=1 prints a per-region table for the last rep (fences make it slower than a plain run).
+    // STRIM_OPTIME_MTP=<head dir> also runs the MTP head over each chunk like EngineCore.coldChunk.
+    // STRIM_OPTIME_SWEEP=<n> then fences one region name at a time (n reps each, interleaved with n
+    // unfenced reps) and prints raw/wall pairs so the per-call fence cost can be differenced out.
     do {
         let store = try WeightStore(dir: URL(fileURLWithPath: args[2]))
         let n = args.count >= 4 ? Int(args[3]) ?? 1024 : 1024
         let reps = args.count >= 5 ? Int(args[4]) ?? 3 : 3
         let chunk = args.count >= 6 ? Int(args[5]) ?? n : n  // optional: prefill step size
+        var head: WeightStore? = nil
+        if OpTimer.on, let hd = ProcessInfo.processInfo.environment["STRIM_OPTIME_MTP"], !hd.isEmpty {
+            let h = try WeightStore(dir: URL(fileURLWithPath: hd))
+            h.useIntegratedMTPPrefixIfNeeded()
+            head = h
+        }
         _ = try QwenModel.forwardAll(tokens: [9707], store: store, cache: ModelCache())
+        if OpTimer.on { OpTimer.calibrate() }
         let base: [Int32] = [9707, 1234, 5678, 198, 2, 220, 17, 15]
         var prompt: [Int32] = []
         while prompt.count < n { prompt.append(contentsOf: base) }
         prompt = Array(prompt.prefix(n))
-        for r in 0 ..< reps {
+        func rep() throws -> Double {
             let cache = ModelCache()
+            if OpTimer.on { OpTimer.reset() }
+            let mtp = head == nil ? nil : MTPState()
+            var carry: MLXArray? = nil
             let t0 = Date()
             var start = 0
             var last: MLXArray? = nil
@@ -957,14 +971,219 @@ if args.count >= 4, args[1] == "benchlayer" {
                 let end = min(start + chunk, n)
                 let out = try QwenModel.forwardAll(tokens: Array(prompt[start ..< end]), store: store, cache: cache, lastTokenOnly: true)
                 if end < n { eval(out.logits) } else { last = out.logits }
+                if let head, let mtp {
+                    // Mirrors coldChunk's head work (norm over the chunk, head step, carry, eval of K/V).
+                    let part = Array(prompt[start ..< end]), m = part.count
+                    OpTimer.ctx = "mtp"
+                    let hn = try OpTimer.time("norm", flops: Double(m * 5120) * 4, bytes: Double(m * 5120 * 4),
+                                              inputs: [out.hidden]) {
+                        try store.rmsNorm("language_model.model.norm", out.hidden)
+                    }
+                    let isLast = end == n
+                    var htoks = start == 0 ? Array(prompt[1 ..< end]) : part
+                    var hid = carry.map { concatenated([$0, hn[0..., 0 ..< (m - 1), 0...]], axis: 1) }
+                        ?? hn[0..., 0 ..< (m - 1), 0...]
+                    if isLast {
+                        htoks.append(prompt[0])
+                        hid = carry.map { concatenated([$0, hn], axis: 1) } ?? hn
+                    }
+                    let inner0 = OpTimer.rawNs(ctx: "mtp")
+                    let s0 = OpTimer.nowNanos()
+                    let ho = try MTP.step(tokens: htoks, hidden: hid, target: store, head: head, state: mtp)
+                    eval(ho)
+                    let total = OpTimer.nowNanos() &- s0
+                    let inner = OpTimer.rawNs(ctx: "mtp") &- inner0
+                    OpTimer.recordRegion("mtp_other", ns: total > inner ? total - inner : 0, ctx: "mtp")
+                    carry = hn[0..., (m - 1) ..< m, 0...]
+                    if let k = mtp.attention.keys, let v = mtp.attention.values { eval(k, v, carry!) }
+                    OpTimer.ctx = "main"
+                }
                 start = end
             }
             eval(last!)
-            let dt = Date().timeIntervalSince(t0)
+            return Date().timeIntervalSince(t0)
+        }
+        var lastDt = 0.0
+        for r in 0 ..< reps {
+            let dt = try rep()
+            lastDt = dt
             print(String(format: "n=%d chunk=%d %.2f s  %.0f tok/s  (rep %d)", n, chunk, dt, Double(n) / dt, r))
+        }
+        if OpTimer.on {
+            print("\nSTRIM_OPTIME report (n=\(n) chunk=\(chunk), last rep, MTP head \(head == nil ? "off" : "on"))")
+            print(OpTimer.report(wallSeconds: lastDt, tokens: n))
+        }
+        if OpTimer.on, let sw = ProcessInfo.processInfo.environment["STRIM_OPTIME_SWEEP"].flatMap({ Int($0) }), sw > 0 {
+            var names: [String] = []
+            for r in OpTimer.rows() where !names.contains(r.name) && r.name != "mtp_other" { names.append(r.name) }
+            let calls = Dictionary(OpTimer.rows().map { ($0.name, $0.calls) }, uniquingKeysWith: +)
+            if let only = ProcessInfo.processInfo.environment["STRIM_OPTIME_SWEEP_NAMES"], !only.isEmpty {
+                let keep = Set(only.split(separator: ",").map(String.init))
+                names = names.filter { keep.contains($0) }
+            }
+            print("SWEEP n=\(n) chunk=\(chunk) reps=\(sw) fence_us=\(Int(OpTimer.fenceNs / 1e3))")
+            print("SWEEP_HEADER name calls raw_ms wall_x_ms wall_base_ms")
+            for name in names {
+                OpTimer.only = []
+                var bw: [Double] = []
+                for _ in 0 ..< sw { bw.append(try rep()) }
+                OpTimer.only = [name]
+                var xw: [Double] = [], raw: [Double] = []
+                for _ in 0 ..< sw {
+                    xw.append(try rep())
+                    raw.append(OpTimer.rows().filter { $0.name == name }.reduce(0) { $0 + $1.rawMs })
+                }
+                OpTimer.only = []
+                bw.append(try rep())   // trailing base brackets drift: base = mean of before/after
+                let b = (bw.dropLast().reduce(0, +) / Double(sw) + bw.last!) / 2
+                print(String(format: "SWEEP %@ %d %.2f %.2f %.2f", name, calls[name] ?? 0,
+                             raw.reduce(0, +) / Double(sw), xw.reduce(0, +) / Double(sw) * 1e3, b * 1e3))
+            }
+            OpTimer.only = nil
         }
     } catch {
         FileHandle.standardError.write(Data("benchprefill failed: \(error)\n".utf8)); exit(1)
+    }
+} else if args.count >= 2, args[1] == "benchgemm" {
+    // GEMM roofline microbench: bf16 8192^3 plus the real 4-bit qmm shapes of the 27B at M in {512,1024,4096}.
+    // Pipelined = R independent calls evaluated together (what the plain run sees); fenced = eval per call
+    // (what OpTimer sees). Optional args[2] = comma list of M values. Weights are random; only speed matters.
+    let ms = args.count >= 3 ? args[2].split(separator: ",").compactMap { Int($0) } : [512, 1024, 4096]
+    func now() -> Double { Double(DispatchTime.now().uptimeNanoseconds) / 1e9 }
+    func line(_ name: String, _ m: Int, _ n: Int, _ k: Int, _ run: () -> MLXArray, outBytes: Int, wBytes: Int) {
+        let flops = 2.0 * Double(m) * Double(n) * Double(k)
+        let r = max(3, min(24, Int(2.5e9 / Double(max(outBytes, 1)))))
+        eval(run()); eval(run())
+        var pip: [Double] = [], fen: [Double] = []
+        for _ in 0 ..< 3 {
+            let t0 = now()
+            var outs: [MLXArray] = []
+            for _ in 0 ..< r { outs.append(run()) }
+            eval(outs)
+            pip.append((now() - t0) / Double(r))
+            outs = []
+            let t1 = now()
+            for _ in 0 ..< r { eval(run()) }
+            fen.append((now() - t1) / Double(r))
+        }
+        pip.sort(); fen.sort()
+        let tp = pip[1], tf = fen[1]
+        print(String(format: "GEMM %@ M=%d N=%d K=%d  pipelined %.3f ms %.1f TF/s %.0f GB/s(w)  fenced %.3f ms %.1f TF/s  fence %.3f ms",
+                     name, m, n, k, tp * 1e3, flops / tp / 1e12, Double(wBytes) / tp / 1e9, tf * 1e3, flops / tf / 1e12, (tf - tp) * 1e3))
+    }
+    MLXRandom.seed(1)
+    do {
+        let a = MLXRandom.normal([8192, 8192]).asType(.bfloat16)
+        let b = MLXRandom.normal([8192, 8192]).asType(.bfloat16)
+        eval(a, b)
+        line("bf16-dense", 8192, 8192, 8192, { matmul(a, b) }, outBytes: 8192 * 8192 * 2, wBytes: 8192 * 8192 * 2)
+    }
+    let shapes: [(String, Int, Int)] = [
+        ("mlp.gateup", 34816, 5120), ("mlp.down", 5120, 17408), ("gdn.in_proj_qkv", 10240, 5120),
+        ("gdn.in_proj_z", 6144, 5120), ("gdn.out_proj", 5120, 6144), ("attn.q_proj", 12288, 5120),
+        ("attn.kv_proj", 1024, 5120), ("attn.o_proj", 5120, 6144),
+    ]
+    for (name, n, k) in shapes {
+        let w = MLXRandom.normal([n, k]).asType(.bfloat16)
+        let (wq, sc, bi0) = quantized(w, groupSize: 64, bits: 4)
+        let bi = bi0!
+        eval(wq, sc, bi)
+        let wBytes = wq.nbytes + sc.nbytes + bi.nbytes
+        for m in ms {
+            let x = MLXRandom.normal([1, m, k]).asType(.bfloat16)
+            eval(x)
+            line("qmm4 " + name, m, n, k, {
+                quantizedMatmul(x, wq, scales: sc, biases: bi, transpose: true, groupSize: 64, bits: 4)
+            }, outBytes: m * n * 2, wBytes: wBytes)
+        }
+        // bf16 reference at M=1024 for the same shape (dequantized weights), to read qmm vs dense.
+        let wd = dequantized(wq, scales: sc, biases: bi, groupSize: 64, bits: 4)
+        let xd = MLXRandom.normal([1, 1024, k]).asType(.bfloat16)
+        eval(wd, xd)
+        line("bf16 " + name, 1024, n, k, { matmul(xd, wd.transposed(-1, -2)) }, outBytes: 1024 * n * 2, wBytes: n * k * 2)
+    }
+} else if args.count >= 2, args[1] == "benchopmicro" {
+    // Non-GEMM op microbench at the chunk shapes of the 27B (S=1024): pipelined (R independent calls, one eval,
+    // the plain run's regime) vs fenced (eval per call, OpTimer's regime). Random data; only speed matters.
+    func now() -> Double { Double(DispatchTime.now().uptimeNanoseconds) / 1e9 }
+    func line(_ name: String, _ run: () -> [MLXArray], r: Int = 24) {
+        eval(run()); eval(run())
+        var pip: [Double] = [], fen: [Double] = []
+        for _ in 0 ..< 5 {
+            let t0 = now()
+            var outs: [MLXArray] = []
+            for _ in 0 ..< r { outs.append(contentsOf: run()) }
+            eval(outs)
+            pip.append((now() - t0) / Double(r))
+            outs = []
+            let t1 = now()
+            for _ in 0 ..< r { eval(run()) }
+            fen.append((now() - t1) / Double(r))
+        }
+        pip.sort(); fen.sort()
+        print(String(format: "OP %@  pipelined %.4f ms  fenced %.4f ms", name, pip[2] * 1e3, fen[2] * 1e3))
+    }
+    MLXRandom.seed(3)
+    let S = 1024, H = 5120
+    func bf(_ shape: [Int], _ scale: Float = 1) -> MLXArray { (MLXRandom.normal(shape) * scale).asType(.bfloat16) }
+    let q = bf([1, S, 16, 128], 0.05), k = bf([1, S, 16, 128], 0.05), v = bf([1, S, 48, 128], 0.5)
+    let g = exp(-MLXRandom.uniform(low: 0.001, high: 0.2, [1, S, 48]))
+    let beta = sigmoid(MLXRandom.normal([1, S, 48]))
+    let ssm = (MLXRandom.normal([1, 48, 128, 128]) * 0.1).asType(.float32)
+    let convIn = bf([1, S + 3, 10240]), convW = bf([10240, 4])
+    let ones = MLXArray.ones([128], dtype: .bfloat16)
+    let aLog = MLXRandom.normal([48]), dtBias = MLXRandom.normal([48])
+    let bProj = bf([1, S, 48]), aProj = bf([1, S, 48])
+    let z = bf([1, S, 48, 128]), yRec = bf([1, S, 48, 128]), normW = MLXArray.ones([128], dtype: .bfloat16)
+    let convOut = bf([1, S, 10240])
+    let hid = bf([1, S, H]), hidW = MLXArray.ones([H], dtype: .bfloat16)
+    let gu = bf([1, S, 34816])
+    eval(q, k, v, g, beta, ssm, convIn, convW, ones, aLog, dtBias, bProj, aProj, z, yRec, normW, convOut, hid, hidW, gu)
+    line("gdn.rec", { let r = GDNMetal.runBlocked(q: q, k: k, v: v, g: g, beta: beta, ssm: ssm); return [r.y, r.ssm] })
+    line("gdn.conv", { [GDNMetal.convSilu(convIn: convIn, weight: convW)] })
+    line("gdn.qknorm_bg", {
+        let qr = convOut[0..., 0..., 0 ..< 2048].reshaped([1, S, 16, 128])
+        let kr = convOut[0..., 0..., 2048 ..< 4096].reshaped([1, S, 16, 128])
+        let a = MLXFast.rmsNorm(qr, weight: ones, eps: 1e-6) * Float(0.0078125)
+        let b = MLXFast.rmsNorm(kr, weight: ones, eps: 1e-6) * Float(0.08838835)
+        let (be, ga) = Fused.betaG(bProj, aProj, aLog: aLog, dtBias: dtBias)
+        return [a, b, be, ga]
+    })
+    line("gdn.norm_gate", { [Fused.gatedNorm(z, MLXFast.rmsNorm(yRec, weight: normW, eps: 1e-6))] })
+    do {
+        let (wq, sc, bi0) = quantized(MLXRandom.normal([48, H]).asType(.bfloat16), groupSize: 64, bits: 4)
+        let bi = bi0!
+        eval(wq, sc, bi)
+        line("gdn.proj_ba(2 calls)", {
+            [quantizedMatmul(hid, wq, scales: sc, biases: bi, transpose: true, groupSize: 64, bits: 4),
+             quantizedMatmul(hid, wq, scales: sc, biases: bi, transpose: true, groupSize: 64, bits: 4)]
+        })
+    }
+    line("norm", { [MLXFast.rmsNorm(hid, weight: hidW, eps: 1e-6)] })
+    line("resid", { [hid + hid] })
+    line("mlp.act", { [Fused.swiglu(gu[0..., 0..., 0 ..< 17408], gu[0..., 0..., 17408 ..< 34816])] })
+    let aq = bf([1, S, 24, 2, 256])
+    let kp = bf([1, S, 4, 256]), vp = bf([1, S, 4, 256])
+    let qn = MLXArray.ones([256], dtype: .bfloat16)
+    let flat = bf([1, S, 6144]), gate = bf([1, S, 6144])
+    eval(aq, kp, vp, qn, flat, gate)
+    line("attn.qknorm", {
+        let h = aq.split(parts: 2, axis: 3)
+        let q0 = h[0].squeezed(axis: 3), gt = h[1].squeezed(axis: 3).reshaped([1, S, 6144])
+        return [MLXFast.rmsNorm(q0, weight: qn, eps: 1e-6).transposed(0, 2, 1, 3),
+                MLXFast.rmsNorm(kp, weight: qn, eps: 1e-6).transposed(0, 2, 1, 3), gt]
+    })
+    line("attn.gate", { [Fused.attnGate(flat, gate)] })
+    for P in [0, 2048, 8192, 15360] {
+        let qq = bf([1, 24, S, 256]), kk = bf([1, 4, P + S, 256]), vv = bf([1, 4, P + S, 256])
+        eval(qq, kk, vv)
+        line("attn.rope(offset=\(P))", {
+            [MLXFast.RoPE(qq, dimensions: 64, traditional: false, base: 10_000_000, scale: 1.0, offset: P),
+             MLXFast.RoPE(kk[0..., 0..., 0 ..< S, 0...], dimensions: 64, traditional: false, base: 10_000_000, scale: 1.0, offset: P)]
+        })
+        line("attn.sdpa(prefix=\(P))", {
+            [MLXFast.scaledDotProductAttention(queries: qq, keys: kk, values: vv, scale: 0.0625, mask: .causal)]
+        }, r: 8)
     }
 } else if args.count >= 3, args[1] == "benchfuse" {
     // The GDN layer's four projections run at ~225-240 GB/s while equally sized

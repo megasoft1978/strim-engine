@@ -1,0 +1,65 @@
+diff --git a/Sources/Ledger/Account.swift b/Sources/Ledger/Account.swift
+index f608b22..6fa7ffe 100644
+--- a/Sources/Ledger/Account.swift
++++ b/Sources/Ledger/Account.swift
+@@ -12,7 +12,7 @@ public struct Account {
+     /// Rejects a transaction whose id is already posted.
+     @discardableResult
+     public mutating func post(_ t: Transaction) -> Bool {
+-        if transactions.contains(where: { $0.memo == t.memo }) { return false }
++        if transactions.contains(where: { $0.id == t.id }) { return false }
+         transactions.append(t)
+         return true
+     }
+@@ -22,7 +22,7 @@ public struct Account {
+     /// The transaction with the largest magnitude (earliest wins a tie).
+     public func largest() -> Transaction? {
+         var best: Transaction?
+-        for t in transactions where best == nil || t.amount > best!.amount { best = t }
++        for t in transactions where best == nil || abs(t.amount.cents) > abs(best!.amount.cents) { best = t }
+         return best
+     }
+ }
+diff --git a/Sources/Ledger/Money.swift b/Sources/Ledger/Money.swift
+index 15240ec..db57fef 100644
+--- a/Sources/Ledger/Money.swift
++++ b/Sources/Ledger/Money.swift
+@@ -13,11 +13,11 @@ public struct Money: Equatable, Comparable {
+         if parts.count == 2 {
+             var f = String(parts[1])
+             guard f.count <= 2, f.allSatisfy({ $0.isNumber }) else { return nil }
+-            while f.count < 2 { f = "0" + f }
++            while f.count < 2 { f += "0" }
+             frac = Int(f)!
+         }
+         let total = whole * 100 + frac
+-        cents = negative && whole > 0 ? -total : total
++        cents = negative ? -total : total
+     }
+ 
+     public static func < (a: Money, b: Money) -> Bool { a.cents < b.cents }
+diff --git a/Sources/Ledger/Report.swift b/Sources/Ledger/Report.swift
+index 36df9f0..efa3bcd 100644
+--- a/Sources/Ledger/Report.swift
++++ b/Sources/Ledger/Report.swift
+@@ -5,17 +5,17 @@ public enum Report {
+         let digits = Array(String(c / 100))
+         var grouped = ""
+         for (i, ch) in digits.enumerated() {
+-            if i > 0 && i % 3 == 0 { grouped += "," }
++            if i > 0 && (digits.count - i) % 3 == 0 { grouped += "," }
+             grouped.append(ch)
+         }
+         let frac = c % 100
+-        let f = "\(frac)"
++        let f = frac < 10 ? "0\(frac)" : "\(frac)"
+         return (m.cents < 0 ? "-" : "") + "$" + grouped + "." + f
+     }
+ 
+     /// One line per transaction ordered by id, then the balance.
+     public static func statement(_ a: Account) -> [String] {
+-        var lines = a.transactions.map { "\($0.id): \(format($0.amount)) \($0.memo)" }
++        var lines = a.transactions.sorted { $0.id < $1.id }.map { "\($0.id): \(format($0.amount)) \($0.memo)" }
+         lines.append("Balance: " + format(a.balance))
+         return lines
+     }

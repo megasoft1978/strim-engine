@@ -9,10 +9,12 @@ import StrimJobs
 
 private struct Boom: Error, CustomStringConvertible { var description: String { "weights missing" } }
 
-private let readRoutes = [("GET", "/v1/strim/status"), ("GET", "/v1/strim/events"), ("GET", "/v1/strim/jobs"), ("GET", "/v1/strim/jobs/j_abcdefgh23")]
+private let readRoutes = [("GET", "/v1/strim/status"), ("GET", "/v1/strim/events"), ("GET", "/v1/strim/jobs"), ("GET", "/v1/strim/jobs/j_abcdefgh23"),
+                            ("GET", "/v1/strim/models"), ("GET", "/v1/strim/pack")]
 private let writeRoutes = [("POST", "/v1/strim/load"), ("POST", "/v1/strim/unload"), ("POST", "/v1/strim/jobs/approve"),
                            ("POST", "/v1/strim/chat/open"), ("POST", "/v1/strim/chat/append"), ("POST", "/v1/strim/chat/cancel"),
-                           ("POST", "/v1/strim/chat/close"), ("DELETE", "/v1/strim/chat/j_abcdefgh23")]
+                           ("POST", "/v1/strim/chat/close"),
+                           ("POST", "/v1/strim/pause"), ("POST", "/v1/strim/resume"), ("POST", "/v1/strim/jobs/cancel"), ("DELETE", "/v1/strim/chat/j_abcdefgh23")]
 
 @Suite("Control routes: auth and guards", .serialized)
 struct ControlGuardTests {

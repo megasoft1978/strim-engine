@@ -11,6 +11,11 @@ public actor FakeControlClient: StrimControlClient {
     public private(set) var calls: [String] = []
     /// Full approval requests (including `patchSHA256`), in order.
     public private(set) var approvals: [PatchApproval] = []
+    public private(set) var pauseState = JobsPauseState(paused: false)
+    public private(set) var modelList = ModelList(models: [])
+    public private(set) var packValue = PackInfo()
+    /// Full chat append requests (including `enableThinking`), in order.
+    public private(set) var appends: [ChatAppendRequest] = []
     /// When set, the next call to any method throws it (then clears).
     public var failNext: Error?
 
@@ -24,11 +29,14 @@ public actor FakeControlClient: StrimControlClient {
 
     public static let sampleStatus = HostStatus(
         state: .ready, model: "Qwen3.8-27B", mtp: "mtp-head",
-        memory: MemoryStats(weightsGB: 15.2, prefixTrieGB: 2, mlxCacheGB: 1, headroomGB: 20))
+        memory: MemoryStats(weightsGB: 15.2, prefixTrieGB: 2, mlxCacheGB: 1, headroomGB: 20), jobsPaused: false,
+        quantFingerprint: "0123456789abcdef/fedcba9876543210")
 
     public func setStatus(_ s: HostStatus) { statusValue = s }
     public func setJobs(_ j: [JobSummary]) { jobList = j }
     public func setDetail(_ d: JobDetail) { details[d.id] = d }
+    public func setModels(_ m: [LocalModel]) { modelList = ModelList(models: m) }
+    public func setPack(_ p: PackInfo) { packValue = p }
     public func setFailNext(_ e: Error?) { failNext = e }
 
     /// Events emitted before any subscriber exists are replayed to the first one.
@@ -83,9 +91,30 @@ public actor FakeControlClient: StrimControlClient {
         var s = session; s.cwd = request.cwd; s.profile = request.profile; return s
     }
     public func chatAppend(_ request: ChatAppendRequest) async throws {
-        try check(); calls.append("chat_append:\(request.sessionID):\(request.text)")
+        try check(); calls.append("chat_append:\(request.sessionID):\(request.text)"); appends.append(request)
     }
     public func chatCancel(_ request: ChatCancelRequest) async throws {
         try check(); calls.append("chat_cancel:\(request.sessionID)")
     }
+
+    public func pauseJobs(_ request: PauseRequest) async throws -> JobsPauseState {
+        try check(); calls.append("pause:\(request.cancelRunning)")
+        pauseState.paused = true; statusValue.jobsPaused = true
+        return pauseState
+    }
+    public func resumeJobs() async throws -> JobsPauseState {
+        try check(); calls.append("resume")
+        pauseState.paused = false; statusValue.jobsPaused = false
+        return pauseState
+    }
+    public func cancelJob(_ request: JobCancelRequest) async throws -> JobCancelResult {
+        try check(); calls.append("cancel_job:\(request.jobID)")
+        guard let i = jobList.firstIndex(where: { $0.id == request.jobID }) else { throw APIError(code: "not_found", message: "no job") }
+        let was = jobList[i].status
+        let terminal: [JobStatusDTO] = [.done, .failed, .cancelled, .limit]
+        if !terminal.contains(was) { jobList[i].status = .cancelled }
+        return JobCancelResult(jobID: request.jobID, status: jobList[i].status, cancelled: !terminal.contains(was))
+    }
+    public func models() async throws -> ModelList { try check(); return modelList }
+    public func pack() async throws -> PackInfo { try check(); return packValue }
 }

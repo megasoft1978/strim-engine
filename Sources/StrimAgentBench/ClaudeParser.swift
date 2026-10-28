@@ -17,6 +17,9 @@ public struct ClaudeRun: Sendable, Equatable {
     public var delegations = 0
     /// `strim_job` calls.
     public var polls = 0
+    /// strim_task/strim_ask calls the host refused for a cwd/path/allowed-root reason. Infrastructure, not a delegation
+    /// outcome: they are removed from `delegations` and never trigger the redo check.
+    public var pathRefusals = 0
     /// nil: no `git apply` attempted. true/false: last real apply succeeded/failed.
     public var patchApplied: Bool?
     /// The parent edited files after a delegation that did not come back verified.
@@ -42,6 +45,12 @@ public enum ClaudeParser {
             return arr.compactMap { $0["text"] as? String }.joined(separator: "\n")
         }
         return ""
+    }
+
+    /// The host's cwd policy refusals (`HostPolicy.violation`): outside allowed roots, cwd missing, credential directory.
+    public static func isPathRefusal(_ body: String) -> Bool {
+        body.contains("is outside the allowed roots") || body.contains("cwd is required and must be inside an allowed root")
+            || (body.hasPrefix("cwd ") && body.contains(" rejected: "))
     }
 
     public static func parse(_ text: String) -> ClaudeRun {
@@ -84,6 +93,11 @@ public enum ClaudeParser {
                     }
                     if p.name == "Bash", p.command.contains("git apply"), !p.command.contains("--check") {
                         run.patchApplied = !isErr
+                    }
+                    if (p.name.hasSuffix("strim_task") || p.name.hasSuffix("strim_ask")), isPathRefusal(body) {
+                        run.pathRefusals += 1
+                        run.delegations = max(0, run.delegations - 1)
+                        continue
                     }
                     if p.name.hasSuffix("strim_task") || p.name.hasSuffix("strim_job") {
                         // A terminal reply that is not DONE ... verify=verified means the parent must do it alone.

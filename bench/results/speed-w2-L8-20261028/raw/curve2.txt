@@ -1,0 +1,508 @@
+# curve: shape M ms/layer GB/s(weights once) ratio_vs_M1 ms_per_row
+CURVE gdn in_proj_qkv M=1 0.0692 ms 426 GB/s x1.00 0.0692 ms/row
+CURVE gdn in_proj_qkv M=2 0.0699 ms 422 GB/s x1.01 0.0349 ms/row
+CURVE gdn in_proj_qkv M=3 0.0710 ms 415 GB/s x1.03 0.0237 ms/row
+CURVE gdn in_proj_qkv M=4 0.0764 ms 386 GB/s x1.10 0.0191 ms/row
+CURVE gdn in_proj_qkv M=5 0.0841 ms 351 GB/s x1.21 0.0168 ms/row
+CURVE gdn in_proj_qkv M=6 0.1096 ms 269 GB/s x1.58 0.0183 ms/row
+CURVE gdn in_proj_qkv M=7 0.1297 ms 227 GB/s x1.87 0.0185 ms/row
+CURVE gdn in_proj_qkv M=8 0.1311 ms 225 GB/s x1.89 0.0164 ms/row
+CURVE gdn in_proj_qkv M=10 0.1574 ms 187 GB/s x2.27 0.0157 ms/row
+CURVE gdn in_proj_qkv M=12 0.1966 ms 150 GB/s x2.84 0.0164 ms/row
+CURVE gdn in_proj_qkv M=16 0.1193 ms 247 GB/s x1.72 0.0075 ms/row
+CURVE gdn in_proj_qkv M=24 0.1251 ms 236 GB/s x1.81 0.0052 ms/row
+CURVE gdn in_proj_qkv M=32 0.1226 ms 241 GB/s x1.77 0.0038 ms/row
+CURVE gdn in_proj_qkv M=64 0.1700 ms 173 GB/s x2.46 0.0027 ms/row
+CURVE gdn in_proj_z M=1 0.0502 ms 352 GB/s x1.00 0.0502 ms/row
+CURVE gdn in_proj_z M=2 0.0515 ms 344 GB/s x1.02 0.0257 ms/row
+CURVE gdn in_proj_z M=3 0.0510 ms 347 GB/s x1.02 0.0170 ms/row
+CURVE gdn in_proj_z M=4 0.0542 ms 326 GB/s x1.08 0.0136 ms/row
+CURVE gdn in_proj_z M=5 0.0590 ms 300 GB/s x1.17 0.0118 ms/row
+CURVE gdn in_proj_z M=6 0.0740 ms 239 GB/s x1.47 0.0123 ms/row
+CURVE gdn in_proj_z M=7 0.0847 ms 209 GB/s x1.69 0.0121 ms/row
+CURVE gdn in_proj_z M=8 0.0851 ms 208 GB/s x1.69 0.0106 ms/row
+CURVE gdn in_proj_z M=10 0.0978 ms 181 GB/s x1.95 0.0098 ms/row
+CURVE gdn in_proj_z M=12 0.1177 ms 150 GB/s x2.34 0.0098 ms/row
+CURVE gdn in_proj_z M=16 0.1975 ms 90 GB/s x3.93 0.0123 ms/row
+CURVE gdn in_proj_z M=24 0.2003 ms 88 GB/s x3.99 0.0083 ms/row
+CURVE gdn in_proj_z M=32 0.1971 ms 90 GB/s x3.92 0.0062 ms/row
+CURVE gdn in_proj_z M=64 0.1132 ms 156 GB/s x2.25 0.0018 ms/row
+CURVE gdn out_proj M=1 0.0534 ms 332 GB/s x1.00 0.0534 ms/row
+CURVE gdn out_proj M=2 0.0514 ms 344 GB/s x0.96 0.0257 ms/row
+CURVE gdn out_proj M=3 0.0520 ms 340 GB/s x0.97 0.0173 ms/row
+CURVE gdn out_proj M=4 0.0546 ms 324 GB/s x1.02 0.0137 ms/row
+CURVE gdn out_proj M=5 0.0587 ms 301 GB/s x1.10 0.0117 ms/row
+CURVE gdn out_proj M=6 0.0750 ms 236 GB/s x1.41 0.0125 ms/row
+CURVE gdn out_proj M=7 0.0836 ms 212 GB/s x1.57 0.0119 ms/row
+CURVE gdn out_proj M=8 0.0866 ms 204 GB/s x1.62 0.0108 ms/row
+CURVE gdn out_proj M=10 0.0968 ms 183 GB/s x1.81 0.0097 ms/row
+CURVE gdn out_proj M=12 0.1187 ms 149 GB/s x2.22 0.0099 ms/row
+CURVE gdn out_proj M=16 0.1919 ms 92 GB/s x3.59 0.0120 ms/row
+CURVE gdn out_proj M=24 0.1954 ms 91 GB/s x3.66 0.0081 ms/row
+CURVE gdn out_proj M=32 0.1927 ms 92 GB/s x3.61 0.0060 ms/row
+CURVE gdn out_proj M=64 0.1174 ms 151 GB/s x2.20 0.0018 ms/row
+CURVE attn q_proj M=1 0.0798 ms 444 GB/s x1.00 0.0798 ms/row
+CURVE attn q_proj M=2 0.0789 ms 449 GB/s x0.99 0.0394 ms/row
+CURVE attn q_proj M=3 0.0814 ms 435 GB/s x1.02 0.0271 ms/row
+CURVE attn q_proj M=4 0.0879 ms 403 GB/s x1.10 0.0220 ms/row
+CURVE attn q_proj M=5 0.0970 ms 365 GB/s x1.22 0.0194 ms/row
+CURVE attn q_proj M=6 0.1284 ms 276 GB/s x1.61 0.0214 ms/row
+CURVE attn q_proj M=7 0.1585 ms 223 GB/s x1.99 0.0226 ms/row
+CURVE attn q_proj M=8 0.1633 ms 217 GB/s x2.05 0.0204 ms/row
+CURVE attn q_proj M=10 0.2021 ms 175 GB/s x2.53 0.0202 ms/row
+CURVE attn q_proj M=12 0.2515 ms 141 GB/s x3.15 0.0210 ms/row
+CURVE attn q_proj M=16 0.1389 ms 255 GB/s x1.74 0.0087 ms/row
+CURVE attn q_proj M=24 0.1463 ms 242 GB/s x1.83 0.0061 ms/row
+CURVE attn q_proj M=32 0.1452 ms 244 GB/s x1.82 0.0045 ms/row
+CURVE attn q_proj M=64 0.1991 ms 178 GB/s x2.50 0.0031 ms/row
+CURVE attn k_proj M=1 0.0211 ms 140 GB/s x1.00 0.0211 ms/row
+CURVE attn k_proj M=2 0.0217 ms 136 GB/s x1.03 0.0109 ms/row
+CURVE attn k_proj M=3 0.0225 ms 131 GB/s x1.06 0.0075 ms/row
+CURVE attn k_proj M=4 0.0232 ms 127 GB/s x1.10 0.0058 ms/row
+CURVE attn k_proj M=5 0.0255 ms 116 GB/s x1.21 0.0051 ms/row
+CURVE attn k_proj M=6 0.0275 ms 107 GB/s x1.30 0.0046 ms/row
+CURVE attn k_proj M=7 0.0299 ms 99 GB/s x1.41 0.0043 ms/row
+CURVE attn k_proj M=8 0.0286 ms 103 GB/s x1.35 0.0036 ms/row
+CURVE attn k_proj M=10 0.0305 ms 97 GB/s x1.44 0.0031 ms/row
+CURVE attn k_proj M=12 0.0357 ms 82 GB/s x1.69 0.0030 ms/row
+CURVE attn k_proj M=16 0.0508 ms 58 GB/s x2.40 0.0032 ms/row
+CURVE attn k_proj M=24 0.0526 ms 56 GB/s x2.49 0.0022 ms/row
+CURVE attn k_proj M=32 0.0512 ms 58 GB/s x2.43 0.0016 ms/row
+CURVE attn k_proj M=64 0.0794 ms 37 GB/s x3.76 0.0012 ms/row
+CURVE attn o_proj M=1 0.0498 ms 356 GB/s x1.00 0.0498 ms/row
+CURVE attn o_proj M=2 0.0519 ms 341 GB/s x1.04 0.0259 ms/row
+CURVE attn o_proj M=3 0.0541 ms 327 GB/s x1.09 0.0180 ms/row
+CURVE attn o_proj M=4 0.0581 ms 304 GB/s x1.17 0.0145 ms/row
+CURVE attn o_proj M=5 0.0630 ms 281 GB/s x1.27 0.0126 ms/row
+CURVE attn o_proj M=6 0.0790 ms 224 GB/s x1.59 0.0132 ms/row
+CURVE attn o_proj M=7 0.0916 ms 193 GB/s x1.84 0.0131 ms/row
+CURVE attn o_proj M=8 0.0907 ms 195 GB/s x1.82 0.0113 ms/row
+CURVE attn o_proj M=10 0.1015 ms 174 GB/s x2.04 0.0101 ms/row
+CURVE attn o_proj M=12 0.1219 ms 145 GB/s x2.45 0.0102 ms/row
+CURVE attn o_proj M=16 0.1956 ms 90 GB/s x3.93 0.0122 ms/row
+CURVE attn o_proj M=24 0.1979 ms 89 GB/s x3.98 0.0082 ms/row
+CURVE attn o_proj M=32 0.1978 ms 89 GB/s x3.97 0.0062 ms/row
+CURVE attn o_proj M=64 0.1226 ms 144 GB/s x2.46 0.0019 ms/row
+CURVE mlp gate+up fused M=1 0.1890 ms 531 GB/s x1.00 0.1890 ms/row
+CURVE mlp gate+up fused M=2 0.1901 ms 527 GB/s x1.01 0.0951 ms/row
+CURVE mlp gate+up fused M=3 0.1949 ms 515 GB/s x1.03 0.0650 ms/row
+CURVE mlp gate+up fused M=4 0.2189 ms 458 GB/s x1.16 0.0547 ms/row
+CURVE mlp gate+up fused M=5 0.2776 ms 361 GB/s x1.47 0.0555 ms/row
+CURVE mlp gate+up fused M=6 0.4457 ms 225 GB/s x2.36 0.0743 ms/row
+CURVE mlp gate+up fused M=7 0.6105 ms 164 GB/s x3.23 0.0872 ms/row
+CURVE mlp gate+up fused M=8 0.6780 ms 148 GB/s x3.59 0.0848 ms/row
+CURVE mlp gate+up fused M=10 0.7401 ms 135 GB/s x3.92 0.0740 ms/row
+CURVE mlp gate+up fused M=12 1.0784 ms 93 GB/s x5.71 0.0899 ms/row
+CURVE mlp gate+up fused M=16 0.3230 ms 310 GB/s x1.71 0.0202 ms/row
+CURVE mlp gate+up fused M=24 0.3470 ms 289 GB/s x1.84 0.0145 ms/row
+CURVE mlp gate+up fused M=32 0.3480 ms 288 GB/s x1.84 0.0109 ms/row
+CURVE mlp gate+up fused M=64 0.4743 ms 211 GB/s x2.51 0.0074 ms/row
+CURVE mlp down M=1 0.1056 ms 475 GB/s x1.00 0.1056 ms/row
+CURVE mlp down M=2 0.1099 ms 456 GB/s x1.04 0.0549 ms/row
+CURVE mlp down M=3 0.1218 ms 412 GB/s x1.15 0.0406 ms/row
+CURVE mlp down M=4 0.1375 ms 365 GB/s x1.30 0.0344 ms/row
+CURVE mlp down M=5 0.1574 ms 319 GB/s x1.49 0.0315 ms/row
+CURVE mlp down M=6 0.2330 ms 215 GB/s x2.21 0.0388 ms/row
+CURVE mlp down M=7 0.2430 ms 206 GB/s x2.30 0.0347 ms/row
+CURVE mlp down M=8 0.2721 ms 184 GB/s x2.58 0.0340 ms/row
+CURVE mlp down M=10 0.3164 ms 158 GB/s x3.00 0.0316 ms/row
+CURVE mlp down M=12 0.3649 ms 137 GB/s x3.45 0.0304 ms/row
+CURVE mlp down M=16 0.4462 ms 112 GB/s x4.23 0.0279 ms/row
+CURVE mlp down M=24 0.4512 ms 111 GB/s x4.27 0.0188 ms/row
+CURVE mlp down M=32 0.4575 ms 110 GB/s x4.33 0.0143 ms/row
+CURVE mlp down M=64 0.2969 ms 169 GB/s x2.81 0.0046 ms/row
+# split: shape M grouping ms/layer(incl concat) ratio_vs_single bitident_vs_single
+SPLIT gdn in_proj_qkv M=5 5 0.0867 ms x1.00 ident=ref
+SPLIT gdn in_proj_qkv M=5 3+2 0.1191 ms x1.37 ident=YES
+SPLIT gdn in_proj_qkv M=6 6 0.1087 ms x1.00 ident=ref
+SPLIT gdn in_proj_qkv M=6 3+3 0.1181 ms x1.09 ident=YES
+SPLIT gdn in_proj_qkv M=6 4+2 0.1274 ms x1.17 ident=YES
+SPLIT gdn in_proj_qkv M=6 5+1 0.1376 ms x1.27 ident=NO
+SPLIT gdn in_proj_qkv M=7 7 0.1297 ms x1.00 ident=ref
+SPLIT gdn in_proj_qkv M=7 4+3 0.1319 ms x1.02 ident=YES
+SPLIT gdn in_proj_qkv M=7 5+2 0.1370 ms x1.06 ident=YES
+SPLIT gdn in_proj_qkv M=8 8 0.1356 ms x1.00 ident=ref
+SPLIT gdn in_proj_qkv M=8 4+4 0.1370 ms x1.01 ident=YES
+SPLIT gdn in_proj_qkv M=8 5+3 0.1411 ms x1.04 ident=YES
+SPLIT gdn in_proj_qkv M=8 6+2 0.1601 ms x1.18 ident=YES
+SPLIT gdn in_proj_qkv M=10 10 0.1578 ms x1.00 ident=ref
+SPLIT gdn in_proj_qkv M=10 5+5 0.1538 ms x0.97 ident=YES
+SPLIT gdn in_proj_qkv M=10 4+4+2 0.1865 ms x1.18 ident=YES
+SPLIT gdn in_proj_qkv M=12 12 0.2039 ms x1.00 ident=ref
+SPLIT gdn in_proj_qkv M=12 4+4+4 0.1946 ms x0.95 ident=YES
+SPLIT gdn in_proj_qkv M=12 6+6 0.2020 ms x0.99 ident=YES
+SPLIT gdn in_proj_qkv M=12 5+5+2 0.2027 ms x0.99 ident=YES
+SPLIT gdn in_proj_qkv M=16 16 0.1190 ms x1.00 ident=ref
+SPLIT gdn in_proj_qkv M=16 4+4+4+4 0.2520 ms x2.12 ident=NO
+SPLIT gdn in_proj_qkv M=16 8+8 0.2430 ms x2.04 ident=NO
+SPLIT gdn in_proj_qkv M=16 5+5+5+1 0.2705 ms x2.27 ident=NO
+SPLIT gdn in_proj_z M=5 5 0.0578 ms x1.00 ident=ref
+SPLIT gdn in_proj_z M=5 3+2 0.0807 ms x1.40 ident=YES
+SPLIT gdn in_proj_z M=6 6 0.0737 ms x1.00 ident=ref
+SPLIT gdn in_proj_z M=6 3+3 0.0838 ms x1.14 ident=YES
+SPLIT gdn in_proj_z M=6 4+2 0.0880 ms x1.19 ident=YES
+SPLIT gdn in_proj_z M=6 5+1 0.0921 ms x1.25 ident=NO
+SPLIT gdn in_proj_z M=7 7 0.0860 ms x1.00 ident=ref
+SPLIT gdn in_proj_z M=7 4+3 0.0913 ms x1.06 ident=YES
+SPLIT gdn in_proj_z M=7 5+2 0.0935 ms x1.09 ident=YES
+SPLIT gdn in_proj_z M=8 8 0.0869 ms x1.00 ident=ref
+SPLIT gdn in_proj_z M=8 4+4 0.0958 ms x1.10 ident=YES
+SPLIT gdn in_proj_z M=8 5+3 0.0960 ms x1.11 ident=YES
+SPLIT gdn in_proj_z M=8 6+2 0.1090 ms x1.25 ident=YES
+SPLIT gdn in_proj_z M=10 10 0.0989 ms x1.00 ident=ref
+SPLIT gdn in_proj_z M=10 5+5 0.1055 ms x1.07 ident=YES
+SPLIT gdn in_proj_z M=10 4+4+2 0.1251 ms x1.27 ident=YES
+SPLIT gdn in_proj_z M=12 12 0.1180 ms x1.00 ident=ref
+SPLIT gdn in_proj_z M=12 4+4+4 0.1322 ms x1.12 ident=YES
+SPLIT gdn in_proj_z M=12 6+6 0.1355 ms x1.15 ident=YES
+SPLIT gdn in_proj_z M=12 5+5+2 0.1359 ms x1.15 ident=YES
+SPLIT gdn in_proj_z M=16 16 0.1979 ms x1.00 ident=ref
+SPLIT gdn in_proj_z M=16 4+4+4+4 0.1680 ms x0.85 ident=NO
+SPLIT gdn in_proj_z M=16 8+8 0.1610 ms x0.81 ident=NO
+SPLIT gdn in_proj_z M=16 5+5+5+1 0.1791 ms x0.91 ident=NO
+SPLIT gdn out_proj M=5 5 0.0598 ms x1.00 ident=ref
+SPLIT gdn out_proj M=5 3+2 0.0831 ms x1.39 ident=YES
+SPLIT gdn out_proj M=6 6 0.0770 ms x1.00 ident=ref
+SPLIT gdn out_proj M=6 3+3 0.0850 ms x1.10 ident=YES
+SPLIT gdn out_proj M=6 4+2 0.0889 ms x1.15 ident=YES
+SPLIT gdn out_proj M=6 5+1 0.0921 ms x1.20 ident=NO
+SPLIT gdn out_proj M=7 7 0.0882 ms x1.00 ident=ref
+SPLIT gdn out_proj M=7 4+3 0.0917 ms x1.04 ident=YES
+SPLIT gdn out_proj M=7 5+2 0.0945 ms x1.07 ident=YES
+SPLIT gdn out_proj M=8 8 0.0894 ms x1.00 ident=ref
+SPLIT gdn out_proj M=8 4+4 0.0961 ms x1.08 ident=YES
+SPLIT gdn out_proj M=8 5+3 0.0966 ms x1.08 ident=YES
+SPLIT gdn out_proj M=8 6+2 0.1091 ms x1.22 ident=YES
+SPLIT gdn out_proj M=10 10 0.1001 ms x1.00 ident=ref
+SPLIT gdn out_proj M=10 5+5 0.1063 ms x1.06 ident=YES
+SPLIT gdn out_proj M=10 4+4+2 0.1266 ms x1.26 ident=YES
+SPLIT gdn out_proj M=12 12 0.1216 ms x1.00 ident=ref
+SPLIT gdn out_proj M=12 4+4+4 0.1326 ms x1.09 ident=YES
+SPLIT gdn out_proj M=12 6+6 0.1361 ms x1.12 ident=YES
+SPLIT gdn out_proj M=12 5+5+2 0.1368 ms x1.12 ident=YES
+SPLIT gdn out_proj M=16 16 0.1922 ms x1.00 ident=ref
+SPLIT gdn out_proj M=16 4+4+4+4 0.1665 ms x0.87 ident=NO
+SPLIT gdn out_proj M=16 8+8 0.1601 ms x0.83 ident=NO
+SPLIT gdn out_proj M=16 5+5+5+1 0.1767 ms x0.92 ident=NO
+SPLIT attn q_proj M=5 5 0.0981 ms x1.00 ident=ref
+SPLIT attn q_proj M=5 3+2 0.1386 ms x1.41 ident=YES
+SPLIT attn q_proj M=6 6 0.1301 ms x1.00 ident=ref
+SPLIT attn q_proj M=6 3+3 0.1401 ms x1.08 ident=YES
+SPLIT attn q_proj M=6 4+2 0.1473 ms x1.13 ident=YES
+SPLIT attn q_proj M=6 5+1 0.1594 ms x1.22 ident=NO
+SPLIT attn q_proj M=7 7 0.1559 ms x1.00 ident=ref
+SPLIT attn q_proj M=7 4+3 0.1509 ms x0.97 ident=YES
+SPLIT attn q_proj M=7 5+2 0.1598 ms x1.02 ident=YES
+SPLIT attn q_proj M=8 8 0.1655 ms x1.00 ident=ref
+SPLIT attn q_proj M=8 4+4 0.1577 ms x0.95 ident=YES
+SPLIT attn q_proj M=8 5+3 0.1625 ms x0.98 ident=YES
+SPLIT attn q_proj M=8 6+2 0.1900 ms x1.15 ident=YES
+SPLIT attn q_proj M=10 10 0.2221 ms x1.00 ident=ref
+SPLIT attn q_proj M=10 5+5 0.1804 ms x0.81 ident=YES
+SPLIT attn q_proj M=10 4+4+2 0.2181 ms x0.98 ident=YES
+SPLIT attn q_proj M=12 12 0.2732 ms x1.00 ident=ref
+SPLIT attn q_proj M=12 4+4+4 0.2279 ms x0.83 ident=YES
+SPLIT attn q_proj M=12 6+6 0.2376 ms x0.87 ident=YES
+SPLIT attn q_proj M=12 5+5+2 0.2400 ms x0.88 ident=YES
+SPLIT attn q_proj M=16 16 0.1391 ms x1.00 ident=ref
+SPLIT attn q_proj M=16 4+4+4+4 0.2948 ms x2.12 ident=NO
+SPLIT attn q_proj M=16 8+8 0.2832 ms x2.04 ident=NO
+SPLIT attn q_proj M=16 5+5+5+1 0.3179 ms x2.28 ident=NO
+SPLIT attn k_proj M=5 5 0.0276 ms x1.00 ident=ref
+SPLIT attn k_proj M=5 3+2 0.0349 ms x1.26 ident=YES
+SPLIT attn k_proj M=6 6 0.0294 ms x1.00 ident=ref
+SPLIT attn k_proj M=6 3+3 0.0357 ms x1.22 ident=YES
+SPLIT attn k_proj M=6 4+2 0.0356 ms x1.21 ident=YES
+SPLIT attn k_proj M=6 5+1 0.0356 ms x1.21 ident=NO
+SPLIT attn k_proj M=7 7 0.0307 ms x1.00 ident=ref
+SPLIT attn k_proj M=7 4+3 0.0370 ms x1.20 ident=YES
+SPLIT attn k_proj M=7 5+2 0.0357 ms x1.16 ident=YES
+SPLIT attn k_proj M=8 8 0.0309 ms x1.00 ident=ref
+SPLIT attn k_proj M=8 4+4 0.0376 ms x1.22 ident=YES
+SPLIT attn k_proj M=8 5+3 0.0376 ms x1.22 ident=YES
+SPLIT attn k_proj M=8 6+2 0.0386 ms x1.25 ident=YES
+SPLIT attn k_proj M=10 10 0.0329 ms x1.00 ident=ref
+SPLIT attn k_proj M=10 5+5 0.0391 ms x1.19 ident=YES
+SPLIT attn k_proj M=10 4+4+2 0.0447 ms x1.36 ident=YES
+SPLIT attn k_proj M=12 12 0.0342 ms x1.00 ident=ref
+SPLIT attn k_proj M=12 4+4+4 0.0462 ms x1.35 ident=YES
+SPLIT attn k_proj M=12 6+6 0.0439 ms x1.28 ident=YES
+SPLIT attn k_proj M=12 5+5+2 0.0465 ms x1.36 ident=YES
+SPLIT attn k_proj M=16 16 0.0506 ms x1.00 ident=ref
+SPLIT attn k_proj M=16 4+4+4+4 0.0543 ms x1.07 ident=NO
+SPLIT attn k_proj M=16 8+8 0.0485 ms x0.96 ident=NO
+SPLIT attn k_proj M=16 5+5+5+1 0.0538 ms x1.06 ident=NO
+SPLIT attn o_proj M=5 5 0.0582 ms x1.00 ident=ref
+SPLIT attn o_proj M=5 3+2 0.0804 ms x1.38 ident=YES
+SPLIT attn o_proj M=6 6 0.0735 ms x1.00 ident=ref
+SPLIT attn o_proj M=6 3+3 0.0843 ms x1.15 ident=YES
+SPLIT attn o_proj M=6 4+2 0.0884 ms x1.20 ident=YES
+SPLIT attn o_proj M=6 5+1 0.0910 ms x1.24 ident=NO
+SPLIT attn o_proj M=7 7 0.0854 ms x1.00 ident=ref
+SPLIT attn o_proj M=7 4+3 0.0905 ms x1.06 ident=YES
+SPLIT attn o_proj M=7 5+2 0.0932 ms x1.09 ident=YES
+SPLIT attn o_proj M=8 8 0.0860 ms x1.00 ident=ref
+SPLIT attn o_proj M=8 4+4 0.0965 ms x1.12 ident=YES
+SPLIT attn o_proj M=8 5+3 0.0958 ms x1.11 ident=YES
+SPLIT attn o_proj M=8 6+2 0.1086 ms x1.26 ident=YES
+SPLIT attn o_proj M=10 10 0.0984 ms x1.00 ident=ref
+SPLIT attn o_proj M=10 5+5 0.1068 ms x1.09 ident=YES
+SPLIT attn o_proj M=10 4+4+2 0.1255 ms x1.28 ident=YES
+SPLIT attn o_proj M=12 12 0.1192 ms x1.00 ident=ref
+SPLIT attn o_proj M=12 4+4+4 0.1329 ms x1.11 ident=YES
+SPLIT attn o_proj M=12 6+6 0.1356 ms x1.14 ident=YES
+SPLIT attn o_proj M=12 5+5+2 0.1368 ms x1.15 ident=YES
+SPLIT attn o_proj M=16 16 0.1909 ms x1.00 ident=ref
+SPLIT attn o_proj M=16 4+4+4+4 0.1701 ms x0.89 ident=NO
+SPLIT attn o_proj M=16 8+8 0.1616 ms x0.85 ident=NO
+SPLIT attn o_proj M=16 5+5+5+1 0.1769 ms x0.93 ident=NO
+SPLIT mlp gate+up fused M=5 5 0.2643 ms x1.00 ident=ref
+SPLIT mlp gate+up fused M=5 3+2 0.3695 ms x1.40 ident=YES
+SPLIT mlp gate+up fused M=6 6 0.4494 ms x1.00 ident=ref
+SPLIT mlp gate+up fused M=6 3+3 0.3730 ms x0.83 ident=YES
+SPLIT mlp gate+up fused M=6 4+2 0.3786 ms x0.84 ident=YES
+SPLIT mlp gate+up fused M=6 5+1 0.3950 ms x0.88 ident=NO
+SPLIT mlp gate+up fused M=7 7 0.5589 ms x1.00 ident=ref
+SPLIT mlp gate+up fused M=7 4+3 0.3957 ms x0.71 ident=YES
+SPLIT mlp gate+up fused M=7 5+2 0.4040 ms x0.72 ident=YES
+SPLIT mlp gate+up fused M=8 8 0.6865 ms x1.00 ident=ref
+SPLIT mlp gate+up fused M=8 4+4 0.4094 ms x0.60 ident=YES
+SPLIT mlp gate+up fused M=8 5+3 0.4168 ms x0.61 ident=YES
+SPLIT mlp gate+up fused M=8 6+2 0.5165 ms x0.75 ident=YES
+SPLIT mlp gate+up fused M=10 10 0.9420 ms x1.00 ident=ref
+SPLIT mlp gate+up fused M=10 5+5 0.4774 ms x0.51 ident=YES
+SPLIT mlp gate+up fused M=10 4+4+2 0.5661 ms x0.60 ident=YES
+SPLIT mlp gate+up fused M=12 12 1.1246 ms x1.00 ident=ref
+SPLIT mlp gate+up fused M=12 4+4+4 0.6097 ms x0.54 ident=YES
+SPLIT mlp gate+up fused M=12 6+6 0.6585 ms x0.59 ident=YES
+SPLIT mlp gate+up fused M=12 5+5+2 0.6698 ms x0.60 ident=YES
+SPLIT mlp gate+up fused M=16 16 0.3307 ms x1.00 ident=ref
+SPLIT mlp gate+up fused M=16 4+4+4+4 0.7880 ms x2.38 ident=NO
+SPLIT mlp gate+up fused M=16 8+8 0.8486 ms x2.57 ident=NO
+SPLIT mlp gate+up fused M=16 5+5+5+1 0.8805 ms x2.66 ident=NO
+SPLIT mlp down M=5 5 0.1766 ms x1.00 ident=ref
+SPLIT mlp down M=5 3+2 0.2085 ms x1.18 ident=YES
+SPLIT mlp down M=6 6 0.2319 ms x1.00 ident=ref
+SPLIT mlp down M=6 3+3 0.2141 ms x0.92 ident=YES
+SPLIT mlp down M=6 4+2 0.2161 ms x0.93 ident=YES
+SPLIT mlp down M=6 5+1 0.2198 ms x0.95 ident=NO
+SPLIT mlp down M=7 7 0.2519 ms x1.00 ident=ref
+SPLIT mlp down M=7 4+3 0.2269 ms x0.90 ident=YES
+SPLIT mlp down M=7 5+2 0.2352 ms x0.93 ident=YES
+SPLIT mlp down M=8 8 0.2658 ms x1.00 ident=ref
+SPLIT mlp down M=8 4+4 0.2394 ms x0.90 ident=YES
+SPLIT mlp down M=8 5+3 0.2470 ms x0.93 ident=YES
+SPLIT mlp down M=8 6+2 0.2765 ms x1.04 ident=YES
+SPLIT mlp down M=10 10 0.3134 ms x1.00 ident=ref
+SPLIT mlp down M=10 5+5 0.2801 ms x0.89 ident=YES
+SPLIT mlp down M=10 4+4+2 0.3049 ms x0.97 ident=YES
+SPLIT mlp down M=12 12 0.3635 ms x1.00 ident=ref
+SPLIT mlp down M=12 4+4+4 0.3291 ms x0.91 ident=YES
+SPLIT mlp down M=12 6+6 0.4177 ms x1.15 ident=YES
+SPLIT mlp down M=12 5+5+2 0.3349 ms x0.92 ident=YES
+SPLIT mlp down M=16 16 0.4465 ms x1.00 ident=ref
+SPLIT mlp down M=16 4+4+4+4 0.4189 ms x0.94 ident=NO
+SPLIT mlp down M=16 8+8 0.4436 ms x0.99 ident=NO
+SPLIT mlp down M=16 5+5+5+1 0.4362 ms x0.98 ident=NO
+# rowident: shape M frac_of_rows_equal_to_M1_call
+ROWIDENT gdn in_proj_qkv M=2 0/2
+ROWIDENT gdn in_proj_qkv M=4 0/4
+ROWIDENT gdn in_proj_qkv M=5 0/5
+ROWIDENT gdn in_proj_qkv M=6 0/6
+ROWIDENT gdn in_proj_qkv M=8 0/8
+ROWIDENT gdn in_proj_qkv M=12 0/12
+ROWIDENT gdn in_proj_qkv M=16 0/16
+ROWIDENT gdn in_proj_z M=2 0/2
+ROWIDENT gdn in_proj_z M=4 0/4
+ROWIDENT gdn in_proj_z M=5 0/5
+ROWIDENT gdn in_proj_z M=6 0/6
+ROWIDENT gdn in_proj_z M=8 0/8
+ROWIDENT gdn in_proj_z M=12 0/12
+ROWIDENT gdn in_proj_z M=16 0/16
+ROWIDENT gdn out_proj M=2 0/2
+ROWIDENT gdn out_proj M=4 0/4
+ROWIDENT gdn out_proj M=5 0/5
+ROWIDENT gdn out_proj M=6 0/6
+ROWIDENT gdn out_proj M=8 0/8
+ROWIDENT gdn out_proj M=12 0/12
+ROWIDENT gdn out_proj M=16 0/16
+ROWIDENT attn q_proj M=2 0/2
+ROWIDENT attn q_proj M=4 0/4
+ROWIDENT attn q_proj M=5 0/5
+ROWIDENT attn q_proj M=6 0/6
+ROWIDENT attn q_proj M=8 0/8
+ROWIDENT attn q_proj M=12 0/12
+ROWIDENT attn q_proj M=16 0/16
+ROWIDENT attn k_proj M=2 0/2
+ROWIDENT attn k_proj M=4 0/4
+ROWIDENT attn k_proj M=5 0/5
+ROWIDENT attn k_proj M=6 0/6
+ROWIDENT attn k_proj M=8 0/8
+ROWIDENT attn k_proj M=12 0/12
+ROWIDENT attn k_proj M=16 0/16
+ROWIDENT attn o_proj M=2 0/2
+ROWIDENT attn o_proj M=4 0/4
+ROWIDENT attn o_proj M=5 0/5
+ROWIDENT attn o_proj M=6 0/6
+ROWIDENT attn o_proj M=8 0/8
+ROWIDENT attn o_proj M=12 0/12
+ROWIDENT attn o_proj M=16 0/16
+ROWIDENT mlp gate+up fused M=2 0/2
+ROWIDENT mlp gate+up fused M=4 0/4
+ROWIDENT mlp gate+up fused M=5 0/5
+ROWIDENT mlp gate+up fused M=6 0/6
+ROWIDENT mlp gate+up fused M=8 0/8
+ROWIDENT mlp gate+up fused M=12 0/12
+ROWIDENT mlp gate+up fused M=16 0/16
+ROWIDENT mlp down M=2 0/2
+ROWIDENT mlp down M=4 0/4
+ROWIDENT mlp down M=5 0/5
+ROWIDENT mlp down M=6 0/6
+ROWIDENT mlp down M=8 0/8
+ROWIDENT mlp down M=12 0/12
+ROWIDENT mlp down M=16 0/16
+# pad: shape M padTo ms/layer ratio_vs_single ident_vs_single rowinvariant
+PAD gdn in_proj_qkv M=5 pad5 0.0819 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_qkv M=5 pad13 0.1263 ms x1.54 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=5 pad16 0.1172 ms x1.43 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=6 pad6 0.1068 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_qkv M=6 pad13 0.1305 ms x1.22 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=6 pad16 0.1210 ms x1.13 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=7 pad7 0.1318 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_qkv M=7 pad13 0.1319 ms x1.00 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=7 pad16 0.1225 ms x0.93 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=8 pad8 0.1325 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_qkv M=8 pad13 0.1308 ms x0.99 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=8 pad16 0.1222 ms x0.92 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=10 pad10 0.1551 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_qkv M=10 pad13 0.1316 ms x0.85 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=10 pad16 0.1220 ms x0.79 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=12 pad12 0.1968 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_qkv M=12 pad13 0.1293 ms x0.66 ident=NO rowinv=YES
+PAD gdn in_proj_qkv M=12 pad16 0.1220 ms x0.62 ident=NO rowinv=YES
+PAD gdn in_proj_z M=5 pad5 0.0599 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_z M=5 pad13 0.1985 ms x3.31 ident=NO rowinv=YES
+PAD gdn in_proj_z M=5 pad16 0.2001 ms x3.34 ident=NO rowinv=YES
+PAD gdn in_proj_z M=6 pad6 0.0740 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_z M=6 pad13 0.1994 ms x2.69 ident=NO rowinv=YES
+PAD gdn in_proj_z M=6 pad16 0.1974 ms x2.67 ident=NO rowinv=YES
+PAD gdn in_proj_z M=7 pad7 0.0848 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_z M=7 pad13 0.1990 ms x2.35 ident=NO rowinv=YES
+PAD gdn in_proj_z M=7 pad16 0.1992 ms x2.35 ident=NO rowinv=YES
+PAD gdn in_proj_z M=8 pad8 0.0878 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_z M=8 pad13 0.1984 ms x2.26 ident=NO rowinv=YES
+PAD gdn in_proj_z M=8 pad16 0.1999 ms x2.28 ident=NO rowinv=YES
+PAD gdn in_proj_z M=10 pad10 0.0978 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_z M=10 pad13 0.1974 ms x2.02 ident=NO rowinv=YES
+PAD gdn in_proj_z M=10 pad16 0.2002 ms x2.05 ident=NO rowinv=YES
+PAD gdn in_proj_z M=12 pad12 0.1200 ms x1.00 ident=ref rowinv=-
+PAD gdn in_proj_z M=12 pad13 0.1975 ms x1.65 ident=NO rowinv=YES
+PAD gdn in_proj_z M=12 pad16 0.1976 ms x1.65 ident=NO rowinv=YES
+PAD gdn out_proj M=5 pad5 0.0609 ms x1.00 ident=ref rowinv=-
+PAD gdn out_proj M=5 pad13 0.1919 ms x3.15 ident=NO rowinv=YES
+PAD gdn out_proj M=5 pad16 0.1967 ms x3.23 ident=NO rowinv=YES
+PAD gdn out_proj M=6 pad6 0.0761 ms x1.00 ident=ref rowinv=-
+PAD gdn out_proj M=6 pad13 0.1926 ms x2.53 ident=NO rowinv=YES
+PAD gdn out_proj M=6 pad16 0.1941 ms x2.55 ident=NO rowinv=YES
+PAD gdn out_proj M=7 pad7 0.0870 ms x1.00 ident=ref rowinv=-
+PAD gdn out_proj M=7 pad13 0.1939 ms x2.23 ident=NO rowinv=YES
+PAD gdn out_proj M=7 pad16 0.1936 ms x2.23 ident=NO rowinv=YES
+PAD gdn out_proj M=8 pad8 0.0890 ms x1.00 ident=ref rowinv=-
+PAD gdn out_proj M=8 pad13 0.1929 ms x2.17 ident=NO rowinv=YES
+PAD gdn out_proj M=8 pad16 0.1934 ms x2.17 ident=NO rowinv=YES
+PAD gdn out_proj M=10 pad10 0.0987 ms x1.00 ident=ref rowinv=-
+PAD gdn out_proj M=10 pad13 0.1934 ms x1.96 ident=NO rowinv=YES
+PAD gdn out_proj M=10 pad16 0.1941 ms x1.97 ident=NO rowinv=YES
+PAD gdn out_proj M=12 pad12 0.1215 ms x1.00 ident=ref rowinv=-
+PAD gdn out_proj M=12 pad13 0.1947 ms x1.60 ident=NO rowinv=YES
+PAD gdn out_proj M=12 pad16 0.1946 ms x1.60 ident=NO rowinv=YES
+PAD attn q_proj M=5 pad5 0.0979 ms x1.00 ident=ref rowinv=-
+PAD attn q_proj M=5 pad13 0.1523 ms x1.56 ident=NO rowinv=YES
+PAD attn q_proj M=5 pad16 0.1455 ms x1.49 ident=NO rowinv=YES
+PAD attn q_proj M=6 pad6 0.1286 ms x1.00 ident=ref rowinv=-
+PAD attn q_proj M=6 pad13 0.1536 ms x1.19 ident=NO rowinv=YES
+PAD attn q_proj M=6 pad16 0.1443 ms x1.12 ident=NO rowinv=YES
+PAD attn q_proj M=7 pad7 0.1649 ms x1.00 ident=ref rowinv=-
+PAD attn q_proj M=7 pad13 0.1522 ms x0.92 ident=NO rowinv=YES
+PAD attn q_proj M=7 pad16 0.1435 ms x0.87 ident=NO rowinv=YES
+PAD attn q_proj M=8 pad8 0.1715 ms x1.00 ident=ref rowinv=-
+PAD attn q_proj M=8 pad13 0.1515 ms x0.88 ident=NO rowinv=YES
+PAD attn q_proj M=8 pad16 0.1434 ms x0.84 ident=NO rowinv=YES
+PAD attn q_proj M=10 pad10 0.2174 ms x1.00 ident=ref rowinv=-
+PAD attn q_proj M=10 pad13 0.1521 ms x0.70 ident=NO rowinv=YES
+PAD attn q_proj M=10 pad16 0.1447 ms x0.67 ident=NO rowinv=YES
+PAD attn q_proj M=12 pad12 0.2769 ms x1.00 ident=ref rowinv=-
+PAD attn q_proj M=12 pad13 0.1540 ms x0.56 ident=NO rowinv=YES
+PAD attn q_proj M=12 pad16 0.1436 ms x0.52 ident=NO rowinv=YES
+PAD attn k_proj M=5 pad5 0.0255 ms x1.00 ident=ref rowinv=-
+PAD attn k_proj M=5 pad13 0.0514 ms x2.02 ident=NO rowinv=YES
+PAD attn k_proj M=5 pad16 0.0521 ms x2.04 ident=NO rowinv=YES
+PAD attn k_proj M=6 pad6 0.0283 ms x1.00 ident=ref rowinv=-
+PAD attn k_proj M=6 pad13 0.0520 ms x1.84 ident=NO rowinv=YES
+PAD attn k_proj M=6 pad16 0.0516 ms x1.83 ident=NO rowinv=YES
+PAD attn k_proj M=7 pad7 0.0319 ms x1.00 ident=ref rowinv=-
+PAD attn k_proj M=7 pad13 0.0524 ms x1.64 ident=NO rowinv=YES
+PAD attn k_proj M=7 pad16 0.0534 ms x1.67 ident=NO rowinv=YES
+PAD attn k_proj M=8 pad8 0.0317 ms x1.00 ident=ref rowinv=-
+PAD attn k_proj M=8 pad13 0.0536 ms x1.69 ident=NO rowinv=YES
+PAD attn k_proj M=8 pad16 0.0532 ms x1.68 ident=NO rowinv=YES
+PAD attn k_proj M=10 pad10 0.0335 ms x1.00 ident=ref rowinv=-
+PAD attn k_proj M=10 pad13 0.0534 ms x1.59 ident=NO rowinv=YES
+PAD attn k_proj M=10 pad16 0.0509 ms x1.52 ident=NO rowinv=YES
+PAD attn k_proj M=12 pad12 0.0349 ms x1.00 ident=ref rowinv=-
+PAD attn k_proj M=12 pad13 0.0513 ms x1.47 ident=NO rowinv=YES
+PAD attn k_proj M=12 pad16 0.0514 ms x1.47 ident=NO rowinv=YES
+PAD attn o_proj M=5 pad5 0.0606 ms x1.00 ident=ref rowinv=-
+PAD attn o_proj M=5 pad13 0.1931 ms x3.19 ident=NO rowinv=YES
+PAD attn o_proj M=5 pad16 0.1935 ms x3.19 ident=NO rowinv=YES
+PAD attn o_proj M=6 pad6 0.0774 ms x1.00 ident=ref rowinv=-
+PAD attn o_proj M=6 pad13 0.1936 ms x2.50 ident=NO rowinv=YES
+PAD attn o_proj M=6 pad16 0.1954 ms x2.52 ident=NO rowinv=YES
+PAD attn o_proj M=7 pad7 0.0869 ms x1.00 ident=ref rowinv=-
+PAD attn o_proj M=7 pad13 0.1945 ms x2.24 ident=NO rowinv=YES
+PAD attn o_proj M=7 pad16 0.1943 ms x2.24 ident=NO rowinv=YES
+PAD attn o_proj M=8 pad8 0.0884 ms x1.00 ident=ref rowinv=-
+PAD attn o_proj M=8 pad13 0.1925 ms x2.18 ident=NO rowinv=YES
+PAD attn o_proj M=8 pad16 0.1929 ms x2.18 ident=NO rowinv=YES
+PAD attn o_proj M=10 pad10 0.1002 ms x1.00 ident=ref rowinv=-
+PAD attn o_proj M=10 pad13 0.1955 ms x1.95 ident=NO rowinv=YES
+PAD attn o_proj M=10 pad16 0.1947 ms x1.94 ident=NO rowinv=YES
+PAD attn o_proj M=12 pad12 0.1205 ms x1.00 ident=ref rowinv=-
+PAD attn o_proj M=12 pad13 0.1937 ms x1.61 ident=NO rowinv=YES
+PAD attn o_proj M=12 pad16 0.1943 ms x1.61 ident=NO rowinv=YES
+PAD mlp gate+up fused M=5 pad5 0.2784 ms x1.00 ident=ref rowinv=-
+PAD mlp gate+up fused M=5 pad13 0.3621 ms x1.30 ident=NO rowinv=YES
+PAD mlp gate+up fused M=5 pad16 0.3338 ms x1.20 ident=NO rowinv=YES
+PAD mlp gate+up fused M=6 pad6 0.4426 ms x1.00 ident=ref rowinv=-
+PAD mlp gate+up fused M=6 pad13 0.3595 ms x0.81 ident=NO rowinv=YES
+PAD mlp gate+up fused M=6 pad16 0.3346 ms x0.76 ident=NO rowinv=YES
+PAD mlp gate+up fused M=7 pad7 0.6010 ms x1.00 ident=ref rowinv=-
+PAD mlp gate+up fused M=7 pad13 0.3579 ms x0.60 ident=NO rowinv=YES
+PAD mlp gate+up fused M=7 pad16 0.3334 ms x0.55 ident=NO rowinv=YES
+PAD mlp gate+up fused M=8 pad8 0.6693 ms x1.00 ident=ref rowinv=-
+PAD mlp gate+up fused M=8 pad13 0.3666 ms x0.55 ident=NO rowinv=YES
+PAD mlp gate+up fused M=8 pad16 0.3424 ms x0.51 ident=NO rowinv=YES
+PAD mlp gate+up fused M=10 pad10 0.9186 ms x1.00 ident=ref rowinv=-
+PAD mlp gate+up fused M=10 pad13 0.3696 ms x0.40 ident=NO rowinv=YES
+PAD mlp gate+up fused M=10 pad16 0.3496 ms x0.38 ident=NO rowinv=YES
+PAD mlp gate+up fused M=12 pad12 1.1511 ms x1.00 ident=ref rowinv=-
+PAD mlp gate+up fused M=12 pad13 0.3646 ms x0.32 ident=NO rowinv=YES
+PAD mlp gate+up fused M=12 pad16 0.3395 ms x0.29 ident=NO rowinv=YES
+PAD mlp down M=5 pad5 0.1641 ms x1.00 ident=ref rowinv=-
+PAD mlp down M=5 pad13 0.4762 ms x2.90 ident=NO rowinv=YES
+PAD mlp down M=5 pad16 0.4770 ms x2.91 ident=NO rowinv=YES
+PAD mlp down M=6 pad6 0.2317 ms x1.00 ident=ref rowinv=-
+PAD mlp down M=6 pad13 0.4770 ms x2.06 ident=NO rowinv=YES
+PAD mlp down M=6 pad16 0.4770 ms x2.06 ident=NO rowinv=YES
+PAD mlp down M=7 pad7 0.2601 ms x1.00 ident=ref rowinv=-
+PAD mlp down M=7 pad13 0.4794 ms x1.84 ident=NO rowinv=YES
+PAD mlp down M=7 pad16 0.4841 ms x1.86 ident=NO rowinv=YES
+PAD mlp down M=8 pad8 0.2730 ms x1.00 ident=ref rowinv=-
+PAD mlp down M=8 pad13 0.4771 ms x1.75 ident=NO rowinv=YES
+PAD mlp down M=8 pad16 0.4790 ms x1.75 ident=NO rowinv=YES
+PAD mlp down M=10 pad10 0.3162 ms x1.00 ident=ref rowinv=-
+PAD mlp down M=10 pad13 0.4762 ms x1.51 ident=NO rowinv=YES
+PAD mlp down M=10 pad16 0.4769 ms x1.51 ident=NO rowinv=YES
+PAD mlp down M=12 pad12 0.3721 ms x1.00 ident=ref rowinv=-
+PAD mlp down M=12 pad13 0.4756 ms x1.28 ident=NO rowinv=YES
+PAD mlp down M=12 pad16 0.4764 ms x1.28 ident=NO rowinv=YES

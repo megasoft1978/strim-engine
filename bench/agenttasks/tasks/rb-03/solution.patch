@@ -1,0 +1,81 @@
+diff --git a/lib/tablefmt.rb b/lib/tablefmt.rb
+index eed59a0..27e2dde 100644
+--- a/lib/tablefmt.rb
++++ b/lib/tablefmt.rb
+@@ -1,10 +1,13 @@
+ # Plain-text tables.
+ class TableFmt
++  ALIGNS = %i[left right].freeze
++
+   attr_reader :headers, :rows
+ 
+   def initialize(headers)
+     @headers = headers.map(&:to_s)
+     @rows = []
++    @align = Hash.new(:left)
+   end
+ 
+   def <<(row)
+@@ -13,4 +16,62 @@ class TableFmt
+     @rows << row.map(&:to_s)
+     self
+   end
++
++  # align(qty: :right, price: :right)
++  def align(spec)
++    spec.each do |col, side|
++      raise ArgumentError, "bad alignment #{side.inspect}" unless ALIGNS.include?(side)
++
++      idx = @headers.index(col.to_s) or raise KeyError, "unknown column #{col}"
++      @align[idx] = side
++    end
++    self
++  end
++
++  def widths(max_width: nil)
++    @headers.each_index.map do |i|
++      w = ([@headers[i]] + @rows.map { |r| r[i] }).map(&:length).max
++      max_width ? [w, max_width].min : w
++    end
++  end
++
++  def sort_by!(column, &key)
++    idx = @headers.index(column.to_s) or raise KeyError, "unknown column #{column}"
++    key ||= ->(v) { v }
++    @rows = @rows.each_with_index.sort_by { |r, i| [key.call(r[idx]), i] }.map(&:first)
++    self
++  end
++
++  def to_s(max_width: nil)
++    w = widths(max_width: max_width)
++    lines = [format_row(@headers, w), w.map { |n| '-' * n }.join(' ')]
++    @rows.each { |r| lines << format_row(r, w) }
++    lines.join("\n")
++  end
++
++  def to_markdown
++    w = widths
++    head = '| ' + @headers.each_index.map { |i| pad(escape(@headers[i]), w[i], @align[i]) }.join(' | ') + ' |'
++    sep = '|' + w.each_index.map { |i| @align[i] == :right ? ('-' * (w[i] + 1)) + ':' : ':' + ('-' * (w[i] + 1)) }.join('|') + '|'
++    body = @rows.map { |r| '| ' + r.each_index.map { |i| pad(escape(r[i]), w[i], @align[i]) }.join(' | ') + ' |' }
++    ([head, sep] + body).join("\n")
++  end
++
++  private
++
++  def escape(s)
++    s.gsub('|', '\\|')
++  end
++
++  def format_row(cells, w)
++    cells.each_index.map { |i| pad(truncate(cells[i], w[i]), w[i], @align[i]) }.join(' ').rstrip
++  end
++
++  def truncate(s, width)
++    s.length <= width ? s : s[0, width - 1] + '…'
++  end
++
++  def pad(s, width, side)
++    side == :right ? s.rjust(width) : s.ljust(width)
++  end
+ end

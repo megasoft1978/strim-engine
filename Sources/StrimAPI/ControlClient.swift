@@ -13,4 +13,18 @@ public protocol StrimControlClient: Sendable {
     func chatOpen(_ request: ChatOpenRequest) async throws -> ChatSession
     func chatAppend(_ request: ChatAppendRequest) async throws
     func chatCancel(_ request: ChatCancelRequest) async throws
+    // Product additions. Defaults throw `not_implemented` so older conformers keep compiling.
+    func pauseJobs(_ request: PauseRequest) async throws -> JobsPauseState
+    func resumeJobs() async throws -> JobsPauseState
+    func cancelJob(_ request: JobCancelRequest) async throws -> JobCancelResult
+    func models() async throws -> ModelList
+    func pack() async throws -> PackInfo
+}
+
+public extension StrimControlClient {
+    func pauseJobs(_ request: PauseRequest) async throws -> JobsPauseState { throw APIError(code: "not_implemented", message: "pause") }
+    func resumeJobs() async throws -> JobsPauseState { throw APIError(code: "not_implemented", message: "resume") }
+    func cancelJob(_ request: JobCancelRequest) async throws -> JobCancelResult { throw APIError(code: "not_implemented", message: "cancel") }
+    func models() async throws -> ModelList { throw APIError(code: "not_implemented", message: "models") }
+    func pack() async throws -> PackInfo { throw APIError(code: "not_implemented", message: "pack") }
 }

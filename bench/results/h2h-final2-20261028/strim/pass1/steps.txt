@@ -1,0 +1,31 @@
+session 17:55:29 cells=agree,w3,w3_32k load={ 3.27 4.81 4.96 } swap=total = 6144.00M  used = 4856.31M  free = 1287.69M  (encrypted)
+[17:55:31] engine pid 8751 ready after 3s
+[17:55:31] CELL warmup load={ 3.27 4.81 4.96 }
+[17:55:36] CELL warmup rc=0 5s memory_aborted=no
+[17:55:36] CELL agree load={ 3.17 4.77 4.94 }
+[17:55:44] CELL agree rc=0 8s memory_aborted=no
+[17:55:44] CELL w3 load={ 3.22 4.72 4.93 }
+[17:56:13] CELL w3 rc=0 29s memory_aborted=no
+[17:56:13] CELL w3_32k load={ 2.62 4.43 4.81 }
+[17:56:55] CELL w3_32k rc=0 42s memory_aborted=no
+end 17:56:55 load={ 3.55 4.46 4.81 } swap=total = 6144.00M  used = 4840.31M  free = 1303.69M  (encrypted)
+session 17:57:06 cells=w4,w4s,w6 load={ 3.54 4.43 4.79 } swap=total = 6144.00M  used = 4840.31M  free = 1303.69M  (encrypted)
+[17:57:08] engine pid 11531 ready after 3s
+[17:57:08] CELL warmup load={ 3.81 4.47 4.80 }
+[17:57:13] CELL warmup rc=0 5s memory_aborted=no
+[17:57:13] CELL w4 load={ 3.83 4.46 4.80 }
+[17:58:12] CELL w4 rc=0 59s memory_aborted=no
+[17:58:12] CELL w4s load={ 4.71 4.66 4.85 }
+[17:58:33] CELL w4s rc=0 21s memory_aborted=no
+[17:58:34] CELL w6 load={ 4.35 4.57 4.82 }
+[17:59:26] CELL w6 rc=0 52s memory_aborted=no
+end 17:59:26 load={ 4.92 4.63 4.81 } swap=total = 6144.00M  used = 4840.31M  free = 1303.69M  (encrypted)
+session 17:59:37 cells=w5,replay load={ 4.84 4.63 4.81 } swap=total = 6144.00M  used = 4840.31M  free = 1303.69M  (encrypted)
+[17:59:40] engine pid 15949 ready after 4s
+[17:59:40] CELL warmup load={ 4.84 4.63 4.81 }
+[17:59:45] CELL warmup rc=0 5s memory_aborted=no
+[17:59:45] CELL w5 load={ 4.77 4.61 4.81 }
+[18:00:12] CELL w5 rc=0 27s memory_aborted=no
+[18:00:12] CELL replay load={ 4.71 4.62 4.80 }
+[18:01:08] CELL replay rc=0 56s memory_aborted=no
+end 18:01:08 load={ 4.13 4.43 4.72 } swap=total = 6144.00M  used = 4840.31M  free = 1303.69M  (encrypted)

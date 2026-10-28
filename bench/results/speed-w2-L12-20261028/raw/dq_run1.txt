@@ -1,0 +1,18 @@
+device: Apple M5 Max os: Version 27.0.1 (Build 26A434) apple10=true
+packed: w [34816, 640] uint32 scales [34816, 80] float16
+DQ M=8 MLX_qmm 0.3898 ms 257 GB/s
+DQ M=8 tile mt=16 nt=16 kt=256 0.3895 ms 257 GB/s vs_MLX x1.00 maxabs=0.25 maxref=336.5
+DQ M=8 tile mt=16 nt=16 kt=128 0.3343 ms 300 GB/s vs_MLX x1.17 maxabs=0.25 maxref=336.5
+DQ M=8 tile mt=16 nt=16 kt=512 0.5611 ms 179 GB/s vs_MLX x0.69 maxabs=0.25 maxref=336.5
+DQ M=8 tile mt=32 nt=16 kt=256 0.3828 ms 262 GB/s vs_MLX x1.02 maxabs=0.25 maxref=336.5
+DQ M=8 tile mt=16 nt=32 kt=64 0.3570 ms 281 GB/s vs_MLX x1.09 maxabs=0.25 maxref=336.5
+DQ M=8 tile mt=32 nt=32 kt=128 0.4066 ms 247 GB/s vs_MLX x0.96 maxabs=0.25 maxref=336.5
+DQ M=8 tile mt=16 nt=8 kt=256 0.3785 ms 265 GB/s vs_MLX x1.03 maxabs=0.25 maxref=336.5
+DQ M=16 MLX_qmm 0.3635 ms 276 GB/s
+DQ M=16 tile mt=16 nt=16 kt=256 0.3898 ms 257 GB/s vs_MLX x0.93 maxabs=0 maxref=342.5
+DQ M=16 tile mt=16 nt=16 kt=128 0.3601 ms 278 GB/s vs_MLX x1.01 maxabs=0 maxref=342.5
+DQ M=16 tile mt=16 nt=16 kt=512 0.5917 ms 169 GB/s vs_MLX x0.61 maxabs=0 maxref=342.5
+DQ M=16 tile mt=32 nt=16 kt=256 0.4127 ms 243 GB/s vs_MLX x0.88 maxabs=0 maxref=342.5
+DQ M=16 tile mt=16 nt=32 kt=64 0.3823 ms 262 GB/s vs_MLX x0.95 maxabs=0 maxref=342.5
+DQ M=16 tile mt=32 nt=32 kt=128 0.4207 ms 238 GB/s vs_MLX x0.86 maxabs=0 maxref=342.5
+DQ M=16 tile mt=16 nt=8 kt=256 0.3979 ms 252 GB/s vs_MLX x0.91 maxabs=0 maxref=342.5

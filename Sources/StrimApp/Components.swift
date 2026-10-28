@@ -130,7 +130,11 @@ struct ControlButtons: View {
         HStack {
             Button("Load") { Task { await model.loadModel() } }.disabled(!load.enabled).help(load.reason ?? "Load the configured model")
             Button("Unload") { Task { await model.unloadModel() } }.disabled(!unload.enabled).help(unload.reason ?? "Unload the model")
-            Button("Pause jobs") {}.disabled(!pause.enabled).help(pause.reason ?? "")
+            Button(model.pauseButtonTitle) { Task { await model.togglePause() } }.disabled(!pause.enabled)
+                .help(pause.reason ?? (model.jobsPaused ? "Admit background jobs again" : "Stop starting background jobs; running ones finish. Chat is not affected."))
+        }
+        if model.jobsPaused {
+            Label("Background jobs are paused. Chat still works.", systemImage: "pause.circle").font(.caption).foregroundStyle(.orange)
         }
         if model.connection.isConnected, load.reason != nil || unload.reason != nil {
             Text([load.reason.map { "Load: \($0)" }, unload.reason.map { "Unload: \($0)" }].compactMap { $0 }.joined(separator: "  |  "))

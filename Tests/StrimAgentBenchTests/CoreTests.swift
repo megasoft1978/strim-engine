@@ -339,3 +339,41 @@ import Testing
         #expect(text.contains("harness verify vs judge") && text.contains("false-done rate"))
     }
 }
+
+@Suite struct PathRefusalTests {
+    private func stream(_ results: [String]) -> String {
+        var lines: [String] = []
+        for (i, r) in results.enumerated() {
+            lines.append(#"{"type":"assistant","message":{"content":[{"type":"tool_use","id":"\#(i)","name":"mcp__strim__strim_task","input":{}}]}}"#)
+            lines.append(#"{"type":"user","message":{"content":[{"type":"tool_result","is_error":true,"tool_use_id":"\#(i)","content":"\#(r)"}]}}"#)
+        }
+        lines.append(#"{"type":"result","is_error":false,"num_turns":3,"total_cost_usd":0.01,"result":"done","usage":{"input_tokens":1,"output_tokens":4}}"#)
+        return lines.joined(separator: "\n")
+    }
+
+    @Test func pathRefusalIsInfraNotDelegation() {
+        let refused = "cwd /var/x/runs/a is outside the allowed roots (mcp.allowedRoots in ~/.strim/config.json); canonical path: /private/var/x/runs/a."
+        let ok = "DONE strim job j verify=verified turn 3/40 5s\nusage: 10 prompt (0 cached) + 5 completion tokens, 2 turns, 5s"
+        let r = ClaudeParser.parse(stream([refused, ok]))
+        #expect(r.pathRefusals == 1)
+        #expect(r.delegations == 1)  // only the retry counts
+        #expect(!r.redo)
+        let only = ClaudeParser.parse(stream([refused]))
+        #expect(only.pathRefusals == 1 && only.delegations == 0 && !only.redo)
+    }
+
+    @Test func otherErrorsStayDelegations() {
+        let r = ClaudeParser.parse(stream(["strim_task error: backend unavailable"]))
+        #expect(r.pathRefusals == 0 && r.delegations == 1)
+        #expect(ClaudeParser.isPathRefusal("cwd /Users/a/.strim rejected: credential directory."))
+        #expect(ClaudeParser.isPathRefusal("cwd is required and must be inside an allowed root (mcp.allowedRoots)."))
+    }
+
+    @Test func guidanceHasCanonicalCwdAndObservableTriggers() {
+        let g = PromptBuilder.routingGuidance(repo: NSTemporaryDirectory())
+        #expect(g.contains(PromptBuilder.canonicalPath(NSTemporaryDirectory())))
+        #expect(g.contains("2 or more files") && g.contains("retry once"))
+        #expect(g.contains("Never delegate design"))
+        #expect(!g.contains("150 words"))
+    }
+}

@@ -12,15 +12,21 @@ public struct AppSettings: Codable, Equatable, Sendable {
     public var controlTokenPath: String
     /// Folder chats work in. Chat is not offered without one (never $HOME).
     public var projectPath: String?
+    /// Recently chosen project folders, newest first (at most `maxRecents`).
+    public var recentProjects: [String]
+    public static let maxRecents = 8
 
     public init(hostURL: String = AppPaths.defaultHostURL, strimBinary: String? = nil, modelPath: String? = nil,
-                mtpPath: String? = nil, controlTokenPath: String = AppPaths.defaultControlTokenPath, projectPath: String? = nil) {
+                mtpPath: String? = nil, controlTokenPath: String = AppPaths.defaultControlTokenPath, projectPath: String? = nil,
+                recentProjects: [String] = []) {
+        self.recentProjects = recentProjects
         self.hostURL = hostURL; self.strimBinary = strimBinary; self.modelPath = modelPath
         self.mtpPath = mtpPath; self.controlTokenPath = controlTokenPath; self.projectPath = projectPath
     }
     enum CodingKeys: String, CodingKey {
         case hostURL = "host_url", strimBinary = "strim_binary", modelPath = "model_path"
         case mtpPath = "mtp_path", controlTokenPath = "control_token_path", projectPath = "project_path"
+        case recentProjects = "recent_projects"
     }
     public init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
@@ -30,6 +36,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         mtpPath = try c.decodeIfPresent(String.self, forKey: .mtpPath)
         controlTokenPath = try c.decodeIfPresent(String.self, forKey: .controlTokenPath) ?? AppPaths.defaultControlTokenPath
         projectPath = try c.decodeIfPresent(String.self, forKey: .projectPath)
+        recentProjects = try c.decodeIfPresent([String].self, forKey: .recentProjects) ?? []
     }
 
     /// nil when `host_url` is not a plain loopback http URL with a port.

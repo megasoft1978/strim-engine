@@ -1,0 +1,56 @@
+STEP M=1 single 27.72 ms (x1.000 vs single) final-h-identical=ref
+STEP M=4 single 33.75 ms (x1.000 vs single) final-h-identical=ref
+STEP M=4 split4 mlp-only 34.30 ms (x1.016 vs single) final-h-identical=YES
+STEP M=4 split4 all 35.22 ms (x1.044 vs single) final-h-identical=YES
+STEP M=4 pad16 mlp-only 45.95 ms (x1.361 vs single) final-h-identical=NO
+STEP M=4 pad16 gateup + split4 rest 45.85 ms (x1.359 vs single) final-h-identical=NO
+STEP M=6 single 43.51 ms (x1.000 vs single) final-h-identical=ref
+STEP M=6 split4 mlp-only 59.93 ms (x1.378 vs single) final-h-identical=YES
+STEP M=6 split4 all 62.43 ms (x1.435 vs single) final-h-identical=YES
+STEP M=6 pad16 mlp-only 50.39 ms (x1.158 vs single) final-h-identical=NO
+STEP M=6 pad16 gateup + split4 rest 60.11 ms (x1.381 vs single) final-h-identical=NO
+STEP M=8 single 50.84 ms (x1.000 vs single) final-h-identical=ref
+STEP M=8 split4 mlp-only 57.77 ms (x1.136 vs single) final-h-identical=YES
+STEP M=8 split4 all 61.14 ms (x1.203 vs single) final-h-identical=YES
+STEP M=8 pad16 mlp-only 51.83 ms (x1.020 vs single) final-h-identical=NO
+STEP M=8 pad16 gateup + split4 rest 57.27 ms (x1.127 vs single) final-h-identical=NO
+STEP M=9 single 65.47 ms (x1.000 vs single) final-h-identical=ref
+STEP M=9 split4 mlp-only 79.29 ms (x1.211 vs single) final-h-identical=NO
+STEP M=9 split4 all 85.00 ms (x1.298 vs single) final-h-identical=NO
+STEP M=9 pad16 mlp-only 59.55 ms (x0.910 vs single) final-h-identical=NO
+STEP M=9 pad16 gateup + split4 rest 70.92 ms (x1.083 vs single) final-h-identical=NO
+STEP M=11 single 76.11 ms (x1.000 vs single) final-h-identical=ref
+STEP M=11 split4 mlp-only 83.01 ms (x1.091 vs single) final-h-identical=YES
+STEP M=11 split4 all 85.33 ms (x1.121 vs single) final-h-identical=YES
+STEP M=11 pad16 mlp-only 65.47 ms (x0.860 vs single) final-h-identical=NO
+STEP M=11 pad16 gateup + split4 rest 70.99 ms (x0.933 vs single) final-h-identical=NO
+STEP M=13 single 84.43 ms (x1.000 vs single) final-h-identical=ref
+STEP M=13 split4 mlp-only 107.69 ms (x1.276 vs single) final-h-identical=NO
+STEP M=13 split4 all 110.94 ms (x1.314 vs single) final-h-identical=NO
+STEP M=13 pad16 mlp-only 83.01 ms (x0.983 vs single) final-h-identical=YES
+STEP M=13 pad16 gateup + split4 rest 84.31 ms (x0.999 vs single) final-h-identical=NO
+STEP M=14 single 85.19 ms (x1.000 vs single) final-h-identical=ref
+STEP M=14 split4 mlp-only 107.49 ms (x1.262 vs single) final-h-identical=NO
+STEP M=14 split4 all 110.43 ms (x1.296 vs single) final-h-identical=NO
+STEP M=14 pad16 mlp-only 82.94 ms (x0.974 vs single) final-h-identical=YES
+STEP M=14 pad16 gateup + split4 rest 83.60 ms (x0.981 vs single) final-h-identical=NO
+STEP M=15 single 84.85 ms (x1.000 vs single) final-h-identical=ref
+STEP M=15 split4 mlp-only 108.09 ms (x1.274 vs single) final-h-identical=NO
+STEP M=15 split4 all 112.22 ms (x1.323 vs single) final-h-identical=NO
+STEP M=15 pad16 mlp-only 83.12 ms (x0.980 vs single) final-h-identical=YES
+STEP M=15 pad16 gateup + split4 rest 85.05 ms (x1.002 vs single) final-h-identical=NO
+STEP M=16 single 82.62 ms (x1.000 vs single) final-h-identical=ref
+STEP M=16 split4 mlp-only 109.70 ms (x1.328 vs single) final-h-identical=NO
+STEP M=16 split4 all 115.22 ms (x1.395 vs single) final-h-identical=NO
+STEP M=16 pad16 mlp-only 82.45 ms (x0.998 vs single) final-h-identical=YES
+STEP M=16 pad16 gateup + split4 rest 115.47 ms (x1.398 vs single) final-h-identical=NO
+STEP M=24 single 85.63 ms (x1.000 vs single) final-h-identical=ref
+STEP M=24 split4 mlp-only 145.66 ms (x1.701 vs single) final-h-identical=NO
+STEP M=24 split4 all 164.91 ms (x1.926 vs single) final-h-identical=NO
+STEP M=24 pad16 mlp-only 85.65 ms (x1.000 vs single) final-h-identical=YES
+STEP M=24 pad16 gateup + split4 rest 165.01 ms (x1.927 vs single) final-h-identical=NO
+STEP M=32 single 85.37 ms (x1.000 vs single) final-h-identical=ref
+STEP M=32 split4 mlp-only 181.70 ms (x2.128 vs single) final-h-identical=NO
+STEP M=32 split4 all 218.24 ms (x2.556 vs single) final-h-identical=NO
+STEP M=32 pad16 mlp-only 84.84 ms (x0.994 vs single) final-h-identical=YES
+STEP M=32 pad16 gateup + split4 rest 217.69 ms (x2.550 vs single) final-h-identical=NO

@@ -1,0 +1,23 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 10,
+  "id" : "py-02",
+  "language" : "python",
+  "license" : "MIT",
+  "note" : "multi-file Python: template renderer (escape order in filters.py, filter chain order in render.py)",
+  "prompt" : "The automated tests of this Python package currently fail. Run `python3 -I -B -m unittest discover -s tests -t .` from the repository root to see the failures (standard library unittest only; there is no pip and no network). Change the package non-test source so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-python",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2122,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/__init__.py" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests\/test_tpl.py" : "cfcb1d48b5475492d36ad1c3d55fa86cae1de92e0a25e90c0da0ced4feaefac4"
+  },
+  "tree_sha256" : "6492eb87879e16c354edce0618886c8c9e9eec8eb9183d8b82f18012b39684b2",
+  "verify_cmd" : "python3 -I -B -m unittest discover -s tests -t ."
+}

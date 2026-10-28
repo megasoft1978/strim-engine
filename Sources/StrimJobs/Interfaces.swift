@@ -179,6 +179,12 @@ public protocol ChatBackend: Sendable {
     func cancelTurn(sessionID: String) async
     /// Closes the session exactly once; nil when unknown or already closing.
     func closeSession(sessionID: String) async -> HarnessJobResult?
+    /// Thinking on/off for the session's engine generation (nil = default), read when the engine session opens. Backends that cannot honor it ignore it.
+    func setThinking(sessionID: String, enabled: Bool?) async
+}
+
+public extension ChatBackend {
+    func setThinking(sessionID: String, enabled: Bool?) async {}
 }
 
 extension HarnessRunner: ChatBackend {}

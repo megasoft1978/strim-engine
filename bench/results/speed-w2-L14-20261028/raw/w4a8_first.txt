@@ -1,0 +1,7 @@
+device: Apple M5 Max os: Version 27.0.1 (Build 26A434) apple10=true
+W4A8 gate+up M=1024 MLX_qmm 6.405 ms 57.0 TF/s
+W4A8 gate+up quantize_only 0.045 ms
+W4A8 gate+up tile=64x64 sg=4 matmul 41.963 ms  total(quant+mm) 40.732 ms  = 6.36x MLX  | relRMS vs qmm 0.005943 (max 2.39)  vs exact-int8-ref 0.0004739 (max 0.268)
+W4A8 down M=1024 MLX_qmm 3.407 ms 53.6 TF/s
+W4A8 down quantize_only 0.113 ms
+W4A8 down tile=64x64 sg=4 matmul 21.029 ms  total(quant+mm) 20.898 ms  = 6.13x MLX  | relRMS vs qmm 0.005938 (max 4.19)  vs exact-int8-ref 0.0004741 (max 0.498)

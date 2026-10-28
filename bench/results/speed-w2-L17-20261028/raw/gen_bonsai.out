@@ -1,0 +1,141 @@
+=== bench/results/speed-w2-L17-20261028/prompts/p01.json promptTokens=70 gen=189
+We need to answer user: "Explain in three short paragraphs why the sky is blue and why sunsets are red." Need final with three short paragraphs. Ensure exactly three paragraphs? Yes. Short. Explain Rayleigh scattering, blue sky, red sunsets due to longer path, scattering removes blue/green, red/orange remains. Maybe mention Mie? Keep concise.
+</think>
+
+The sky is blue because sunlight scatters off molecules in the atmosphere. Shorter blue wavelengths scatter much more strongly than longer red wavelengths, so blue light is spread across the sky and reaches our eyes from all directions.
+
+At sunset, sunlight travels through a much thicker layer of air to reach us. This longer path scatters away most of the blue and green light before it reaches our eyes.
+
+What remains is the longer-wavelength red and orange light, which is why sunsets and sunrises often appear red, orange, or pink.<|im_end|>
+=== prefill 1.74s (40 tok/s) decode 20.69 tok/s peakFootprint=7.65 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p02.json promptTokens=77 gen=300
+We need to respond to user: "Write a short story (about 150 words) about a lighthouse keeper who finds a message in a bottle." Need produce final story about 150 words. Need likely count words. Let's draft around 150 words. Need maybe exactly? "about 150 words" so close. Let's craft and count.
+
+Draft:
+"The storm had not broken for three days. When it finally did, the sea threw a bottle against the lighthouse steps. Old Maren wiped salt from the glass and found a note inside, folded into a tight square.
+
+'If you are reading this, I am still alive. I am on the island beyond the fog. I cannot return. Please keep the light burning. It is the only thing that tells me the world has not forgotten me.'
+
+Maren read it twice. The island beyond the fog was a place sailors called the Drowned Shore, where no boat had returned in forty years. She looked out at the black water, then at the lamp above her, steady and golden.
+
+She did not write a reply. Instead, she polished the lens, trimmed the wick, and kept the light burning all night.
+
+By morning, the fog had lifted, and a small boat was waiting at the shore."
+
+Count words. Let's count carefully.
+The1 storm2 had3 not4 broken5 for6 three7 days8.
+=== prefill 0.62s (124 tok/s) decode 49.41 tok/s peakFootprint=8.80 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p03.json promptTokens=69 gen=124
+We need to answer user: "What are the main differences between TCP and UDP? Answer with a concise bullet list." Need final concise bullet list. Ensure no extra.
+</think>
+
+- **Reliability:** TCP guarantees delivery; UDP does not.
+- **Connection:** TCP is connection-oriented; UDP is connectionless.
+- **Ordering:** TCP preserves message order; UDP may deliver out of order.
+- **Overhead:** TCP has higher overhead; UDP is lighter and faster.
+- **Use cases:** TCP for web, email, file transfer; UDP for streaming, gaming, DNS.<|im_end|>
+=== prefill 0.66s (105 tok/s) decode 50.23 tok/s peakFootprint=8.99 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p04.json promptTokens=65 gen=300
+We need to answer user's request: "Summarize the causes of the French Revolution in five sentences." Need produce exactly five sentences? Likely yes. Need ensure five sentences. Need maybe concise. Let's craft 5 sentences, each sentence clear. Count sentences: 1) The French Revolution was caused by deep social and political inequality under the Ancien Régime, where the privileged First and Second Estates avoided most taxes while the Third Estate bore the burden. 2) Financial crisis, worsened by costly wars and royal overspending, forced the monarchy to seek new taxes and expose the weakness of the old system. 3) Enlightenment ideas about liberty, equality, and popular sovereignty inspired criticism of absolute monarchy and inspired demands for reform. 4) Economic hardship, including poor harvests, bread shortages, and high prices, intensified popular anger and made the crisis more urgent. 5) The failure of the Estates-General to resolve the tax and representation crisis, followed by the Third Estate's declaration of the National Assembly, turned political discontent into revolution.
+Check five sentences. Yes. Need final only. Ensure no semicolon? fine.
+</think>
+
+The French Revolution was caused by deep social and political inequality under the Ancien Régime, where the privileged First and Second Estates avoided most taxes while the Third Estate bore the burden.  
+Financial crisis, worsened by costly wars and royal overspending, forced the monarchy to seek new taxes and exposed the weakness of the old system.  
+
+=== prefill 0.64s (101 tok/s) decode 49.40 tok/s peakFootprint=8.94 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p05.json promptTokens=75 gen=283
+We need answer user: "Write a Python function that returns the n-th Fibonacci number iteratively, with a docstring and two example calls." Need provide code likely. Need final concise. Include function fib(n) iterative, docstring, examples. Need maybe handle n negative? Could include. Ensure two example calls. Maybe show output. Let's craft.
+</think>
+
+```python
+def fibonacci(n):
+    """
+    Return the n-th Fibonacci number iteratively.
+
+    The Fibonacci sequence is defined as:
+        F(0) = 0
+        F(1) = 1
+        F(n) = F(n - 1) + F(n - 2) for n > 1
+
+    Parameters:
+        n (int): The index of the Fibonacci number to return.
+
+    Returns:
+        int: The n-th Fibonacci number.
+
+    Raises:
+        ValueError: If n is negative.
+    """
+    if n < 0:
+        raise ValueError("n must be a non-negative integer")
+
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+
+    return a
+
+
+# Example calls
+print(fibonacci(0))  # 0
+print(fibonacci(10)) # 55
+```<|im_end|>
+=== prefill 0.64s (118 tok/s) decode 49.88 tok/s peakFootprint=8.75 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p06.json promptTokens=71 gen=300
+We need answer user: "Write a Swift function that reverses the words in a string, and explain its time complexity." Need provide Swift code and explanation. Need think about details: reverse words in string. Could mean reverse order of words, e.g. "hello world" -> "world hello". Need Swift function. Consider spaces? Usually split by spaces, reverse, join. But if multiple spaces? Could preserve? Simpler: split(separator: " ") but empty strings if multiple spaces. Better use components(separatedBy: " ") and filter? But if multiple spaces, filter removes empties and collapses spaces. If want preserve spaces? User likely simple. Could provide robust version preserving single spaces? Let's craft answer with function:
+
+func reverseWords(_ input: String) -> String {
+    return input
+        .split(separator: " ")
+        .reversed()
+        .joined(separator: " ")
+}
+
+But split(separator:) by default omits empty subsequences, so multiple spaces collapsed. If want preserve exact spaces? Could use components and filter? Actually components(separatedBy: " ") includes empty for multiple spaces. Reversing components would reverse empty strings too, preserving count? Example "a  b" components ["a","","b"] reversed ["b","","a"] joined "b  a" preserves spaces positions? It reverses tokens including empty, so spaces between words reversed? For "a  b" -> "b  a" yes
+=== prefill 0.69s (102 tok/s) decode 48.15 tok/s peakFootprint=8.73 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p07.json promptTokens=75 gen=300
+We need answer user: "Write a bash one-liner that counts the number of lines in all .txt files under the current directory recursively." Need provide one-liner. Need think about best command. Options:
+find . -type f -name '*.txt' -exec wc -l {} + | tail -n1? But wc -l output includes filenames and total line. If no files? find -print0? Need count lines in all .txt files recursively. One-liner: find . -type f -name '*.txt' -exec wc -l {} + | awk '{sum+=$1} END{print sum+0}'
+This handles multiple files, no filenames? wc -l with multiple files prints per file and total. awk sum all numeric first fields. But if filenames have spaces? find -exec wc -l {} + passes as args, okay. If no files, wc -l with no args? find -exec ... + with no matches: command not executed? Actually find -exec cmd {} + if no files, command not executed, so no output, awk END prints 0. Good.
+Alternative: find . -type f -name '*.txt' -print0 | xargs -0 wc -l | tail -n1? If no files, xargs wc -l with no args? GNU xargs without -r runs command once with no args, wc -l reads stdin? That would count stdin lines,
+=== prefill 0.67s (112 tok/s) decode 47.68 tok/s peakFootprint=8.90 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p08.json promptTokens=80 gen=300
+We need answer user: "Fix the bug: def avg(xs): return sum(xs)/len(xs)  # crashes on empty list. Show the corrected code only."
+Need provide corrected code only. Need likely handle empty list. What should return? Not specified. Could return 0? Or raise? "crashes on empty list" fix likely avoid ZeroDivisionError. Common: if not xs: return 0. Or return None? Need choose. Since only code, maybe:
+def avg(xs):
+    if not xs:
+        return 0
+    return sum(xs) / len(xs)
+Could also return None. Which is more expected? For average of empty list, mathematically undefined. But to fix crash, return 0 is common in simple exercises. Maybe return None is safer. User says crashes on empty list. Show corrected code only. Need no explanation. Which corrected code? If they expect no crash, returning 0. But if average empty list, maybe return 0.0. Let's think. In Python, statistics.mean([]) raises StatisticsError. But simple fix: if len(xs)==0: return 0. Could be accepted. Need only code. Ensure syntax.
+Final:
+def avg(xs):
+    if not xs:
+        return 0
+    return sum(xs) / len(xs)
+Could use 0.0. If xs ints, sum/len float. Return 0.
+=== prefill 0.66s (121 tok/s) decode 48.76 tok/s peakFootprint=8.75 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p09.json promptTokens=347 gen=70
+The user is asking about the current weather in Rome. I should use the get_weather tool with city="Rome". The unit is optional, so I'll use the default (probably celsius).
+</think>
+
+<tool_call>
+<function=get_weather>
+<parameter=city>
+Rome
+</parameter>
+</function>
+</tool_call><|im_end|>
+=== prefill 0.92s (378 tok/s) decode 47.64 tok/s peakFootprint=9.85 GiB
+=== bench/results/speed-w2-L17-20261028/prompts/p10.json promptTokens=377 gen=56
+The user is asking me to read the file src/main.rs and tell them how many lines it has. Let's do that.
+</think>
+
+<tool_call>
+<function=read_file>
+<parameter=path>
+src/main.rs
+</parameter>
+</function>
+</tool_call><|im_end|>
+=== prefill 0.96s (391 tok/s) decode 46.47 tok/s peakFootprint=9.86 GiB

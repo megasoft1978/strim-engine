@@ -1,0 +1,20 @@
+base OP gdn.rec  pipelined 0.9900 ms  fenced 1.1283 ms
+base OP gdn.conv  pipelined 0.1534 ms  fenced 0.2469 ms
+base OP gdn.qknorm_bg  pipelined 0.0786 ms  fenced 0.2207 ms
+base OP gdn.norm_gate  pipelined 0.0861 ms  fenced 0.2126 ms
+base OP gdn.proj_ba(2 calls)  pipelined 0.1119 ms  fenced 0.2606 ms
+new OP gdn.rec  pipelined 0.6824 ms  fenced 0.9576 ms
+new OP gdn.conv  pipelined 0.3104 ms  fenced 0.2462 ms
+new OP gdn.qknorm_bg  pipelined 0.0799 ms  fenced 0.2176 ms
+new OP gdn.norm_gate  pipelined 0.0865 ms  fenced 0.2104 ms
+new OP gdn.proj_ba(2 calls)  pipelined 0.1311 ms  fenced 0.2846 ms
+base OP gdn.rec  pipelined 0.8262 ms  fenced 1.0675 ms
+base OP gdn.conv  pipelined 0.1589 ms  fenced 0.2370 ms
+base OP gdn.qknorm_bg  pipelined 0.0793 ms  fenced 0.2188 ms
+base OP gdn.norm_gate  pipelined 0.0858 ms  fenced 0.2103 ms
+base OP gdn.proj_ba(2 calls)  pipelined 0.1108 ms  fenced 0.2591 ms
+new OP gdn.rec  pipelined 0.6892 ms  fenced 0.9577 ms
+new OP gdn.conv  pipelined 0.3030 ms  fenced 0.2502 ms
+new OP gdn.qknorm_bg  pipelined 0.0801 ms  fenced 0.2132 ms
+new OP gdn.norm_gate  pipelined 0.0877 ms  fenced 0.2058 ms
+new OP gdn.proj_ba(2 calls)  pipelined 0.1122 ms  fenced 0.2570 ms

@@ -1,0 +1,1 @@
+captured via STRIM_GDN_CAPDIR=/tmp/ps2-cap

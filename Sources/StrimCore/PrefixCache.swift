@@ -16,10 +16,25 @@ public struct CutPolicy: Equatable, Sendable {
     /// generation prompt) is almost always a cut and the next turn reuses the whole previous prompt.
     public let assistant: Int32?
     public let assistantMin: Int
-    public init(maxBlock: Int, minBlock: Int = 0, boundary: Int32? = nil, assistant: Int32? = nil, assistantMin: Int = 256) {
+    /// Tail merge: a short prompt (`limit <= tailMergeMax`, itself at most `maxBlock`) whose last cut would
+    /// leave fewer than `tailFloor` tokens is prefilled as ONE chunk. The leftover chunk (typically the
+    /// `<|im_start|>assistant` generation prompt, ~11 tokens) pays a full weight-streaming pass (~66 ms)
+    /// for no work. Only first blocks qualify: longer prompts keep the cut the next turn reuses.
+    public let tailFloor: Int
+    public let tailMergeMax: Int
+    public init(maxBlock: Int, minBlock: Int = 0, boundary: Int32? = nil, assistant: Int32? = nil, assistantMin: Int = 256,
+                tailFloor: Int = 0, tailMergeMax: Int = 0) {
         precondition(maxBlock > 0)
         self.maxBlock = maxBlock; self.minBlock = max(min(minBlock, maxBlock), 1); self.boundary = boundary
         self.assistant = assistant; self.assistantMin = max(min(assistantMin, self.minBlock), 1)
+        self.tailFloor = max(tailFloor, 0); self.tailMergeMax = min(max(tailMergeMax, 0), maxBlock)
+    }
+
+    /// True when the cut at `e` is dropped by the tail merge. Monotone in `limit`: a smaller limit
+    /// (the lookup passes count-1) merges at least whenever the chunk loop does, so a lookup never
+    /// walks to a node the chunk loop would not cut.
+    func tailMerged(_ e: Int, pos: Int, limit: Int) -> Bool {
+        tailFloor > 0 && pos == 0 && limit <= tailMergeMax && limit - e < tailFloor
     }
     public static func fixed(_ n: Int) -> CutPolicy { CutPolicy(maxBlock: n) }
     /// Fallback `<|im_start|>` id (Qwen2.5/3); the engine overrides it from the tokenizer.
@@ -36,10 +51,10 @@ public struct CutPolicy: Equatable, Sendable {
             var p = pos + (assistant == nil ? minBlock : assistantMin)
             while p < cap && p < limit {
                 if tokens[p] == b {
-                    if p - pos >= minBlock { return p }
+                    if p - pos >= minBlock { return tailMerged(p, pos: pos, limit: limit) ? nil : p }
                     // Short block: cut only before `<|im_start|>assistant`, which needs the next token.
                     if p + 1 >= limit { return nil }
-                    if tokens[p + 1] == assistant { return p }
+                    if tokens[p + 1] == assistant { return tailMerged(p, pos: pos, limit: limit) ? nil : p }
                 }
                 p += 1
             }
@@ -74,8 +89,14 @@ public struct MTPBlock {
     public let k: MLXArray      // [1,Hkv,n,D]
     public let v: MLXArray
     public let hidden: MLXArray // [1,1,5120]
+    /// Logical head index of the first stored entry (`lo`); -1 = unspecified (contiguous chain assumed).
+    /// Blocks of a full head chain are contiguous from 0; a windowed head (MTPState.base > 0) starts later.
+    public let start: Int
+    public var entries: Int { k.shape[2] }
     public var bytes: Int { k.nbytes + v.nbytes + hidden.nbytes }
-    public init(k: MLXArray, v: MLXArray, hidden: MLXArray) { self.k = k; self.v = v; self.hidden = hidden }
+    public init(k: MLXArray, v: MLXArray, hidden: MLXArray, start: Int = -1) {
+        self.k = k; self.v = v; self.hidden = hidden; self.start = start
+    }
 }
 
 public final class PrefixStore {
@@ -97,6 +118,8 @@ public final class PrefixStore {
         var stateBytes = 0                     // conv + ssm (dropped by `thinState` under budget pressure)
         var lastUse = 0
         var evicted = false
+        /// Disk-cache key (hash chain through this block); nil when the disk cache is off.
+        var diskKey: Data?
         /// A hit point needs the GDN state at its end; a thinned interior node keeps only its KV/MTP block.
         var hasState: Bool { !ssm.isEmpty }
         init(tokens: [Int32], parent: Node?, depth: Int) {
@@ -120,6 +143,8 @@ public final class PrefixStore {
     public let thinStride: Int
     private var rootChildren: [UInt64: [Node]] = [:]
     private var tick = 0
+    /// Opt-in disk spill (`STRIM_PREFIX_DISK=1`); nil = memory-only, no extra work anywhere.
+    public var disk: PrefixDisk?
 
     /// An explicit `chunk` means fixed blocks of that size; otherwise `policy` (default: `PrefixPrefill.defaultPolicy`).
     public init(budgetBytes: Int, chunk: Int? = nil, policy: CutPolicy? = nil, thinStride: Int? = nil) {
@@ -146,27 +171,92 @@ public final class PrefixStore {
         children[h]?.first { $0.tokens.elementsEqual(toks) }
     }
 
+    private struct Walk { var node: Node?; var last: Node?; var pos: Int; var mtpStop: Bool }
+
+    private func walk(_ tokens: [Int32], limit: Int, requireMTP: Bool) -> Walk {
+        var w = Walk(node: nil, last: nil, pos: 0, mtpStop: false)
+        var h: UInt64 = 0
+        var children = rootChildren
+        var prevBlock: MTPBlock? = nil
+        while let e = policy.blockEnd(tokens, from: w.pos, limit: limit) {
+            let blk = tokens[w.pos ..< e]
+            h = Self.blockHash(h, blk)
+            guard let next = find(children, h, blk) else { break }
+            if requireMTP {
+                // Whole chain must carry head state, and consecutive blocks must be contiguous
+                // (a windowed head leaves the early nodes without blocks; see MTPBlock.start).
+                guard let b = next.mtp else { w.mtpStop = true; break }
+                if let p = prevBlock, p.start >= 0, b.start >= 0, p.start + p.entries != b.start { w.mtpStop = true; break }
+                prevBlock = b
+            }
+            if next.hasState { w.node = next }
+            w.last = next
+            children = next.children; w.pos = e
+        }
+        return w
+    }
+
     /// Deepest aligned entry matching a prefix of `tokens`, using at most `maxTokens` tokens.
     /// Marks the matched chain as recently used.
     /// With `requireMTP`, only nodes carrying head state (and whose whole chain does) count.
+    /// With a disk cache, a memory miss continues on disk: verified files for the following blocks are loaded
+    /// into the trie (within the memory budget) and the walk is repeated.
     public func lookup(_ tokens: [Int32], maxTokens: Int, requireMTP: Bool = false) -> Node? {
-        var node: Node? = nil
-        var h: UInt64 = 0
-        var children = rootChildren
-        var pos = 0
         let limit = min(tokens.count, maxTokens)
-        while let e = policy.blockEnd(tokens, from: pos, limit: limit) {
-            let blk = tokens[pos ..< e]
-            h = Self.blockHash(h, blk)
-            guard let next = find(children, h, blk) else { break }
-            if requireMTP && next.mtp == nil { break }
-            if next.hasState { node = next }
-            children = next.children; pos = e
+        var w = walk(tokens, limit: limit, requireMTP: requireMTP)
+        if let disk, !w.mtpStop, loadFromDisk(disk, tokens: tokens, limit: limit, from: w.last, pos: w.pos) {
+            w = walk(tokens, limit: limit, requireMTP: requireMTP)
         }
+        let node = w.node
         tick += 1
         var n = node
         while let x = n { x.lastUse = tick; n = x.parent }
+        if let disk, let k = node?.diskKey { disk.touch(k) }
         return node
+    }
+
+    /// Loads the longest run of verified disk nodes following `last` (nil = root) for `tokens[pos...]`.
+    /// Each node counts against `budgetBytes` exactly like an inserted one; nothing beyond one node's tensors
+    /// is transiently held. Returns true if at least one node was attached.
+    private func loadFromDisk(_ disk: PrefixDisk, tokens: [Int32], limit: Int, from last: Node?, pos: Int) -> Bool {
+        var pk: Data
+        if let last { guard let k = last.diskKey else { return false }; pk = k } else { pk = disk.rootKey }
+        var plan: [(key: Data, range: Range<Int>)] = []
+        var p = pos
+        while let e = policy.blockEnd(tokens, from: p, limit: limit) {
+            let k = disk.key(parent: pk, tokens: tokens[p ..< e])
+            guard disk.has(k) else { break }
+            plan.append((k, p ..< e)); pk = k; p = e
+        }
+        guard !plan.isEmpty else { return false }
+        let t0 = Date()
+        let files = disk.readVerified(plan.map { $0.key })
+        var parent = last
+        var loaded = 0, bytes = 0
+        for (i, f) in files.enumerated() {
+            if let parent, parent.evicted { break }
+            let need = f.bytes
+            if need > budgetBytes { break }
+            if totalBytes + need > budgetBytes {
+                // Protect the chain being extended, then make room the same way an insert would.
+                tick += 1
+                var n = parent
+                while let x = n { x.lastUse = tick; n = x.parent }
+                reclaim(to: budgetBytes - need)
+                if let parent, parent.evicted { break }
+                if totalBytes + need > budgetBytes { break }
+            }
+            let blk = Array(tokens[plan[i].range])
+            let h = Self.blockHash(parent?.hash ?? 0, blk[...])
+            guard let node = PrefixDisk.makeNode(f, tokens: blk, parent: parent, hash: h, key: plan[i].key) else { break }
+            tick += 1; node.lastUse = tick
+            if let parent { parent.children[h, default: []].append(node) } else { rootChildren[h, default: []].append(node) }
+            totalBytes += node.bytes; nodeCount += 1
+            loaded += 1; bytes += node.bytes
+            parent = node
+        }
+        if loaded > 0 { disk.recordLoad(nodes: loaded, bytes: bytes, seconds: Date().timeIntervalSince(t0)) }
+        return loaded > 0
     }
 
     private func chain(of node: Node) -> [Node] {
@@ -214,13 +304,47 @@ public final class PrefixStore {
         return (m, lastBlock.hidden)
     }
 
+    /// Head state for a request whose MTP head covers only the last window of the prompt
+    /// (`from` = first logical head entry it wants; nodes before the window carry no block).
+    /// Uses the longest run of blocks ending at `node` whose entries are contiguous, drops
+    /// entries before `from`, and sets `MTPState.base`. A node without a block gives an empty
+    /// head positioned at `node.end` and no carry (the next chunk then starts its first
+    /// entry at the chunk start instead of one before it). Never throws: a missing or
+    /// non-contiguous chain only shortens the window.
+    public func restoreMTPWindow(_ node: Node, from: Int) -> (state: MTPState, carry: MLXArray?) {
+        let m = MTPState()
+        guard let tail = node.mtp else { m.base = node.end; return (m, nil) }
+        if tail.start < 0, let r = try? restoreMTP(node) { return (r.state, r.carry) }   // unspecified starts: full chain from 0
+        if tail.start < 0 { m.base = node.end; return (m, nil) }
+        var run: [MTPBlock] = [tail]
+        var n = node.parent
+        while let x = n, let b = x.mtp, b.start >= 0, run[0].start >= 0, b.start + b.entries == run[0].start {
+            run.insert(b, at: 0); n = x.parent
+        }
+        var ks = run.map { $0.k }, vs = run.map { $0.v }
+        var start = run[0].start
+        if start < from {
+            let total = run.reduce(0) { $0 + $1.entries }
+            let cut = min(from - start, total)
+            if cut >= total { m.base = start + cut; return (m, tail.hidden) }
+            let k = ks.count == 1 ? ks[0] : concatenated(ks, axis: 2)
+            let v = vs.count == 1 ? vs[0] : concatenated(vs, axis: 2)
+            ks = [k[0..., 0..., cut..., 0...]]; vs = [v[0..., 0..., cut..., 0...]]
+            start += cut
+        }
+        m.base = start
+        m.attention.keys = ks.count == 1 ? ks[0][0..., 0..., 0...] : concatenated(ks, axis: 2)
+        m.attention.values = vs.count == 1 ? vs[0][0..., 0..., 0...] : concatenated(vs, axis: 2)
+        return (m, tail.hidden)
+    }
+
     /// Store the boundary at `parent.depth + 1` blocks from the live `cache` (whose position
     /// must equal that boundary). Copies the block's KV delta; GDN arrays are immutable
     /// values, held by reference. Evicts LRU leaves to stay under budget; returns nil if the
     /// new node itself did not fit (callers then stop inserting along this chain).
     @discardableResult
     public func insert(parent: Node?, tokens: [Int32], cache: ModelCache,
-                       mtp: MTPBlock? = nil) throws -> Node? {
+                       mtp: MTPBlock? = nil, windowedHead: Bool = false, asyncEval: Bool = false) throws -> Node? {
         let depth = (parent?.depth ?? 0) + 1
         let lo = parent?.end ?? 0, hi = tokens.count
         guard hi > lo, hi - lo <= chunk, cache.position == hi else {
@@ -232,10 +356,12 @@ public final class PrefixStore {
         let h = Self.blockHash(ph, blk[...])
         if let existing = find(parent?.children ?? rootChildren, h, blk[...]) {
             tick += 1; existing.lastUse = tick
+            if let disk, let k = existing.diskKey { disk.touch(k) }
             // A node first stored without head state can gain it, once its parent has it.
-            if let mtp, existing.mtp == nil, parent == nil || parent?.mtp != nil {
+            if let mtp, existing.mtp == nil, parent == nil || parent?.mtp != nil || windowedHead {
                 existing.mtp = mtp; existing.bytes += mtp.bytes; totalBytes += mtp.bytes
                 eval(mtp.k, mtp.v, mtp.hidden)
+                if let disk, let k = existing.diskKey, let pk = parent?.diskKey ?? (parent == nil ? disk.rootKey : nil) { disk.spill(existing, key: k, parentKey: pk, force: true) }
                 evictToBudget()
                 return existing.evicted ? nil : existing
             }
@@ -258,16 +384,23 @@ public final class PrefixStore {
             node.stateBytes += conv.nbytes + ssm.nbytes
         }
         node.bytes += node.stateBytes
-        if let mtp, parent == nil || parent?.mtp != nil {
+        if let mtp, parent == nil || parent?.mtp != nil || windowedHead {
             node.mtp = mtp; node.bytes += mtp.bytes
         }
         var toEval = Array(node.k.values) + Array(node.v.values) + Array(node.conv.values) + Array(node.ssm.values)
         if let m = node.mtp { toEval += [m.k, m.v, m.hidden] }
-        eval(toEval)
+        // asyncEval: the block copies are queued behind the chunk that produced them (same stream, in order)
+        // and the caller moves on; the arrays are ordinary lazy MLX values until they run.
+        if asyncEval { MLX.asyncEval(toEval) } else { eval(toEval) }
         tick += 1; node.lastUse = tick
         if let parent { parent.children[h, default: []].append(node) }
         else { rootChildren[h, default: []].append(node) }
         totalBytes += node.bytes; nodeCount += 1
+        if let disk, let pk = parent?.diskKey ?? (parent == nil ? disk.rootKey : nil) {
+            let k = disk.key(parent: pk, tokens: blk[...])
+            node.diskKey = k
+            disk.spill(node, key: k, parentKey: pk)
+        }
         evictToBudget()
         return node.evicted ? nil : node
     }
@@ -369,8 +502,16 @@ public enum PrefixPrefill {
                          minBlock: Int(env["STRIM_PREFIX_CUT_MIN"] ?? "") ?? defaultMinBlock,
                          boundary: boundaryLock.withLock { boundaryId },
                          assistant: assistantMin > 0 ? boundaryLock.withLock { assistantId } : nil,
-                         assistantMin: assistantMin)
+                         assistantMin: assistantMin,
+                         tailFloor: Int(env["STRIM_PREFIX_TAIL_FLOOR"] ?? "") ?? defaultTailFloor,
+                         tailMergeMax: Int(env["STRIM_PREFIX_TAIL_MAX"] ?? "") ?? defaultTailMergeMax)
     }
+
+    /// Tail merge (see `CutPolicy.tailFloor`): prompts of at most `defaultTailMergeMax` tokens whose
+    /// final chunk would be under `defaultTailFloor` tokens run as one chunk. `STRIM_PREFIX_TAIL_FLOOR=0`
+    /// disables it (as does `STRIM_PREFIX_CUTS=fixed`).
+    public static let defaultTailFloor = 128
+    public static let defaultTailMergeMax = 768
 
     private static let boundaryLock = NSLock()
     nonisolated(unsafe) private static var boundaryId: Int32 = CutPolicy.imStartId
@@ -472,7 +613,7 @@ public enum PrefixPrefill {
                     if cut != nil, cache != nil, end - 1 > lo {
                         block = MTPBlock(k: contiguous(k[0..., 0..., lo ..< (end - 1), 0...]),
                                          v: contiguous(v[0..., 0..., lo ..< (end - 1), 0...]),
-                                         hidden: carry!)
+                                         hidden: carry!, start: lo)
                     }
                     eval(k, v, carry!)
                 }

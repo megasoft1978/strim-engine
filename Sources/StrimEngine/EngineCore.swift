@@ -88,15 +88,42 @@ final class PrefillJob {
     var carry: MLXArray?
     var node: PrefixStore.Node?
     var canInsert = true
+    /// Probe of the previously submitted chunk (`EngineCore.prefillPipe`): waited on after the next chunk is queued.
+    var probe: MLXArray?
     var matched = 0
     var headOut: MLXArray?
     var logits: MLXArray?
     var lastHidden: MLXArray?
     var seedToken: Int32 = -1
+    /// First logical MTP head entry this job's head covers (0 = whole prompt). > 0 for long prompts:
+    /// the head only prefills the last `headWindow` tokens (`windowStart`).
+    var headStart = 0
+    var headSkipped = 0, headRan = 0
     var hot: HotState?
     var hs: [MLXArray] = []
     init(tokens: [Int32], live: ModelCache) { self.tokens = tokens; self.live = live }
     var done: Bool { pos >= tokens.count }
+
+    /// Whether a cold prefill runs the MTP head (~2.8% of prefill, bench/results/speed-w2-L0-20261028).
+    /// A prefetch (`prefetch`) always does: it exists to leave head blocks in the trie for later requests.
+    /// A real request that will not speculate (`wantMTP` false, e.g. sampled with STRIM_SAMPLED_DEPTH0=1)
+    /// or whose draft depth is 0 never reads the head state, so it skips the head.
+    /// `STRIM_MTP_PREFILL=always` restores the old unconditional head prefill.
+    static func wantsHead(hasHead: Bool, wantMTP: Bool, depth: Int, prefetch: Bool,
+                          env: [String: String] = ProcessInfo.processInfo.environment) -> Bool {
+        guard hasHead else { return false }
+        if prefetch || env["STRIM_MTP_PREFILL"] == "always" { return true }
+        return wantMTP && depth > 0
+    }
+
+    /// MTP head window for a cold prefill of `count` tokens. Entry i of the head pairs the target hidden at
+    /// i with token i+1, depends only on its own pair, and RoPE is relative, so the head can start anywhere;
+    /// it only drafts, so its context length affects acceptance, never the output. Default off (measure first); suggested 4096
+    /// (`STRIM_MTP_WINDOW=N`; 0 = whole prompt, the pre-window behavior). Returns 0 when the prompt fits.
+    static func windowStart(count: Int, env: [String: String] = ProcessInfo.processInfo.environment) -> Int {
+        let w = Int(env["STRIM_MTP_WINDOW"] ?? "") ?? 0
+        return w > 0 && count > w ? count - w : 0
+    }
 
     /// Jumps to the deepest trie node past `pos` that matches `tokens` (restored state is identical
     /// to computed state), so a request that waited behind a leader reuses what the leader inserted.
@@ -104,12 +131,16 @@ final class PrefillJob {
     /// so far, and a lookup only ever finds the same cuts the chunk loop would produce.
     @discardableResult
     func adoptCachedPrefix(_ store: PrefixStore, requireMTP: Bool) throws -> Bool {
+        // A windowed head never requires head blocks on the whole chain: nodes before the window carry none.
+        let windowed = requireMTP && headStart > 0
         guard hot == nil, !done,
-              let hit = store.lookup(tokens, maxTokens: tokens.count - 1, requireMTP: requireMTP),
+              let hit = store.lookup(tokens, maxTokens: tokens.count - 1, requireMTP: requireMTP && !windowed),
               hit.end > pos else { return false }
         let restored = try store.restore(hit)
-        if requireMTP { let r = try store.restoreMTP(hit); mtp = r.state; carry = r.carry }
+        if windowed { let r = store.restoreMTPWindow(hit, from: headStart); mtp = r.state; carry = r.carry }
+        else if requireMTP { let r = try store.restoreMTP(hit); mtp = r.state; carry = r.carry }
         live = restored
+        live.kvReserve = tokens.count
         pos = hit.end; node = hit; matched = hit.end; canInsert = true
         return true
     }
@@ -130,6 +161,7 @@ final class Request {
     var cache: ModelCache?
     var next: Int32 = -1
     var sampler: Sampler?
+    var constraint: RequestConstraint?
     var decoder: StreamDecoder
     var parser: ToolCallParser
     var gen: [Int32] = []
@@ -172,12 +204,23 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
     var sched = Scheduler()
     var batch: BatchedModelCache?
     var batchOrder: [Int] = []
+    var grammar: GrammarEngine?
+    var deviceMasks: DeviceMasks?
     var hotLRU: [SessionID] = []
     var admitted: [Int: Int] = [:]
     var nextSession: UInt64 = 0
     var stopFlag = false
     var unhealthy: String?
     var unitsRun = 0
+    /// Per-phase wall clock on stderr (`STRIM_SERVER_LOG`): template+tokenize in `append`, queue wait, per chunk
+    /// graph build / head / eval / trie insert, finish to first emit. Diagnostics only.
+    static let phaseLog = ProcessInfo.processInfo.environment["STRIM_SERVER_LOG"] != nil
+    static func phase(_ s: @autoclosure () -> String) {
+        if phaseLog { FileHandle.standardError.write(Data("[phase] \(s())\n".utf8)) }
+    }
+    /// STRIM_PREFILL_PIPE=1: a non-final cold chunk is submitted with asyncEval and the host builds the next chunk's
+    /// graph while the GPU runs it (at most two chunks in flight). Same kernels in the same order, so results are identical.
+    static let prefillPipe = ProcessInfo.processInfo.environment["STRIM_PREFILL_PIPE"] == "1"
     static let trace = ProcessInfo.processInfo.environment["STRIM_ENGINE_TRACE"] != nil
     /// STRIM_MEM_TRACE=1: MLX memory per work unit and after weight load (stderr). Off by default.
     static let memTrace = ProcessInfo.processInfo.environment["STRIM_MEM_TRACE"] != nil
@@ -219,7 +262,10 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
             // admission and `relieveMemoryPressure`, and a hard MLX limit below a transient peak would fail a request.
             Memory.memoryLimit = max(cfg.memoryBudgetBytes, Int(Double(ProcessInfo.processInfo.physicalMemory) * 0.70), weightBytes + (2 << 30))
             if let c = cfg.mlxCacheLimitBytes { Memory.cacheLimit = c }
-            if let b = cfg.prefixCacheBytes { prefix = PrefixStore(budgetBytes: b) }
+            if let b = cfg.prefixCacheBytes {
+                prefix = PrefixStore(budgetBytes: b)
+                prefix?.disk = PrefixDisk.fromEnvironment(modelDir: cfg.modelDir, headDir: cfg.headDir, policy: prefix!.policy)
+            }
             if Self.memTrace { memLog("weights-expected=\(weightBytes >> 20)MB after-open") }
             // Warm kernels / compiled functions on this thread before any request is timed.
             let warm: [Int32] = [9707, 1234, 5678, 198, 2, 220, 17, 15]
@@ -322,6 +368,8 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
     func append(_ id: SessionID, _ input: TurnInput) throws -> Int {
         let s = try session(id)
         guard s.activeRequest == nil else { throw EngineError.busy(id) }
+        let tAppend = Date()
+        defer { if Self.phaseLog { Self.phase("append (template+tokenize) \(String(format: "%.1f", Date().timeIntervalSince(tAppend) * 1000)) ms ids=\(s.ids.count)") } }
         switch input {
         case let .messages(m):
             guard s.mode != .ids else { throw EngineError.badInput("session is in raw-ids mode") }
@@ -408,6 +456,7 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
                 // STRIM_SAMPLED_DEPTH0=1 restores depth-0 decode for sampled requests (bench baseline).
                 req.wantMTP = head != nil && (params.isGreedy || ProcessInfo.processInfo.environment["STRIM_SAMPLED_DEPTH0"] == nil)
                 if !params.isGreedy { req.sampler = Sampler(params: params) }
+                if let spec = params.constraint { req.constraint = try makeConstraint(spec, startsInThink: s.opensReasoning) }
                 var hot: HotState? = nil
                 if let h = s.hot {
                     if hotUsable(h, ids: ids, greedyMTP: req.wantMTP) { hot = h } else { dropHot(s) }
@@ -422,7 +471,8 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
                     job.hot = hot
                     req.job = job
                 } else {
-                    req.job = try coldJob(ids)
+                    req.job = try coldJob(ids, head: PrefillJob.wantsHead(hasHead: head != nil, wantMTP: req.wantMTP,
+                                                                           depth: cfg.mtpDepth, prefetch: false))
                 }
                 s.activeRequest = requestId
                 requests[requestId] = req
@@ -468,9 +518,11 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
     /// (`PrefillJob.adoptCachedPrefix`), not at admission: requests admitted together would all
     /// see the same empty trie, while a follower's first chunk runs after the leader's inserts.
     /// Prefill is FIFO within a class, so followers simply wait their turn; no in-flight waiting.
-    func coldJob(_ ids: [Int32]) throws -> PrefillJob {
+    func coldJob(_ ids: [Int32], head wantHead: Bool = true) throws -> PrefillJob {
         let j = PrefillJob(tokens: ids, live: ModelCache())
-        j.mtp = head != nil ? MTPState() : nil
+        j.live.kvReserve = ids.count
+        j.mtp = head != nil && wantHead ? MTPState() : nil
+        if j.mtp != nil { j.headStart = PrefillJob.windowStart(count: ids.count) }
         return j
     }
 
@@ -495,6 +547,7 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
         admitted[r.id] = nil
         requests[r.id] = nil
         if r.session?.activeRequest == r.id { r.session?.activeRequest = nil }
+        r.stream?.constraint = nil
         r.job = nil; r.stream = nil; r.cache = nil
     }
 
@@ -530,6 +583,9 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
         if let st = r.stream, st.stats.drafts > r.drafts0 {
             r.usage.mtpAccept = Double(st.stats.acceptedDrafts - r.accepted0) / Double(st.stats.drafts - r.drafts0)
             r.usage.mtpPasses = st.stats.passes - r.passes0
+            if ProcessInfo.processInfo.environment["STRIM_TIMING"] != nil {
+                FileHandle.standardError.write(Data("req \(r.id) prompt \(r.usage.promptTokens) mtp_accept \(String(format: "%.4f", r.usage.mtpAccept ?? 0)) passes \(r.usage.mtpPasses ?? 0)\n".utf8))
+            }
         }
         if let s = r.session {
             if reason == .cancelled {
@@ -607,6 +663,7 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
             r.gen.append(t)
             if r.stop.contains(t) { reason = .stop; break }
             visible.append(t)
+            r.constraint?.advance(t)
             if r.gen.count >= r.params.maxTokens { reason = .length; break }
         }
         if r.tFirst == nil {
@@ -708,7 +765,10 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
 
     func prefillUnit(_ r: Request) throws {
         guard let j = r.job else { throw EngineError.badInput("request has no prefill job") }
-        if r.tPrefillStart == nil { r.tPrefillStart = Date() }
+        if r.tPrefillStart == nil {
+            r.tPrefillStart = Date()
+            if Self.phaseLog { Self.phase("r\(r.id) queue \(String(format: "%.1f", r.tPrefillStart!.timeIntervalSince(r.submitted) * 1000)) ms (submit to first prefill unit)") }
+        }
         if j.hot != nil { try hotChunk(r, j) } else { try coldChunk(r, j) }
         if j.done { try finishPrefill(r, j) }
     }
@@ -718,16 +778,19 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
     /// `enginebench` checks it against `SpecPrefill.run`.
     func coldChunk(_ r: Request, _ j: PrefillJob) throws {
         let policy = prefix?.policy ?? PrefixPrefill.defaultPolicy
-        if let prefix, try j.adoptCachedPrefix(prefix, requireMTP: head != nil) { r.usage.cachedTokens = j.matched }
+        if let prefix, try j.adoptCachedPrefix(prefix, requireMTP: j.mtp != nil) { r.usage.cachedTokens = j.matched }
         let tokens = j.tokens
         let pos = j.pos
         let cut = policy.blockEnd(tokens, from: pos, limit: tokens.count)
         let end = cut ?? tokens.count
         let last = end == tokens.count
         let part = Array(tokens[pos ..< end])
+        let ph0 = Date()
+        let pipe = Self.prefillPipe && !last
         var h = try store.embedding("language_model.model.embed_tokens", tokens: part)
             .reshaped([1, part.count, 5120])
         for i in 0 ..< 64 { h = try DecoderLayer.forward(h, store: store, layer: i, cache: j.live) }
+        let ph1 = Date()
         j.live.position += part.count
         let m = part.count
         if last {
@@ -739,34 +802,71 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
         }
         var block: MTPBlock? = nil
         if let head, let mtp = j.mtp {
-            let hn = try store.rmsNorm("language_model.model.norm", h)
-            var htoks = pos == 0 ? Array(tokens[1 ..< end]) : part
-            var hid = j.carry.map { concatenated([$0, hn[0..., 0 ..< (m - 1), 0...]], axis: 1) }
-                ?? hn[0..., 0 ..< (m - 1), 0...]
-            if last {
-                j.seedToken = r.sampler?.sampleFirst(j.logits!) ?? Int32(argMax(j.logits!).item(Int32.self))
-                htoks.append(j.seedToken)
-                hid = j.carry.map { concatenated([$0, hn], axis: 1) } ?? hn
-            }
-            let lo = pos == 0 ? 0 : pos - 1
-            if !htoks.isEmpty {
-                j.headOut = try MTP.step(tokens: htoks, hidden: hid, target: store, head: head, state: mtp)
-            }
-            j.carry = hn[0..., (m - 1) ..< m, 0...]
-            if let k = mtp.attention.keys, let v = mtp.attention.values {
-                if cut != nil, prefix != nil, end - 1 > lo {
-                    block = MTPBlock(k: contiguous(k[0..., 0..., lo ..< (end - 1), 0...]),
-                                     v: contiguous(v[0..., 0..., lo ..< (end - 1), 0...]),
-                                     hidden: j.carry!)
+            // Head entry i pairs target hidden i with token i+1. This chunk produces logical entries
+            // e0 ..< end-1 (+ the seed entry end-1 on the last chunk); a windowed head (j.headStart > 0)
+            // starts at s = max(e0, headStart), so chunks wholly before the window skip the head.
+            // Without a carry (trie hit on a node that has no head block) the first entry is the chunk's own.
+            let e0 = pos == 0 ? 0 : (j.carry != nil ? pos - 1 : pos)
+            let s = max(e0, j.headStart)
+            if s >= (last ? end : end - 1) {
+                j.headSkipped += 1
+                j.carry = try store.rmsNorm("language_model.model.norm", h[0..., (m - 1) ..< m, 0...])
+                if pipe { asyncEval(j.carry!) } else { eval(j.carry!) }
+            } else {
+                let hn = try store.rmsNorm("language_model.model.norm", h)
+                var htoks = pos == 0 ? Array(tokens[1 ..< end]) : (j.carry != nil ? part : Array(tokens[(pos + 1) ..< end]))
+                var hid = j.carry.map { concatenated([$0, hn[0..., 0 ..< (m - 1), 0...]], axis: 1) }
+                    ?? hn[0..., 0 ..< (m - 1), 0...]
+                if last {
+                    j.seedToken = firstToken(r, j.logits!)
+                    htoks.append(j.seedToken)
+                    hid = j.carry.map { concatenated([$0, hn], axis: 1) } ?? hn
                 }
-                eval(k, v, j.carry!)
+                if s > e0 { htoks = Array(htoks.dropFirst(s - e0)); hid = hid[0..., (s - e0)..., 0...] }
+                j.headRan += 1
+                if !htoks.isEmpty {
+                    if mtp.attention.offset == 0 { mtp.base = s }
+                    j.headOut = try MTP.step(tokens: htoks, hidden: hid, target: store, head: head, state: mtp)
+                }
+                j.carry = hn[0..., (m - 1) ..< m, 0...]
+                if let k = mtp.attention.keys, let v = mtp.attention.values {
+                    if cut != nil, prefix != nil, end - 1 > s {
+                        let a = s - mtp.base, b = end - 1 - mtp.base
+                        block = MTPBlock(k: contiguous(k[0..., 0..., a ..< b, 0...]),
+                                         v: contiguous(v[0..., 0..., a ..< b, 0...]),
+                                         hidden: j.carry!, start: s)
+                    }
+                    if pipe { asyncEval(k, v, j.carry!) } else { eval(k, v, j.carry!) }
+                }
             }
+        } else if last {                 // head skipped (no speculation for this request): still need the first token
+            j.seedToken = firstToken(r, j.logits!)
         }
-        if !last { eval(j.live) }
+        let ph2 = Date()
+        if !last { if pipe { asyncEval(j.live) } else { eval(j.live) } }
+        let ph3 = Date()
+        if last, ProcessInfo.processInfo.environment["STRIM_TIMING"] != nil {
+            FileHandle.standardError.write(Data("coldjob tokens \(tokens.count) head_start \(j.headStart) head_skipped \(j.headSkipped) head_ran \(j.headRan)\n".utf8))
+        }
         j.pos = end
         if let prefix, j.canInsert, cut != nil {
-            j.node = try prefix.insert(parent: j.node, tokens: Array(tokens[0 ..< end]), cache: j.live, mtp: block)
+            j.node = try prefix.insert(parent: j.node, tokens: Array(tokens[0 ..< end]), cache: j.live, mtp: block,
+                                          windowedHead: j.headStart > 0, asyncEval: pipe)
             if j.node == nil { j.canInsert = false }   // did not fit: keep computing, stop storing
+        }
+        if pipe {
+            // Bound the queue to two chunks: wait for the previous chunk only after this one is submitted.
+            let p = h[0..., (m - 1) ..< m, 0...]
+            asyncEval(p)
+            if let old = j.probe { eval(old) }
+            j.probe = p
+        } else {
+            j.probe = nil
+        }
+        if Self.phaseLog {
+            let ph4 = Date()
+            func ms(_ a: Date, _ b: Date) -> String { String(format: "%.1f", b.timeIntervalSince(a) * 1000) }
+            Self.phase("r\(r.id) chunk pos=\(pos) n=\(m) last=\(last) build=\(ms(ph0, ph1)) head=\(ms(ph1, ph2)) eval=\(ms(ph2, ph3)) insert=\(ms(ph3, ph4)) total=\(ms(ph0, ph4))")
         }
         if last, r.wantMTP, let head, let mtp = j.mtp, let o = j.headOut {
             try SpecStream.setSeed(from: o, store: store, head: head, mtp: mtp, chain: QwenModel.defaultDraftChain)
@@ -784,7 +884,7 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
         j.pos = end
         if j.done, r.wantMTP, let stream = j.hot?.stream {
             let hidden = j.hs.count == 1 ? j.hs[0] : concatenated(j.hs, axis: 1)
-            let nextTok = r.sampler?.sampleFirst(j.logits!) ?? Int32(argMax(j.logits!).item(Int32.self))
+            let nextTok = firstToken(r, j.logits!)
             try stream.reseed(appended: j.tokens, hidden: hidden, nextToken: nextTok)
             j.seedToken = nextTok
         }
@@ -792,6 +892,8 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
     }
 
     func finishPrefill(_ r: Request, _ j: PrefillJob) throws {
+        let tFin = Date()
+        defer { if Self.phaseLog && r.cont != nil { Self.phase("r\(r.id) finishPrefill->first emit \(String(format: "%.1f", Date().timeIntervalSince(tFin) * 1000)) ms; prefill unit start->now \(String(format: "%.1f", Date().timeIntervalSince(r.tPrefillStart ?? tFin) * 1000)) ms") } }
         guard let logits = j.logits else { throw EngineError.badInput("prefill produced no logits") }
         if r.cont == nil {                       // prefetch: the trie has the chunks, nothing to decode
             finish(r, .length)
@@ -803,17 +905,18 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
             if let hs = j.hot?.stream {
                 r.stream = hs
             } else {
-                r.stream = SpecStream(store: store, head: head, cache: j.live, mtp: j.mtp!, seedToken: j.seedToken,
+                r.stream = SpecStream(store: store, head: head, cache: j.live, mtp: j.mtp ?? MTPState(), seedToken: j.seedToken,
                                       lastHidden: j.lastHidden, depth: cfg.mtpDepth)
             }
             if let sm = r.sampler { r.stream!.enableSampling(sm.config) } else { r.stream!.disableSampling() }
+            r.stream!.constraint = r.constraint
             first = r.stream!.pending
             r.drafts0 = r.stream!.stats.drafts; r.accepted0 = r.stream!.stats.acceptedDrafts; r.passes0 = r.stream!.stats.passes
         } else if var sm = r.sampler {
-            first = sm.sample(logits)
+            first = sm.sample(r.constraint?.apply(logits) ?? logits)
             r.sampler = sm
         } else {
-            first = Int32(argMax(logits).item(Int32.self))
+            first = Int32(argMax(r.constraint?.apply(logits) ?? logits).item(Int32.self))
         }
         r.next = first
         r.job = nil
@@ -846,7 +949,8 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
         if let reason = emit(r, [nt]) { finish(r, reason) }
     }
 
-    func pick(_ r: Request, _ logits: MLXArray) -> Int32 {
+    func pick(_ r: Request, _ rawLogits: MLXArray) -> Int32 {
+        let logits = r.constraint?.apply(rawLogits) ?? rawLogits
         if var sm = r.sampler {
             let t = sm.sample(logits); r.sampler = sm; return t
         }
@@ -875,7 +979,7 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
         guard members.count == batchOrder.count else { throw EngineError.badInput("batch out of sync") }
         let lg = try BatchModel.forward(tokens: members.map { [$0.next] }, store: store, cache: bc)
         let toks: [Int32]
-        if members.allSatisfy({ $0.sampler == nil }) {
+        if members.allSatisfy({ $0.sampler == nil && $0.constraint == nil }) {
             toks = argMax(lg, axis: -1).reshaped([members.count]).asArray(Int32.self)
         } else {
             toks = members.enumerated().map { (i, r) in pick(r, lg[i, 0]) }

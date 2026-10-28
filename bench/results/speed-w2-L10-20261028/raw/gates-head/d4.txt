@@ -1,0 +1,4 @@
+batch vs single logits: max 7.31250
+sequential 3.438 s  7.0 tok/s/req  27.9 aggregate
+batched    1.048 s  22.9 tok/s/req  91.6 aggregate
+tokens match: yes

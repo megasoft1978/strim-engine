@@ -59,7 +59,7 @@ public enum ClaudeSandbox {
     /// Profile text. `authFile`: the single real file P/M may read for login (never the rest of ~/.claude*).
     public static func profile(workdir: String, runDir: String, net: Net, claudeBin: String, authFile: String? = nil,
                                home: String = NSHomeDirectory(), goCache: String? = nil, extraReadable: [String] = [],
-                               allowPrefsDaemon: Bool = false, keychainFile: String? = nil) -> String {
+                               allowPrefsDaemon: Bool = false, keychainFile: String? = nil, readOnlyPaths: [String] = []) -> String {
         var sp = SandboxProfile(access: .write, writableRoots: [workdir, runDir] + (goCache.map { [$0] } ?? []), jobTmp: runDir + "/tmp",
                                 home: home, extraReadable: (runtimeReadable(claudeBin: claudeBin, home: home) + extraReadable).filter { !ReadableRoots.isForbidden($0, home: home) })
         sp.gitWritable = []
@@ -92,6 +92,8 @@ public enum ClaudeSandbox {
                 for v in variants(dir) + variants((dir as NSString).deletingLastPathComponent) { p += "(allow file-read-metadata (literal \(quote(v))))\n" }
             }
         }
+        // Paid arms: the task's test paths cannot be written (Bash children inherit this profile). Empty for the local arm.
+        p += PaidBash.profileSuffix(workdir: workdir, testPaths: readOnlyPaths)
         return p
     }
 
@@ -158,6 +160,11 @@ public enum BashAllow {
             switch language ?? "" {
             case "go": bins += ["go", "gofmt"]
             case "swift": bins += ["swift"]
+            case "typescript", "javascript": bins += ["node", "tsc"]
+            case "react": bins += ["bun"]
+            case "rust": bins += ["cargo"]
+            case "ruby": bins += ["ruby"]
+            case "python": bins += ["python3"]
             default: break
             }
             for b in bins where !p.contains(b) { p.append(b) }

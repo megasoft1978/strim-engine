@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 12,
+  "id" : "tf-20",
+  "language" : "swift",
+  "license" : "MIT",
+  "note" : "multi-file Swift: Interval validation, merge, free-slot computation (6 injected bugs in 3 files)",
+  "prompt" : "The automated tests of this Swift package currently fail. Run `swift test --build-system native --disable-sandbox` from the repository root to see the failures. Change the package non-test source code so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-swift",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1700,
+  "test_paths" : [
+    "Tests"
+  ],
+  "test_sha256" : {
+    "Tests\/IntervalsTests\/IntervalsTests.swift" : "a9c56ddc11a5a99aeb0051a3b03ba1b7a71023e94f9876c2db4c2952a7176c86"
+  },
+  "tree_sha256" : "f2388cea60112181c31865c95d420f2dd47af22aa561ec26577901ea215e9c10",
+  "verify_cmd" : "swift test --build-system native --disable-sandbox"
+}

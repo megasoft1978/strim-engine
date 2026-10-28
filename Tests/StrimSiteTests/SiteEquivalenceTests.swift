@@ -17,5 +17,8 @@ import Testing
         #expect(res.readme == readme)
         let data = readString(repoRoot + "/site/data/results.json")
         #expect(res.dataJSON == data)
+        // the generated comparison data, charts and the chart CSS block must match what is committed
+        #expect(res.generated.keys.contains("site/data/headline.json"))
+        for (rel, content) in res.generated { #expect(content == readString(repoRoot + "/" + rel), "\(rel) differs from the committed file") }
     }
 }

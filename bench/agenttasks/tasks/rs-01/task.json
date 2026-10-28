@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 8,
+  "id" : "rs-01",
+  "language" : "rust",
+  "license" : "MIT",
+  "note" : "Rust: closed interval length\/contains and merge (sort key, adjacency)",
+  "prompt" : "The automated tests of this Rust crate currently fail. Run `cargo test --offline` from the repository root to see the failures (the crate has no dependencies; there is no network). Change the crate's non-test source so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-rust",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1336,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/intervals.rs" : "d86a299af25f1e1c6a4af17c97fcb85df0aab7cf65e72faba19e654882be8593"
+  },
+  "tree_sha256" : "ed46782f4019c7026b76336a169c264b3100c22b0c498ed18e4c830a0989483a",
+  "verify_cmd" : "cargo test --offline --quiet"
+}

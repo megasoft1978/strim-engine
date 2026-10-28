@@ -1,0 +1,115 @@
+diff --git a/bump.go b/bump.go
+index 2a4c0b4..f961b39 100644
+--- a/bump.go
++++ b/bump.go
+@@ -10,8 +10,11 @@ func Bump(v Version, kind string) (Version, error) {
+ 	case "major":
+ 		return Version{Major: v.Major + 1}, nil
+ 	case "minor":
+-		return Version{Major: v.Major, Minor: v.Minor + 1, Patch: v.Patch}, nil
++		return Version{Major: v.Major, Minor: v.Minor + 1}, nil
+ 	case "patch":
++		if len(v.Pre) > 0 {
++			return Version{Major: v.Major, Minor: v.Minor, Patch: v.Patch}, nil
++		}
+ 		return Version{Major: v.Major, Minor: v.Minor, Patch: v.Patch + 1}, nil
+ 	}
+ 	return v, fmt.Errorf("semver: unknown bump %q", kind)
+diff --git a/compare.go b/compare.go
+index b5402cf..443a15a 100644
+--- a/compare.go
++++ b/compare.go
+@@ -22,13 +22,16 @@ func Compare(a, b Version) int {
+ 	if c := cmpInt(a.Minor, b.Minor); c != 0 {
+ 		return c
+ 	}
++	if c := cmpInt(a.Patch, b.Patch); c != 0 {
++		return c
++	}
+ 	switch {
+ 	case len(a.Pre) == 0 && len(b.Pre) == 0:
+ 		return 0
+ 	case len(a.Pre) == 0:
+-		return -1
+-	case len(b.Pre) == 0:
+ 		return 1
++	case len(b.Pre) == 0:
++		return -1
+ 	}
+ 	for i := 0; i < len(a.Pre) && i < len(b.Pre); i++ {
+ 		if c := cmpIdent(a.Pre[i], b.Pre[i]); c != 0 {
+@@ -43,7 +46,7 @@ func cmpIdent(x, y string) int {
+ 	yn, ye := strconv.Atoi(y)
+ 	switch {
+ 	case xe == nil && ye == nil:
+-		return cmpIdent2(x, y)
++		return cmpInt(xn, yn)
+ 	case xe == nil:
+ 		return -1
+ 	case ye == nil:
+diff --git a/constraint.go b/constraint.go
+index 6355b63..9ebd7f2 100644
+--- a/constraint.go
++++ b/constraint.go
+@@ -20,7 +20,7 @@ func Satisfies(v Version, c string) (bool, error) {
+ 
+ func check(v Version, t string) (bool, error) {
+ 	op, rest := "=", t
+-	for _, p := range []string{">", "<", ">=", "<=", "=", "^", "~"} {
++	for _, p := range []string{">=", "<=", ">", "<", "=", "^", "~"} {
+ 		if strings.HasPrefix(t, p) {
+ 			op, rest = p, t[len(p):]
+ 			break
+@@ -41,9 +41,14 @@ func check(v Version, t string) (bool, error) {
+ 		return Compare(v, lo) < 0, nil
+ 	case "^":
+ 		hi := Version{Major: lo.Major + 1}
++		if lo.Major == 0 && lo.Minor > 0 {
++			hi = Version{Minor: lo.Minor + 1}
++		} else if lo.Major == 0 {
++			hi = Version{Patch: lo.Patch + 1}
++		}
+ 		return Compare(v, lo) >= 0 && Compare(v, hi) < 0, nil
+ 	case "~":
+-		hi := Version{Major: lo.Major + 1}
++		hi := Version{Major: lo.Major, Minor: lo.Minor + 1}
+ 		return Compare(v, lo) >= 0 && Compare(v, hi) < 0, nil
+ 	}
+ 	return Compare(v, lo) == 0, nil
+diff --git a/parse.go b/parse.go
+index ec01855..d659ec9 100644
+--- a/parse.go
++++ b/parse.go
+@@ -17,11 +17,11 @@ func Parse(s string) (Version, error) {
+ 	orig := s
+ 	s = strings.TrimPrefix(strings.TrimSpace(s), "v")
+ 	var v Version
+-	if i := strings.IndexByte(s, '-'); i >= 0 {
+-		v.Pre = strings.Split(s[i+1:], ".")
++	if i := strings.IndexByte(s, '+'); i >= 0 {
+ 		s = s[:i]
+ 	}
+-	if i := strings.IndexByte(s, '+'); i >= 0 {
++	if i := strings.IndexByte(s, '-'); i >= 0 {
++		v.Pre = strings.Split(s[i+1:], ".")
+ 		s = s[:i]
+ 	}
+ 	parts := strings.Split(s, ".")
+@@ -31,7 +31,7 @@ func Parse(s string) (Version, error) {
+ 	nums := []*int{&v.Major, &v.Minor, &v.Patch}
+ 	for i, p := range parts {
+ 		n, err := strconv.Atoi(p)
+-		if err != nil || n < 0 {
++		if err != nil || n < 0 || (len(p) > 1 && p[0] == '0') {
+ 			return v, fmt.Errorf("semver: %q: bad number %q", orig, p)
+ 		}
+ 		*nums[i] = n
+@@ -41,5 +41,8 @@ func Parse(s string) (Version, error) {
+ 
+ func (v Version) String() string {
+ 	s := fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch)
++	if len(v.Pre) > 0 {
++		s += "-" + strings.Join(v.Pre, ".")
++	}
+ 	return s
+ }

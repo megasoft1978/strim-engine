@@ -9,6 +9,7 @@ import StrimServer
 
 // strim serve <model> [mtpHead] [--port N=8203] [--token-file PATH] [--no-auth] [--model-dir DIR]...
 //                              [--max-inflight N] [--max-background N] [--no-admission]
+//                              [--prefix-disk] [--prefix-disk-dir DIR]
 //
 // Engine + OpenAI-compatible HTTP server in one process, bound to 127.0.0.1. A bearer token is required
 // unless --no-auth is given; it lives in ~/.strim/token (0600) and only the path is printed.
@@ -32,6 +33,11 @@ func runServe(_ args: [String]) {
             return args[i]
         }
         if a == "--no-auth" { noAuth = true }
+        else if a == "--prefix-disk" { setenv("STRIM_PREFIX_DISK", "1", 1) }
+        else if a == "--prefix-disk-dir" || a.hasPrefix("--prefix-disk-dir=") {
+            setenv("STRIM_PREFIX_DISK", "1", 1)
+            setenv("STRIM_PREFIX_DISK_DIR", (value() as NSString).expandingTildeInPath, 1)
+        }
         else if a == "--model-dir" || a.hasPrefix("--model-dir=") { modelDirs.append((value() as NSString).expandingTildeInPath) }
         else if a == "--port" || a.hasPrefix("--port=") {
             guard let p = UInt16(value()) else { fail("bad --port") }
@@ -46,7 +52,7 @@ func runServe(_ args: [String]) {
     }
     guard let model = positional.first, positional.count <= 2 else {
         fail("usage: strim serve <model> [mtpHead] [--port N=8203] [--token-file PATH] [--no-auth] [--model-dir DIR]... "
-             + "[--max-inflight N] [--max-background N] [--no-admission]")
+             + "[--max-inflight N] [--max-background N] [--no-admission] [--prefix-disk] [--prefix-disk-dir DIR]")
     }
     let head = positional.count > 1 ? positional[1] : nil
 

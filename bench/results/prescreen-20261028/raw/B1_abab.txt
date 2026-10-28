@@ -1,0 +1,6 @@
+[14:26:49] start B1_abab load={ 5.08 7.30 6.05 } swap=total = 6144.00M  used = 4894.38M  free = 1249.62M  (encrypted)
+bench/h2h/pass.sh: line 27: 84548 Terminated: 15          "$H/watchdog.sh" "$PID" "$D/cell" "$D/watch.csv"
+bench/h2h/pass.sh: line 27: 86197 Terminated: 15          "$H/watchdog.sh" "$PID" "$D/cell" "$D/watch.csv"
+bench/h2h/pass.sh: line 27: 87647 Terminated: 15          "$H/watchdog.sh" "$PID" "$D/cell" "$D/watch.csv"
+bench/h2h/pass.sh: line 27: 88537 Terminated: 15          "$H/watchdog.sh" "$PID" "$D/cell" "$D/watch.csv"
+[14:29:31] end rc=0 aborted=0

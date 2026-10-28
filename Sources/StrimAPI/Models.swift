@@ -48,18 +48,24 @@ public struct HostStatus: Codable, Sendable, Equatable {
     public var lastCrash: String?
     /// Estimate only; UI must label it as such.
     public var parentTokensSavedEstimate: Int?
+    /// Background jobs are paused (`POST pause`). Nil from hosts that predate the pause route.
+    public var jobsPaused: Bool?
+    /// Hash of the loaded model's per-tensor quantization specs (`<model>/<head>`); nil when stopped or from older hosts.
+    public var quantFingerprint: String?
     public init(state: HostState, model: String? = nil, mtp: String? = nil, loadProgress: Double? = nil,
                 memory: MemoryStats, decodeTPS: Double = 0, prefillTPS: Double = 0, mtpAcceptance: Double = 0,
                 mtpDepth: Double = 0, prefixHitRate: Double = 0, savedPrefillSeconds: Double = 0,
                 activeJobs: Int = 0, queuedJobs: Int = 0, tokensToday: Int = 0, localTokensGenerated: Int = 0,
-                uptimeSeconds: Double = 0, lastCrash: String? = nil, parentTokensSavedEstimate: Int? = nil) {
+                uptimeSeconds: Double = 0, lastCrash: String? = nil, parentTokensSavedEstimate: Int? = nil,
+                jobsPaused: Bool? = nil, quantFingerprint: String? = nil) {
+        self.quantFingerprint = quantFingerprint
         self.state = state; self.model = model; self.mtp = mtp; self.loadProgress = loadProgress
         self.memory = memory; self.decodeTPS = decodeTPS; self.prefillTPS = prefillTPS
         self.mtpAcceptance = mtpAcceptance; self.mtpDepth = mtpDepth; self.prefixHitRate = prefixHitRate
         self.savedPrefillSeconds = savedPrefillSeconds; self.activeJobs = activeJobs; self.queuedJobs = queuedJobs
         self.tokensToday = tokensToday; self.localTokensGenerated = localTokensGenerated
         self.uptimeSeconds = uptimeSeconds; self.lastCrash = lastCrash
-        self.parentTokensSavedEstimate = parentTokensSavedEstimate
+        self.parentTokensSavedEstimate = parentTokensSavedEstimate; self.jobsPaused = jobsPaused
     }
     enum CodingKeys: String, CodingKey {
         case state, model, mtp, memory
@@ -68,7 +74,8 @@ public struct HostStatus: Codable, Sendable, Equatable {
         case savedPrefillSeconds = "saved_prefill_seconds", activeJobs = "active_jobs", queuedJobs = "queued_jobs"
         case tokensToday = "tokens_today", localTokensGenerated = "local_tokens_generated"
         case uptimeSeconds = "uptime_seconds", lastCrash = "last_crash"
-        case parentTokensSavedEstimate = "parent_tokens_saved_estimate"
+        case parentTokensSavedEstimate = "parent_tokens_saved_estimate", jobsPaused = "jobs_paused"
+        case quantFingerprint = "quant_fingerprint"
     }
 }
 
@@ -155,14 +162,23 @@ public struct PatchApproval: Codable, Sendable, Equatable {
 public struct ChatOpenRequest: Codable, Sendable, Equatable {
     public var cwd: String
     public var profile: String
-    public init(cwd: String, profile: String = "interactive") { self.cwd = cwd; self.profile = profile }
+    /// Thinking on/off for the session (nil = host default). Honored when the chat backend supports it.
+    public var enableThinking: Bool?
+    public init(cwd: String, profile: String = "interactive", enableThinking: Bool? = nil) {
+        self.cwd = cwd; self.profile = profile; self.enableThinking = enableThinking
+    }
+    enum CodingKeys: String, CodingKey { case cwd, profile, enableThinking = "enable_thinking" }
 }
 
 public struct ChatAppendRequest: Codable, Sendable, Equatable {
     public var sessionID: String
     public var text: String
-    public init(sessionID: String, text: String) { self.sessionID = sessionID; self.text = text }
-    enum CodingKeys: String, CodingKey { case sessionID = "session_id", text }
+    /// Thinking on/off for this and following turns (nil = unchanged). Honored when the chat backend supports it.
+    public var enableThinking: Bool?
+    public init(sessionID: String, text: String, enableThinking: Bool? = nil) {
+        self.sessionID = sessionID; self.text = text; self.enableThinking = enableThinking
+    }
+    enum CodingKeys: String, CodingKey { case sessionID = "session_id", text, enableThinking = "enable_thinking" }
 }
 
 /// A chat session is a job that accepts further user turns.

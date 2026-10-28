@@ -1,0 +1,9 @@
+[strim rep0 turn 1/8] ttft=0.621s prompt=490 cached=0 flag=ok err=None
+[strim rep0 turn 2/8] ttft=0.430s prompt=782 cached=483 flag=ok err=None
+[strim rep0 turn 3/8] ttft=0.432s prompt=1083 cached=775 flag=ok err=None
+[strim rep0 turn 4/8] ttft=0.431s prompt=1380 cached=1076 flag=ok err=None
+[strim rep0 turn 5/8] ttft=0.431s prompt=1673 cached=1373 flag=ok err=None
+[strim rep0 turn 6/8] ttft=0.434s prompt=1961 cached=1666 flag=ok err=None
+[strim rep0 turn 7/8] ttft=0.442s prompt=2266 cached=1954 flag=ok err=None
+[strim rep0 turn 8/8] ttft=0.438s prompt=2562 cached=2259 flag=ok err=None
+wrote bench/results/speed-w2-L1b-L3-20261028/ab-short/armA/strim/pass1/replay/raw.jsonl and bench/results/speed-w2-L1b-L3-20261028/ab-short/armA/strim/pass1/replay/summary.md

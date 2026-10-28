@@ -90,8 +90,9 @@ public enum SpecSampling {
     /// One verify round. `logits` is `[k+1, V]` (row i = target distribution after feed[i]),
     /// `drafts` the k proposed tokens, the token decided by row i sits at output position
     /// `firstIndex + i`. Returns lazy scalars (accepted draft count, next pending token).
-    public static func verify(logits: MLXArray, drafts: [Int32], config c: SamplingConfig,
-                              firstIndex: Int) -> (accepted: MLXArray, token: MLXArray) {
+    public static func verify(logits rawLogits: MLXArray, drafts: [Int32], config c: SamplingConfig,
+                              firstIndex: Int, mask: MLXArray? = nil) -> (accepted: MLXArray, token: MLXArray) {
+        let logits = mask.map { maskLogits(rawLogits, $0) } ?? rawLogits
         let k = drafts.count
         let V = logits.shape[logits.ndim - 1]
         let nz = noise(seed: c.seed, positions: Array(firstIndex ..< firstIndex + k + 1), vocab: V)
@@ -105,7 +106,8 @@ public enum SpecSampling {
     }
 
     /// Plain sample (no draft) from one position's logits `[V]` at output position `index`.
-    public static func sample(logits: MLXArray, config c: SamplingConfig, index: Int) -> MLXArray {
+    public static func sample(logits rawLogits: MLXArray, config c: SamplingConfig, index: Int, mask: MLXArray? = nil) -> MLXArray {
+        let logits = mask.map { maskLogits(rawLogits, $0) } ?? rawLogits
         let V = logits.shape[logits.ndim - 1]
         let nz = noise(seed: c.seed, positions: [index], vocab: V)
         let (_, tok) = rowOutcome(logits: logits.reshaped([1, V]), drafts: MLXArray([Int32(-1)]), noise: nz,

@@ -1,0 +1,124 @@
+CAL addchain_dep N=256 total=1.327 ms per_op=5.18 us
+CAL addchain_dep N=1024 total=2.249 ms per_op=2.20 us
+CAL add_dep_slope 1.20 us/kernel
+CAL addchain_dep N=4096 total=5.120 ms per_op=1.25 us
+CAL add_dep_slope 0.93 us/kernel
+CAL addchain_indep N=256 total=0.365 ms per_op=1.43 us
+CAL addchain_indep N=1024 total=1.249 ms per_op=1.22 us
+CAL rmsnorm_dep N=256 total=0.763 ms per_op=2.98 us
+CAL rmsnorm_dep N=1024 total=2.589 ms per_op=2.53 us
+CAL roundtrip_one_tiny_eval 0.092 ms
+CAL chunk single N=2048 2.635 ms
+CAL chunk k=512 boundaries=3 eval_each=3.099 ms (+154.6 us/boundary) asyncEval_each=2.568 ms (+-22.3 us/boundary)
+CAL chunk k=128 boundaries=15 eval_each=4.914 ms (+152.0 us/boundary) asyncEval_each=2.532 ms (+-6.9 us/boundary)
+CAL chunk k=32 boundaries=63 eval_each=10.575 ms (+126.0 us/boundary) asyncEval_each=2.588 ms (+-0.7 us/boundary)
+CAL chunk k=8 boundaries=255 eval_each=33.160 ms (+119.7 us/boundary) asyncEval_each=4.577 ms (+7.6 us/boundary)
+DOT cfg=M1 labeled_nodes=4089
+DOT cfg=M1 Load 1461
+DOT cfg=M1 QuantizedMatmul 433
+DOT cfg=M1 Reshape 385
+DOT cfg=M1 RMSNorm 305
+DOT cfg=M1 Slice 304
+DOT cfg=M1 Transpose 160
+DOT cfg=M1 AsType 146
+DOT cfg=M1 Squeeze 132
+DOT cfg=M1 CompiledAsTypeSigmoidBroadcastBroadcastMultiplyAsTypeBroadcastBroadcastMultiplyAsType 112
+DOT cfg=M1 Gather 99
+DOT cfg=M1 Contiguous 96
+DOT cfg=M1 CustomKernel 96
+DOT cfg=M1 Concatenate 80
+DOT cfg=M1 CompiledExpNegativeAsTypeBroadcastBroadcastAddExpBroadcastBroadcastAddLogBroadcastBroadcastMultiplyExp 48
+DOT cfg=M1 Sigmoid 48
+DOT cfg=M1 Broadcast 35
+DOT cfg=M1 Full 33
+DOT cfg=M1 SliceUpdate 32
+DOT cfg=M1 RoPE 32
+DOT cfg=M1 Split 16
+DOT cfg=M1 CompiledAsTypeAsTypeSigmoidBroadcastBroadcastMultiplyAsType 16
+DOT cfg=M1 ScaledDotProductAttention 16
+DOT cfg=M1 Multiply 2
+DOT cfg=M1 Quantize 1
+DOT cfg=M1 ArgReduce 1
+digraph {
+{ 534262648120 [label ="Load", shape=rectangle]; }
+{ "A"; }
+534262648120 -> "A"
+{ rank=source; "B"; }
+{ 534264774680 [label ="Gather", shape=rectangle]; }
+"A" -> 534264774680
+"B" -> 534264774680
+{ "C"; }
+534264774680 -> "C"
+{ 534255485192 [label ="Squeeze", shape=rectangle]; }
+"C" -> 534255485192
+{ "D"; }
+534255485192 -> "D"
+{ 534262648040 [label ="Load", shape=rectangle]; }
+{ "E"; }
+534262648040 -> "E"
+{ 534264774840 [label ="Gather", shape=rectangle]; }
+"E" -> 534264774840
+"B" -> 534264774840
+{ "F"; }
+534264774840 -> "F"
+{ 534255485112 [label ="Squeeze", shape=rectangle]; }
+"F" -> 534255485112
+{ "G"; }
+534255485112 -> "G"
+{ 534262647400 [label ="Load", shape=rectangle]; }
+{ "H"; }
+534262647400 -> "H"
+{ 534264775000 [label ="Gather", shape=rectangle]; }
+DOT cfg=M3rec labeled_nodes=2572
+DOT cfg=M3rec QuantizedMatmul 433
+DOT cfg=M3rec Reshape 385
+DOT cfg=M3rec Slice 352
+DOT cfg=M3rec RMSNorm 305
+DOT cfg=M3rec Transpose 160
+DOT cfg=M3rec AsType 144
+DOT cfg=M3rec Squeeze 132
+DOT cfg=M3rec CompiledAsTypeSigmoidBroadcastBroadcastMultiplyAsTypeBroadcastBroadcastMultiplyAsType 112
+DOT cfg=M3rec Gather 99
+DOT cfg=M3rec Contiguous 96
+DOT cfg=M3rec CustomKernel 96
+DOT cfg=M3rec CompiledExpNegativeAsTypeBroadcastBroadcastAddExpBroadcastBroadcastAddLogBroadcastBroadcastMultiplyExp 48
+DOT cfg=M3rec Concatenate 48
+DOT cfg=M3rec Sigmoid 48
+DOT cfg=M3rec RoPE 32
+DOT cfg=M3rec SliceUpdate 32
+DOT cfg=M3rec CompiledAsTypeAsTypeSigmoidBroadcastBroadcastMultiplyAsType 16
+DOT cfg=M3rec ScaledDotProductAttention 16
+DOT cfg=M3rec Split 16
+DOT cfg=M3rec Quantize 1
+DOT cfg=M3rec ArgReduce 1
+digraph {
+{ rank=source; "A"; }
+{ rank=source; "B"; }
+{ 534249490968 [label ="Gather", shape=rectangle]; }
+"A" -> 534249490968
+"B" -> 534249490968
+{ "C"; }
+534249490968 -> "C"
+{ 534256038104 [label ="Squeeze", shape=rectangle]; }
+"C" -> 534256038104
+{ "D"; }
+534256038104 -> "D"
+{ rank=source; "E"; }
+{ 534249491128 [label ="Gather", shape=rectangle]; }
+"E" -> 534249491128
+"B" -> 534249491128
+{ "F"; }
+534249491128 -> "F"
+{ 534256037864 [label ="Squeeze", shape=rectangle]; }
+"F" -> 534256037864
+{ "G"; }
+534256037864 -> "G"
+{ rank=source; "H"; }
+{ 534249488408 [label ="Gather", shape=rectangle]; }
+"H" -> 534249488408
+"B" -> 534249488408
+{ "I"; }
+534249488408 -> "I"
+{ 534256037784 [label ="Squeeze", shape=rectangle]; }
+"I" -> 534256037784
+BYTES layer_weights=13.697 GB lm_head=0.715 GB total=14.412 GB -> roofline@530GB/s 27.19 ms

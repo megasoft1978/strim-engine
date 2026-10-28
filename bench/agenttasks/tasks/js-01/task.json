@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 6,
+  "id" : "js-01",
+  "language" : "javascript",
+  "license" : "MIT",
+  "note" : "Node.js: version comparison compares numeric parts as strings",
+  "prompt" : "The automated tests of this Node.js package currently fail. Run `node --test` from the repository root to see the failures. Change the package non-test source code so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-node",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1503,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/semver.test.js" : "92216b4003a95cd8360f88668a803490ee95e8e92be33d16ff99c953423b3864"
+  },
+  "tree_sha256" : "3bb8c8aa575180664b496985f8788b02081db09e060b70c9250955557fd5e7b1",
+  "verify_cmd" : "node --test"
+}

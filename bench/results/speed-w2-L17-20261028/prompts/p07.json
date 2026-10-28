@@ -1,0 +1,1 @@
+[{"role":"user","content":"Write a bash one-liner that counts the number of lines in all .txt files under the current directory recursively."}]

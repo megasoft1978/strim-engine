@@ -53,9 +53,12 @@ public struct GenParams: Sendable {
     public var priority: Priority
     /// Do not stop on the model's default end tokens (`<|im_end|>`, `<|endoftext|>`); only `stopIds` stop.
     public var ignoreEOS: Bool
+    /// Constrained decoding (structured output, forced tool calls) and the reasoning budget. nil: plain decode, zero overhead.
+    public var constraint: ConstraintSpec?
     public init(maxTokens: Int = 256, temperature: Float = 0, topP: Float = 1, topK: Int = 0,
                 seed: UInt64? = nil, stopIds: [Int32] = [], priority: Priority = .interactive,
-                ignoreEOS: Bool = false) {
+                ignoreEOS: Bool = false, constraint: ConstraintSpec? = nil) {
+        self.constraint = constraint
         self.maxTokens = maxTokens; self.temperature = temperature; self.topP = topP; self.topK = topK
         self.seed = seed; self.stopIds = stopIds; self.priority = priority; self.ignoreEOS = ignoreEOS
     }

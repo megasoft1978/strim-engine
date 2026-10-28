@@ -1,0 +1,18 @@
+OP gdn.rec  pipelined 0.8300 ms  fenced 1.1110 ms
+OP gdn.conv  pipelined 0.1552 ms  fenced 0.2440 ms
+OP gdn.qknorm_bg  pipelined 0.0798 ms  fenced 0.2202 ms
+OP gdn.norm_gate  pipelined 0.0850 ms  fenced 0.2091 ms
+OP gdn.proj_ba(2 calls)  pipelined 0.1123 ms  fenced 0.2600 ms
+OP norm  pipelined 0.0292 ms  fenced 0.1635 ms
+OP resid  pipelined 0.0273 ms  fenced 0.1523 ms
+OP mlp.act  pipelined 0.2082 ms  fenced 0.3536 ms
+OP attn.qknorm  pipelined 0.1156 ms  fenced 0.2599 ms
+OP attn.gate  pipelined 0.0450 ms  fenced 0.1712 ms
+OP attn.rope(offset=0)  pipelined 0.0508 ms  fenced 0.1757 ms
+OP attn.sdpa(prefix=0)  pipelined 0.3452 ms  fenced 0.5414 ms
+OP attn.rope(offset=2048)  pipelined 0.0501 ms  fenced 0.1805 ms
+OP attn.sdpa(prefix=2048)  pipelined 1.5326 ms  fenced 1.7121 ms
+OP attn.rope(offset=8192)  pipelined 0.0528 ms  fenced 0.1808 ms
+OP attn.sdpa(prefix=8192)  pipelined 5.0937 ms  fenced 5.2875 ms
+OP attn.rope(offset=15360)  pipelined 0.0520 ms  fenced 0.1913 ms
+OP attn.sdpa(prefix=15360)  pipelined 9.4479 ms  fenced 9.6729 ms

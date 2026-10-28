@@ -1,0 +1,34 @@
+{
+  "answer_env" : "ANSWER_FILE",
+  "base_commit" : "",
+  "class" : "repo-qa",
+  "est_solo_turns" : 5,
+  "expected_answer" : {
+    "all_of" : [
+      "record\\.rs[^0-9]{1,12}27([^0-9]|$)",
+      "(^|[^0-9])41([^0-9]|$)",
+      "split_fields",
+      "field\\.rs[^0-9]{1,12}[3-5]([^0-9]|$)"
+    ]
+  },
+  "id" : "rs-04",
+  "known_answer" : "Error::UnterminatedQuote is built at src\/record.rs:27 and src\/record.rs:41; field splitting is split_fields at src\/field.rs:4.",
+  "language" : "rust",
+  "license" : "MIT",
+  "no_edit" : true,
+  "note" : "Rust repo-QA: where UnterminatedQuote errors are produced",
+  "prompt" : "Answer a question about the repository in the current directory. Do NOT modify any file. Reply with the repo-relative file path(s) and the exact symbol name(s) (function, class, method or variable) that answer it, each as path:line (the line where the symbol or the relevant statement is). Keep the answer short.\n\nQuestion: In which file and on which two lines is the Error::UnterminatedQuote error value constructed, and which function does the per-record field splitting that signals an unterminated quote by returning None (file and line of its definition)?",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-rust",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2381,
+  "test_paths" : [
+
+  ],
+  "test_sha256" : {
+
+  },
+  "tree_sha256" : "fe5fbc16c3551e9c7315a270d37d98e7d7485bf00650dcc391b39fb46320a762",
+  "verify_cmd" : "grep -Eq 'record\\.rs[^0-9]{1,12}27([^0-9]|$)' \"$ANSWER_FILE\" && grep -Eq '(^|[^0-9])41([^0-9]|$)' \"$ANSWER_FILE\" && grep -Eq 'split_fields' \"$ANSWER_FILE\" && grep -Eq 'field\\.rs[^0-9]{1,12}[3-5]([^0-9]|$)' \"$ANSWER_FILE\"",
+  "wrong_answer" : "Error::UnterminatedQuote is built in src\/lib.rs:10 and fields are split by Table::parse."
+}

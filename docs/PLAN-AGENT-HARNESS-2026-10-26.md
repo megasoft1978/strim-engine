@@ -42,7 +42,7 @@ Local model output is untrusted and prompt-injectable via file contents.
 - Redact secrets in tool output and results. Control-token injection already neutralised.
 
 ## App
-SwiftPM SwiftUI: `MenuBarExtra` + window. Chat (streaming, reasoning, tool cards), project picker, Jobs (app/MCP), diff view approve/reject (`git apply --3way`), settings, health. App = interactive priority, MCP jobs = background (`paused_interactive`). `scripts/make-app.sh` builds and ad-hoc signs `Strim.app`. Unknowns: metallib location in bundle; relative draft-vocab lookup (install `<model>/draft_vocab.json`).
+SwiftPM SwiftUI: `MenuBarExtra` + window. Chat (streaming, reasoning, tool cards), project picker, Jobs (app/MCP), diff view approve/reject (plain `git apply` after `--check`; no `--3way`), settings, health. App = interactive priority, MCP jobs = background (`paused_interactive`). `scripts/make-app.sh` builds and ad-hoc signs `Strim.app`. Unknowns: metallib location in bundle; relative draft-vocab lookup (install `<model>/draft_vocab.json`).
 
 ## Harness2 (vendor/harness2)
 Adopt: component pack on disk (system, guardrails, memory, tool guidance, subagents, skills; always-on <=~3K tokens); Codex-compatible `AGENTS.md` + `.agents/skills/*/SKILL.md` (index in prompt, bodies lazy); in-process read-only `task` subagent (fork of system prefix, 1 level, 1 concurrent); pack fingerprint per job/bench row; `events.jsonl` trajectories; optional `strim evolve` (propose/probe/compose, deterministic test checks as judge, k<=2, background priority).

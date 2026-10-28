@@ -95,6 +95,12 @@ struct JobDetailView: View {
                     Spacer()
                     Text(d.summary.status.rawValue).foregroundStyle(.secondary)
                 }
+                HStack {
+                    let cancel = model.cancelJobAvailability(for: d.summary)
+                    Button("Cancel job", role: .destructive) { Task { await model.cancelJob(d.id) } }
+                        .disabled(!cancel.enabled).help(cancel.reason ?? "Stop this job")
+                    if let r = cancel.reason, !cancel.enabled { Text(r).font(.caption).foregroundStyle(.secondary) }
+                }
                 Text("\(d.turns) turns | \(StatsFormat.tokens(d.localTokens)) local tokens" + (d.summary.cwd.map { " | \($0)" } ?? ""))
                     .font(.caption).foregroundStyle(.secondary)
                 if let r = d.resultSummary { Text(r).font(.callout).textSelection(.enabled) }
@@ -214,67 +220,5 @@ struct Badge: View {
     var body: some View {
         Text(text).font(.caption2.bold()).padding(.horizontal, 5).padding(.vertical, 1)
             .background(color.opacity(0.2), in: Capsule()).foregroundStyle(color)
-    }
-}
-
-struct ChatTab: View {
-    @ObservedObject var model: AppModel
-    @State private var draft = ""
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            switch model.chat {
-            case .unknown:
-                Text("Chat has not been opened.").foregroundStyle(.secondary)
-                Button("Open chat session") { Task { await model.probeChat() } }
-                    .disabled(!model.connection.isConnected)
-            case .unavailable(let why):
-                Label(why, systemImage: "bubble.left.and.exclamationmark.bubble.right").foregroundStyle(.secondary)
-                Button("Retry") { Task { await model.probeChat() } }
-            case .ready(let s):
-                Text("Session \(s.sessionID) in \(s.cwd)").font(.caption).foregroundStyle(.secondary)
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 6) {
-                        ForEach(model.chatMessages) { m in
-                            Text("\(m.role.rawValue): \(m.text)").textSelection(.enabled)
-                                .foregroundStyle(m.role == .reasoning ? .secondary : .primary)
-                        }
-                    }.frame(maxWidth: .infinity, alignment: .leading)
-                }
-                HStack {
-                    TextField("Message", text: $draft).onSubmit(send)
-                    Button("Send", action: send)
-                    Button("Cancel") { Task { await model.cancelChat() } }
-                }
-            }
-            if case .unknown = model.chat {} else { Spacer(minLength: 0) }
-        }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task { if model.chat == .unknown, model.connection.isConnected { await model.probeChat() } }
-    }
-    private func send() { let t = draft; draft = ""; Task { await model.sendChat(t) } }
-}
-
-struct SettingsTab: View {
-    @ObservedObject var model: AppModel
-    @State private var draft = AppSettings()
-    var body: some View {
-        Form {
-            TextField("Host URL", text: $draft.hostURL)
-            TextField("strim binary", text: Binding(get: { draft.strimBinary ?? "" }, set: { draft.strimBinary = $0.isEmpty ? nil : $0 }),
-                      prompt: Text("absolute path; auto: ~/.strim/bin, /opt/homebrew/bin, /usr/local/bin"))
-            TextField("Model path", text: Binding(get: { draft.modelPath ?? "" }, set: { draft.modelPath = $0.isEmpty ? nil : $0 }))
-            TextField("MTP head path", text: Binding(get: { draft.mtpPath ?? "" }, set: { draft.mtpPath = $0.isEmpty ? nil : $0 }))
-            TextField("Project folder (chat)", text: Binding(get: { draft.projectPath ?? "" }, set: { draft.projectPath = $0.isEmpty ? nil : $0 }),
-                      prompt: Text("required for chat; never your home folder"))
-            LabeledContent("Control token file", value: draft.controlTokenPath)
-            HStack {
-                Button("Save") { model.update(settings: draft) }.disabled(draft == model.settings)
-                Button("Revert") { draft = model.settings }.disabled(draft == model.settings)
-                Text("Stored in ~/.strim/app.json").font(.caption).foregroundStyle(.secondary)
-            }
-        }
-        .padding()
-        .onAppear { draft = model.settings }
     }
 }

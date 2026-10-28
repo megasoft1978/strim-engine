@@ -115,6 +115,7 @@ public enum BatchModel {
                                         indices: MLXArray(ids).reshaped([B, c]))
             for i in 0 ..< layers {
                 h = try DecoderLayer.forwardBatched(h, store: store, layer: i, cache: cache)
+                QwenModel.pipe(h, layer: i, of: layers, rows: c * B)
             }
             if end == S {
                 let last = h[0..., (c - 1) ..< c, 0...]
@@ -136,6 +137,7 @@ public enum BatchModel {
         var h = try store.embedding("language_model.model.embed_tokens", indices: idx)
         for i in 0 ..< layers {
             h = try DecoderLayer.forwardBatched(h, store: store, layer: i, cache: cache)
+            QwenModel.pipe(h, layer: i, of: layers, rows: 1)
         }
         let normed = try store.rmsNorm("language_model.model.norm", h)
         return try store.linear("language_model.lm_head", normed)

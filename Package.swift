@@ -20,7 +20,7 @@ let package = Package(
             .product(name: "MLXRandom", package: "mlx-swift"),
         ]),
         .target(name: "StrimTokenizer"),
-        .executableTarget(name: "StrimCLI", dependencies: ["StrimCore", "StrimEngine", "StrimPrompt", "StrimTemplate", "StrimTokenizer", "StrimHTTP", "StrimServer", "StrimHost", "StrimJobs", "StrimHarness", "StrimAgentBench", "StrimMCPClients", "StrimAPI", "StrimControl", "StrimEvolve", "StrimSoak", "StrimBenchHTTP", "StrimSite", "StrimAdmission"]),
+        .executableTarget(name: "StrimCLI", dependencies: ["StrimCore", "StrimEngine", "StrimPrompt", "StrimTemplate", "StrimTokenizer", "StrimHTTP", "StrimServer", "StrimHost", "StrimJobs", "StrimHarness", "StrimAgentBench", "StrimMCPClients", "StrimAPI", "StrimControl", "StrimEvolve", "StrimSoak", "StrimBenchHTTP", "StrimSite", "StrimAdmission", "StrimPull"]),
         .target(name: "StrimAppCore", dependencies: ["StrimAPI"]),
         .testTarget(name: "StrimAppCoreTests", dependencies: ["StrimAppCore", "StrimAPI"]),
         .executableTarget(name: "StrimApp", dependencies: ["StrimAppCore", "StrimAPI"]),
@@ -66,6 +66,8 @@ let package = Package(
         .testTarget(name: "StrimSoakTests", dependencies: ["StrimSoak", "StrimAgentBench"]),
         .target(name: "StrimBenchHTTP", dependencies: ["StrimHTTP"]),
         .testTarget(name: "StrimBenchHTTPTests", dependencies: ["StrimBenchHTTP"]),
+        .target(name: "StrimPull"),
+        .testTarget(name: "StrimPullTests", dependencies: ["StrimPull"]),
         .target(name: "StrimSite"),
         .testTarget(name: "StrimSiteTests", dependencies: ["StrimSite"]),
     ]

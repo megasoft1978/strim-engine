@@ -56,20 +56,33 @@ public enum MLP {
 
     /// SwiGLU: down(silu(gate(x)) * up(x)), with gate and up as one fused qmv.
     public static func forward(_ x: MLXArray, store: WeightStore, layer: Int) throws -> MLXArray {
+        // gate/up with different bits or group size cannot share one matmul.
+        guard try store.mlpFusable(layer) else {
+            return try forward(x, store: store, prefix: "language_model.model.layers.\(layer).mlp.")
+        }
+        let spec = try store.quantSpec("language_model.model.layers.\(layer).mlp.gate_proj")
         let f = try store.mlpFused(layer)
-        let all = store.qmm(x, f.w, f.s, f.b)
+        let all = OpTimer.qmm(store, "mlp.gateup", x, f.w, f.s, f.b, spec: spec)
         let inter = all.shape[all.ndim - 1] / 2
-        let gate = all[0..., 0..., 0 ..< inter]
-        let up = all[0..., 0..., inter ..< (2 * inter)]
-        let act = Fused.swiglu(gate, up)
-        return try store.linear("language_model.model.layers.\(layer).mlp.down_proj", act)
+        let act = swiglu(all, inter: inter)
+        return try OpTimer.linear(store, "mlp.down", "language_model.model.layers.\(layer).mlp.down_proj", act)
+    }
+
+    private static func swiglu(_ all: MLXArray, inter: Int) -> MLXArray {
+        OpTimer.time("mlp.act", flops: Double(all.size / 2) * 6, bytes: Double(all.nbytes + all.nbytes / 2),
+                     inputs: [all]) {
+            let gate = all[0..., 0..., 0 ..< inter]
+            let up = all[0..., 0..., inter ..< (2 * inter)]
+            return Fused.swiglu(gate, up)
+        }
     }
 
     public static func forward(_ x: MLXArray, store: WeightStore, prefix: String) throws -> MLXArray {
-        let gate = try store.linear(prefix + "gate_proj", x)
-        let up = try store.linear(prefix + "up_proj", x)
-        let act = Fused.swiglu(gate, up)
-        return try store.linear(prefix + "down_proj", act)
+        let gate = try OpTimer.linear(store, "mlp.gateup", prefix + "gate_proj", x)
+        let up = try OpTimer.linear(store, "mlp.gateup", prefix + "up_proj", x)
+        let act = OpTimer.time("mlp.act", flops: Double(gate.size) * 6, bytes: Double(gate.nbytes * 3),
+                               inputs: [gate, up]) { Fused.swiglu(gate, up) }
+        return try OpTimer.linear(store, "mlp.down", prefix + "down_proj", act)
     }
 }
 
@@ -77,7 +90,9 @@ public enum DecoderLayer {
     /// One full transformer layer: pre-norm attention/GDN + residual, pre-norm MLP + residual.
     public static func forward(_ x: MLXArray, store: WeightStore, layer: Int, cache: ModelCache? = nil) throws -> MLXArray {
         let p = "language_model.model.layers.\(layer)."
-        let n1 = try store.rmsNorm(p + "input_layernorm", x)
+        let n1 = try OpTimer.time("norm", flops: Double(x.size) * 4, bytes: Double(x.nbytes * 2), inputs: [x]) {
+            try store.rmsNorm(p + "input_layernorm", x)
+        }
         // Layer 0/1/2 are GDN (full_attention_interval = 4); 3 is gated attention.
         let mixed: MLXArray
         if (layer + 1) % 4 != 0 {
@@ -85,9 +100,11 @@ public enum DecoderLayer {
         } else {
             mixed = try Attention.forward(n1, store: store, layer: layer, cache: cache?.attentionCache(layer))
         }
-        let h = x + mixed
-        let n2 = try store.rmsNorm(p + "post_attention_layernorm", h)
+        let h = OpTimer.time("resid", flops: Double(x.size), bytes: Double(x.nbytes * 3), inputs: [x, mixed]) { x + mixed }
+        let n2 = try OpTimer.time("norm", flops: Double(h.size) * 4, bytes: Double(h.nbytes * 2), inputs: [h]) {
+            try store.rmsNorm(p + "post_attention_layernorm", h)
+        }
         let mlp = try MLP.forward(n2, store: store, layer: layer)
-        return h + mlp
+        return OpTimer.time("resid", flops: Double(h.size), bytes: Double(h.nbytes * 3), inputs: [h, mlp]) { h + mlp }
     }
 }

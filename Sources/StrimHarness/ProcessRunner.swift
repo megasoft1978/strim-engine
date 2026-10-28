@@ -16,11 +16,15 @@ public struct ProcessRunner: CommandRunner {
     /// `ulimit -u` = the user's current process count + this margin; 0 disables. Plain `ulimit` sets soft and
     /// hard, so the agent cannot raise either.
     public var processMargin: Int
+    /// Adds the language toolchains (`Toolchains`): their bin dirs on PATH, offline settings, caches under the job tmp, code-injection
+    /// variables absent. The matching read grants live in the profile (`BashTool.makeRunner`).
+    public var toolchains: Bool
 
     public static let defaultPath = "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin"
 
     public init(profile: SandboxProfile, passthroughEnv: [String] = [], killGrace: TimeInterval = 1,
-                sandboxed: Bool = true, maxFileSizeKB: Int = 512 * 1024, processMargin: Int = 256) {
+                sandboxed: Bool = true, maxFileSizeKB: Int = 512 * 1024, processMargin: Int = 256, toolchains: Bool = false) {
+        self.toolchains = toolchains
         self.profile = profile; self.passthroughEnv = passthroughEnv
         self.killGrace = killGrace; self.sandboxed = sandboxed
         self.maxFileSizeKB = maxFileSizeKB; self.processMargin = processMargin
@@ -43,6 +47,7 @@ public struct ProcessRunner: CommandRunner {
             e["GIT_ALTERNATE_OBJECT_DIRECTORIES"] = profile.gitControlDirs.map { $0 + "/objects" }.joined(separator: ":")
         }
         for k in passthroughEnv { if let v = parent[k] { e[k] = v } }
+        if toolchains { Toolchains.apply(to: &e, home: profile.home, scratch: profile.jobTmp) }   // after passthrough: injection variables stay cleared
         for (k, v) in extra { e[k] = v }
         return e
     }

@@ -1,0 +1,9 @@
+[mlx-vlm rep0 turn 1/8] ttft=4.039s prompt=4094 cached=0 flag=ok err=None
+[mlx-vlm rep0 turn 2/8] ttft=9.374s prompt=9349 cached=0 flag=ok err=None
+[mlx-vlm rep0 turn 3/8] ttft=14.835s prompt=14630 cached=0 flag=short err=None
+[mlx-vlm rep0 turn 4/8] ttft=20.538s prompt=19887 cached=0 flag=short err=None
+[mlx-vlm rep0 turn 5/8] ttft=26.662s prompt=25159 cached=0 flag=short err=None
+[mlx-vlm rep0 turn 6/8] ttft=32.998s prompt=30381 cached=0 flag=short err=None
+[mlx-vlm rep0 turn 7/8] ttft=39.918s prompt=35640 cached=0 flag=short err=None
+[mlx-vlm rep0 turn 8/8] ttft=46.407s prompt=40841 cached=0 flag=short err=None
+wrote bench/results/h2h-final2-20261028/raw/mlx-vlm/pass1/replay/raw.jsonl and bench/results/h2h-final2-20261028/raw/mlx-vlm/pass1/replay/summary.md

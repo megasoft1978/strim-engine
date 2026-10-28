@@ -2,7 +2,9 @@ import Foundation
 
 let NB = "\u{00A0}"
 
-let FINAL_REL = "bench/results/h2h-final-20261028"
+/// THE head-to-head run the site and README present. Everything (figures, charts, run date, build, versions, validity text, raw-results link) is derived from this directory;
+/// to swap in a clean rerun change this one line and run `strim site build`.
+let FINAL_REL = "bench/results/h2h-final2-20261028"
 let FINAL_SRC = FINAL_REL + "/summary.md"
 let ENG_LABEL: [String: String] = ["strim": "Strim", "rapid-mlx": "rapid-mlx (MTP)", "mlx-vlm": "mlx-vlm (no MTP)"]
 let ENGINES = ["strim", "rapid-mlx", "mlx-vlm"]
@@ -35,6 +37,9 @@ public final class SiteBuilder {
     var finalDir: String { root + "/" + FINAL_REL }
 
     var D: SiteData!
+    /// Parsed site/data/headline.json (generated) and site/data/features.json (hand-filled): the data behind the comparison charts and matrix.
+    var H: PyJSON = .null
+    var F: PyJSON = .null
     /// First fatal condition hit by a non-throwing page helper (Python would have crashed there).
     var failure: String?
     /// Tests only: roots registered via SafeIO.registerTestRoot may contain symlinked components (overlay trees). Never true for the CLI.

@@ -9,6 +9,10 @@ public final class AttentionCache {
     var vbuf: MLXArray?
     public private(set) var offset = 0
     static let step = 256
+    /// Capacity target in tokens (0 = grow chunk by chunk). A cold prefill sets the prompt length so the
+    /// first append allocates the whole buffer once instead of reallocating and copying it at every chunk.
+    /// The final capacity (prompt rounded up to `step`) equals the chunk-by-chunk one, hit or miss.
+    var reserve = 0
     public init() {}
 
     private func view(_ b: MLXArray?) -> MLXArray? {
@@ -31,7 +35,8 @@ public final class AttentionCache {
         let end = offset + S
         if kbuf == nil || vbuf == nil || end > kbuf!.shape[2] {
             // New capacity: `end` rounded up to the growth step; keep only valid positions.
-            let grow = (end + Self.step - 1) / Self.step * Self.step - offset
+            let target = max(end, reserve)
+            let grow = (target + Self.step - 1) / Self.step * Self.step - offset
             func grown(_ old: MLXArray?, _ like: MLXArray) -> MLXArray {
                 let z = MLXArray.zeros([like.shape[0], like.shape[1], grow, like.shape[3]], dtype: like.dtype)
                 guard let old else { return z }
@@ -95,9 +100,19 @@ public final class ModelCache {
     private(set) var recording = false
     public init() {}
 
+    /// Prompt length the attention buffers are sized for (see `AttentionCache.reserve`); applies to
+    /// existing and future layers. 0 = off; active only with `STRIM_KV_PREALLOC=1` until validated.
+    public var kvReserve = 0 {
+        didSet {
+            let r = Self.preallocOn ? kvReserve : 0
+            for c in attention.values { c.reserve = r }
+        }
+    }
+    static let preallocOn = ProcessInfo.processInfo.environment["STRIM_KV_PREALLOC"] == "1"
+
     public func attentionCache(_ layer: Int) -> AttentionCache {
         if let c = attention[layer] { return c }
-        let c = AttentionCache(); attention[layer] = c; return c
+        let c = AttentionCache(); c.reserve = Self.preallocOn ? kvReserve : 0; attention[layer] = c; return c
     }
 
     /// Shallow snapshot: MLX arrays are immutable, so holding references is enough.

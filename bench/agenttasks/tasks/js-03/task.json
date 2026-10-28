@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 10,
+  "id" : "js-03",
+  "language" : "javascript",
+  "license" : "MIT",
+  "note" : "Node.js feature: LRU cache gains peek(), ttl with injected clock, onEvict callback; tests already written",
+  "prompt" : "This Node.js package is a small LRU cache. The test file test\/lru.test.js already contains tests for new behaviour that is not implemented yet: `peek`, a `ttl` option (default and per-entry, with an injectable `now` clock) and an `onEvict(key, value, reason)` callback. Run `node --test` from the repository root to see the failures. Implement the feature in the non-test source so the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what you changed.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-node",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1482,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/lru.test.js" : "7b5bd3dc3d951214ca7c1dff07b48f341ef39fc211e5d66a88be2c8837a74c02"
+  },
+  "tree_sha256" : "df142769e9b035ae2d5aacdc25a285b49f67f66a4b6a385e1a1e3b00aad0cf34",
+  "verify_cmd" : "node --test"
+}

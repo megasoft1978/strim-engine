@@ -65,6 +65,9 @@ public actor JobManager: JobManaging {
     private var active: Set<JobID> = []
     private var waiters: [JobID: [UUID: Waiter]] = [:]
     private var persistTail: Task<Void, Never>?
+    /// Background pause: queued jobs are not admitted and an approved job waits before it takes its admission slot.
+    /// Chat sessions (interactive) are never affected.
+    private var backgroundPaused = false
 
     public init(executor: @escaping JobExecutor,
                 store: JobStore = InMemoryJobStore(),
@@ -93,6 +96,36 @@ public actor JobManager: JobManaging {
     }
 
     public func setRequireApproval(_ on: Bool) { requireApproval = on }
+
+    // MARK: - Background pause
+
+    public var isBackgroundPaused: Bool { backgroundPaused }
+
+    /// Delegated (non-chat) jobs: queued, and admitted-but-unfinished ones.
+    public var backgroundCounts: (queued: Int, running: Int) {
+        let bg = jobs.values.filter { $0.chatProfileName == nil && !$0.status.isTerminal }
+        return (bg.filter { $0.status == .queued }.count, bg.filter { $0.status != .queued }.count)
+    }
+
+    /// Stops admitting background jobs. Running ones finish, or are cancelled with `cancelRunning`. Queued jobs stay
+    /// queued. Idempotent. Returns how many jobs were cancelled.
+    @discardableResult
+    public func pauseBackground(cancelRunning: Bool = false) async -> Int {
+        backgroundPaused = true
+        guard cancelRunning else { return 0 }
+        var n = 0
+        for id in Array(active) where jobs[id]?.chatProfileName == nil && jobs[id]?.status.isTerminal == false {
+            _ = try? await cancel(id)
+            n += 1
+        }
+        return n
+    }
+
+    /// Admits queued background jobs again. Idempotent.
+    public func resumeBackground() {
+        backgroundPaused = false
+        pump()
+    }
 
     // MARK: - API
 
@@ -275,6 +308,13 @@ public actor JobManager: JobManaging {
         return out
     }
 
+    /// Forwards the thinking toggle to the backend for an open session (no-op when unsupported).
+    public func setChatThinking(_ id: JobID, enabled: Bool?) async throws {
+        guard let chat, let j = jobs[id], j.chatProfileName != nil else { throw ChatError.sessionNotFound(id) }
+        if j.status.isTerminal { throw j.reason == JobFailureReason.idleTimeout ? ChatError.idleTimeout : ChatError.sessionClosed }
+        await chat.setThinking(sessionID: id, enabled: enabled)
+    }
+
     /// Cancels the running turn; returns once it has stopped. The session stays open.
     public func cancelTurn(_ id: JobID) async throws {
         guard let chat, let j = jobs[id], j.chatProfileName != nil else { throw ChatError.sessionNotFound(id) }
@@ -376,6 +416,7 @@ public actor JobManager: JobManaging {
     // MARK: - Scheduling
 
     private func pump() {
+        guard !backgroundPaused else { return }
         while active.count < maxConcurrent, let id = queue.first {
             queue.removeFirst()
             guard jobs[id]?.status == .queued else { continue }
@@ -408,6 +449,11 @@ public actor JobManager: JobManaging {
                 finalize(id, status: .cancelled, summary: "rejected", reason: nil)
                 return
             }
+        }
+        guard jobs[id]?.status.isTerminal == false else { return }
+        // Paused after this job was admitted (for example while awaiting approval): hold until resumed or cancelled.
+        while backgroundPaused, jobs[id]?.status.isTerminal == false {
+            do { try await Task.sleep(for: min(pollInterval, .milliseconds(200))) } catch { return }
         }
         guard jobs[id]?.status.isTerminal == false else { return }
         // Delegated jobs are background work: wait for a slot (interactive outranks; cancel while waiting drops out).

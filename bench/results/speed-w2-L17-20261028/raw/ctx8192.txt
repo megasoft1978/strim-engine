@@ -1,0 +1,5 @@
+[16:52:26] start ctx8192 load={ 4.11 4.82 4.25 } swap=total = 9216.00M  used = 7728.31M  free = 1487.69M  (encrypted)
+[mem] loaded (lazy) footprint=0.01 GiB mlxActive=0.00 GiB mlxPeak=0.00 GiB mlxCache=0.00 GiB
+[mem] after ctx 8192 footprint=10.37 GiB mlxActive=7.09 GiB mlxPeak=10.72 GiB mlxCache=3.11 GiB
+ctx=8192 prefill 9.95s (824 tok/s) decode 42.76 tok/s peakFootprint=11.17 GiB
+[16:52:37] end rc=0 aborted=0

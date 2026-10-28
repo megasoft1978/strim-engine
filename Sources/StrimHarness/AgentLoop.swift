@@ -476,6 +476,8 @@ public final class LoopConversation: @unchecked Sendable {
     public fileprivate(set) var commands: [CommandRecord] = []
     /// User turns run so far.
     public fileprivate(set) var userTurns = 0
+    /// Thinking requested for the engine session when it opens (first turn); nil = the thinking knob.
+    var thinking: Bool?
 
     init(spec: HarnessJobSpec, workspace: Workspace) { self.spec = spec; self.workspace = workspace }
 }
@@ -531,10 +533,11 @@ extension AgentLoop {
                 let config = sessionConfig
                 let firstUser = envBlock(spec: c.spec, workspace: c.workspace)
                 let fixedChars = systemPrompt.count + config.tools.reduce(0) { $0 + $1.json.serialized().count }
-                let session = try await engine.openSession(self.config(thinking: thinkingPolicyOn))
+                let thinkingNow = c.thinking ?? thinkingPolicyOn
+                let session = try await engine.openSession(self.config(thinking: thinkingNow))
                 c.box.set(session)
                 var fresh = LoopState(session: session, charsSince: fixedChars + firstUser.count)
-                if thinkingPolicyOn { fresh.thinking = true; fresh.transcript = [.system(systemPrompt), .user(firstUser)] }
+                if thinkingNow { fresh.thinking = true; fresh.transcript = [.system(systemPrompt), .user(firstUser)] }
                 c.state = fresh
                 _ = try await engine.append(session, .messages([.system(systemPrompt), .user(firstUser)]))
             }

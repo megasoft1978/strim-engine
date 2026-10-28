@@ -1,0 +1,33 @@
+{
+  "answer_env" : "ANSWER_FILE",
+  "base_commit" : "",
+  "class" : "repo-qa",
+  "est_solo_turns" : 5,
+  "expected_answer" : {
+    "all_of" : [
+      "render\\.py[^0-9]{1,12}(2[89]|30)([^0-9]|$)",
+      "(_lookup|lookup)",
+      "(^|[^0-9])(9|10)([^0-9]|$)"
+    ]
+  },
+  "id" : "py-04",
+  "known_answer" : "tpl\/render.py:29 raises TemplateError for an unknown filter; _lookup is defined at tpl\/render.py:9.",
+  "language" : "python",
+  "license" : "MIT",
+  "no_edit" : true,
+  "note" : "Python repo-QA: unknown-filter error and dotted lookup",
+  "prompt" : "Answer a question about the repository in the current directory. Do NOT modify any file. Reply with the repo-relative file path(s) and the exact symbol name(s) (function, class, method or variable) that answer it, each as path:line (the line where the symbol or the relevant statement is). Keep the answer short.\n\nQuestion: In which file and on which line is TemplateError raised for an unknown filter name, and in which file and line is the function defined that resolves dotted names like user.name against the context?",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-python",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2108,
+  "test_paths" : [
+
+  ],
+  "test_sha256" : {
+
+  },
+  "tree_sha256" : "7360c7857d1fd7d3c6758dac9efa9de9ff799b7d97c98b68def5d9df66c6a428",
+  "verify_cmd" : "grep -Eq 'render\\.py[^0-9]{1,12}(2[89]|30)([^0-9]|$)' \"$ANSWER_FILE\" && grep -Eq '(_lookup|lookup)' \"$ANSWER_FILE\" && grep -Eq '(^|[^0-9])(9|10)([^0-9]|$)' \"$ANSWER_FILE\"",
+  "wrong_answer" : "tpl\/filters.py:4 raises it and tpl\/lexer.py:8 resolves names."
+}

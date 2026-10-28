@@ -32,5 +32,9 @@ Details: `docs/CONTROL-API.md`, `docs/MCP.md`, `docs/APP.md`.
   explicit approval that carries the SHA-256 of the exact patch bytes the reviewer saw; a changed
   patch is refused. Apply also refuses repositories whose git config, attributes or includes could
   run code.
+- **Disk prefix cache (opt-in).** `STRIM_PREFIX_DISK=1` writes KV/GDN/MTP tensors and a hash chain (no token ids or
+  text) under `~/.strim/cache` (0700, files 0600). The tensors still encode prompt content for a same-user reader;
+  `strim cache clear` removes them. Files are SHA-256 checked on load; bad ones are deleted. See
+  `docs/PREFIX-DISK-2026-10-28.md`.
 - **Out of scope.** A process running as the same macOS user can read the token files and your
   files, and Strim does not defend against it. Model output quality is not a security property.

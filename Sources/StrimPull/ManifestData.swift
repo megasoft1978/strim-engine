@@ -1,0 +1,73 @@
+// Generated from the Hugging Face tree API (/api/models/<repo>/tree/<sha>?recursive=true) on 2026-10-28.
+// LFS files carry the sha256 (lfs.oid); other files carry the git blob sha1 (oid). Do not edit by hand.
+
+extension PullManifest {
+    static let repos: [PullRepo] = [
+        PullRepo(name: "qwen38-4bit", repo: "mlx-community/Qwen3.8-27B-4bit", revision: "10c35caafbb80f7dc6a7a432cdd11af10a6d4818", files: [
+            PullFile(path: "chat_template.jinja", size: 8952, gitSha1: "c0c686f9c38d70d179fb7b5f5aa7530bc913dda3"),
+            PullFile(path: "config.json", size: 4932, gitSha1: "3fb03e916f494e6745aa23df751da26f79e06470"),
+            PullFile(path: "generation_config.json", size: 202, gitSha1: "023756cfadf88e5bf69eefeee3e172f38c448d64"),
+            PullFile(path: "model-00001-of-00003.safetensors", size: 5343268662, sha256: "6cc1508e96fb5d0865dfd5753a79f4ec60651bf3e2a82844a7e8ae9c60528c0d"),
+            PullFile(path: "model-00002-of-00003.safetensors", size: 5354185130, sha256: "83f2a20ca8058f486a3634a27faf99587f4cd3c156a83dee34fb99e6ac178670"),
+            PullFile(path: "model-00003-of-00003.safetensors", size: 5357087557, sha256: "31b8c91ef899f79efaaa69e3d2c096f6e2ebeb2ff20e29222abbd9ebc79e560a"),
+            PullFile(path: "model.safetensors.index.json", size: 218281, gitSha1: "05a3a3a17368d54d2887783e96b3a8191e9655f0"),
+            PullFile(path: "tokenizer.json", size: 19989325, sha256: "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523"),
+            PullFile(path: "tokenizer_config.json", size: 1165, gitSha1: "1d134cd298be1e3be25db393d93a1cefe80e3214"),
+        ]),
+        PullRepo(name: "qwen38-mtp-4bit", repo: "mlx-community/Qwen3.8-27B-MTP-4bit", revision: "b643c01b6d3b094e325edb6ebd832e16c486c575", files: [
+            PullFile(path: "chat_template.jinja", size: 8952, gitSha1: "c0c686f9c38d70d179fb7b5f5aa7530bc913dda3"),
+            PullFile(path: "config.json", size: 3804, gitSha1: "56b13e5d42f12fa801786b93e7f82560eb45ae58"),
+            PullFile(path: "model.safetensors", size: 238934137, sha256: "76663c101e7e8ea9c0ae17bcb95183cd7f733ce424c912b8b264a7b1c48e4cc6"),
+            PullFile(path: "model.safetensors.index.json", size: 1973, gitSha1: "756ae902e67e01eee539160a0516746fe065dc4e"),
+            PullFile(path: "tokenizer.json", size: 19989325, sha256: "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523"),
+            PullFile(path: "tokenizer_config.json", size: 1124, gitSha1: "d1a20cc3a8838d08eca9de8a7b84d510d60a0524"),
+        ]),
+        PullRepo(name: "qwen38-6bit", repo: "lmstudio-community/Qwen3.8-27B-MLX-6bit", revision: "05f38c1f39e2f39619653616fe8e96a5d676358e", files: [
+            PullFile(path: "chat_template.jinja", size: 8952, gitSha1: "c0c686f9c38d70d179fb7b5f5aa7530bc913dda3"),
+            PullFile(path: "config.json", size: 4932, gitSha1: "cc323e8e4f6a8bb0ed8b8aa6552ebb4007b33c09"),
+            PullFile(path: "generation_config.json", size: 202, gitSha1: "023756cfadf88e5bf69eefeee3e172f38c448d64"),
+            PullFile(path: "model-00001-of-00005.safetensors", size: 5362726126, sha256: "39a48bfd79609b341f4ed420cdc92e3edce316cd3f5ef7db2dcd371f48c90588"),
+            PullFile(path: "model-00002-of-00005.safetensors", size: 5344281968, sha256: "d9011deb397afa986754a8abe3872b87a21c2bd6d7f9ed50bd8cba3890b782f9"),
+            PullFile(path: "model-00003-of-00005.safetensors", size: 5331479330, sha256: "760d392182ee77093df96328110596e230a9f4cab37febd70ae29173f7ff7e01"),
+            PullFile(path: "model-00004-of-00005.safetensors", size: 5331479394, sha256: "513fbeb37662c2b6020ebe4d61e5e9192f7abb5970aef0cd291b7a55f445c23e"),
+            PullFile(path: "model-00005-of-00005.safetensors", size: 1407912947, sha256: "6ed59540691cfb8f8adeaa186506d3fc44b0f0ce392c7caf59116bb6ae580c01"),
+            PullFile(path: "model.safetensors.index.json", size: 218281, gitSha1: "8b98b99f4d9b89201f21c172b6092a27be968035"),
+            PullFile(path: "tokenizer.json", size: 19989325, sha256: "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523"),
+            PullFile(path: "tokenizer_config.json", size: 10404, gitSha1: "e3e0db7dfbf98a6537db964d8821812652f07fd0"),
+        ]),
+        PullRepo(name: "qwen38-8bit", repo: "mlx-community/Qwen3.8-27B-8bit", revision: "815b83c0df8ffd1d1b5244cf75fd6ef14fca9ef9", files: [
+            PullFile(path: "chat_template.jinja", size: 8952, gitSha1: "c0c686f9c38d70d179fb7b5f5aa7530bc913dda3"),
+            PullFile(path: "config.json", size: 4932, gitSha1: "52ce4562cbed340b0feaf6feb89f8e6f43f4deea"),
+            PullFile(path: "generation_config.json", size: 202, gitSha1: "023756cfadf88e5bf69eefeee3e172f38c448d64"),
+            PullFile(path: "model-00001-of-00006.safetensors", size: 5317707581, sha256: "c7921fe72af5c961c3c4230ea25068ed6d1e502d5ecb2b4a53b7c9c213effa0c"),
+            PullFile(path: "model-00002-of-00006.safetensors", size: 5354102610, sha256: "e9d93d15495354045da281f102649b99793e5b6ed0e05852c58f46e6616b54a0"),
+            PullFile(path: "model-00003-of-00006.safetensors", size: 5354184694, sha256: "7015f40310c86a18230e28644832b624532333d5dfbf7584e6c62341dbd8975e"),
+            PullFile(path: "model-00004-of-00006.safetensors", size: 5337309653, sha256: "7dc8ae53ed51d153e6b59499cdf004bf6ef15aab6757c7604ed4834774abc2c2"),
+            PullFile(path: "model-00005-of-00006.safetensors", size: 5292848464, sha256: "8817c22c01aebdcde54eac315e9766f705eb512ba7ba84ac47501c663f930ac5"),
+            PullFile(path: "model-00006-of-00006.safetensors", size: 2845065477, sha256: "fce51843fc07e1c67c5ec6d19edb46e4fa8d2b51a1cb6c8316b0a7cc069c0eb4"),
+            PullFile(path: "model.safetensors.index.json", size: 218281, gitSha1: "2201d72086cbb2e5dd524d3937182a859b685fc3"),
+            PullFile(path: "tokenizer.json", size: 19989325, sha256: "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523"),
+            PullFile(path: "tokenizer_config.json", size: 1165, gitSha1: "1d134cd298be1e3be25db393d93a1cefe80e3214"),
+        ]),
+        PullRepo(name: "qwen38-mtp-8bit", repo: "mlx-community/Qwen3.8-27B-MTP-8bit", revision: "e88e48d055732ad75d9435f3059139d5279f2064", files: [
+            PullFile(path: "chat_template.jinja", size: 8952, gitSha1: "c0c686f9c38d70d179fb7b5f5aa7530bc913dda3"),
+            PullFile(path: "config.json", size: 3804, gitSha1: "c40a938625b994f451afe70a1286fdd974eec9d4"),
+            PullFile(path: "model.safetensors", size: 451270785, sha256: "20b7873a0a9b0b6618fe7f7d20c324ea9f87bba833173e37e26fdde936ac1f2c"),
+            PullFile(path: "model.safetensors.index.json", size: 1973, gitSha1: "d644801a9b99be7b57f61cc81026360d90fb60e8"),
+            PullFile(path: "tokenizer.json", size: 19989325, sha256: "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523"),
+            PullFile(path: "tokenizer_config.json", size: 1124, gitSha1: "d1a20cc3a8838d08eca9de8a7b84d510d60a0524"),
+        ]),
+        PullRepo(name: "qwen38-oq4e-mtp", repo: "Jundot/Qwen3.8-27B-oQ4e-mtp", revision: "b47cb89d5da40c67a334403330a826c7591fbc09", files: [
+            PullFile(path: "chat_template.jinja", size: 8952, gitSha1: "c0c686f9c38d70d179fb7b5f5aa7530bc913dda3"),
+            PullFile(path: "config.json", size: 47302, gitSha1: "8eaffa5a4a3100063280433aaee260c37a8a748a"),
+            PullFile(path: "generation_config.json", size: 202, gitSha1: "023756cfadf88e5bf69eefeee3e172f38c448d64"),
+            PullFile(path: "model-00001-of-00004.safetensors", size: 5016415582, sha256: "a52b4d90bdd3ac6faaa1b5e2dbd392476ff4a89f612d58f2cdf5da3e600505b6"),
+            PullFile(path: "model-00002-of-00004.safetensors", size: 5017583687, sha256: "da76b97546d3d6115539f7c3f56cb69a3eebd6b29d45f3f3e31223f993e5643a"),
+            PullFile(path: "model-00003-of-00004.safetensors", size: 5001653251, sha256: "22b410fbeb6bd93cd226fbf3d035744d70adf137ad4be9ba7ff4560fc38b3616"),
+            PullFile(path: "model-00004-of-00004.safetensors", size: 1936029038, sha256: "0e513a47300167766fe294ad9c9b8583853debc18dfb05ebadb018bffc97fa7a"),
+            PullFile(path: "model.safetensors.index.json", size: 212223, gitSha1: "9798d031b4e08096ab726c494ef2e51ba1ea5a96"),
+            PullFile(path: "tokenizer.json", size: 12809320, sha256: "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3"),
+            PullFile(path: "tokenizer_config.json", size: 17928, gitSha1: "5de744b3fca2129d7186979ae47c06be33903243"),
+        ]),
+    ]
+}

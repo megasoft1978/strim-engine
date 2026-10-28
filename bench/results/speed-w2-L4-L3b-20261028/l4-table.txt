@@ -1,0 +1,40 @@
+# raw/l4-4096-d2
+1_A.txt arm=A decode_tok_s=44.99 ms_pass=46.50 host_wait=40.00 syncs/round=2.00 accept 54%
+2_B.txt arm=B decode_tok_s=45.91 ms_pass=45.10 host_wait=40.30 syncs/round=1.00 accept 54%
+3_A.txt arm=A decode_tok_s=45.68 ms_pass=45.50 host_wait=39.70 syncs/round=2.00 accept 54%
+4_B.txt arm=B decode_tok_s=45.79 ms_pass=45.50 host_wait=40.70 syncs/round=1.00 accept 54%
+5_A.txt arm=A decode_tok_s=45.92 ms_pass=45.80 host_wait=40.00 syncs/round=2.00 accept 54%
+6_B.txt arm=B decode_tok_s=46.77 ms_pass=44.70 host_wait=40.00 syncs/round=1.00 accept 54%
+MEAN arm=A n=3 decode_tok_s=45.53 ms_pass=45.93 host_wait=39.90
+MEAN arm=B n=3 decode_tok_s=46.16 ms_pass=45.10 host_wait=40.33
+ids A==B: identical (2 rep dumps compared)
+# raw/l4-4096-d4
+1_A.txt arm=A decode_tok_s=46.24 ms_pass=54.90 host_wait=46.90 syncs/round=2.00 accept 39%
+2_B.txt arm=B decode_tok_s=46.12 ms_pass=54.50 host_wait=49.40 syncs/round=1.00 accept 39%
+3_A.txt arm=A decode_tok_s=45.99 ms_pass=55.00 host_wait=47.00 syncs/round=2.00 accept 39%
+4_B.txt arm=B decode_tok_s=46.46 ms_pass=54.70 host_wait=49.50 syncs/round=1.00 accept 39%
+5_A.txt arm=A decode_tok_s=46.33 ms_pass=54.40 host_wait=46.80 syncs/round=2.00 accept 39%
+6_B.txt arm=B decode_tok_s=46.35 ms_pass=54.90 host_wait=49.60 syncs/round=1.00 accept 39%
+MEAN arm=A n=3 decode_tok_s=46.19 ms_pass=54.77 host_wait=46.90
+MEAN arm=B n=3 decode_tok_s=46.31 ms_pass=54.70 host_wait=49.50
+ids A==B: identical (2 rep dumps compared)
+# raw/l4-8192-d2
+1_A.txt arm=A decode_tok_s=54.62 ms_pass=47.20 host_wait=41.50 syncs/round=2.00 accept 81%
+2_B.txt arm=B decode_tok_s=55.31 ms_pass=46.90 host_wait=42.20 syncs/round=1.00 accept 81%
+3_A.txt arm=A decode_tok_s=50.81 ms_pass=47.90 host_wait=41.60 syncs/round=2.00 accept 81%
+4_B.txt arm=B decode_tok_s=54.73 ms_pass=47.40 host_wait=42.40 syncs/round=1.00 accept 81%
+5_A.txt arm=A decode_tok_s=53.79 ms_pass=48.40 host_wait=42.40 syncs/round=2.00 accept 81%
+6_B.txt arm=B decode_tok_s=54.47 ms_pass=47.00 host_wait=42.20 syncs/round=1.00 accept 81%
+MEAN arm=A n=3 decode_tok_s=53.07 ms_pass=47.83 host_wait=41.83
+MEAN arm=B n=3 decode_tok_s=54.84 ms_pass=47.10 host_wait=42.27
+ids A==B: identical (2 rep dumps compared)
+# raw/l4-8192-d4
+1_A.txt arm=A decode_tok_s=51.11 ms_pass=58.90 host_wait=50.20 syncs/round=2.00 accept 54%
+2_B.txt arm=B decode_tok_s=42.68 ms_pass=57.80 host_wait=52.60 syncs/round=1.00 accept 54%
+3_A.txt arm=A decode_tok_s=53.14 ms_pass=58.50 host_wait=50.00 syncs/round=2.00 accept 54%
+4_B.txt arm=B decode_tok_s=53.52 ms_pass=57.30 host_wait=52.20 syncs/round=1.00 accept 54%
+5_A.txt arm=A decode_tok_s=51.93 ms_pass=59.20 host_wait=50.30 syncs/round=2.00 accept 54%
+6_B.txt arm=B decode_tok_s=52.47 ms_pass=57.80 host_wait=52.50 syncs/round=1.00 accept 54%
+MEAN arm=A n=3 decode_tok_s=52.06 ms_pass=58.87 host_wait=50.17
+MEAN arm=B n=3 decode_tok_s=49.56 ms_pass=57.63 host_wait=52.43
+ids A==B: identical (2 rep dumps compared)

@@ -27,6 +27,7 @@ import Testing
 
     @Test func decodeNeverWaitsMoreThanOneChunk() {
         var s = Scheduler()
+        s.burst = .legacy   // default is the gap cap (PrefillBurstTests); this pins the legacy alternation
         s.add(id: 1, priority: .interactive, phase: .decode)
         s.add(id: 2, priority: .interactive)
         var sinceDecode = 0
@@ -179,5 +180,105 @@ import Testing
         var s = decoders(2, policy: .batch)
         #expect(Scheduler().policy == .batch)
         #expect(s.pick() == .decodeBatch(join: [1, 2]))
+    }
+}
+
+/// Manual clock: the engine calls pick() at every unit start, so the test advances time by each unit's duration.
+final class SchedulerFakeClock { var t = 0.0 }
+
+@Suite struct PrefillBurstTests {
+    private func sched(_ b: PrefillBurst) -> (Scheduler, SchedulerFakeClock) {
+        var s = Scheduler()
+        let c = SchedulerFakeClock()
+        s.burst = b; s.clock = { c.t }
+        return (s, c)
+    }
+
+    private func letter(_ u: Scheduler.Unit?) -> String {
+        switch u {
+        case .prefill?: return "P"
+        case .decodeSolo?, .decodeBatch?: return "D"
+        case nil: return "-"
+        }
+    }
+
+    @Test func envParsing() {
+        #expect(PrefillBurst.from(env: [:]) == PrefillBurst(units: Int.max, gapSeconds: 3.0))   // default on
+        #expect(Scheduler().burst == PrefillBurst(units: Int.max, gapSeconds: 3.0))
+        #expect(PrefillBurst.from(env: ["STRIM_PREFILL_GAP_MS": "0"]) == .legacy)
+        #expect(PrefillBurst.from(env: ["STRIM_PREFILL_GAP_MS": "off"]) == .legacy)
+        #expect(PrefillBurst.from(env: ["STRIM_PREFILL_GAP_MS": "3000"]) == PrefillBurst(units: Int.max, gapSeconds: 3.0))
+        #expect(PrefillBurst.from(env: ["STRIM_PREFILL_GAP_MS": "1500"]) == PrefillBurst(units: Int.max, gapSeconds: 1.5))
+        #expect(PrefillBurst.from(env: ["STRIM_PREFILL_BURST": "3"]) == PrefillBurst(units: 3, gapSeconds: 3.0))
+        #expect(PrefillBurst.from(env: ["STRIM_PREFILL_BURST": "0"]).units == 1)
+        #expect(PrefillBurst.from(env: ["STRIM_PREFILL_BURST": "2", "STRIM_PREFILL_GAP_MS": "250"])
+            == PrefillBurst(units: 2, gapSeconds: 0.25))
+    }
+
+    /// Ordering guarantee: up to N prefill units run back to back while a decoder waits, then one decode unit.
+    @Test func burstRunsNPrefillUnitsBeforeEachDecode() {
+        let (s0, c) = sched(PrefillBurst(units: 3, gapSeconds: .infinity))
+        var s = s0
+        s.add(id: 1, priority: .interactive, phase: .decode)
+        s.add(id: 2, priority: .interactive)
+        var seq = ""
+        for _ in 0 ..< 8 { c.t += 0.6; seq += letter(s.pick()) }
+        #expect(seq == "PPPDPPPD")
+    }
+
+    /// Ordering guarantee: prefill wall time since the last decode unit is capped (inter-token gap).
+    @Test func gapCapForcesDecodeAfterPrefillTime() {
+        let (s0, c) = sched(PrefillBurst(units: Int.max, gapSeconds: 1.5))
+        var s = s0
+        s.add(id: 1, priority: .interactive, phase: .decode)
+        s.add(id: 2, priority: .interactive)
+        var seq = ""
+        for _ in 0 ..< 6 { c.t += 0.6; seq += letter(s.pick()) }   // each unit lasts 0.6 s
+        #expect(seq == "PPDPPD")   // unit 0.6 s, cap 1.5 s: decode when prefill run + predicted unit reaches the cap
+    }
+
+    /// Ordering guarantee: a prefill-only period (no decoder) does not charge the gap of a decoder that arrives later.
+    @Test func prefillWithoutDecodersDoesNotCountAgainstTheGap() {
+        let (s0, c) = sched(PrefillBurst(units: Int.max, gapSeconds: 1.5))
+        var s = s0
+        s.add(id: 2, priority: .interactive)
+        for _ in 0 ..< 5 { c.t += 0.6; #expect(s.pick() == .prefill(2)) }
+        s.add(id: 1, priority: .interactive, phase: .decode)
+        c.t += 0.6
+        #expect(s.pick() == .prefill(2))
+        c.t += 0.6
+        #expect(s.pick() == .prefill(2))
+        c.t += 0.6
+        #expect(s.pick() == .decodeSolo(1))
+    }
+
+    /// Invariant over a longer run: between two decode units, prefill wall time never exceeds the cap (predicted-unit rule).
+    @Test func decodeNeverWaitsPastTheCapPlusOneUnit() {
+        let cap = 1.5, unit = 0.6
+        let (s0, c) = sched(PrefillBurst(units: Int.max, gapSeconds: cap))
+        var s = s0
+        s.add(id: 1, priority: .interactive, phase: .decode)
+        for id in 2 ... 6 { s.add(id: id, priority: .interactive) }
+        var sinceDecode = 0.0, worst = 0.0, decodes = 0
+        for _ in 0 ..< 60 {
+            switch s.pick() {
+            case .prefill?: c.t += unit; sinceDecode += unit; worst = max(worst, sinceDecode)
+            case .decodeSolo?, .decodeBatch?: c.t += 0.05; sinceDecode = 0; decodes += 1
+            case nil: Issue.record("idle with work pending")
+            }
+        }
+        #expect(decodes > 0)
+        #expect(worst <= cap + 1e-9)
+    }
+
+    /// Legacy default is unchanged: one prefill unit, then one decode unit, regardless of the clock.
+    @Test func legacyDefaultAlternatesOneToOne() {
+        let (s0, c) = sched(.legacy)
+        var s = s0
+        s.add(id: 1, priority: .interactive, phase: .decode)
+        s.add(id: 2, priority: .interactive)
+        var seq = ""
+        for _ in 0 ..< 6 { c.t += 5.0; seq += letter(s.pick()) }
+        #expect(seq == "PDPDPD")
     }
 }

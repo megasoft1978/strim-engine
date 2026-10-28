@@ -27,6 +27,18 @@ public struct SpecStats {
 }
 
 public enum QwenModel {
+    /// Pipelined graph build: `asyncEval(h)` after every N-th layer of a decode / verify pass lets the GPU
+    /// start while the host builds and encodes the remaining layers (hides the ~3 ms build). `STRIM_PIPE_LAYERS=N`
+    /// sets N for decode and verify (M <= 8 rows) and batched decode; 0 = off. `STRIM_PIPE_PREFILL_LAYERS=N`
+    /// does the same for prefill-sized chunks (default 0: GPU-bound, no gain). asyncEval never changes numerics.
+    static func pipeEnv(_ key: String, _ def: Int) -> Int { max(Int(ProcessInfo.processInfo.environment[key] ?? "") ?? def, 0) }
+    nonisolated(unsafe) public static var pipeEvery = pipeEnv("STRIM_PIPE_LAYERS", 4)
+    nonisolated(unsafe) public static var pipePrefillEvery = pipeEnv("STRIM_PIPE_PREFILL_LAYERS", 0)
+    @inline(__always) static func pipe(_ h: MLXArray, layer i: Int, of layers: Int, rows: Int) {
+        let n = rows <= 8 ? pipeEvery : pipePrefillEvery
+        if n > 0, (i + 1) % n == 0, i < layers - 1 { asyncEval(h) }
+    }
+
     /// Limit speculative drafts so a verify round cannot exceed the output budget.
     static func draftDepth(_ requested: Int, remainingTokens: Int) -> Int {
         min(max(requested, 0), max(remainingTokens - 1, 0))
@@ -39,6 +51,7 @@ public enum QwenModel {
             .reshaped([1, tokens.count, 5120])
         for i in 0 ..< layers {
             h = try DecoderLayer.forward(h, store: store, layer: i, cache: cache)
+            pipe(h, layer: i, of: layers, rows: tokens.count)
         }
         let hidden = h
         h = try store.rmsNorm("language_model.model.norm", h)
@@ -50,18 +63,46 @@ public enum QwenModel {
     public static func forwardAll(tokens: [Int32], store: WeightStore, cache: ModelCache,
                                   layers: Int = 64,
                                   lastTokenOnly: Bool = false) throws -> (hidden: MLXArray, logits: MLXArray) {
-        var h = try store.embedding("language_model.model.embed_tokens", tokens: tokens)
-            .reshaped([1, tokens.count, 5120])
+        let h = try OpTimer.time("embed", bytes: Double(tokens.count * 5120 * 2)) {
+            try store.embedding("language_model.model.embed_tokens", tokens: tokens)
+                .reshaped([1, tokens.count, 5120])
+        }
+        return try forwardAll(embedded: h, count: tokens.count, store: store, cache: cache,
+                              layers: layers, lastTokenOnly: lastTokenOnly)
+    }
+
+    /// `forwardAll` with the token ids as a device array (`[n]` or `[1,n]`, possibly still
+    /// the lazy output of a draft chain), so a verify pass can be built and queued
+    /// without a host read of the drafts. Same embedding rows, same arithmetic.
+    public static func forwardAll(indices: MLXArray, store: WeightStore, cache: ModelCache,
+                                  layers: Int = 64,
+                                  lastTokenOnly: Bool = false) throws -> (hidden: MLXArray, logits: MLXArray) {
+        let n = indices.size
+        let h = try OpTimer.time("embed", bytes: Double(n * 5120 * 2)) {
+            try store.embedding("language_model.model.embed_tokens", indices: indices)
+                .reshaped([1, n, 5120])
+        }
+        return try forwardAll(embedded: h, count: n, store: store, cache: cache,
+                              layers: layers, lastTokenOnly: lastTokenOnly)
+    }
+
+    private static func forwardAll(embedded: MLXArray, count: Int, store: WeightStore, cache: ModelCache,
+                                   layers: Int, lastTokenOnly: Bool) throws -> (hidden: MLXArray, logits: MLXArray) {
+        var h = embedded
         for i in 0 ..< layers {
             h = try DecoderLayer.forward(h, store: store, layer: i, cache: cache)
+            pipe(h, layer: i, of: layers, rows: count)
         }
         let hidden = h
         // Prefill only needs the last position's logits. Computing lm_head over every
         // prompt token is ~100 ms at 4K and allocates [1,S,152K]; verify needs them all.
-        let normed = try store.rmsNorm("language_model.model.norm",
-                                   lastTokenOnly ? h[0..., (tokens.count - 1) ..< tokens.count, 0...] : h)
-        let logits = try store.linear("language_model.lm_head", normed)
-        cache.position += tokens.count
+        let hIn = lastTokenOnly ? h[0..., (count - 1) ..< count, 0...] : h
+        let normed = try OpTimer.time("norm", flops: Double(hIn.size) * 4, bytes: Double(hIn.nbytes * 2),
+                                      inputs: [h]) {
+            try store.rmsNorm("language_model.model.norm", hIn)
+        }
+        let logits = try OpTimer.linear(store, "lm_head", "language_model.lm_head", normed)
+        cache.position += count
         return (hidden, logits)
     }
 
@@ -110,7 +151,6 @@ public enum QwenModel {
         let cache = ModelCache()
         let (hidden, logits) = try forwardAll(tokens: prompt, store: store, cache: cache,
                                               layers: layers, lastTokenOnly: true)
-        stats.prefillSeconds = Date().timeIntervalSince(t0)
         var out = prompt
         let b = Int32(argMax(logits[0, 0]).item(Int32.self))
         let mtp = MTPState()
@@ -120,7 +160,12 @@ public enum QwenModel {
                                     head: head, mtp: mtp, chain: chain)
             lastHidden = try store.rmsNorm("language_model.model.norm",
                                            hidden[0..., (prompt.count - 1) ..< prompt.count, 0...])
+            // Force the lazy head seed so prefillSeconds covers it (decode_tok_s excludes it).
+            if let s = mtp.seedHidden { eval(s) }
+            if let t = mtp.seedTokenIndex { eval(t) }
+            if let k = mtp.attention.keys, let v = mtp.attention.values { eval(k, v) }
         }
+        stats.prefillSeconds = Date().timeIntervalSince(t0)
         let stream = SpecStream(store: store, head: head, cache: cache, mtp: mtp, seedToken: b,
                                 lastHidden: lastHidden, depth: depth, layers: layers, chain: chain,
                                 adaptive: adaptive, maxDepth: maxDepth, maintainHead: false)

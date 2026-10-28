@@ -1,0 +1,24 @@
+benchprefill M=523
+n=523 chunk=523 0.59 s  892 tok/s  (rep 2)
+n=523 chunk=523 0.59 s  890 tok/s  (rep 3)
+n=523 chunk=523 0.59 s  892 tok/s  (rep 4)
+benchprefill M=530
+n=530 chunk=530 0.59 s  899 tok/s  (rep 2)
+n=530 chunk=530 0.59 s  896 tok/s  (rep 3)
+n=530 chunk=530 0.59 s  895 tok/s  (rep 4)
+benchprefill M=523
+n=523 chunk=523 0.59 s  887 tok/s  (rep 2)
+n=523 chunk=523 0.60 s  877 tok/s  (rep 3)
+n=523 chunk=523 0.59 s  886 tok/s  (rep 4)
+benchprefill M=530
+n=530 chunk=530 0.59 s  897 tok/s  (rep 2)
+n=530 chunk=530 0.59 s  898 tok/s  (rep 3)
+n=530 chunk=530 0.59 s  896 tok/s  (rep 4)
+benchprefill M=523
+n=523 chunk=523 0.59 s  890 tok/s  (rep 2)
+n=523 chunk=523 0.59 s  890 tok/s  (rep 3)
+n=523 chunk=523 0.59 s  888 tok/s  (rep 4)
+benchprefill M=530
+n=530 chunk=530 0.59 s  895 tok/s  (rep 2)
+n=530 chunk=530 0.59 s  897 tok/s  (rep 3)
+n=530 chunk=530 0.59 s  897 tok/s  (rep 4)

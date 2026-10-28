@@ -1,0 +1,23 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 8,
+  "id" : "rb-01",
+  "language" : "ruby",
+  "license" : "MIT",
+  "note" : "Ruby: number-to-words (hyphenated tens, 'and' placement) and ordinal suffix teens",
+  "prompt" : "The automated tests of this Ruby library currently fail. Run `ruby -Ilib -Itest test\/all_test.rb` from the repository root to see the failures (minitest from the standard library; no gems to install, no network). Change the library's non-test source under lib\/ so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-ruby",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1400,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/all_test.rb" : "3ff59e43ff8c77bfaefc6df5100f2344cd4f26996c6e7c5459fd0833f379272d",
+    "test\/numwords_test.rb" : "be7d48cfde28f7b40c4f99ae8023402d6bc64b57f0c57d36f27f4a8633a949f1"
+  },
+  "tree_sha256" : "d18b66b085e724de9d2ee30bb14917146c2a31c670c5d6b523e36b43c7f73d8b",
+  "verify_cmd" : "ruby -Ilib -Itest test\/all_test.rb"
+}

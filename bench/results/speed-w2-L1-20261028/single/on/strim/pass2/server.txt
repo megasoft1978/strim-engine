@@ -1,0 +1,8 @@
+strim: mcp.allowedRoots is not set; delegated jobs are limited to /Users/user (credential directories such as ~/.strim, ~/.aws, ~/.ssh stay refused). Set mcp.allowedRoots in ~/.strim/config.json to narrow it.
+draft vocab: loaded bench/draft_vocab_48k.json
+engine ready in 2.8s  model=qwen38-4bit  head=models/qwen38-mtp-4bit
+strim serve: http://127.0.0.1:8203  (OpenAI-compatible: /v1/chat/completions /v1/models /health /metrics)
+auth: DISABLED (--no-auth), loopback dev only
+control: http://127.0.0.1:8203/v1/strim/status  (menu-bar app API; control token: /Users/user/.strim/control-token)
+mcp: http://127.0.0.1:8203/mcp  (register with: strim mcp-config --claude|--codex --port 8203)
+admission: on  max_inflight=8  max_background=7

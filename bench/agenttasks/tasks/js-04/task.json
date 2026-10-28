@@ -1,0 +1,33 @@
+{
+  "answer_env" : "ANSWER_FILE",
+  "base_commit" : "",
+  "class" : "repo-qa",
+  "est_solo_turns" : 5,
+  "expected_answer" : {
+    "all_of" : [
+      "retryDelay",
+      "backoff\\.js[^0-9]{1,12}1[0-3]([^0-9]|$)",
+      "worker\\.js[^0-9]{1,12}(29|3[0-2])([^0-9]|$)"
+    ]
+  },
+  "id" : "js-04",
+  "known_answer" : "retryDelay in src\/queue\/backoff.js:12 computes the exponential delay; src\/queue\/worker.js:31 assigns job.runAt = clock.now() + retryDelay(...).",
+  "language" : "javascript",
+  "license" : "MIT",
+  "no_edit" : true,
+  "note" : "Node.js repo-QA: where retry delay is computed and applied",
+  "prompt" : "Answer a question about the repository in the current directory. Do NOT modify any file. Reply with the repo-relative file path(s) and the exact symbol name(s) (function, class, method or variable) that answer it, each as path:line (the line where the symbol or the relevant statement is). Keep the answer short.\n\nQuestion: In this job-queue package, which function computes the delay before a failed job is retried (file and the line of the formula), and in which file and line is that delay applied to the job's next run time?",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-node",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2319,
+  "test_paths" : [
+
+  ],
+  "test_sha256" : {
+
+  },
+  "tree_sha256" : "1b8ad109c1d6ae06e0b6f2dd6d92290d6a2a23a91ab21b4fe1558e3de646bcdf",
+  "verify_cmd" : "grep -Eq 'retryDelay' \"$ANSWER_FILE\" && grep -Eq 'backoff\\.js[^0-9]{1,12}1[0-3]([^0-9]|$)' \"$ANSWER_FILE\" && grep -Eq 'worker\\.js[^0-9]{1,12}(29|3[0-2])([^0-9]|$)' \"$ANSWER_FILE\"",
+  "wrong_answer" : "Store.takeDue in src\/queue\/store.js:13 and Job.exhausted in src\/queue\/job.js:23."
+}

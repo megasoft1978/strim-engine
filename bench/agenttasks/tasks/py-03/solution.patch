@@ -1,0 +1,76 @@
+diff --git a/moneyx/money.py b/moneyx/money.py
+index 5d51bdf..9844ea3 100644
+--- a/moneyx/money.py
++++ b/moneyx/money.py
+@@ -1,6 +1,9 @@
+ from dataclasses import dataclass
++from decimal import ROUND_HALF_EVEN, Decimal
++from functools import total_ordering
+ 
+ 
++@total_ordering
+ @dataclass(frozen=True)
+ class Money:
+     """An amount in minor units (cents) of one currency."""
+@@ -18,3 +21,61 @@ class Money:
+         frac = (frac + "00")[:2]
+         sign = -1 if whole.startswith("-") else 1
+         return cls(sign * (abs(int(whole)) * 100 + int(frac)), currency)
++
++    def _same(self, other):
++        if not isinstance(other, Money):
++            return NotImplemented
++        if other.currency != self.currency:
++            raise ValueError(f"currency mismatch: {self.currency} vs {other.currency}")
++        return other
++
++    def __str__(self):
++        sign = "-" if self.cents < 0 else ""
++        whole, frac = divmod(abs(self.cents), 100)
++        return f"{self.currency} {sign}{whole}.{frac:02d}"
++
++    def __add__(self, other):
++        o = self._same(other)
++        return o if o is NotImplemented else Money(self.cents + o.cents, self.currency)
++
++    def __sub__(self, other):
++        o = self._same(other)
++        return o if o is NotImplemented else Money(self.cents - o.cents, self.currency)
++
++    def __neg__(self):
++        return Money(-self.cents, self.currency)
++
++    def __abs__(self):
++        return Money(abs(self.cents), self.currency)
++
++    def __mul__(self, factor):
++        if isinstance(factor, bool) or not isinstance(factor, (int, float)):
++            return NotImplemented
++        exact = Decimal(self.cents) * Decimal(str(factor))
++        return Money(int(exact.quantize(Decimal(1), rounding=ROUND_HALF_EVEN)), self.currency)
++
++    __rmul__ = __mul__
++
++    def __lt__(self, other):
++        o = self._same(other)
++        return o if o is NotImplemented else self.cents < o.cents
++
++    def is_zero(self):
++        return self.cents == 0
++
++    def allocate(self, parts):
++        if parts < 1:
++            raise ValueError("parts must be >= 1")
++        return self.allocate_ratios([1] * parts)
++
++    def allocate_ratios(self, ratios):
++        """Split into len(ratios) parts proportional to the ratios; the remainder goes one cent at a time to the first parts."""
++        total = sum(ratios)
++        if not ratios or total <= 0 or any(r < 0 for r in ratios):
++            raise ValueError("ratios must be non-negative with a positive sum")
++        sign = -1 if self.cents < 0 else 1
++        base = [abs(self.cents) * r // total for r in ratios]
++        remainder = abs(self.cents) - sum(base)
++        for i in range(remainder):
++            base[i % len(base)] += 1
++        return [Money(sign * b, self.currency) for b in base]

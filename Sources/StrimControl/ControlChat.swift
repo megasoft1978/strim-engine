@@ -16,6 +16,7 @@ extension StrimControlPlane {
             if let v = policy.violation(access: "read", cwd: b.cwd) { throw ControlError.forbidden(v) }
         }
         let id = try await jobs.openSession(HarnessJobSpec(task: "", cwd: b.cwd, access: access), profile: profile)
+        if let t = b.enableThinking { try await jobs.setChatThinking(id, enabled: t) }
         return try .json(ChatSession(sessionID: id, jobID: id, cwd: b.cwd, profile: b.profile))
     }
 
@@ -47,6 +48,7 @@ extension StrimControlPlane {
             guard ControlMapping.isValidJobID(id) else { throw ChatError.sessionNotFound(id) }
             let state = await slot.status().state
             guard state == .ready || state == .busy else { throw ControlError.unavailable("no model loaded (state: \(state.rawValue))") }
+            if let t = b.enableThinking { try await jobs.setChatThinking(id, enabled: t) }
             stream = try await jobs.appendUserTurn(id, text: b.text)
         } catch let e as HTTPServerError {
             throw e

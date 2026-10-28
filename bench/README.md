@@ -37,8 +37,8 @@ machine; record the checkpoint, quant, context, and whether anything else was ru
 
 ## `strim agentbench`: paid arms (P, M) and credentials
 
-The paid arms run the real Claude Code under `sandbox-exec` with file tools only (no Bash; the harness runs the verify command
-itself after the client exits). The sandbox must still let Claude read `~/.claude/.credentials.json` and reach the network to
+The paid arms run the real Claude Code under `sandbox-exec` with file tools plus a scoped Bash (see "Paid-arm Bash" below; the
+harness still runs the verify command itself after the client exits). The sandbox must still let Claude read `~/.claude/.credentials.json` and reach the network to
 log in, so a prompt-injected task repo could in principle make the client's own tool layer misuse them. Residual risk: the file
 tools are denied for `~/.claude*` by permission rule, not by the sandbox. Run paid arms only on corpora you control. Arm M passes
 the Strim bearer token through the `STRIM_MCP_TOKEN` environment variable; `mcp.json` holds no secret.
@@ -58,3 +58,34 @@ mcp-clients Claude lane pass `USER`, `LOGNAME` and the host's `CLAUDE_CONFIG_DIR
 `~/Library/Keychains/login.keychain-db` (one literal file; the directory and `~/.claude*` stay denied, no Bash tool, items are
 released by securityd under their own access control). Residual risk: the sandboxed client can read that database file. A client
 that reports an error with zero model usage (for example `Not logged in`) is recorded as an infra error, not a task FAIL.
+
+### Paid-arm Bash (owner decision 2026-10-28)
+
+Without a shell the P/M parent could not run the task's tests (pilot 2 follow-up), so P is a handicapped baseline and M's routing
+rule is confounded. P and M now get a Bash tool, but it cannot execute repository code (`PaidBash.swift`, `RunTests.swift`):
+- Why not plain `go test`: `sandbox-exec` cannot be nested and cannot tell the client from its Bash child, so any Bash child has the
+  client's network and can read its OAuth credential file / login keychain database. `go test`/`swift test` run parent-written code
+  (`TestMain`, `init`, build plugins), so they would let that code exfiltrate the subscription credential.
+- What Bash may run: `ls cat head tail wc grep diff pwd`, `git status`, and `runtests`. Denied (deny beats allow): `go`, `swift`, `rg`
+  (`--pre` runs commands), `git diff|log|grep|show` (`--ext-diff`, `--output`), curl, wget, ssh, scp, nc, sudo, sh/bash/zsh, python, env/printenv,
+  `rm -r*`, git push/remote/config. No sed/awk/find/cp/mv/touch/mkdir (file tools edit).
+- `runtests go test|vet|build ...` / `runtests swift test|build ...` is a script (in `<run dir>/bin`, first on `PATH`) that sends its args
+  to a per-run loopback service in the HOST process (random token). The host validates them (only those runner subcommands; `-exec`,
+  `-toolexec`, `-vettool`, `-overlay`, `--scratch-path` ... refused), runs them in the verify-style sandbox (all network denied,
+  no reads of home/credentials/keychain/other runs/the task dir, writes only in the worktree and a scratch dir), 300 s timeout, 80 calls
+  per run, output capped to 20000 chars. Tests: `PaidBashTests` (a Go test program under `runtests` cannot read a credential canary, other
+  runs, hidden files, dial loopback or the internet, or write outside; refused requests; rule set vs injection forms).
+- Client profile (shared by its Bash children): writes only in the worktree and run dir; home, `~/.ssh`, `~/.strim`, `~/.aws`,
+  `~/.claude*` (except the login files the client needs), Keychains dir, other runs' dirs and shared temp areas unreadable; the task's
+  `test_paths` are write-denied (reads stay open) and are still hash-checked and restored before grading. Local arms' profiles unchanged.
+- Env: allow-listed client env (minimal `PATH`, `HOME`, `USER`, `TMPDIR`, Claude vars, `STRIM_MCP_TOKEN` for M), `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1`,
+  per-command timeout 120 s (max 300 s), output cap 20000 chars (`BASH_*` variables).
+- Preflight: P/M runs call `SelfCheck.checkPaidBash` (live sandbox probes, rule set, runtests refusals, `go version` through the service) and
+  abort as an infra error on failure.
+
+Residual risk, stated plainly: (1) the Bash child still has the client's network and can read the OAuth credential file and login keychain database. It cannot run
+code through an allowed tool, but if Claude Code's command matcher were bypassed (an injection form it mis-parses), arbitrary code would run with that
+access. The tests model the matcher conservatively (`strictPermits`) but cannot prove Claude Code's parser. (2) `HOME` is the real home (login needs it) and
+`STRIM_MCP_TOKEN` is in the client env (arm M); only the deny profile protects them. (3) Test code run by `runtests` can write anywhere in the worktree (hash restore
+covers `test_paths` only) and use the CPU for 300 s. (4) The env scrub, `BASH_*` limits and the `runtests` call path from the real client are unexercised until the first
+paid run (no client was launched here). Run P/M only on corpora you control. Stronger option not built: an egress proxy allow-listing Anthropic hosts so the Bash child has no general network.

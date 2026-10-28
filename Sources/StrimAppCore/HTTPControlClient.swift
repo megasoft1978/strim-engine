@@ -299,6 +299,18 @@ public struct HTTPControlClient: StrimControlClient {
     public func chatAppend(_ request: ChatAppendRequest) async throws { _ = try await post(StrimRoutes.chatAppend, request) }
     public func chatCancel(_ request: ChatCancelRequest) async throws { _ = try await post(StrimRoutes.chatCancel, request) }
 
+    public func pauseJobs(_ request: PauseRequest) async throws -> JobsPauseState {
+        try decode(JobsPauseState.self, try await post(StrimRoutes.pause, request))
+    }
+    public func resumeJobs() async throws -> JobsPauseState {
+        try decode(JobsPauseState.self, try await send(StrimRoutes.resume, method: "POST", body: Data("{}".utf8)))
+    }
+    public func cancelJob(_ request: JobCancelRequest) async throws -> JobCancelResult {
+        try decode(JobCancelResult.self, try await post(StrimRoutes.jobCancel, request))
+    }
+    public func models() async throws -> ModelList { try decode(ModelList.self, try await send(StrimRoutes.models)) }
+    public func pack() async throws -> PackInfo { try decode(PackInfo.self, try await send(StrimRoutes.pack)) }
+
     public func events() -> AsyncThrowingStream<StrimEvent, Error> {
         let req = makeRequest(StrimRoutes.events, timeout: streamIdleTimeout)
         var accept = req
@@ -355,4 +367,9 @@ struct InvalidConfigClient: StrimControlClient {
     func chatOpen(_ request: ChatOpenRequest) async throws -> ChatSession { throw err }
     func chatAppend(_ request: ChatAppendRequest) async throws { throw err }
     func chatCancel(_ request: ChatCancelRequest) async throws { throw err }
+    func pauseJobs(_ request: PauseRequest) async throws -> JobsPauseState { throw err }
+    func resumeJobs() async throws -> JobsPauseState { throw err }
+    func cancelJob(_ request: JobCancelRequest) async throws -> JobCancelResult { throw err }
+    func models() async throws -> ModelList { throw err }
+    func pack() async throws -> PackInfo { throw err }
 }

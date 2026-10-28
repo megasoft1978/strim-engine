@@ -141,7 +141,7 @@ private func awaitSubscribed(_ m: AppModel, _ fake: FakeControlClient) async -> 
         #expect(await waitFor { m.connection.isConnected })
         #expect(m.loadAvailability.enabled)
         #expect(m.unloadAvailability == .no("No model loaded"))
-        #expect(m.pauseAvailability.enabled == false)
+        #expect(m.pauseAvailability.enabled, "pause is a real control now")
         await m.loadModel()
         #expect(await fake.calls == ["load:/models/q"])
         #expect(m.status?.state == .ready)

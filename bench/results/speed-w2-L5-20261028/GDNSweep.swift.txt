@@ -1,0 +1,354 @@
+// Snapshot-only sweep harness (copied into Sources/StrimCore/GDNSweep.swift of the build snapshot; not shipped).
+import Foundation
+import MLX
+import MLXRandom
+import MLXFast
+
+public enum GDNSweep {
+    public struct V { public var name: String; public var tb: Int; public var db: Int; public var fstage: Bool; public var flags: String = "" }
+
+    static func source(_ v: V) -> String {
+        let TB = v.tb, DB = v.db
+        let R = v.flags.contains("2") ? 2 : (v.flags.contains("4") ? 4 : 1)
+        let NT = 8 * DB / R
+        let f = v.flags
+        let vec = f.contains("v") || f.contains("p"), ys = f.contains("y"), xr = f.contains("x"), pf = f.contains("p")
+        let kqType = v.fstage ? "float" : "bfloat16_t"
+        let pad = v.fstage ? 4 : 8
+        let kLoad = v.fstage ? "float4 kf[4]; for (int i = 0; i < 4; ++i) kf[i] = k4[i];"
+                             : "float4 kf[4]; for (int i = 0; i < 4; ++i) kf[i] = float4(k4[i]);"
+        let k4t = v.fstage ? "const threadgroup float4*" : "const threadgroup vec<bfloat16_t,4>*"
+        let q4conv = v.fstage ? "q4[i]" : "float4(q4[i])"
+        let KQC = (TB * 16 + NT - 1) / NT
+        let VC = (TB * (DB / 8) + NT - 1) / NT
+        // load block into registers
+        let loadBlock: String
+        let storeBlock: String
+        if vec {
+            loadBlock = """
+                uint tt_ = min((uint)TB, T - (T0));
+                for (int j = 0; j < \(KQC); ++j) {
+                    uint p = tid + j * \(NT);
+                    if (p < tt_ * 16) {
+                        uint r = p / 16, c = p % 16;
+                        kr_[j] = *(const device uint4*)(k_base + (size_t)((T0) + r) * krow + c * 8);
+                        qr_[j] = *(const device uint4*)(q_base + (size_t)((T0) + r) * krow + c * 8);
+                    }
+                }
+                for (int j = 0; j < \(VC); ++j) {
+                    uint p = tid + j * \(NT);
+                    if (p < tt_ * \(DB / 8)) {
+                        uint r = p / \(DB / 8), c = p % \(DB / 8);
+                        vr_[j] = *(const device uint4*)(v_base + (size_t)((T0) + r) * Hv * 128 + c * 8);
+                    }
+                }
+                if (tid < tt_) {
+                    gr_ = g[((size_t)b * T + (T0) + tid) * Hv + hv];
+                    br_ = beta[((size_t)b * T + (T0) + tid) * Hv + hv];
+                }
+                """
+            storeBlock = """
+                for (int j = 0; j < \(KQC); ++j) {
+                    uint p = tid + j * \(NT);
+                    if (p < tt * 16) {
+                        uint r = p / 16, c = p % 16;
+                        *(threadgroup uint4*)&k_s[r][c * 8] = kr_[j];
+                        *(threadgroup uint4*)&q_s[r][c * 8] = qr_[j];
+                    }
+                }
+                for (int j = 0; j < \(VC); ++j) {
+                    uint p = tid + j * \(NT);
+                    if (p < tt * \(DB / 8)) {
+                        uint r = p / \(DB / 8), c = p % \(DB / 8);
+                        *(threadgroup uint4*)&v_s[r][c * 8] = vr_[j];
+                    }
+                }
+                if (tid < tt) { g_s[tid] = gr_; b_s[tid] = br_; }
+                """
+        } else {
+            loadBlock = ""
+            storeBlock = """
+                for (uint p = tid; p < tt * 128; p += \(NT)) {
+                    uint r = p / 128, d = p % 128;
+                    k_s[r][d] = k_base[(size_t)(t0 + r) * krow + d];
+                    q_s[r][d] = q_base[(size_t)(t0 + r) * krow + d];
+                }
+                for (uint p = tid; p < tt * DB; p += \(NT)) {
+                    uint r = p / DB, d = p % DB;
+                    v_s[r][d] = v_base[(size_t)(t0 + r) * Hv * 128 + d];
+                }
+                for (uint p = tid; p < tt; p += \(NT)) {
+                    g_s[p] = g[((size_t)b * T + t0 + p) * Hv + hv];
+                    b_s[p] = beta[((size_t)b * T + t0 + p) * Hv + hv];
+                }
+                """
+        }
+        let regsDecl = vec ? "uint4 kr_[\(KQC)], qr_[\(KQC)], vr_[\(VC)]; float gr_ = 0.0f, br_ = 0.0f;" : ""
+        let loopHead: String
+        if pf {
+            loopHead = """
+                { const uint T0 = 0; \(loadBlock) }
+                for (uint t0 = 0; t0 < T; t0 += TB) {
+                    uint tt = min((uint)TB, T - t0);
+                    \(storeBlock)
+                    threadgroup_barrier(mem_flags::mem_threadgroup);
+                    if (t0 + TB < T) { const uint T0 = t0 + TB; \(loadBlock) }
+                """
+        } else if vec {
+            loopHead = """
+                for (uint t0 = 0; t0 < T; t0 += TB) {
+                    uint tt = min((uint)TB, T - t0);
+                    { const uint T0 = t0; \(loadBlock) }
+                    \(storeBlock)
+                    threadgroup_barrier(mem_flags::mem_threadgroup);
+                """
+        } else {
+            loopHead = """
+                for (uint t0 = 0; t0 < T; t0 += TB) {
+                    uint tt = min((uint)TB, T - t0);
+                    \(storeBlock)
+                    threadgroup_barrier(mem_flags::mem_threadgroup);
+                """
+        }
+        // pf declares regs inside nested scopes; hoist declarations instead
+        let regDecl = pf ? "" : ""
+        _ = regDecl
+        let yStore = ys ? "y_s[t][dv] = (bfloat16_t)out;" : "y_base[(size_t)(t0 + t) * Hv * 128 + dv] = (bfloat16_t)out;"
+        let yFlush = ys ? """
+                for (uint p = tid; p < tt * \(DB / 8); p += \(NT)) {
+                    uint r = p / \(DB / 8), c = p % \(DB / 8);
+                    *(device uint4*)(y_base + (size_t)(t0 + r) * Hv * 128 + c * 8) = *(threadgroup uint4*)&y_s[r][c * 8];
+                }
+                """ : ""
+        let kvRed = xr ? """
+                    part += simd_shuffle_xor(part, 4);
+                    part += simd_shuffle_xor(part, 2);
+                    part += simd_shuffle_xor(part, 1);
+                    float kv_mem = part;
+                """ : """
+                    part += simd_shuffle_down(part, 4);
+                    part += simd_shuffle_down(part, 2);
+                    part += simd_shuffle_down(part, 1);
+                    float kv_mem = simd_shuffle(part, (tid % 32) / 8 * 8);
+                """
+        let deferO = f.contains("d")
+        let unroll = f.contains("u") ? "#pragma clang loop unroll_count(2)\n" : ""
+        let yStoreP = ys ? "y_s[t - 1][dv] = (bfloat16_t)oPrev;" : "y_base[(size_t)(t0 + t - 1) * Hv * 128 + dv] = (bfloat16_t)oPrev;"
+        let yStoreL = ys ? "y_s[tt - 1][dv] = (bfloat16_t)oPrev;" : "y_base[(size_t)(t0 + tt - 1) * Hv * 128 + dv] = (bfloat16_t)oPrev;"
+        let yStoreR = ys ? "y_s[t][dvr] = (bfloat16_t)out;" : "y_base[(size_t)(t0 + t) * Hv * 128 + dvr] = (bfloat16_t)out;"
+        let tokenLoop: String
+        if deferO {
+            tokenLoop = """
+                float oPrev = 0.0f;
+                \(unroll)for (uint t = 0; t < tt; ++t) {
+                    float gt = g_s[t];
+                    float bt = b_s[t];
+                    \(k4t) k4 = (\(k4t))&k_s[t][d0];
+                    \(k4t) q4 = (\(k4t))&q_s[t][d0];
+                    \(kLoad)
+                    float4 p4 = 0.0f;
+                    for (int i = 0; i < 4; ++i) {
+                        st[i] = st[i] * gt;
+                        p4 += st[i] * kf[i];
+                    }
+                    float part = p4.x + p4.y + p4.z + p4.w;
+                    part += simd_shuffle_xor(part, 4);
+                    oPrev += simd_shuffle_down(oPrev, 4);
+                    part += simd_shuffle_xor(part, 2);
+                    oPrev += simd_shuffle_down(oPrev, 2);
+                    part += simd_shuffle_xor(part, 1);
+                    oPrev += simd_shuffle_down(oPrev, 1);
+                    if (t > 0 && seg == 0) { \(yStoreP) }
+                    float kv_mem = part;
+                    float delta = (float(v_s[t][dv]) - kv_mem) * bt;
+
+                    float4 o4 = 0.0f;
+                    for (int i = 0; i < 4; ++i) {
+                        st[i] += kf[i] * delta;
+                        o4 += st[i] * \(q4conv);
+                    }
+                    oPrev = o4.x + o4.y + o4.z + o4.w;
+                }
+                oPrev += simd_shuffle_down(oPrev, 4);
+                oPrev += simd_shuffle_down(oPrev, 2);
+                oPrev += simd_shuffle_down(oPrev, 1);
+                if (seg == 0) { \(yStoreL) }
+                """
+        } else {
+            tokenLoop = """
+                \(unroll)for (uint t = 0; t < tt; ++t) {
+                    float gt = g_s[t];
+                    float bt = b_s[t];
+                    \(k4t) k4 = (\(k4t))&k_s[t][d0];
+                    \(k4t) q4 = (\(k4t))&q_s[t][d0];
+                    \(kLoad)
+                    float kvm[\(R)];
+                    for (int r = 0; r < \(R); ++r) {
+                        float4 p4 = 0.0f;
+                        for (int i = 0; i < 4; ++i) {
+                            st[r][i] = st[r][i] * gt;
+                            p4 += st[r][i] * kf[i];
+                        }
+                        float part = p4.x + p4.y + p4.z + p4.w;
+                        \(kvRed)
+                        kvm[r] = kv_mem;
+                    }
+                    for (int r = 0; r < \(R); ++r) {
+                        uint dvr = dvb * \(R) + r;
+                        float delta = (float(v_s[t][dvr]) - kvm[r]) * bt;
+                        float4 o4 = 0.0f;
+                        for (int i = 0; i < 4; ++i) {
+                            st[r][i] += kf[i] * delta;
+                            o4 += st[r][i] * \(q4conv);
+                        }
+                        float out = o4.x + o4.y + o4.z + o4.w;
+                        out += simd_shuffle_down(out, 4);
+                        out += simd_shuffle_down(out, 2);
+                        out += simd_shuffle_down(out, 1);
+                        if (seg == 0) {
+                            \(yStoreR)
+                        }
+                    }
+                }
+                """
+        }
+        return """
+            constexpr int TB = \(TB);
+            constexpr int DB = \(DB);
+            uint T = dims[0], Hk = dims[1], Hv = dims[2], B = dims[3];
+            uint tid = thread_position_in_threadgroup.x;
+            uint blk = threadgroup_position_in_grid.x;
+            uint hv = threadgroup_position_in_grid.y;
+            uint b = threadgroup_position_in_grid.z;
+            uint hk = hv / (Hv / Hk);
+            uint dv0 = blk * DB;
+
+            uint dvb = tid / 8;
+            uint dv = dvb;
+            uint seg = tid % 8;
+            uint d0 = seg * 16;
+
+            threadgroup \(kqType) k_s[TB][128 + \(pad)];
+            threadgroup \(kqType) q_s[TB][128 + \(pad)];
+            threadgroup bfloat16_t v_s[TB][DB + 8];
+            threadgroup bfloat16_t y_s[\(ys ? TB : 1)][DB + 8];
+            threadgroup float g_s[TB];
+            threadgroup float b_s[TB];
+
+            const device bfloat16_t* k_base = k + ((size_t)b * T * Hk + hk) * 128;
+            const device bfloat16_t* q_base = q + ((size_t)b * T * Hk + hk) * 128;
+            const device bfloat16_t* v_base = v + ((size_t)b * T * Hv + hv) * 128 + dv0;
+            const size_t krow = (size_t)Hk * 128;
+
+            float4 st[\(R)][4];
+            for (int r = 0; r < \(R); ++r) {
+                const device float4* S_in = (const device float4*)(
+                    ssm + (((size_t)b * Hv + hv) * 128 + dv0 + dvb * \(R) + r) * 128 + d0);
+                for (int i = 0; i < 4; ++i) st[r][i] = S_in[i];
+            }
+
+            device bfloat16_t* y_base = y + ((size_t)b * T * Hv + hv) * 128 + dv0;
+
+            \(regsDecl)
+            \(loopHead)
+
+                \(tokenLoop)
+                threadgroup_barrier(mem_flags::mem_threadgroup);
+                \(yFlush)
+            }
+
+            for (int r = 0; r < \(R); ++r) {
+                device float4* S_out = (device float4*)(
+                    ssmOut + (((size_t)b * Hv + hv) * 128 + dv0 + dvb * \(R) + r) * 128 + d0);
+                for (int i = 0; i < 4; ++i) S_out[i] = st[r][i];
+            }
+            """
+    }
+
+    static func make(_ v: V) -> (MLXArray, MLXArray, MLXArray, MLXArray, MLXArray, MLXArray) -> [MLXArray] {
+        let kern = MLXFast.metalKernel(name: "gdn_sweep_\(v.name)", inputNames: ["q", "k", "v", "g", "beta", "ssm", "dims"],
+                                       outputNames: ["y", "ssmOut"], source: source(v), header: "")
+        return { q, k, vv, g, beta, ssm in
+            let B = q.shape[0], S = q.shape[1], Hk = q.shape[2], Hv = vv.shape[2]
+            let dims = MLXArray([Int32(S), Int32(Hk), Int32(Hv), Int32(B)])
+            return kern([q, k, vv, g, beta, ssm, dims],
+                        grid: (128 / v.db * (8 * v.db / (v.flags.contains("2") ? 2 : (v.flags.contains("4") ? 4 : 1))), Hv, B), threadGroup: (8 * v.db / (v.flags.contains("2") ? 2 : (v.flags.contains("4") ? 4 : 1)), 1, 1),
+                        outputShapes: [[B, S, Hv, 128], [B, Hv, 128, 128]], outputDTypes: [.bfloat16, .float32])
+        }
+    }
+
+    static func inputs(S: Int, B: Int, seed: UInt64) -> [MLXArray] {
+        MLXRandom.seed(seed)
+        let conv = (MLXRandom.normal([B, S, 2 * 16 * 128 + 48 * 128]) * 0.5).asType(.bfloat16)
+        let q = (MLXRandom.normal([B, S, 16, 128]) * 0.05).asType(.bfloat16)
+        let k = (MLXRandom.normal([B, S, 16, 128]) * 0.05).asType(.bfloat16)
+        let v = conv[0..., 0..., (2 * 16 * 128)...].reshaped([B, S, 48, 128])
+        let g = exp(-MLXRandom.uniform(low: 0.001, high: 0.2, [B, S, 48]))
+        let beta = sigmoid(MLXRandom.normal([B, S, 48]))
+        let ssm = (MLXRandom.normal([B, 48, 128, 128]) * 0.1).asType(.float32)
+        eval(q, k, v, g, beta, ssm)
+        return [q, k, v, g, beta, ssm]
+    }
+
+    static func now() -> Double { Double(DispatchTime.now().uptimeNanoseconds) / 1e9 }
+
+    /// args: list of "name:tb:db:f" variant specs; first is the reference (must be baseline 48:32:b).
+    public static func run(_ specs: [String], capture: [String]) {
+        var vs: [V] = []
+        for s in specs {
+            let p = s.split(separator: ":").map(String.init)
+            vs.append(V(name: s.replacingOccurrences(of: ":", with: "_"), tb: Int(p[0])!, db: Int(p[1])!, fstage: p[2] == "f", flags: p.count > 3 ? p[3] : ""))
+        }
+        let fns = vs.map { make($0) }
+        // identity vs the shipped kernel and vs the first variant
+        var sets: [(String, [MLXArray])] = []
+        for (S, B) in [(1024, 1), (1000, 1), (2048, 1), (512, 1), (47, 1), (49, 1), (1, 1), (3, 1), (777, 2), (4096, 1)] {
+            sets.append(("rand S=\(S) B=\(B)", inputs(S: S, B: B, seed: UInt64(S * 7 + B))))
+        }
+        for path in capture {
+            if let a = try? loadArrays(url: URL(fileURLWithPath: path)) {
+                sets.append(("captured \(path.split(separator: "/").last!)", ["q", "k", "v", "g", "beta", "ssm"].map { a[$0]! }))
+            }
+        }
+        for (label, a) in sets {
+            let ship = GDNMetal.runBlocked(q: a[0], k: a[1], v: a[2], g: a[3], beta: a[4], ssm: a[5])
+            eval(ship.y, ship.ssm)
+            var line = "IDENT \(label):"
+            for (i, f) in fns.enumerated() {
+                let r = f(a[0], a[1], a[2], a[3], a[4], a[5])
+                eval(r)
+                let dy = (r[0].asType(.float32) .!= ship.y.asType(.float32)).sum().item(Int.self)
+                let ds = (r[1] .!= ship.ssm).sum().item(Int.self)
+                line += " \(vs[i].name)=\(dy + ds == 0 ? "OK" : "DIFF(\(dy),\(ds))")"
+            }
+            print(line)
+        }
+        // interleaved min-of-8 timing, S=1024 and S=4096
+        for S in [1024, 4096] {
+            let a = inputs(S: S, B: 1, seed: 11)
+            let R = 12
+            for f in fns { eval(f(a[0], a[1], a[2], a[3], a[4], a[5])) }
+            var best = [Double](repeating: .infinity, count: fns.count)
+            for _ in 0 ..< 8 {
+                for (i, f) in fns.enumerated() {
+                    let t0 = now()
+                    var outs: [MLXArray] = []
+                    for _ in 0 ..< R { outs.append(contentsOf: f(a[0], a[1], a[2], a[3], a[4], a[5])) }
+                    eval(outs)
+                    best[i] = min(best[i], (now() - t0) / Double(R))
+                }
+            }
+            // shipped kernel for reference
+            var bs = Double.infinity
+            for _ in 0 ..< 8 {
+                let t0 = now(); var outs: [MLXArray] = []
+                for _ in 0 ..< R { let r = GDNMetal.runBlocked(q: a[0], k: a[1], v: a[2], g: a[3], beta: a[4], ssm: a[5]); outs += [r.y, r.ssm] }
+                eval(outs); bs = min(bs, (now() - t0) / Double(R))
+            }
+            print(String(format: "TIME S=%d shipped %.4f ms", S, bs * 1e3))
+            for (i, v) in vs.enumerated() {
+                print(String(format: "TIME S=%d %@ %.4f ms (%.3fx vs first)", S, v.name, best[i] * 1e3, best[0] / best[i]))
+            }
+        }
+    }
+}

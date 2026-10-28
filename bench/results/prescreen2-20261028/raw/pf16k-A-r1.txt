@@ -1,0 +1,2 @@
+n=16384 chunk=1024 16.88 s  971 tok/s  (rep 0)
+n=16384 chunk=1024 16.90 s  969 tok/s  (rep 1)

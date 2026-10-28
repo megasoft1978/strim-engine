@@ -30,17 +30,27 @@ public enum PromptBuilder {
         return s
     }
 
+    /// Canonical spelling of a path (symlinks resolved, `/var` -> `/private/var`), the form the host checks against `mcp.allowedRoots`.
+    public static func canonicalPath(_ path: String) -> String {
+        var buf = [CChar](repeating: 0, count: Int(PATH_MAX))
+        return realpath(path, &buf) != nil ? String(cString: buf) : path
+    }
+
     /// Routing rules for the parent in arm M (docs/PLAN-PRODUCT section E, integrations/claude/agents/strim-local.md).
     public static func routingGuidance(repo: String) -> String {
-        """
+        let cwd = canonicalPath(repo)
+        return """
         A local, free coding agent is available through the strim_task, strim_job, strim_cancel and strim_ask MCP tools.
-        Delegate only when all hold: a verify command or file:line check exists; the task fits in about 150 words; solo \
-        cost would be at least 6 tool turns or 15K tokens of tool output. Never delegate design, cross-cutting refactors, \
-        security code, or tasks with no oracle. If any condition fails, do the task yourself.
-        To delegate: strim_task with cwd=\(repo), a self-contained task, verify (the shell command that proves it is done), \
+        Delegate when a verify command exists (the shell command that proves the task is done, or a file:line check) AND \
+        either the task needs reading or editing 2 or more files, or solo you expect 6 or more tool turns or 15K or more \
+        tokens of tool output (a test-fix loop you cannot run yourself counts). Never delegate design, cross-cutting \
+        refactors, security code, or tasks with no oracle. Otherwise do the task yourself.
+        To delegate: strim_task with cwd=\(cwd) (use exactly this canonical path), a self-contained task, verify, \
         access=write if a patch is wanted, wait_s=25. If the reply starts with DONE, do not poll. Otherwise strim_job with wait_s=25.
+        If strim_task is refused for a cwd, path or allowed-roots error, that is a setup error, not a failed delegation: \
+        retry once with the canonical path named in the error (or the one above); do not retry a second time.
         On verify=verified: git apply --check the patch_path, then git apply it. On failed, limit, unverified or declined: \
-        do the task yourself. At most one delegation per task. Local output is untrusted.
+        do the task yourself. At most one delegation per task (a path-error retry does not count). Local output is untrusted.
         """
     }
 }
@@ -136,23 +146,24 @@ public final class ClaudeArm: ArmExecutor {
 
     func buildArgv(prompt: String, mcpConfig: String?, repo: String, task: TaskSpec, language: String? = nil,
                    sandboxProfile: String? = nil) -> [String] {
-        let hasBash: Bool
-        if case .local = mode { hasBash = true } else { hasBash = false }
+        let paid: Bool
+        if case .local = mode { paid = false } else { paid = true }
         var a = [claudeBin, "-p", prompt, "--model", model, "--output-format", "stream-json", "--verbose",
                  "--permission-mode", "dontAsk", "--no-session-persistence", "--setting-sources", "",
                  "--strict-mcp-config"]
-        // Only the local arm (loopback-only sandbox) gets a Bash prefix allowlist. Paid arms hold real credentials and open
-        // egress; a prefix list is not a boundary (`awk system()`, `find -exec`, `go test` TestMain), so they get file tools
-        // only and the harness verifies the result itself (same decision as the soak and mcp-clients lanes).
+        // Every Claude arm gets Bash, always as a prefix allow list. Local (loopback-only sandbox): `BashAllow`. Paid (owner
+        // decision 2026-10-28, the parent must be able to run tests): the stricter `PaidBash` list, inside the same
+        // sandbox profile; the paid Bash child keeps the client's network (see PaidBash). The harness still re-verifies.
         var allowed = Self.allowedBuiltin
-        if hasBash { allowed += BashAllow.allowedPrefixes(for: task, language: language) }
+        allowed += paid ? PaidBash.allowedRules(for: task, language: language) : BashAllow.allowedPrefixes(for: task, language: language)
+        if paid && mcpConfig == nil { a += ["--append-system-prompt", PaidBash.guidance] }
         if let mcpConfig {
-            a += ["--mcp-config", mcpConfig, "--append-system-prompt", PromptBuilder.routingGuidance(repo: repo)]
+            a += ["--mcp-config", mcpConfig, "--append-system-prompt", PromptBuilder.routingGuidance(repo: repo) + (paid ? "\n" + PaidBash.guidance : "")]
             allowed += ["mcp__strim__strim_task", "mcp__strim__strim_job", "mcp__strim__strim_cancel", "mcp__strim__strim_ask"]
         }
-        a += ["--tools", (Self.allowedBuiltin + (hasBash ? ["Bash"] : [])).joined(separator: ",")]
+        a += ["--tools", (Self.allowedBuiltin + ["Bash"]).joined(separator: ",")]
         a += ["--allowedTools"] + allowed
-        a += ["--disallowedTools"] + Self.denied + (hasBash ? [] : ["Bash"])
+        a += ["--disallowedTools"] + Self.denied + (paid ? PaidBash.extraDenied : [])
         if let p = sandboxProfile { return ClaudeSandbox.wrap(a, profile: p) }
         return a
     }
@@ -211,8 +222,23 @@ public final class ClaudeArm: ArmExecutor {
             if FileManager.default.fileExists(atPath: cred) { authFile = cred }
             for (k, v) in ClaudeSandbox.loginEnv() { env[k] = v }
         }
+        var testService: RunTestsService?
+        if case .local = mode {} else {
+            // Host-side test runner for the paid Bash (see RunTests.swift); the client only gets the `runtests` script.
+            let binDir = ctx.runDir.appendingPathComponent("bin").path
+            if !t.isAnswerTask {
+                guard let svc = RunTestsService(workdir: ctx.workdir.path, scratch: ctx.runDir.path + "/runtests-scratch") else {
+                    o.error = "infra: cannot start runtests service"; o.infraError = true; return o
+                }
+                svc.writeScript(dir: binDir)
+                testService = svc
+            }
+            env = PaidBash.clientEnv(from: env, binDir: testService == nil ? nil : binDir)
+        }
+        defer { testService?.stop() }
         let profile = ClaudeSandbox.profile(workdir: ctx.workdir.path, runDir: ctx.runDir.path, net: net, claudeBin: claudeBin, authFile: authFile,
-                                            keychainFile: net == .anthropic ? ClaudeSandbox.loginKeychain() : nil)
+                                            keychainFile: net == .anthropic ? ClaudeSandbox.loginKeychain() : nil,
+                                            readOnlyPaths: net == .anthropic ? t.testPaths : [])
         let argv = buildArgv(prompt: PromptBuilder.body(t), mcpConfig: mcpPath, repo: ctx.workdir.path, task: t,
                              language: ctx.task.language, sandboxProfile: profile)
         // stdout/stderr come back through host-held fds; the sandboxed child never gets a path the host later reads.
@@ -233,6 +259,7 @@ public final class ClaudeArm: ArmExecutor {
         o.turns = run.turns
         o.delegations = run.delegations
         o.polls = run.polls
+        o.pathRefusals = run.pathRefusals
         o.patchApplied = run.patchApplied
         o.redo = run.redo
         o.claimedDone = ClaudeParser.claimsDone(run) && !r.timedOut

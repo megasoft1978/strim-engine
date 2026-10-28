@@ -43,7 +43,7 @@ public struct SandboxProfile: Sendable, Equatable {
         }.joined()
     }
 
-    static let secretSubpaths = [".ssh", ".aws", ".gnupg", ".codex", "Library/Keychains", ".config/gh"]
+    static let secretSubpaths = [".ssh", ".aws", ".gnupg", ".codex", "Library/Keychains", ".config/gh", ".strim/cache"]
     static let secretLiterals = [".strim/token", ".netrc"]
 
     /// Quote a string for an SBPL string literal.

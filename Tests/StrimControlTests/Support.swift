@@ -75,6 +75,9 @@ final class FakeChat: ChatBackend, @unchecked Sendable {
         lock.withLock { closed.append(sessionID) }
         return HarnessJobResult(status: .done, summary: "session closed")
     }
+    private var _thinking: [Bool?] = []
+    var thinking: [Bool?] { lock.withLock { _thinking } }
+    func setThinking(sessionID: String, enabled: Bool?) async { lock.withLock { _thinking.append(enabled) } }
     var cancelCount: Int { lock.withLock { cancelTurns.count } }
     var terminatedCount: Int { lock.withLock { terminated } }
 }

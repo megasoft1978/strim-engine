@@ -1,0 +1,47 @@
+draft vocab: loaded bench/draft_vocab_48k.json
+checkprefix model=/Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit N=8192 shared=3072 chunk=1024
+(a) miss reference (no store)
+  hash fd761fce21eaeb25  tokens [220, 197, 1, 197, 1, 197, 1, 197, 1, 197, 1, 197, 1, 197, 1, 197]  7.983 s
+(b) hit vs miss
+  PASS  cold-store miss == reference
+  store after warm: nodes 2 bytes 485 MB
+  PASS  hit == miss (hash+tokens)  hit hash fd761fce21eaeb25 matched 3072
+  PASS  matched == 3072
+  PASS  second hit unchanged (no aliasing)
+  PASS  reverse: short prompt hit == short miss  matched 3072
+  PASS  forked tail hit == miss
+(c) eviction with tiny budget
+  PASS  insert run == reference
+  PASS  budget respected  bytes 677 MB budget 728 MB nodes 4 evictions 1
+  PASS  post-eviction hit == reference  matched 6144
+(d) unrelated prompt
+  PASS  unrelated -> miss, identical
+(e) TTFT N=8192, shared 3072
+  miss 8.031 s  hit 0.563 s  speedup 14.26x
+  bytes: total store 3156 MB over 13 nodes (~242 MB/node); restored ModelCache.byteSize 626 MB
+(f) policy-prefill cost vs one-shot, N=8192
+  chunked 1027 tok/s (7.979 s)  one-shot 1022 tok/s (8.018 s)  cost -0.5%
+(g) MTP over the prefix cache, N=8192
+  miss ref: [220, 197, 1, 197, 1, 197, 1, 197]...  prefill 8.168 s
+  PASS  cold-store spec miss == ref
+  PASS  spec hit == miss (cache, head KV, seed hidden, logits, token)  cache true mtp true seed true logits true tok true
+  PASS  64 speculative tokens identical (hit)
+  PASS  matched == 3072
+  PASS  second spec hit unchanged
+  PASS  forked tail spec hit == miss
+  PASS  unrelated spec -> miss, identical
+  PASS  head-less nodes -> spec miss, identical
+  PASS  after upgrade spec hit == miss  matched 7680
+  PASS  tiny budget insert run == ref
+  PASS  budget respected  bytes 701 MB budget 746 MB nodes 4 evictions 1
+  PASS  post-eviction spec hit == ref  matched 6144
+  --- numbers
+  bytes/node: plain 242.8 MB, with MTP 248.8 MB, MTP +6.01 MB (+2.47%); plain store before upgrade 485 MB
+  prefill N=8192: plain 1012 tok/s (8.097 s)  with head pass 990 tok/s (8.277 s)  head overhead 2.22%
+  TTFT(prefill+seed): miss 8.252 s  hit 0.580 s  speedup 14.23x
+  spec decode 64 tok: miss 73.7 tok/s accept 88% 3.56 tok/pass | hit 74.8 tok/s accept 88% 3.56 tok/pass
+(h) hot session continuation (informational)
+  hot: turn1 20 tokens, append 901, turn2 [220, 220, 16, 198, 248069, 271, 40, 2688, 14169, 11, 694, 353, 2688, 524, 2858, 310, 1236, 5357, 314, 279] head pos 2241 cache pos 2241
+  append-logits: max|hot-cold| 0.1875  argmax hot 220 cold 220  cold margin 0.875
+  hot-continue vs cold: IDENTICAL over 20 tokens (min cold margin 0.000)
+checkprefix: ALL PASS

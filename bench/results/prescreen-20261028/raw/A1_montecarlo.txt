@@ -1,0 +1,6 @@
+c=4 len U[64,512] tail_share=18.7% decode-wall gain if tail uses MTP(20ms/tok)=7.5%
+c=8 len U[64,512] tail_share=6.8% decode-wall gain if tail uses MTP(20ms/tok)=2.7%
+c=4 len U[128,128] tail_share=0.0% decode-wall gain if tail uses MTP(20ms/tok)=0.0%
+c=8 len U[128,128] tail_share=0.0% decode-wall gain if tail uses MTP(20ms/tok)=0.0%
+c=4 len U[32,1024] tail_share=21.2% decode-wall gain if tail uses MTP(20ms/tok)=8.5%
+c=8 len U[32,1024] tail_share=8.1% decode-wall gain if tail uses MTP(20ms/tok)=3.2%

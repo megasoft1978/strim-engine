@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 12,
+  "id" : "js-02",
+  "language" : "javascript",
+  "license" : "MIT",
+  "note" : "multi-file Node.js: expression evaluator (decimal tokenizing in tokenize.js, ^ associativity in parse.js)",
+  "prompt" : "The automated tests of this Node.js package currently fail. Run `node --test` from the repository root to see the failures. Change the package non-test source code so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-node",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 1815,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/evaluate.test.js" : "b4f1f5adba99518eb1cebcffd471da66e2f475aeef975a90295c70caf1f80e44"
+  },
+  "tree_sha256" : "1bd667f2dcf38b44ec794c90d7c0ed93097ab22100b82fdd4bba1656d50b4415",
+  "verify_cmd" : "node --test"
+}

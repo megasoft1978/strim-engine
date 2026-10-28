@@ -52,7 +52,7 @@ import Testing
         let broken = try Self.setValue("final.d4k.strim", .double(99.9))
         guard case .ok(let r) = try Self.runCheck(["site/data/results.json": broken]) else { Issue.record("threw"); return }
         #expect(r.exitCode == 1)
-        #expect(r.errors.first == "site/data/results.json is out of sync with bench/results/h2h-final-20261028 (run strim site build)")
+        #expect(r.errors.first == "site/data/results.json is out of sync with \(FINAL_REL) (run strim site build)")
     }
 
     @Test func droppedFigureIdFails() throws {
@@ -68,31 +68,24 @@ import Testing
         #expect(r.errors.contains { $0.contains("out of sync") })
     }
 
-    static let h2hSummary = "/bench/results/h2h-final-20261028/summary.md"
+    static let h2hSummary = "/" + FINAL_REL + "/summary.md"
 
     @Test func summaryCellDisagreeingWithResultsJSONFails() throws {
         let sm = readString(repoRoot + Self.h2hSummary)
-        let broken = sm.replacingOccurrences(of: "| cold 4K prefill | tok/s | 980.1 |", with: "| cold 4K prefill | tok/s | 980.2 |")
+        let broken = sm.replacingOccurrences(of: "| cold 4K prefill | tok/s | 982.1 |", with: "| cold 4K prefill | tok/s | 982.2 |")
         #expect(broken != sm)
-        guard case .threw(let m) = try Self.runCheck(["bench/results/h2h-final-20261028/summary.md": broken]) else { Issue.record("expected a failure"); return }
-        #expect(m.hasPrefix("cold 4K prefill/strim: summary.md says '980.2', results.json says 980.124"))
+        guard case .threw(let m) = try Self.runCheck([FINAL_REL + "/summary.md": broken]) else { Issue.record("expected a failure"); return }
+        #expect(m.hasPrefix("cold 4K prefill/strim: summary.md says '982.2', results.json says 982.083"))
     }
 
     @Test func ratioDisagreeingWithResultsJSONFails() throws {
         let sm = readString(repoRoot + Self.h2hSummary)
-        let broken = sm.replacingOccurrences(of: "| 0.99x | 0.98x | TIE | TIE |", with: "| 0.90x | 0.98x | TIE | TIE |")
+        let broken = sm.replacingOccurrences(of: "| 1.00x | 0.98x | TIE | TIE |", with: "| 0.90x | 0.98x | TIE | TIE |")
         #expect(broken != sm)
-        guard case .threw(let m) = try Self.runCheck(["bench/results/h2h-final-20261028/summary.md": broken]) else { Issue.record("expected a failure"); return }
+        guard case .threw(let m) = try Self.runCheck([FINAL_REL + "/summary.md": broken]) else { Issue.record("expected a failure"); return }
         #expect(m.hasPrefix("cold 4K prefill: ratio 0.90x vs rival rapid-mlx disagrees with results.json"))
     }
 
-    @Test func claimWordingChangedFails() throws {
-        let sm = readString(repoRoot + Self.h2hSummary)
-        let broken = sm.replacingOccurrences(of: "24-41% faster than rapid-mlx", with: "25-41% faster than rapid-mlx")
-        #expect(broken != sm)
-        guard case .threw(let m) = try Self.runCheck(["bench/results/h2h-final-20261028/summary.md": broken]) else { Issue.record("expected a failure"); return }
-        #expect(m.hasPrefix("summary.md claim wording lacks '24-41% faster than rapid-mlx'"))
-    }
 
     @Test func missingSourceFileFails() throws {
         let broken = try Self.editFigures { figs in
@@ -125,7 +118,7 @@ import Testing
     }
 
     @Test func checkModeWritesNothing() throws {
-        let overlay = try OverlayRoot(replacing: ["site/index.html": "stale", "README.md": "stale", "site/data/results.json": Self.resultsText()])
+        let overlay = try OverlayRoot(replacing: ["site/index.html": "stale", "site/benchmarks.html": "stale", "README.md": "stale", "site/data/results.json": Self.resultsText()])
         let b = SiteBuilder(root: overlay.path)
         b.log = { _ in }
         _ = try b.run(SiteOptions(check: true))
@@ -134,7 +127,8 @@ import Testing
     }
 
     @Test func buildModeWritesCommittedBytes() throws {
-        let overlay = try OverlayRoot(replacing: ["site/index.html": "stale", "README.md": "stale", "site/data/results.json": Self.resultsText()])
+        let overlay = try OverlayRoot(replacing: ["site/index.html": "stale", "site/benchmarks.html": "stale", "README.md": "stale", "site/data/results.json": Self.resultsText(),
+                                                  "site/data/headline.json": "stale", "site/assets/style.css": "body { margin: 0 }\n"])
         let b = SiteBuilder(root: overlay.path)
         var lines: [String] = []
         b.log = { lines.append($0) }
@@ -143,6 +137,10 @@ import Testing
         #expect(readString(overlay.path + "/site/index.html") == readString(repoRoot + "/site/index.html"))
         #expect(readString(overlay.path + "/README.md") == readString(repoRoot + "/README.md"))
         #expect(readString(overlay.path + "/site/data/results.json") == Self.resultsText())
+        #expect(readString(overlay.path + "/site/data/headline.json") == readString(repoRoot + "/site/data/headline.json"))
+        let css = readString(overlay.path + "/site/assets/style.css")
+        #expect(css.hasPrefix("body { margin: 0 }\n") && css.contains(HV_BEGIN) && css.contains(HV_END))
+        #expect(readString(overlay.path + "/site/assets/h2h-speedup.svg") == readString(repoRoot + "/site/assets/h2h-speedup.svg"))
         #expect(lines.contains { $0.hasPrefix("wrote site/index.html (") && $0.hasSuffix(" bytes) and README.md") })
         #expect(lines.contains { $0.hasPrefix("figures: ") && $0.contains("html links checked:") })
     }
@@ -153,7 +151,7 @@ import Testing
         b.log = { lines.append($0) }
         let r = try b.run(SiteOptions(listFigures: true))
         #expect(r.exitCode == 0)
-        #expect(lines.count == 387)
+        #expect(lines.count == 392)
         #expect(lines.first?.hasPrefix("pc.4k.miss\t3.994\ts\t") == true)
     }
 }

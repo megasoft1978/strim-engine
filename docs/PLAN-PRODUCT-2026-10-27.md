@@ -25,7 +25,7 @@ The menu-bar app comes after that gate, as a thin client of one launchd-hosted `
 - Every run is a StrimJobs job; a chat session is a job that accepts `appendUserTurn` (new).
 - `StrimControl`: guarded routes on the same server: `GET /v1/strim/status`, SSE `/v1/strim/events`, `POST /v1/strim/load|unload`, jobs list/approve/reject/apply, chat open/append/cancel.
 - `StrimAPI`: Codable DTOs only. `StrimApp`: SwiftUI on `StrimAPI`.
-- The parent tree is written only by an explicit UI Apply (`git apply --3way`) or by the MCP parent applying the patch.
+- The parent tree is written only by an explicit UI Apply or by the MCP parent applying the patch. Apply is plain `git apply` (after `--check`) of the exact bytes whose SHA-256 the user reviewed: the UI must confirm explicitly and send `patch_sha256`, and the host refuses a missing or changed digest. `--3way` is not used on purpose: its merge fallback consults repo-controlled merge drivers and attributes. A patch that does not apply cleanly is a 409 and the tree stays untouched.
 
 ## C. Self-optimization (harness2-inspired, deterministic)
 - Search space: system prompt variants, per-tool guidance, per-class playbooks (test-fix, repo QA, mechanical edit), result formatting caps, compaction prompt and thresholds, thinking on the first planning turn only, temperature 0 vs 0.6. Tool order fixed.
@@ -44,7 +44,7 @@ Do not build: multi-model or cloud backends, marketplace, editor, generic MCP ma
 ## E. Routing for the parent
 Delegate only when all hold: a verify command or file:line check exists; the task fits in about 150 words; expected solo cost >= 6 tool turns or >= 15K tool-output tokens. Never delegate design, cross-cutting refactors, security code, or no-oracle tasks.
 Fallback: `verified` -> apply; `failed|limit|unverified` -> do it alone; at most 1 delegation per task. The local model may decline on turn 1.
-Claude: heuristics in `integrations/claude/agents/strim-local.md` with `model: haiku` (confirm on this Claude Code version); trust `verified`. Codex: AGENTS.md snippet. Consider merging to 2 tools after measuring.
+Claude: delegation heuristics in `integrations/claude/agents/strim-local.md`; apply only `verified` results. Codex: `integrations/codex/AGENTS-strim.md`. Consider merging to 2 tools after measuring.
 Measurement: arms P, M, H, C interleaved on the same snapshot; 3 classes x 10 tasks x 2 reps x (P, M) = about 120 parent runs; plus a tax arm (10 non-delegable tasks with and without the MCP).
 
 ## F. Tests

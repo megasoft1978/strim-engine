@@ -1,0 +1,16 @@
+[16:43:22] start layers load={ 3.04 3.59 3.44 } swap=total = 9216.00M  used = 7989.31M  free = 1226.69M  (encrypted)
+embed    rms=0.012 absmax=0.5 nonfinite=0
+layer  0 rms=0.141 absmax=30.0 nonfinite=0
+layer  1 rms=0.191 absmax=36.0 nonfinite=0
+layer  2 rms=0.195 absmax=43.8 nonfinite=0
+layer  3 rms=0.294 absmax=52.2 nonfinite=0
+layer  7 rms=0.423 absmax=72.5 nonfinite=0
+layer 15 rms=0.730 absmax=116.5 nonfinite=0
+layer 23 rms=0.783 absmax=133.0 nonfinite=0
+layer 31 rms=1.045 absmax=176.0 nonfinite=0
+layer 39 rms=1.076 absmax=182.0 nonfinite=0
+layer 47 rms=1.350 absmax=207.0 nonfinite=0
+layer 55 rms=2.503 absmax=432.0 nonfinite=0
+layer 63 rms=8.101 absmax=960.0 nonfinite=0
+final    rms=1.456 absmax=46.0 nonfinite=0
+[16:43:24] end rc=0 aborted=0

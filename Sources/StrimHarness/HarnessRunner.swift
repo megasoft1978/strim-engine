@@ -230,7 +230,9 @@ public actor HarnessRunner {
         // Fresh HOME and TMPDIR under an unpredictable subdir of the job tmp, never used by agent commands, so
         // caches and dotfiles the agent planted in its own HOME/TMPDIR are not picked up.
         let base = jobTmp + "/verify-" + UUID().uuidString
-        let env = ["HOME": base + "/home", "TMPDIR": base + "/tmp"]
+        var env = ["HOME": base + "/home", "TMPDIR": base + "/tmp"]
+        // Toolchain caches too (npm, cargo target dir, ...): nothing the agent left in the shared job tmp is reused.
+        env.merge(Toolchains.cacheEnv(scratch: base)) { a, _ in a }
         do {
             for d in [base, env["HOME"]!, env["TMPDIR"]!] { try makeDir(d) }
         } catch {

@@ -1,0 +1,20 @@
+benchbatchsplit model=qwen38-4bit ctx=1024 B=4 warm=2 steps=8
+class                                           ms/step      %    syncs    corr ms   corr %
+GDN in_proj matmuls                              34.021   69.5    192.0      6.877    14.1
+GDN conv                                          8.782   18.0     48.0      1.996     4.1
+GDN recurrence                                   14.646   29.9     48.0      7.859    16.1
+GDN out_proj                                      9.149   18.7     48.0      2.363     4.8
+attn projections                                 11.521   23.6     64.0      2.473     5.1
+attn KV append (concat)                           2.771    5.7     16.0      0.509     1.0
+attn KV batch gather (concat)                     0.000    0.0      0.0      0.000     0.0
+attn mask construction                            0.000    0.0      0.0      0.000     0.0
+attn SDPA                                         3.619    7.4     16.0      1.357     2.8
+MLP                                              32.983   67.4     64.0     23.935    48.9
+final norm + lm_head                              1.675    3.4      2.0      1.392     2.8
+other (norms, gates, RoPE, residual, embed)      61.134  125.0    401.0      4.442     9.1
+sum of classes                                  180.301  368.6    899.0     53.203   108.8
+total step (no per-stage sync)                   48.921  100.0
+gap: raw +268.6%, corrected +8.8% (sum vs total); eval+sync cost 0.1414 ms x 899 syncs/step
+share GDN conv+recurrence + KV concat + mask: 53.6% raw, 21.2% corrected
+synthetic KV concat, same shapes (16 layers, B appends + gather): 1.397 ms/step (2.9% of total)
+RESULT ctx=1024 B=4 total 48.921 ms/step

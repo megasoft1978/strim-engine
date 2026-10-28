@@ -106,8 +106,19 @@ struct ChatRequest {
         // tools
         var toolChoice: String?
         var toolsDisabled = false
-        if let tc = root["tool_choice"] {
-            if let s = tc.stringValue { toolChoice = s; toolsDisabled = (s == "none") }
+        var namedTool: String?
+        if let tc = root["tool_choice"], !tc.isNull {
+            if let s = tc.stringValue {
+                guard ["auto", "none", "required"].contains(s) else { throw APIError.badRequest("tool_choice: unsupported value '\(s)'") }
+                toolChoice = s; toolsDisabled = (s == "none")
+            } else if tc["type"]?.stringValue == "function" {
+                guard let n = (tc["function"]?["name"] ?? tc["name"])?.stringValue, !n.isEmpty else {
+                    throw APIError.badRequest("tool_choice: function name is required")
+                }
+                toolChoice = "required"; namedTool = n
+            } else {
+                throw APIError.badRequest("tool_choice: unsupported value (use auto, none, required or {\"type\":\"function\",\"function\":{\"name\":...}})")
+            }
         }
         var tools: [ToolSpec] = []
         if !toolsDisabled, let list = root["tools"]?.arrayValue {
@@ -169,6 +180,8 @@ struct ChatRequest {
         let ignoreEOS = root["ignore_eos"]?.boolValue ?? false
         let includeUsage = root["stream_options"]?["include_usage"]?.boolValue ?? false
 
+        let constraint = try parseConstraint(root, tools: tools, toolChoice: toolChoice, namedTool: namedTool, toolsDisabled: toolsDisabled)
+
         var config = SessionConfig(tools: tools, enableThinking: enableThinking, toolChoice: toolChoice,
                                    reasoningEffort: effort, preserveThinking: preserve)
         config.reasoningPolicy = .disableWhenTools
@@ -179,10 +192,56 @@ struct ChatRequest {
             maxTokens = min(maxTokens, ServerLimits.backgroundMaxTokens)
         }
         let params = GenParams(maxTokens: maxTokens, temperature: Float(temperature), topP: Float(topP), topK: topK,
-                               seed: seed, stopIds: [], priority: priority, ignoreEOS: ignoreEOS)
+                               seed: seed, stopIds: [], priority: priority, ignoreEOS: ignoreEOS, constraint: constraint)
         return ChatRequest(messages: messages, config: config, params: params, stop: stop,
                            stream: root["stream"]?.boolValue ?? false, includeUsage: includeUsage,
                            fingerprint: fingerprint(raw, tools: tools, config: config))
+    }
+
+    /// response_format / forced tool_choice / thinking budget. Unsupported schema keywords are a 400, never ignored.
+    static func parseConstraint(_ root: OrderedJSON, tools: [ToolSpec], toolChoice: String?, namedTool: String?,
+                                toolsDisabled: Bool) throws -> ConstraintSpec? {
+        var spec = ConstraintSpec()
+        if let rf = root["response_format"], !rf.isNull {
+            switch rf["type"]?.stringValue {
+            case "text"?: break
+            case "json_object"?: spec.json = .object
+            case "json_schema"?:
+                guard let schema = rf["json_schema"]?["schema"] ?? rf["schema"], case .object = schema else {
+                    throw APIError.badRequest("response_format.json_schema.schema is required and must be an object")
+                }
+                spec.json = .schema(schema)
+            default:
+                throw APIError.badRequest("response_format.type must be one of 'text', 'json_object', 'json_schema'")
+            }
+        }
+        if toolChoice == "required" && tools.isEmpty {
+            throw APIError.badRequest(namedTool.map { "tool_choice names function '\($0)' but no tools are declared" }
+                ?? "tool_choice 'required' needs at least one tool in tools")
+        }
+        if !tools.isEmpty && !toolsDisabled {
+            if let n = namedTool, !tools.contains(where: { $0.name == n }) {
+                throw APIError.badRequest("tool_choice names function '\(n)' which is not in tools")
+            }
+            var parallel = true
+            if let p = root["parallel_tool_calls"], !p.isNull {
+                guard let b = p.boolValue else { throw APIError.badRequest("parallel_tool_calls must be a boolean") }
+                parallel = b
+            }
+            spec.toolCalls = .init(tools: tools, name: namedTool, parallel: parallel, forced: toolChoice == "required")
+        }
+        for key in ["thinking_budget", "thinking_token_budget"] {
+            let v = root[key] ?? root["chat_template_kwargs"]?[key]
+            guard let v, !v.isNull else { continue }
+            guard let n = v.intValue, n >= 0 else { throw APIError.badRequest("\(key) must be a non-negative integer") }
+            spec.thinkingBudget = n
+            break
+        }
+        if !spec.hasGrammar && spec.thinkingBudget == nil { return nil }
+        do { try GrammarProgram.validate(spec) } catch let e as GrammarError {
+            throw APIError.badRequest((spec.toolCalls?.forced == true ? "tool_choice: " : "response_format: ") + e.message)
+        }
+        return spec
     }
 
     /// FNV-1a over: leading system/developer messages, the first user message, the tool declarations and the

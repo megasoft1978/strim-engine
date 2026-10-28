@@ -93,7 +93,7 @@ public enum Corpus {
     public static func prepare(root: URL, tasks: [LoadedTask], write: Bool, scratch: URL) -> [String] {
         var report: [String] = []
         var manifestTasks: [[String: Any]] = []
-        var counts: [String: Int] = [:], langs: [String: Int] = [:]
+        var counts: [String: Int] = [:], langs: [String: Int] = [:], balance: [String: [String: Int]] = [:]
         for t in tasks {
             let tj = t.dir.appendingPathComponent("task.json")
             guard let data = try? Data(contentsOf: tj), var obj = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
@@ -117,11 +117,12 @@ public enum Corpus {
             counts[t.spec.taskClass, default: 0] += 1
             let lang = (obj["language"] as? String) ?? "?"
             langs[lang, default: 0] += 1
+            balance[lang, default: [:]][t.spec.taskClass, default: 0] += 1
             manifestTasks.append(["id": t.id, "class": t.spec.taskClass, "language": lang, "license": obj["license"] ?? "",
                                   "repo": obj["repo"] ?? "", "base_commit": obj["base_commit"] ?? "", "tree_sha256": tree])
         }
         if write {
-            let manifest: [String: Any] = ["version": 2, "counts": counts, "languages": langs, "tasks": manifestTasks]
+            let manifest: [String: Any] = ["version": 2, "counts": counts, "languages": langs, "balance": balance, "tasks": manifestTasks]
             if let d = try? JSONSerialization.data(withJSONObject: manifest, options: [.prettyPrinted, .sortedKeys]) {
                 try? (d + Data("\n".utf8)).write(to: root.appendingPathComponent("manifest.json"))
             }

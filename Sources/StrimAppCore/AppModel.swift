@@ -17,13 +17,6 @@ public struct Availability: Equatable, Sendable {
     public static func no(_ r: String) -> Availability { Availability(enabled: false, reason: r) }
 }
 
-public struct ChatMessage: Identifiable, Equatable, Sendable {
-    public enum Role: String, Sendable { case user, assistant, reasoning, tool }
-    public var id = UUID()
-    public var role: Role
-    public var text: String
-}
-
 public enum ChatState: Equatable, Sendable {
     case unknown
     case unavailable(String)
@@ -59,6 +52,13 @@ public final class AppModel: ObservableObject {
     @Published public private(set) var notice: String?
     @Published public private(set) var chat: ChatState = .unknown
     @Published public private(set) var chatMessages: [ChatMessage] = []
+    /// A user turn is running (between send and the `done` delta or a cancel).
+    @Published public private(set) var chatGenerating = false
+    /// Sent with every turn (`enable_thinking`).
+    @Published public var thinkingEnabled = true
+    @Published public private(set) var availableModels: [LocalModel] = []
+    @Published public private(set) var modelListNote: String?
+    @Published public private(set) var packInfo: PackInfo?
     @Published public private(set) var actionInFlight: String?
     @Published public private(set) var launchAtLogin: Bool
     @Published public private(set) var settings: AppSettings
@@ -78,8 +78,14 @@ public final class AppModel: ObservableObject {
     private let clipboard: ClipboardWriting
     private let persist: @Sendable (AppSettings) throws -> Void
     private let pollInterval: Double?
+    private let modelScan: @Sendable () -> [LocalModel]
     private let tokenStatus: @Sendable (AppSettings) -> TokenFileStatus
     private var loop: Task<Void, Never>?
+    private var pendingText = ""
+    private var pendingRole: ChatMessage.Role?
+    private var flushTask: Task<Void, Never>?
+    private var turnLedger = TokenLedger()
+    private var turnStart: Date?
 
     public init(settings: AppSettings = .load(),
                 makeClient: @escaping @Sendable (AppSettings) -> StrimControlClient,
@@ -91,7 +97,9 @@ public final class AppModel: ObservableObject {
                 persist: @escaping @Sendable (AppSettings) throws -> Void = { try $0.save() },
                 pollInterval: Double? = 5,
                 testMode: Bool = ProcessInfo.processInfo.environment["STRIM_APP_TEST"] == "1",
-                tokenStatus: @escaping @Sendable (AppSettings) -> TokenFileStatus = { TokenReader(path: $0.controlTokenPath).inspect() }) {
+                tokenStatus: @escaping @Sendable (AppSettings) -> TokenFileStatus = { TokenReader(path: $0.controlTokenPath).inspect() },
+                modelScan: @escaping @Sendable () -> [LocalModel] = { LocalModelScanner.scan() }) {
+        self.modelScan = modelScan
         self.settings = settings; self.makeClient = makeClient; self.client = makeClient(settings)
         self.clock = clock; self.launcher = launcher; self.mcp = mcp; self.loginItem = loginItem
         self.clipboard = clipboard; self.persist = persist; self.pollInterval = pollInterval
@@ -106,10 +114,11 @@ public final class AppModel: ObservableObject {
                             clipboard: ClipboardWriting = PasteboardClipboard(),
                             persist: @escaping @Sendable (AppSettings) throws -> Void = { _ in },
                             pollInterval: Double? = 5, testMode: Bool = false,
-                            tokenStatus: @escaping @Sendable (AppSettings) -> TokenFileStatus = { _ in .ok }) {
+                            tokenStatus: @escaping @Sendable (AppSettings) -> TokenFileStatus = { _ in .ok },
+                            modelScan: @escaping @Sendable () -> [LocalModel] = { [] }) {
         self.init(settings: settings, makeClient: { _ in client }, clock: clock, launcher: launcher, mcp: mcp,
                   loginItem: loginItem, clipboard: clipboard, persist: persist, pollInterval: pollInterval, testMode: testMode,
-                  tokenStatus: tokenStatus)
+                  tokenStatus: tokenStatus, modelScan: modelScan)
     }
 
     // MARK: derived UI state
@@ -161,7 +170,34 @@ public final class AppModel: ObservableObject {
         if s.activeJobs > 0 || s.state == .busy { return .no("Jobs are running") }
         return .yes
     }
-    public var pauseAvailability: Availability { .no("Pause is not available on this host yet") }
+    /// Background jobs are paused on the host (chat is never paused).
+    public var jobsPaused: Bool { status?.jobsPaused == true }
+    /// Pause when running, resume when paused.
+    public var pauseAvailability: Availability {
+        guard status != nil else { return .no("Host offline") }
+        if actionInFlight != nil { return .no("Another action is in progress") }
+        return .yes
+    }
+    public var pauseButtonTitle: String { jobsPaused ? "Resume jobs" : "Pause jobs" }
+
+    public func cancelJobAvailability(for job: JobSummary?) -> Availability {
+        guard status != nil else { return .no("Host offline") }
+        guard let job else { return .no("Select a job") }
+        if actionInFlight != nil { return .no("Another action is in progress") }
+        let done: [JobStatusDTO] = [.done, .failed, .cancelled, .limit]
+        if done.contains(job.status) { return .no("Job already \(job.status.rawValue)") }
+        return .yes
+    }
+
+    /// Selected model differs from what the host has loaded: it only takes effect after a load action.
+    public var modelSelectionNote: String? {
+        guard let want = settings.modelPath, !want.isEmpty else { return nil }
+        let name = (want as NSString).lastPathComponent
+        guard let s = status else { return "Selected: \(name)" }
+        if s.model == nil || s.state == .stopped { return "Selected: \(name). Press Load to use it." }
+        if s.model != name { return "Selected: \(name). The host runs \(s.model ?? "another model"); Unload, then Load to switch." }
+        return nil
+    }
 
     public func approveAvailability(for job: JobDetail?) -> Availability {
         guard status != nil else { return .no("Host offline") }
@@ -240,6 +276,7 @@ public final class AppModel: ObservableObject {
                 connection = .connected(s)
                 log("connected: state=\(s.state.rawValue)")
                 await refreshJobs()
+                await refreshPack()
                 try await runSession()
                 if Task.isCancelled { return }
                 disconnect(OfflineBanner.streamEnded + " Reconnecting.")
@@ -285,6 +322,7 @@ public final class AppModel: ObservableObject {
     }
 
     private func disconnect(_ reason: String, error: Error? = nil) {
+        if chatGenerating { flushPending(); finishTurn() }
         connection = .disconnected(reason: reason)
         if let error { lastError = error.localizedDescription }
         log("disconnected: \(reason)")
@@ -302,6 +340,10 @@ public final class AppModel: ObservableObject {
             Task { await refreshJobs(); if selectedJob?.id == j.jobID { await refreshSelectedJob() } }
         case .harnessEvent(let h):
             log("harness \(h.jobID.prefix(8)): \(h.kind)" + (h.text.map { " \($0.prefix(80))" } ?? ""))
+            if h.kind == "usage", case .ready(let s) = chat, s.sessionID == h.jobID, chatGenerating,
+               let t = h.text, let (p, c, o) = TokenLedger.parse(t) {
+                turnLedger.add(prompt: p, cached: c, completion: o)
+            }
         case .chatDelta(let d):
             applyDelta(d)
         case .error(let e):
@@ -341,6 +383,76 @@ public final class AppModel: ObservableObject {
         guard unloadAvailability.enabled else { return }
         await run("Unload") { try await client.unload(); log("unload requested") }
         await refreshStatus()
+    }
+
+    public func pauseJobs() async {
+        guard pauseAvailability.enabled, !jobsPaused else { return }
+        await run("Pause jobs") { _ = try await client.pauseJobs(PauseRequest()); log("background jobs paused") }
+        await refreshStatus()
+    }
+    public func resumeJobs() async {
+        guard pauseAvailability.enabled, jobsPaused else { return }
+        await run("Resume jobs") { _ = try await client.resumeJobs(); log("background jobs resumed") }
+        await refreshStatus()
+    }
+    public func togglePause() async { if jobsPaused { await resumeJobs() } else { await pauseJobs() } }
+
+    public func cancelJob(_ id: String) async {
+        guard cancelJobAvailability(for: jobs.first { $0.id == id }).enabled else { return }
+        await run("Cancel job") {
+            let r = try await client.cancelJob(JobCancelRequest(jobID: id))
+            log("cancel job \(id.prefix(8)): \(r.status.rawValue)" + (r.cancelled ? "" : " (already finished)"))
+        }
+        await refreshJobs()
+        if selectedJob?.id == id { await refreshSelectedJob() }
+        await refreshStatus()
+    }
+
+    // MARK: pickers and pack
+
+    /// Local models from the host (`GET models`); falls back to scanning `~/.strim/models` and `~/models`.
+    public func refreshModels() async {
+        do {
+            availableModels = try await client.models().models
+            modelListNote = availableModels.isEmpty ? "The host found no model directories under its allowed roots." : nil
+        } catch {
+            availableModels = modelScan()
+            modelListNote = availableModels.isEmpty ? "No models found in ~/.strim/models or ~/models. Type a path below." : "Scanned locally (the host does not list models)."
+        }
+    }
+
+    /// Records the choice in settings only; the host switches models on an explicit Load.
+    public func selectModel(_ m: LocalModel) {
+        var new = settings
+        if m.kind == "mtp" { new.mtpPath = m.path } else { new.modelPath = m.path }
+        update(settings: new)
+        notice = m.kind == "mtp" ? "MTP head set to \(m.name). It applies at the next Load." : "Model set to \(m.name). Press Load to use it."
+    }
+
+    public func refreshPack() async {
+        if let p = try? await client.pack() { packInfo = p }
+    }
+
+    /// Validates with `ProjectFolder.resolve`, stores the folder and puts it first in the recents; starts a fresh chat.
+    @discardableResult
+    public func setProject(_ raw: String) -> Bool {
+        switch ProjectFolder.resolve(raw) {
+        case .failure(let e):
+            lastError = e.message
+            return false
+        case .success(let dir):
+            var new = settings
+            new.projectPath = dir
+            new.recentProjects = ([dir] + new.recentProjects.filter { $0 != dir }).prefix(AppSettings.maxRecents).map { $0 }
+            update(settings: new)
+            chat = .unknown; chatMessages = []; chatGenerating = false
+            return true
+        }
+    }
+
+    /// Recents that still resolve to a valid project folder.
+    public var validRecentProjects: [String] {
+        settings.recentProjects.filter { if case .success = ProjectFolder.resolve($0) { true } else { false } }
     }
 
     public func refreshJobs() async {
@@ -449,33 +561,89 @@ public final class AppModel: ObservableObject {
         case .failure(let e):
             chat = .unavailable(e.message)
         case .success(let cwd):
-            do { chat = .ready(try await client.chatOpen(ChatOpenRequest(cwd: cwd))) }
+            do { chat = .ready(try await client.chatOpen(ChatOpenRequest(cwd: cwd, enableThinking: thinkingEnabled))) }
             catch {
                 chat = .unavailable(isNotImplemented(error) ? ChatState.notAvailableYet : "Chat error: \(error.localizedDescription)")
             }
         }
     }
     public func sendChat(_ text: String) async {
-        guard case .ready(let s) = chat, !text.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        guard case .ready(let s) = chat, !text.trimmingCharacters(in: .whitespaces).isEmpty, !chatGenerating else { return }
+        flushPending()
         chatMessages.append(ChatMessage(role: .user, text: text))
-        await run("Chat") { try await client.chatAppend(ChatAppendRequest(sessionID: s.sessionID, text: text)) }
+        chatGenerating = true; turnLedger = TokenLedger(); turnStart = clock.now()
+        await run("Chat") {
+            do { try await client.chatAppend(ChatAppendRequest(sessionID: s.sessionID, text: text, enableThinking: thinkingEnabled)) }
+            catch { chatGenerating = false; throw error }
+        }
     }
     public func cancelChat() async {
-        guard case .ready(let s) = chat else { return }
+        guard case .ready(let s) = chat, chatGenerating else { return }
         await run("Cancel chat") { try await client.chatCancel(ChatCancelRequest(sessionID: s.sessionID)) }
+        flushPending()
+        finishTurn()
     }
+
+    public func copyMessage(_ id: UUID) {
+        guard let m = chatMessages.first(where: { $0.id == id }) else { return }
+        let text = m.tool.map { "\($0.name) \($0.args)" + ($0.result.map { "\n\($0)" } ?? "") } ?? m.text
+        clipboard.copy(text)
+        notice = "Message copied."
+    }
+
+    /// Ends the turn: stamps the ledger onto the turn's last non-user message.
+    private func finishTurn() {
+        guard chatGenerating else { return }
+        chatGenerating = false
+        if let start = turnStart { turnLedger.seconds = max(0, clock.now().timeIntervalSince(start)) }
+        turnStart = nil
+        if let i = chatMessages.indices.last, chatMessages[i].role != .user { chatMessages[i].ledger = turnLedger }
+        turnLedger = TokenLedger()
+    }
+
+    /// Text deltas arrive many times per second; they are coalesced (~30 Hz) so SwiftUI redraws stay cheap.
     private func applyDelta(_ d: ChatDelta) {
-        let role: ChatMessage.Role
         switch d.kind {
-        case .text: role = .assistant
-        case .reasoning: role = .reasoning
-        case .toolCall, .toolResult: role = .tool
-        case .done: return
+        case .text: appendStreamed(.assistant, d.text)
+        case .reasoning: appendStreamed(.reasoning, d.text)
+        case .toolCall:
+            flushPending()
+            let card = ToolCard.call(d.text)
+            chatMessages.append(ChatMessage(role: .tool, text: d.text, tool: card))
+        case .toolResult:
+            flushPending()
+            let r = ToolCard.parseResult(d.text)
+            if let i = chatMessages.lastIndex(where: { $0.role == .tool && $0.tool?.finished == false && ($0.tool?.name == r.name || r.name.isEmpty) }) {
+                chatMessages[i].tool?.result = r.summary; chatMessages[i].tool?.isError = r.isError
+                chatMessages[i].text = d.text
+            } else {
+                chatMessages.append(ChatMessage(role: .tool, text: d.text, tool: ToolCard(name: r.name, result: r.summary, isError: r.isError)))
+            }
+        case .done:
+            flushPending()
+            finishTurn()
         }
-        if role != .tool, let last = chatMessages.last, last.role == role {
-            chatMessages[chatMessages.count - 1].text += d.text
+    }
+
+    private func appendStreamed(_ role: ChatMessage.Role, _ text: String) {
+        if pendingRole != role { flushPending() }
+        pendingRole = role; pendingText += text
+        guard flushTask == nil else { return }
+        flushTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 33_000_000)
+            self?.flushPending()
+        }
+    }
+
+    private func flushPending() {
+        flushTask?.cancel(); flushTask = nil
+        guard let role = pendingRole, !pendingText.isEmpty else { pendingRole = nil; pendingText = ""; return }
+        let text = pendingText
+        pendingRole = nil; pendingText = ""
+        if let last = chatMessages.last, last.role == role {
+            chatMessages[chatMessages.count - 1].text += text
         } else {
-            chatMessages.append(ChatMessage(role: role, text: d.text))
+            chatMessages.append(ChatMessage(role: role, text: text))
         }
     }
 }

@@ -1,0 +1,17 @@
+device: Apple M5 Max os: Version 27.0.1 (Build 26A434) apple10=true
+W4A8 gate+up M=1024 MLX_qmm 6.337 ms 57.6 TF/s
+W4A8 gate+up quantize_only 0.050 ms
+W4A8 gate+up tile=64x64 sg=8 matmul 8.610 ms  total(quant+mm) 8.184 ms  = 1.29x MLX  | relRMS vs qmm 0.00594 (max 2.62)  vs exact-int8-ref 0.0004739 (max 0.275)
+W4A8 gate+up tile=64x128 sg=8 matmul 34.740 ms  total(quant+mm) 34.823 ms  = 5.50x MLX  | relRMS vs qmm 0.00594 (max 2.62)  vs exact-int8-ref 0.0004739 (max 0.275)
+W4A8 gate+up tile=128x64 sg=8 matmul 33.766 ms  total(quant+mm) 33.813 ms  = 5.34x MLX  | relRMS vs qmm 0.00594 (max 2.62)  vs exact-int8-ref 0.0004739 (max 0.275)
+W4A8 gate+up tile=32x64 sg=4 matmul 10.257 ms  total(quant+mm) 9.329 ms  = 1.47x MLX  | relRMS vs qmm 0.00594 (max 2.62)  vs exact-int8-ref 0.0004739 (max 0.275)
+W4A8 gate+up tile=64x32 sg=4 matmul 11.314 ms  total(quant+mm) 9.179 ms  = 1.45x MLX  | relRMS vs qmm 0.00594 (max 2.62)  vs exact-int8-ref 0.0004739 (max 0.275)
+W4A8 gate+up tile=64x64 sg=4 matmul 32.436 ms  total(quant+mm) 32.274 ms  = 5.09x MLX  | relRMS vs qmm 0.00594 (max 2.62)  vs exact-int8-ref 0.0004739 (max 0.275)
+W4A8 down M=1024 MLX_qmm 3.402 ms 53.7 TF/s
+W4A8 down quantize_only 0.111 ms
+W4A8 down tile=64x64 sg=8 matmul 4.134 ms  total(quant+mm) 4.222 ms  = 1.24x MLX  | relRMS vs qmm 0.005938 (max 4.12)  vs exact-int8-ref 0.000474 (max 0.527)
+W4A8 down tile=64x128 sg=8 matmul 17.717 ms  total(quant+mm) 17.580 ms  = 5.17x MLX  | relRMS vs qmm 0.005938 (max 4.12)  vs exact-int8-ref 0.000474 (max 0.527)
+W4A8 down tile=128x64 sg=8 matmul 16.999 ms  total(quant+mm) 17.098 ms  = 5.03x MLX  | relRMS vs qmm 0.005938 (max 4.12)  vs exact-int8-ref 0.000474 (max 0.527)
+W4A8 down tile=32x64 sg=4 matmul 4.734 ms  total(quant+mm) 4.719 ms  = 1.39x MLX  | relRMS vs qmm 0.005938 (max 4.12)  vs exact-int8-ref 0.000474 (max 0.527)
+W4A8 down tile=64x32 sg=4 matmul 4.706 ms  total(quant+mm) 4.583 ms  = 1.35x MLX  | relRMS vs qmm 0.005938 (max 4.12)  vs exact-int8-ref 0.000474 (max 0.527)
+W4A8 down tile=64x64 sg=4 matmul 16.613 ms  total(quant+mm) 16.466 ms  = 4.84x MLX  | relRMS vs qmm 0.005938 (max 4.12)  vs exact-int8-ref 0.000474 (max 0.527)

@@ -6,6 +6,11 @@ struct StrimMenuApp: App {
     @StateObject private var model: AppModel
 
     init() {
+        if let dir = SnapshotMode.directory {
+            _model = StateObject(wrappedValue: AppModel(makeClient: { s in HTTPControlClient.make(settings: s) }))
+            Task { @MainActor in await SnapshotMode.run(into: dir) }
+            return
+        }
         let m = AppModel(makeClient: { s in HTTPControlClient.make(settings: s) })
         _model = StateObject(wrappedValue: m)
         m.start()

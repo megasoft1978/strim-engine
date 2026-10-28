@@ -1,0 +1,96 @@
+diff --git a/Sources/Calc/Calculator.swift b/Sources/Calc/Calculator.swift
+index a5d8ed8..25a328d 100644
+--- a/Sources/Calc/Calculator.swift
++++ b/Sources/Calc/Calculator.swift
+@@ -5,7 +5,7 @@ public enum Calculator {
+             let e = try Parser.parse(try Lexer.tokens(input))
+             return Format.render(try Eval.eval(e))
+         } catch CalcError.divZero {
+-            return "error"
++            return "div by zero"
+         } catch {
+             return "error"
+         }
+diff --git a/Sources/Calc/Eval.swift b/Sources/Calc/Eval.swift
+index 18f10ab..4645bf7 100644
+--- a/Sources/Calc/Eval.swift
++++ b/Sources/Calc/Eval.swift
+@@ -12,6 +12,7 @@ public enum Eval {
+             case "-": return l - r
+             case "*": return l * r
+             case "/":
++                if r == 0 { throw CalcError.divZero }
+                 return l / r
+             default: return pow(l, r)
+             }
+diff --git a/Sources/Calc/Format.swift b/Sources/Calc/Format.swift
+index 04bb037..b249a54 100644
+--- a/Sources/Calc/Format.swift
++++ b/Sources/Calc/Format.swift
+@@ -5,6 +5,7 @@ public enum Format {
+     public static func render(_ v: Double) -> String {
+         if v == v.rounded() && abs(v) < 1e15 { return String(Int(v)) }
+         var s = String(format: "%.6f", v)
++        while s.hasSuffix("0") { s.removeLast() }
+         return s
+     }
+ }
+diff --git a/Sources/Calc/Lexer.swift b/Sources/Calc/Lexer.swift
+index 613205d..8c1f3b1 100644
+--- a/Sources/Calc/Lexer.swift
++++ b/Sources/Calc/Lexer.swift
+@@ -16,7 +16,7 @@ public enum Lexer {
+             if c == " " { i += 1; continue }
+             if c.isNumber || c == "." {
+                 var j = i
+-                while j < cs.count, cs[j].isNumber { j += 1 }
++                while j < cs.count, cs[j].isNumber || cs[j] == "." { j += 1 }
+                 guard let v = Double(String(cs[i..<j])) else { throw CalcError.badChar(c) }
+                 out.append(.num(v))
+                 i = j
+@@ -29,7 +29,7 @@ public enum Lexer {
+             case "/": out.append(.slash)
+             case "^": out.append(.caret)
+             case "(": out.append(.lparen)
+-            case ")": out.append(.lparen)
++            case ")": out.append(.rparen)
+             default: throw CalcError.badChar(c)
+             }
+             i += 1
+diff --git a/Sources/Calc/Parser.swift b/Sources/Calc/Parser.swift
+index b7b6b51..0a61881 100644
+--- a/Sources/Calc/Parser.swift
++++ b/Sources/Calc/Parser.swift
+@@ -24,7 +24,7 @@ public struct Parser {
+         var l = try term()
+         while let t = peek(), t == .plus || t == .minus {
+             pos += 1
+-            let r = try expr()
++            let r = try term()
+             l = .bin(t == .plus ? "+" : "-", l, r)
+         }
+         return l
+@@ -34,20 +34,20 @@ public struct Parser {
+         var l = try unary()
+         while let t = peek(), t == .star || t == .slash {
+             pos += 1
+-            let r = try term()
++            let r = try unary()
+             l = .bin(t == .star ? "*" : "/", l, r)
+         }
+         return l
+     }
+ 
+     mutating func unary() throws -> Expr {
+-        if peek() == .minus { pos += 1; return .neg(try power()) }
++        if peek() == .minus { pos += 1; return .neg(try unary()) }
+         return try power()
+     }
+ 
+     mutating func power() throws -> Expr {
+         let b = try atom()
+-        if peek() == .caret { pos += 1; return .bin("^", b, try atom()) }
++        if peek() == .caret { pos += 1; return .bin("^", b, try unary()) }
+         return b
+     }
+ 
