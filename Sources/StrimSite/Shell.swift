@@ -15,8 +15,8 @@ extension SiteBuilder {
 <title>\(esc(title))</title>
 <meta name="description" content="\(esc(desc))">
 <meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#0A0920" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#F6F4FF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C0D10" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FAFAFB" media="(prefers-color-scheme: light)">
 <link rel="canonical" href="\(url)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Strim">
@@ -40,18 +40,15 @@ extension SiteBuilder {
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body class="\(bodyClass)">
-<div class="aurora" aria-hidden="true"><i></i><i></i><b></b></div>
-<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false"><defs><linearGradient id="gg" gradientUnits="userSpaceOnUse" x1="8" y1="0" x2="72" y2="0"><stop offset="0" style="stop-color:var(--a)"/><stop offset=".5" style="stop-color:var(--b)"/><stop offset="1" style="stop-color:var(--c)"/></linearGradient></defs></svg>
-
 """
     }
 
-    /// Sticky translucent navigation with a scroll progress bar. `links` are (label, href); `sub` is a second row of in-page links below the bar.
+    /// Sticky solid navigation. `links` are (label, href); `sub` is a second row of in-page links below the bar.
     func headerHTML(_ links: [(String, String)], brandHref: String, sub: [(String, String)] = []) -> String {
         var o = "<a class=\"skip\" href=\"#main\">Skip to content</a>\n<header class=\"site\"><div class=\"wrap\"><div class=\"hbar\">"
         o += "<a class=\"brand\" href=\"\(brandHref)\">\(markSVG("hb", standalone: false, title: ""))<span>strim</span></a>"
         o += "<nav aria-label=\"Sections\"><ul>" + links.map { "<li><a href=\"\($0.1)\">\(esc($0.0))</a></li>" }.joined() + "</ul></nav>"
-        o += "<button type=\"button\" class=\"theme\" id=\"theme\" aria-label=\"Switch between dark and light\" hidden>Theme</button></div></div><div class=\"prog\" id=\"prog\" aria-hidden=\"true\"></div></header>\n"
+        o += "<button type=\"button\" class=\"theme\" id=\"theme\" aria-label=\"Switch between dark and light\" title=\"Switch theme\" hidden><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42\"/></svg></button></div></div></header>\n"
         if !sub.isEmpty {
             o += "<div class=\"wrap\"><nav class=\"subnav\" aria-label=\"On this page\"><ul>" + sub.map { "<li><a href=\"\($0.1)\">\(esc($0.0))</a></li>" }.joined() + "</ul></nav></div>\n"
         }

@@ -26,6 +26,11 @@ struct SettingsTab: View {
                     }
                     if let p = draft.hostURLProblem { Label(p, systemImage: "exclamationmark.triangle.fill").font(.caption).foregroundStyle(Strim.C.coral) }
                 }
+                SettingsGroup("Server", icon: "power") {
+                    Toggle("Start server when Strim opens", isOn: $draft.startServerWhenOpens)
+                        .toggleStyle(StrimToggleStyle())
+                    Text("The server starts after the model is available.").font(.caption).foregroundStyle(Strim.C.muted)
+                }
                 ProjectPickerSection(model: model, draft: $draft)
                 SettingsGroup("Paths and tokens", icon: "key") {
                     SettingsField("strim binary", text: Binding(get: { draft.strimBinary ?? "" }, set: { draft.strimBinary = $0.isEmpty ? nil : $0 }),

@@ -1,35 +1,24 @@
 import Foundation
 
-// Brand: "Aurora glass" (docs/design/DESIGN-NOTES.md, direction C). Night navy, one blue > violet > pink gradient, glass cards, never green.
+// Direction D site marks and share art: flat neutral surfaces with restrained indigo.
 // Marks, banner and charts for the README are generated here from data. They use system font stacks and no filters, because GitHub renders SVG files as images.
 
-let BR_NIGHT = "#0A0920"
-let BR_TEXT = "#F1EFFF"
-let BR_MUTED = "#A29FC8"
-let BR_STOPS = ["#7C7BFF", "#B25CFF", "#FF4FD0"]
+let BR_NIGHT = "#0C0D10"
+let BR_TEXT = "#ECEDEF"
+let BR_MUTED = "#A3A6B1"
+let BR_ACCENT = "#7C7CF5"
 let BR_SANS = "-apple-system,'Helvetica Neue',Arial,sans-serif"
 let BR_MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"
 let SITE_URL = "https://megasoft1978.github.io/strim-engine/"
 let REPO_URL = "https://github.com/megasoft1978/strim-engine"
 
-/// The S of four glowing token capsules: one dashed, round-capped path.
+/// The S of four indigo token capsules: one dashed, round-capped path.
 let MARK_PATH = "M46 19H28A8.5 8.5 0 0 0 28 36H36A8.5 8.5 0 0 1 36 53H17"
-
-/// Three-stop gradient with literal colours.
-func gradDefLiteral(_ id: String, x1: String = "0", y1: String = "0", x2: String = "1", y2: String = "0", units: String = "") -> String {
-    let u = units.isEmpty ? "" : " gradientUnits=\"\(units)\""
-    return "<linearGradient id=\"\(id)\"\(u) x1=\"\(x1)\" y1=\"\(y1)\" x2=\"\(x2)\" y2=\"\(y2)\">"
-        + zip(["0", ".5", "1"], BR_STOPS).map { "<stop offset=\"\($0)\" stop-color=\"\($1)\"/>" }.joined() + "</linearGradient>"
-}
 
 /// The mark as a rounded navy tile with the capsule S, as an SVG fragment (defs + shapes) to place in a 64x64 box. `p` makes the ids unique.
 func markInner(_ p: String, rx: Double = 16) -> String {
-    "<defs><linearGradient id=\"\(p)t\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"#2A2470\"/><stop offset=\"1\" stop-color=\"#120F33\"/></linearGradient>"
-        + gradDefLiteral(p + "s", x2: "1", y2: "1") + "</defs>"
-        + "<rect width=\"64\" height=\"64\" rx=\"\(fnum(rx))\" fill=\"url(#\(p)t)\"/><rect x=\".5\" y=\".5\" width=\"63\" height=\"63\" rx=\"\(fnum(rx - 0.5))\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\".16\"/>"
-        + "<path d=\"\(MARK_PATH)\" fill=\"none\" stroke=\"url(#\(p)s)\" stroke-width=\"15\" stroke-linecap=\"round\" stroke-dasharray=\"14.5 11\" stroke-dashoffset=\"-1\" opacity=\".07\"/>"
-        + "<path d=\"\(MARK_PATH)\" fill=\"none\" stroke=\"url(#\(p)s)\" stroke-width=\"12\" stroke-linecap=\"round\" stroke-dasharray=\"14.5 11\" stroke-dashoffset=\"-1\" opacity=\".12\"/>"
-        + "<path d=\"\(MARK_PATH)\" fill=\"none\" stroke=\"url(#\(p)s)\" stroke-width=\"8.5\" stroke-linecap=\"round\" stroke-dasharray=\"14.5 11\" stroke-dashoffset=\"-1\"/>"
+    "<rect width=\"64\" height=\"64\" rx=\"\(fnum(rx))\" fill=\"#14151A\"/><rect x=\".5\" y=\".5\" width=\"63\" height=\"63\" rx=\"\(fnum(rx - 0.5))\" fill=\"none\" stroke=\"#2A2C34\"/>"
+        + "<path d=\"\(MARK_PATH)\" fill=\"none\" stroke=\"#9393FF\" stroke-width=\"8.5\" stroke-linecap=\"round\" stroke-dasharray=\"14.5 11\" stroke-dashoffset=\"-1\"/>"
 }
 
 /// Standalone mark SVG (logo.svg, favicon.svg); `inline` gives an aria-hidden fragment for the page header.
@@ -90,22 +79,17 @@ extension SiteBuilder {
         let top = niceTopWide(bars)
         func X(_ v: Double) -> Double { 110 + v / top * 1060 }
         let sans = "font-family=\"\(BR_SANS)\"", mono = "font-family=\"\(BR_MONO)\""
-        var b = "<defs>" + gradDefLiteral("g") + gradDefLiteral("gu", x1: "110", x2: "1170", units: "userSpaceOnUse")
-        b += "<radialGradient id=\"b1\" cx=\".15\" cy=\".05\" r=\".8\"><stop offset=\"0\" stop-color=\"#6E6BFF\" stop-opacity=\".5\"/><stop offset=\"1\" stop-color=\"#6E6BFF\" stop-opacity=\"0\"/></radialGradient>"
-        b += "<radialGradient id=\"b2\" cx=\".9\" cy=\".1\" r=\".6\"><stop offset=\"0\" stop-color=\"#FF4FD0\" stop-opacity=\".35\"/><stop offset=\"1\" stop-color=\"#FF4FD0\" stop-opacity=\"0\"/></radialGradient>"
-        b += "<radialGradient id=\"o\" cx=\".35\" cy=\".3\" r=\".8\"><stop offset=\"0\" stop-color=\"#FFD1F3\"/><stop offset=\".4\" stop-color=\"#FF4FD0\"/><stop offset=\"1\" stop-color=\"#B25CFF\"/></radialGradient>"
-        b += "<radialGradient id=\"h\"><stop offset=\"0\" stop-color=\"#FF4FD0\" stop-opacity=\".55\"/><stop offset=\"1\" stop-color=\"#FF4FD0\" stop-opacity=\"0\"/></radialGradient></defs>"
-        b += "<rect width=\"1280\" height=\"640\" fill=\"\(BR_NIGHT)\"/><rect width=\"1280\" height=\"640\" fill=\"url(#b1)\"/><rect width=\"1280\" height=\"640\" fill=\"url(#b2)\"/>"
+        var b = "<rect width=\"1280\" height=\"640\" fill=\"\(BR_NIGHT)\"/>"
         b += "<g transform=\"translate(80 70) scale(1.125)\">\(markInner("bm"))</g>"
         b += "<text x=\"168\" y=\"122\" \(sans) font-size=\"44\" font-weight=\"700\" letter-spacing=\"-1.5\" fill=\"\(BR_TEXT)\">strim</text>"
         b += "<text x=\"80\" y=\"256\" \(sans) font-size=\"92\" font-weight=\"700\" letter-spacing=\"-4\" fill=\"\(BR_TEXT)\">Your Mac, now a</text>"
-        b += "<text x=\"80\" y=\"350\" \(sans) font-size=\"92\" font-weight=\"700\" letter-spacing=\"-4\" fill=\"url(#g)\">local AI server.</text>"
-        b += "<rect x=\"80\" y=\"396\" width=\"1120\" height=\"170\" rx=\"26\" fill=\"#fff\" fill-opacity=\".06\" stroke=\"#fff\" stroke-opacity=\".14\"/>"
-        b += "<text x=\"110\" y=\"436\" \(mono) font-size=\"14\" letter-spacing=\"2\" fill=\"\(BR_MUTED)\">DECODE TOK/S &#183; \(ENGINES.count) CURRENT ENGINES + 2 EARLIER POINTS &#183; QWEN3.8-27B &#183; M5 MAX &#183; RUN OF \(esc(wideDate))</text>"
-        b += "<line x1=\"110\" x2=\"1170\" y1=\"500\" y2=\"500\" stroke=\"url(#gu)\" stroke-width=\"3\" opacity=\".9\"/>"
+        b += "<text x=\"80\" y=\"350\" \(sans) font-size=\"92\" font-weight=\"700\" letter-spacing=\"-4\" fill=\"\(BR_TEXT)\">local AI server.</text>"
+        b += "<rect x=\"80\" y=\"396\" width=\"1120\" height=\"170\" rx=\"12\" fill=\"#14151A\" stroke=\"#2A2C34\"/>"
+        b += "<text x=\"110\" y=\"436\" \(mono) font-size=\"14\" letter-spacing=\"2\" fill=\"\(BR_MUTED)\">DECODE TOK/S &#183; QWEN3.8-27B &#183; M5 MAX &#183; \(ENGINES.count) CURRENT ENGINES + 2 EARLIER RUNS</text>"
+        b += "<line x1=\"110\" x2=\"1170\" y1=\"500\" y2=\"500\" stroke=\"#2A2C34\" stroke-width=\"2\"/>"
         let rest = bars.filter { !$0.strim }
         for (k, r) in rest.enumerated() {
-            b += "<circle cx=\"\(fnum(X(r.value)))\" cy=\"500\" r=\"\(k == 0 ? 9 : 6)\" fill=\"\(BR_NIGHT)\" stroke=\"\(BR_TEXT)\" stroke-width=\"2\"\(r.earlier ? " stroke-dasharray=\"2 2\"" : "")}/>"
+            b += "<circle cx=\"\(fnum(X(r.value)))\" cy=\"500\" r=\"\(k == 0 ? 9 : 6)\" fill=\"\(BR_NIGHT)\" stroke=\"\(BR_TEXT)\" stroke-width=\"2\"\(r.earlier ? " stroke-dasharray=\"2 2\"" : "")/>"
         }
         if let r = rest.first {
             b += "<text x=\"\(fnum(X(r.value)))\" y=\"476\" text-anchor=\"middle\" \(mono) font-size=\"18\" fill=\"\(BR_TEXT)\">\(esc(fmtFixed(r.value, 1)))</text>"
@@ -116,8 +100,8 @@ extension SiteBuilder {
         }
         if let s = bars.first(where: { $0.strim }) {
             let x = X(s.value)
-            b += "<circle cx=\"\(fnum(x))\" cy=\"500\" r=\"42\" fill=\"url(#h)\"/><circle cx=\"\(fnum(x))\" cy=\"500\" r=\"20\" fill=\"url(#o)\"/>"
-            b += "<text x=\"\(fnum(x))\" y=\"454\" text-anchor=\"middle\" \(sans) font-size=\"46\" font-weight=\"700\" letter-spacing=\"-2\" fill=\"url(#g)\">\(esc(fmtFixed(s.value, 1)))</text>"
+            b += "<circle cx=\"\(fnum(x))\" cy=\"500\" r=\"10\" fill=\"\(BR_ACCENT)\" stroke=\"#9393FF\" stroke-width=\"2\"/>"
+            b += "<text x=\"\(fnum(x))\" y=\"454\" text-anchor=\"middle\" \(sans) font-size=\"46\" font-weight=\"700\" letter-spacing=\"-2\" fill=\"\(BR_ACCENT)\">\(esc(fmtFixed(s.value, 1)))</text>"
         }
         b += "<text x=\"110\" y=\"548\" \(mono) font-size=\"13\" fill=\"\(BR_MUTED)\">\(wideFromRun ? "Strim build \(esc(wideBuild)); dashed points are from \(esc(wideArchiveDate))" : "Earlier run points"). brew install megasoft1978/strim/strim</text>"
         let label = bannerAlt()

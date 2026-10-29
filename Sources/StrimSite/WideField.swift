@@ -103,7 +103,7 @@ extension SiteBuilder {
     func wideSectionHTML() -> String {
         var o = "<section id=\"wide\" aria-labelledby=\"h-wide\"><h2 id=\"h-wide\">Wider field: five engines, with two earlier-run points</h2>"
         o += "<ul class=\"legend earlier-legend\"><li><svg class=\"earlier-run\" viewBox=\"0 0 18 18\" aria-hidden=\"true\"><circle cx=\"9\" cy=\"9\" r=\"5\"/></svg>Dashed hollow beads are llama.cpp and Ollama from the \(esc(wideArchiveDate)) run.</li></ul>"
-        o += "<figure class=\"hvfig wide\"><div class=\"glass\"><div class=\"hvwrap\">\(numberLineSVG(narrow: false, standalone: false))\(numberLineSVG(narrow: true, standalone: false))</div></div><figcaption class=\"cap\">\(esc(wideCaption()))</figcaption></figure>"
+        o += "<figure class=\"hvfig wide\"><div class=\"surface\"><div class=\"hvwrap\">\(numberLineSVG(narrow: false, standalone: false))\(numberLineSVG(narrow: true, standalone: false))</div></div><figcaption class=\"cap\">\(esc(wideCaption()))</figcaption></figure>"
         o += "<p>The five filled points are medians from the same \(esc(wideDate)) head-to-head, built from Strim \(esc(wideBuild)); llama.cpp and Ollama are hollow dashed beads from the earlier run. They are visual context only. <a href=\"../\(esc(FINAL_REL))/summary.md\">Current run source</a>; <a href=\"../\(esc(WIDE_REL))/summary.md\">earlier run source</a>.</p></section>\n\n"
         return o
     }

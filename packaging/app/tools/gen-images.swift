@@ -26,15 +26,27 @@ var data: Data
 switch args[1] {
 case "icon":
     data = render(1024, 1024) { c in
-        // macOS icon grid: 824x824 rounded square centred in 1024.
+        // Quiet modern: neutral tile and the four capsule segments of the S mark in two flat indigo tints.
         let r = CGRect(x: 100, y: 100, width: 824, height: 824)
         let path = CGPath(roundedRect: r, cornerWidth: 184, cornerHeight: 184, transform: nil)
         c.addPath(path); c.clip()
-        let g = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(),
-                           colors: [CGColor(red: 0.13, green: 0.16, blue: 0.30, alpha: 1), CGColor(red: 0.36, green: 0.30, blue: 0.85, alpha: 1)] as CFArray,
-                           locations: [0, 1])!
-        c.drawLinearGradient(g, start: CGPoint(x: 512, y: 100), end: CGPoint(x: 512, y: 924), options: [])
-        text("S", 560, .heavy, .white, center: CGPoint(x: 512, y: 512))
+        c.setFillColor(CGColor(red: 0.078, green: 0.082, blue: 0.102, alpha: 1))
+        c.fill(r)
+        c.setStrokeColor(CGColor(red: 0.165, green: 0.173, blue: 0.204, alpha: 1))
+        c.setLineWidth(3)
+        c.addPath(path); c.strokePath()
+
+        let indigo = CGColor(red: 0.486, green: 0.486, blue: 0.961, alpha: 1)
+        let indigoTint = CGColor(red: 0.400, green: 0.408, blue: 0.820, alpha: 1)
+        c.setLineWidth(104); c.setLineCap(.round)
+        c.setStrokeColor(indigo)
+        c.move(to: CGPoint(x: 710, y: 686)); c.addLine(to: CGPoint(x: 465, y: 686)); c.strokePath()
+        c.setStrokeColor(indigoTint)
+        c.addArc(center: CGPoint(x: 465, y: 512), radius: 174, startAngle: .pi / 2, endAngle: 3 * .pi / 2, clockwise: false); c.strokePath()
+        c.addArc(center: CGPoint(x: 565, y: 279), radius: 59, startAngle: .pi / 2, endAngle: -.pi / 2, clockwise: true); c.strokePath()
+        c.setStrokeColor(indigo)
+        // Run beneath the lower curve so rasterization cannot leave a pinhole at the join.
+        c.move(to: CGPoint(x: 620, y: 220)); c.addLine(to: CGPoint(x: 220, y: 220)); c.strokePath()
     }
 case "background":
     data = render(660, 400) { c in

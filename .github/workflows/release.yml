@@ -147,10 +147,10 @@ jobs:
           if [ -n "$IDENTITY" ]; then sign=(--sign-identity "$IDENTITY"); fi
           if [ -n "$IDENTITY" ] && [ -n "$PROFILE" ]; then notarize=(--notarize "$PROFILE"); fi
           [ -n "$IDENTITY" ] || echo "Ad-hoc signing (no Developer ID secrets)."
-          packaging/release/make-release.sh --build-dir "$BUILD_DIR" --out dist ${sign[@]+"${sign[@]}"}
-          packaging/app/make-app.sh --build-dir "$BUILD_DIR" --out dist ${sign[@]+"${sign[@]}"} ${notarize[@]+"${notarize[@]}"}
+          packaging/release/make-release.sh --build-dir "$BUILD_DIR" --out "$GITHUB_WORKSPACE/dist" ${sign[@]+"${sign[@]}"}
+          packaging/app/make-app.sh --build-dir "$BUILD_DIR" --out "$GITHUB_WORKSPACE/dist" ${sign[@]+"${sign[@]}"} ${notarize[@]+"${notarize[@]}"}
           # make-dmg.sh skips the Finder layout by itself when Finder scripting is unavailable (headless runner).
-          packaging/app/make-dmg.sh --app dist/Strim.app --out dist ${sign[@]+"${sign[@]}"} ${notarize[@]+"${notarize[@]}"}
+          packaging/app/make-dmg.sh --app "$GITHUB_WORKSPACE/dist/Strim.app" --out "$GITHUB_WORKSPACE/dist" ${sign[@]+"${sign[@]}"} ${notarize[@]+"${notarize[@]}"}
           ls -l dist
 
       - name: Smoke check the DMG

@@ -26,6 +26,13 @@ private final class FakeModelDownloadProcess: ModelDownloadProcess, @unchecked S
     func cancel() { lock.lock(); _cancelled = true; lock.unlock() }
 }
 
+@MainActor private func waitForDownload(_ condition: () -> Bool) async {
+    for _ in 0..<400 {
+        if condition() { return }
+        try? await Task.sleep(for: .milliseconds(5))
+    }
+}
+
 @Test func pullJSONParserHandlesPartialLinesAndUnknownEvents() {
     var parser = PullJSONParser()
     let a = Data("{\"event\":\"progress\",\"file\":\"weights-".utf8)
@@ -66,7 +73,7 @@ private final class FakeModelDownloadProcess: ModelDownloadProcess, @unchecked S
     downloader.confirm()
     #expect(downloader.state == .confirming)
     downloader.beginDownload()
-    try await Task.sleep(for: .milliseconds(50))
+    await waitForDownload { downloader.state == .done && started == 1 }
     #expect(downloader.state == .done)
     #expect(started == 1)
     #expect(runner.runs == 1)
@@ -101,7 +108,7 @@ private final class FakeModelDownloadProcess: ModelDownloadProcess, @unchecked S
     if case .needsDownload(_, _, let resumable) = downloader.state { #expect(resumable) }
     else { Issue.record("expected resumable first-run state") }
     downloader.confirm(); downloader.beginDownload()
-    try await Task.sleep(for: .milliseconds(50))
+    await waitForDownload { downloader.state == .done }
     #expect(downloader.state == .done)
     #expect(runner.runs == 2)
 }
@@ -111,10 +118,10 @@ private final class FakeModelDownloadProcess: ModelDownloadProcess, @unchecked S
     let downloader = ModelDownloader(process: runner, directory: "/unused", binary: { "/fixture/strim" },
                                     freeSpace: { _ in 30_000_000_000 }, modelExists: { false })
     downloader.inspect(); downloader.confirm(); downloader.beginDownload()
-    try await Task.sleep(for: .milliseconds(30))
+    await waitForDownload { if case .failed = downloader.state { true } else { false } }
     #expect(downloader.state == .failed(message: "network error: fixture failure", resumable: true))
     downloader.retry()
-    try await Task.sleep(for: .milliseconds(50))
+    await waitForDownload { downloader.state == .done }
     #expect(downloader.state == .done)
     #expect(runner.runs == 2)
 }

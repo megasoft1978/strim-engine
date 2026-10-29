@@ -7,6 +7,10 @@ public struct ModelDownloadProgress: Equatable, Sendable {
     public var totalBytes: Int64
     public var bytesPerSec: Double
     public var etaSec: Double?
+    public init(file: String, doneBytes: Int64, totalBytes: Int64, bytesPerSec: Double, etaSec: Double? = nil) {
+        self.file = file; self.doneBytes = doneBytes; self.totalBytes = totalBytes
+        self.bytesPerSec = bytesPerSec; self.etaSec = etaSec
+    }
     public var fraction: Double { totalBytes > 0 ? min(1, Double(doneBytes) / Double(totalBytes)) : 0 }
 }
 
@@ -103,6 +107,13 @@ public final class ProcessModelDownload: ModelDownloadProcess, @unchecked Sendab
 
 public enum ProcessModelDownloadError: Error { case exit(Int32) }
 
+private final class DownloadEventDeliveries: @unchecked Sendable {
+    private let lock = NSLock()
+    private var tasks: [Task<Void, Never>] = []
+    func append(_ task: Task<Void, Never>) { lock.lock(); tasks.append(task); lock.unlock() }
+    func drain() -> [Task<Void, Never>] { lock.lock(); defer { lock.unlock() }; defer { tasks.removeAll() }; return tasks }
+}
+
 @MainActor
 public final class ModelDownloader: ObservableObject {
     @Published public private(set) var state: ModelDownloadState = .idle
@@ -113,12 +124,15 @@ public final class ModelDownloader: ObservableObject {
     private let directory: String
     private let freeSpace: (URL) -> Int64
     private let modelExists: () -> Bool
-    private let autostart: @MainActor () -> Void
+    private var autostart: @MainActor () -> Void
     private var task: Task<Void, Never>?
+    private var activeRunID = UUID()
     private var parser = PullJSONParser()
     private var resumable = false
     private var cancelRequested = false
     private var hasConfirmed = false
+    private var modelReadyReported = false
+    private var pendingProcessError: (String, String)?
 
     deinit { process.cancel() }
 
@@ -127,18 +141,30 @@ public final class ModelDownloader: ObservableObject {
                     if case .found(let path) = HostCommand.resolveBinary(settings: AppSettings()) { path } else { nil }
                 },
                 freeSpace: @escaping (URL) -> Int64 = { ModelDisk.freeBytes(at: $0) },
-                modelExists: (() -> Bool)? = nil, autostart: @escaping @MainActor () -> Void = {}) {
+                modelExists: (() -> Bool)? = nil, initialState: ModelDownloadState = .idle,
+                autostart: @escaping @MainActor () -> Void = {}) {
         self.process = process; self.directory = directory; self.binary = binary; self.freeSpace = freeSpace; self.autostart = autostart
         self.modelExists = modelExists ?? { ModelDisk.hasRequiredFiles(at: directory) }
+        self.state = initialState
+        self.resumable = ModelDisk.hasPartialFiles(at: directory)
     }
     public func inspect() {
-        if modelExists() { state = .done; autostart(); return }
+        if modelExists() {
+            state = .done
+            if !modelReadyReported { modelReadyReported = true; autostart() }
+            return
+        }
         let free = freeSpace(URL(fileURLWithPath: directory))
         state = .needsDownload(sizeBytes: Self.modelBytes, freeBytes: free, resumable: resumable)
     }
+    public func setAutostartHandler(_ handler: @escaping @MainActor () -> Void) { autostart = handler }
     public func confirm() {
         guard case .needsDownload = state else { return }
         state = .confirming
+    }
+    public func dismissConfirmation() {
+        guard case .confirming = state else { return }
+        state = .needsDownload(sizeBytes: Self.modelBytes, freeBytes: freeSpace(URL(fileURLWithPath: directory)), resumable: resumable)
     }
     public func beginDownload() {
         guard case .confirming = state else { return }
@@ -150,25 +176,44 @@ public final class ModelDownloader: ObservableObject {
         }
         guard let bin = binary() else { state = .failed(message: "Strim CLI was not found.", resumable: resumable); return }
         parser = PullJSONParser()
+        pendingProcessError = nil
         cancelRequested = false
+        let runID = UUID()
+        activeRunID = runID
         task = Task { [weak self, process] in
             guard let self else { return }
             do {
+                let deliveries = DownloadEventDeliveries()
                 try await process.run(binary: bin, arguments: ["pull", "--progress-json", "--tier", "4bit", "--dir", directory]) { [weak self] data in
-                    Task { @MainActor in self?.consume(data) }
+                    let delivery = Task { @MainActor in
+                        guard let self, self.activeRunID == runID else { return }
+                        self.consume(data)
+                    }
+                    deliveries.append(delivery)
                 }
+                guard activeRunID == runID else { return }
+                for delivery in deliveries.drain() { await delivery.value }
+                guard activeRunID == runID else { return }
                 for event in parser.finish() { apply(event) }
-                if case .failed = state {} else { state = .done; resumable = false; autostart() }
+                if let (_, message) = pendingProcessError {
+                    state = .failed(message: message, resumable: true)
+                    resumable = true
+                } else if case .failed = state {} else {
+                    state = .done; resumable = false
+                    if !modelReadyReported { modelReadyReported = true; autostart() }
+                }
             } catch {
+                guard activeRunID == runID else { return }
                 if cancelRequested { return }
                 resumable = true
-                if case .failed = state {} else { state = .failed(message: error.localizedDescription, resumable: true) }
+                let message = pendingProcessError?.1 ?? error.localizedDescription
+                state = .failed(message: message, resumable: true)
             }
         }
         state = .downloading(.init(file: "Preparing download", doneBytes: 0, totalBytes: Self.modelBytes, bytesPerSec: 0, etaSec: nil))
     }
     public func cancel() {
-        cancelRequested = true; process.cancel(); resumable = true; task?.cancel(); task = nil
+        cancelRequested = true; activeRunID = UUID(); process.cancel(); resumable = true; task?.cancel(); task = nil
         state = .needsDownload(sizeBytes: Self.modelBytes, freeBytes: freeSpace(URL(fileURLWithPath: directory)), resumable: true)
     }
     public func retry() {
@@ -191,7 +236,7 @@ public final class ModelDownloader: ObservableObject {
         case .done:
             if case .failed = state { return }
             state = .done; resumable = false
-        case .error(_, let message): state = .failed(message: message, resumable: true); resumable = true
+        case .error(let code, let message): pendingProcessError = (code, message)
         case .ignored: break
         }
     }
@@ -214,5 +259,17 @@ public enum ModelDisk {
             guard fm.fileExists(atPath: path + "/config.json"), let files = try? fm.contentsOfDirectory(atPath: path) else { return false }
             return files.contains { $0.hasSuffix(".safetensors") }
         }
+    }
+    public static func hasPartialFiles(at root: String) -> Bool {
+        for repo in ["qwen38-4bit", "qwen38-mtp-4bit"] {
+            let repoPath = root + "/" + repo
+            guard let enumerator = FileManager.default.enumerator(atPath: repoPath) else { continue }
+            for case let relative as String in enumerator where relative.hasSuffix(".part") {
+                let path = repoPath + "/" + relative
+                if let attrs = try? FileManager.default.attributesOfItem(atPath: path),
+                   ((attrs[.size] as? NSNumber)?.int64Value ?? 0) > 0 { return true }
+            }
+        }
+        return false
     }
 }

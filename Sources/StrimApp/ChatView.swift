@@ -140,8 +140,8 @@ struct ChatComposer: View {
             } else {
                 let empty = draft.trimmingCharacters(in: .whitespaces).isEmpty
                 Button(action: send) {
-                    Image(systemName: "arrow.up").font(.system(size: 13, weight: .bold)).foregroundStyle(.white)
-                        .frame(width: 30, height: 30).background(Strim.ctaGradient, in: Circle())
+                    Image(systemName: "arrow.up").font(.system(size: 13, weight: .bold)).foregroundStyle(Strim.C.onAccent)
+                        .frame(width: 30, height: 30).background(Strim.C.accent, in: Circle())
                 }
                 .buttonStyle(.plain).disabled(empty).opacity(empty ? 0.4 : 1).accessibilityLabel("Send")
             }
@@ -168,10 +168,10 @@ struct MessageRow: View {
                     Text(markdown(message.text)).textSelection(.enabled)
                         .padding(.horizontal, 14).padding(.vertical, 9)
                         .background(
-                            LinearGradient(colors: [Strim.C.indigo.opacity(0.30), Strim.C.violet.opacity(0.26)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                            Strim.C.accentFill,
                             in: UnevenRoundedRectangle(topLeadingRadius: 16, bottomLeadingRadius: 16, bottomTrailingRadius: 4, topTrailingRadius: 16, style: .continuous))
                         .overlay(UnevenRoundedRectangle(topLeadingRadius: 16, bottomLeadingRadius: 16, bottomTrailingRadius: 4, topTrailingRadius: 16, style: .continuous)
-                            .strokeBorder(Strim.C.indigo.opacity(0.4), lineWidth: 1))
+                            .strokeBorder(Strim.C.hairline, lineWidth: 1))
                 }
             case .assistant:
                 HStack(alignment: .top, spacing: 8) {
@@ -185,13 +185,13 @@ struct MessageRow: View {
                 }
             case .reasoning:
                 StrimDisclosure(isOpen: $isOpen) {
-                    Label { Text("Reasoning").font(Strim.F.label()).tracking(1).textCase(.uppercase) } icon: { Image(systemName: "brain") }
+                    Label { Text("Reasoning").font(Strim.F.label()) } icon: { Image(systemName: "brain") }
                         .font(.caption).foregroundStyle(Strim.C.muted)
                 } content: {
                     Text(message.text).font(.callout).foregroundStyle(Strim.C.muted).textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 12)
-                        .overlay(alignment: .leading) { Rectangle().fill(Strim.gradient).frame(width: 2).opacity(0.8) }
+                        .overlay(alignment: .leading) { Rectangle().fill(Strim.C.hairline).frame(width: 2) }
                         .padding(.leading, 16)
                 }
                 .padding(.leading, 30)
@@ -245,7 +245,7 @@ struct ToolCardView: View {
         return Image(systemName: name).font(.system(size: 10, weight: .heavy))
             .foregroundStyle(card.finished ? (card.isError ? Strim.C.coral : Strim.C.accentText) : Strim.C.muted)
             .frame(width: 22, height: 22)
-            .background(card.isError ? Strim.C.coralFill : Strim.C.indigo.opacity(0.16), in: Circle())
+            .background(card.isError ? Strim.C.coralFill : Strim.C.accentFill, in: Circle())
     }
 
     private func codeBlock(_ text: String, _ color: Color) -> some View {
@@ -283,7 +283,7 @@ struct CodeBlockView: View {
         let lines = code.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
         VStack(alignment: .leading, spacing: 0) {
             if !language.isEmpty {
-                Text(language).font(Strim.F.label()).tracking(1).textCase(.uppercase).foregroundStyle(Strim.C.muted)
+                Text(language).font(Strim.F.label()).foregroundStyle(Strim.C.muted)
                     .padding(.horizontal, 10).padding(.top, 6)
             }
             ScrollView(.horizontal, showsIndicators: false) {
@@ -317,7 +317,7 @@ struct CodeBlockView: View {
     }
     private func fill(_ k: DiffLineKind) -> Color {
         switch k {
-        case .added: Strim.C.indigo.opacity(0.14)
+        case .added: Strim.C.accentFill
         case .removed: Strim.C.coralFill
         default: .clear
         }

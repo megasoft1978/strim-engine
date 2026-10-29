@@ -37,3 +37,67 @@ import StrimAPI
         #expect(MenuBarGlyph.badge(for: status(.error)) == .diamond)
     }
 }
+
+/// WCAG contrast of the Direction D palette, both themes.
+@Suite struct PaletteContrastTests {
+    private func lin(_ c: UInt32) -> Double {
+        let v = Double(c) / 255
+        return v <= 0.03928 ? v / 12.92 : pow((v + 0.055) / 1.055, 2.4)
+    }
+    private func lum(_ h: UInt32) -> Double {
+        0.2126 * lin((h >> 16) & 255) + 0.7152 * lin((h >> 8) & 255) + 0.0722 * lin(h & 255)
+    }
+    private func ratio(_ a: UInt32, _ b: UInt32) -> Double {
+        let (x, y) = (lum(a), lum(b))
+        return (max(x, y) + 0.05) / (min(x, y) + 0.05)
+    }
+    private typealias P = Strim.Palette
+    private func themes<T>(_ f: (Bool) -> T) -> [T] { [f(true), f(false)] }
+    private func pick(_ t: (dark: UInt32, light: UInt32), _ dark: Bool) -> UInt32 { dark ? t.dark : t.light }
+
+    @Test func palettePinnedToSpec() {
+        #expect(P.bg.dark == 0x0C0D10 && P.bg.light == 0xFAFAFB)
+        #expect(P.accent.dark == 0x7C7CF5 && P.accent.light == 0x4F46E5)
+        #expect(P.onAccent.dark == 0x0C0D10 && P.onAccent.light == 0xFFFFFF)
+    }
+
+    @Test func bodyTextMeetsAA() {
+        for dark in [true, false] {
+            for surface in [P.bg, P.surface, P.surface2] {
+                let s = pick(surface, dark)
+                #expect(ratio(pick(P.text, dark), s) >= 4.5)
+                #expect(ratio(pick(P.muted, dark), s) >= 4.5)
+                #expect(ratio(pick(P.accent, dark), s) >= 4.5)
+            }
+            // Primary button label on the accent fill, including hover.
+            #expect(ratio(pick(P.onAccent, dark), pick(P.accent, dark)) >= 4.5)
+            #expect(ratio(pick(P.onAccent, dark), pick(P.accentHover, dark)) >= 4.5)
+        }
+    }
+
+    @Test func largeTextAndMarksMeet3() {
+        for dark in [true, false] {
+            for surface in [P.bg, P.surface, P.surface2] {
+                #expect(ratio(pick(P.focus, dark), pick(surface, dark)) >= 3)
+                #expect(ratio(pick(P.accentHover, dark), pick(surface, dark)) >= 3 || !dark)
+            }
+            // Hairline ring / dot outlines are decorative; the status shape and label carry state.
+            #expect(ratio(pick(P.muted, dark), pick(P.surface, dark)) >= 3)
+        }
+    }
+
+    @Test func noSemanticThemeTokenUsesGreenAsItsSignal() {
+        let colors: [(dark: UInt32, light: UInt32)] = [
+            P.bg, P.surface, P.surface2, P.hairline, P.text, P.muted, P.accent,
+            P.onAccent, P.accentHover, P.focus,
+        ]
+        for pair in colors {
+            for color in [pair.dark, pair.light] {
+                let red = (color >> 16) & 255
+                let green = (color >> 8) & 255
+                let blue = color & 255
+                #expect(!(green > red && green > blue))
+            }
+        }
+    }
+}

@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import StrimAPI
 
 public enum ConnectionState: Equatable, Sendable {
@@ -67,6 +68,9 @@ public final class AppModel: ObservableObject {
     @Published public private(set) var reconnectAttempts = 0
     /// Banner about the control-token file (missing, insecure permissions, ...). Never contains the token.
     @Published public private(set) var tokenWarning: String?
+    @Published public private(set) var modelDownloadState: ModelDownloadState = .idle
+    public let modelDownloader: ModelDownloader
+    @Published public private(set) var hostProcessPID: Int32?
 
     public let testMode: Bool
     public let logLimit = 200
@@ -81,6 +85,9 @@ public final class AppModel: ObservableObject {
     private let persist: @Sendable (AppSettings) throws -> Void
     private let pollInterval: Double?
     private let modelScan: @Sendable () -> [LocalModel]
+    private var modelDownloadObservation: AnyCancellable?
+    private var initialConnectionChecked = false
+    private let discoverHostProcess: Bool
     private let tokenStatus: @Sendable (AppSettings) -> TokenFileStatus
     private var loop: Task<Void, Never>?
     private var pendingText = ""
@@ -103,13 +110,26 @@ public final class AppModel: ObservableObject {
                 pollInterval: Double? = 5,
                 testMode: Bool = ProcessInfo.processInfo.environment["STRIM_APP_TEST"] == "1",
                 tokenStatus: @escaping @Sendable (AppSettings) -> TokenFileStatus = { TokenReader(path: $0.controlTokenPath).inspect() },
-                modelScan: @escaping @Sendable () -> [LocalModel] = { LocalModelScanner.scan() }) {
+                modelScan: @escaping @Sendable () -> [LocalModel] = { LocalModelScanner.scan() },
+                modelDownloader: ModelDownloader? = nil, discoverHostProcess: Bool = true) {
         self.modelScan = modelScan
         self.settings = settings; self.makeClient = makeClient; self.client = makeClient(settings)
         self.clock = clock; self.launcher = launcher; self.mcp = mcp; self.loginItem = loginItem
         self.clipboard = clipboard; self.persist = persist; self.pollInterval = pollInterval
         self.testMode = testMode; self.launchAtLogin = loginItem.isEnabled; self.tokenStatus = tokenStatus
+        self.discoverHostProcess = discoverHostProcess
         self.tokenWarning = tokenStatus(settings).banner(path: settings.controlTokenPath)
+        let downloader = modelDownloader ?? ModelDownloader(
+            binary: {
+                if case .found(let path) = HostCommand.resolveBinary(settings: settings) { return path }
+                return nil
+            })
+        self.modelDownloader = downloader
+        self.modelDownloadState = downloader.state
+        self.modelDownloadObservation = downloader.$state.sink { [weak self] state in
+            Task { @MainActor in self?.modelDownloadState = state }
+        }
+        downloader.setAutostartHandler { [weak self] in self?.scheduleServerAutostart() }
     }
 
     /// Fixed-client convenience (tests, previews).
@@ -120,10 +140,12 @@ public final class AppModel: ObservableObject {
                             persist: @escaping @Sendable (AppSettings) throws -> Void = { _ in },
                             pollInterval: Double? = 5, testMode: Bool = false,
                             tokenStatus: @escaping @Sendable (AppSettings) -> TokenFileStatus = { _ in .ok },
-                            modelScan: @escaping @Sendable () -> [LocalModel] = { [] }) {
+                            modelScan: @escaping @Sendable () -> [LocalModel] = { [] },
+                            modelDownloader: ModelDownloader? = nil, discoverHostProcess: Bool = false) {
         self.init(settings: settings, makeClient: { _ in client }, clock: clock, launcher: launcher, mcp: mcp,
                   loginItem: loginItem, clipboard: clipboard, persist: persist, pollInterval: pollInterval, testMode: testMode,
-                  tokenStatus: tokenStatus, modelScan: modelScan)
+                  tokenStatus: tokenStatus, modelScan: modelScan, modelDownloader: modelDownloader,
+                  discoverHostProcess: discoverHostProcess)
     }
 
     // MARK: derived UI state
@@ -256,12 +278,28 @@ public final class AppModel: ObservableObject {
     public func acknowledgeUpdatedPatch() { reviewedDigest = selectedPatchDigest }
 
     public var hostCanBeStarted: Bool { !connection.isConnected }
+    public var serverStartAvailability: Availability {
+        switch modelDownloadState {
+        case .needsDownload: return .no("Download the model first")
+        case .confirming, .downloading, .verifying: return .no("Wait for the model download to finish")
+        case .failed: return .no("Retry the model download first")
+        case .idle, .done: return hostCanBeStarted ? .yes : .no("Server is already running")
+        }
+    }
+    public var serverStopAvailability: Availability {
+        guard connection.isConnected else { return .no("Server is offline") }
+        return hostProcessPID == nil ? .no("Could not identify the Strim server process") : .yes
+    }
 
     // MARK: lifecycle
 
     public func start() {
         guard loop == nil else { return }
         loop = Task { [weak self] in await self?.runLoop() }
+        if !testMode, case .idle = modelDownloader.state { modelDownloader.inspect() }
+    }
+    public func checkModelAvailability() {
+        if !testMode, case .idle = modelDownloader.state { modelDownloader.inspect() }
     }
     public func stop() { loop?.cancel(); loop = nil }
 
@@ -280,6 +318,8 @@ public final class AppModel: ObservableObject {
                 backoff.reset(); reconnectAttempts = 0
                 lastError = nil
                 connection = .connected(s)
+                initialConnectionChecked = true
+                if discoverHostProcess, hostProcessPID == nil { hostProcessPID = findServerPID() }
                 log("connected: state=\(s.state.rawValue)")
                 await refreshJobs()
                 await refreshPack()
@@ -289,6 +329,7 @@ public final class AppModel: ObservableObject {
             } catch {
                 if Task.isCancelled { return }
                 disconnect(OfflineBanner.text(for: error, hostURL: settings.hostURL), error: error)
+                initialConnectionChecked = true
             }
             let delay = backoff.next()
             reconnectAttempts += 1
@@ -516,8 +557,13 @@ public final class AppModel: ObservableObject {
     }
 
     public func startHost() {
-        switch launcher.start(settings: settings) {
+        guard serverStartAvailability.enabled else { return }
+        var launchSettings = settings
+        if launchSettings.modelPath == nil { launchSettings.modelPath = AppPaths.home + "/.strim/models/qwen38-4bit" }
+        if launchSettings.mtpPath == nil { launchSettings.mtpPath = AppPaths.home + "/.strim/models/qwen38-mtp-4bit" }
+        switch launcher.start(settings: launchSettings) {
         case .started(let pid):
+            hostProcessPID = pid
             notice = "Started strim serve (pid \(pid)). Log: ~/.strim/host.log"
             log("started host pid \(pid)")
             reconnectNow()
@@ -536,6 +582,57 @@ public final class AppModel: ObservableObject {
         }
     }
 
+    private func scheduleServerAutostart() {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            while !initialConnectionChecked && !Task.isCancelled { try? await Task.sleep(for: .milliseconds(100)) }
+            guard settings.startServerWhenOpens, !connection.isConnected else { return }
+            startHost()
+        }
+    }
+
+    public func stopServer() async {
+        guard let pid = hostProcessPID ?? findServerPID() else {
+            lastError = "Stop server: could not identify the Strim server process."
+            return
+        }
+        hostProcessPID = pid
+        _ = kill(pid, SIGTERM)
+        for _ in 0..<40 {
+            if kill(pid, 0) != 0 { hostProcessPID = nil; reconnectNow(); return }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        lastError = "Stop server: process \(pid) did not exit after SIGTERM."
+    }
+
+    private func findServerPID() -> Int32? {
+        guard case .found(let binary) = HostCommand.resolveBinary(settings: settings) else { return nil }
+        let lookup = Process()
+        lookup.executableURL = URL(fileURLWithPath: "/usr/sbin/lsof")
+        lookup.arguments = ["-nP", "-iTCP:\(settings.port)", "-sTCP:LISTEN", "-t"]
+        lookup.standardOutput = Pipe(); lookup.standardError = FileHandle.nullDevice
+        guard (try? lookup.run()) != nil else { return nil }
+        let data = (lookup.standardOutput as? Pipe)?.fileHandleForReading.readDataToEndOfFile() ?? Data()
+        lookup.waitUntilExit()
+        for line in String(decoding: data, as: UTF8.self).split(whereSeparator: \.isNewline) {
+            guard let pid = Int32(line), pid > 1, pid != getpid() else { continue }
+            let check = Process(); check.executableURL = URL(fileURLWithPath: "/bin/ps")
+            check.arguments = ["-p", String(pid), "-o", "command="]
+            let pipe = Pipe(); check.standardOutput = pipe; check.standardError = FileHandle.nullDevice
+            guard (try? check.run()) != nil else { continue }
+            let command = String(decoding: pipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+            check.waitUntilExit()
+            if command.hasPrefix(binary), command.dropFirst(binary.count).trimmingCharacters(in: .whitespaces).hasPrefix("serve ") { return pid }
+        }
+        return nil
+    }
+
+    public func confirmModelDownload() { modelDownloader.confirm() }
+    public func dismissModelDownloadConfirmation() { modelDownloader.dismissConfirmation() }
+    public func beginModelDownload() { modelDownloader.beginDownload() }
+    public func cancelModelDownload() { modelDownloader.cancel() }
+    public func retryModelDownload() { modelDownloader.retry() }
+
     public func copyMCPCommands() async {
         let text = await mcp.commands(settings: settings)
         clipboard.copy(text)
@@ -549,12 +646,14 @@ public final class AppModel: ObservableObject {
 
     public func update(settings new: AppSettings) {
         let connChanged = new.hostURL != settings.hostURL || new.controlTokenPath != settings.controlTokenPath
+        let autoStartEnabled = !settings.startServerWhenOpens && new.startServerWhenOpens
         settings = new
         do { try persist(new) } catch { lastError = "Saving settings: \(error.localizedDescription)" }
         refreshTokenWarning()
         if connChanged {
             client = makeClient(new); reconnectNow()
         }
+        if autoStartEnabled, case .done = modelDownloadState { scheduleServerAutostart() }
     }
 
     public func dismissNotice() { notice = nil }

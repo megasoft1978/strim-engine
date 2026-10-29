@@ -12,21 +12,24 @@ public struct AppSettings: Codable, Equatable, Sendable {
     public var controlTokenPath: String
     /// Folder chats work in. Chat is not offered without one (never $HOME).
     public var projectPath: String?
+    /// Start the local Strim server after the model is available. Defaults on for first-run convenience.
+    public var startServerWhenOpens: Bool
     /// Recently chosen project folders, newest first (at most `maxRecents`).
     public var recentProjects: [String]
     public static let maxRecents = 8
 
     public init(hostURL: String = AppPaths.defaultHostURL, strimBinary: String? = nil, modelPath: String? = nil,
                 mtpPath: String? = nil, controlTokenPath: String = AppPaths.defaultControlTokenPath, projectPath: String? = nil,
-                recentProjects: [String] = []) {
+                recentProjects: [String] = [], startServerWhenOpens: Bool = true) {
         self.recentProjects = recentProjects
         self.hostURL = hostURL; self.strimBinary = strimBinary; self.modelPath = modelPath
         self.mtpPath = mtpPath; self.controlTokenPath = controlTokenPath; self.projectPath = projectPath
+        self.startServerWhenOpens = startServerWhenOpens
     }
     enum CodingKeys: String, CodingKey {
         case hostURL = "host_url", strimBinary = "strim_binary", modelPath = "model_path"
         case mtpPath = "mtp_path", controlTokenPath = "control_token_path", projectPath = "project_path"
-        case recentProjects = "recent_projects"
+        case recentProjects = "recent_projects", startServerWhenOpens = "start_server_when_opens"
     }
     public init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
@@ -37,6 +40,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         controlTokenPath = try c.decodeIfPresent(String.self, forKey: .controlTokenPath) ?? AppPaths.defaultControlTokenPath
         projectPath = try c.decodeIfPresent(String.self, forKey: .projectPath)
         recentProjects = try c.decodeIfPresent([String].self, forKey: .recentProjects) ?? []
+        startServerWhenOpens = try c.decodeIfPresent(Bool.self, forKey: .startServerWhenOpens) ?? true
     }
 
     /// nil when `host_url` is not a plain loopback http URL with a port.

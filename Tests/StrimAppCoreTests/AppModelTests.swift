@@ -5,10 +5,11 @@ import StrimAPI
 
 @MainActor
 private func makeModel(_ client: StrimControlClient, clock: AppClock = RecordingClock(auto: 100), launcher: HostLauncher = MockLauncher(.needsModel),
-                       clip: MockClipboard = MockClipboard(), login: MockLogin = MockLogin(), settings: AppSettings = AppSettings(modelPath: "/models/q", projectPath: "/tmp"),
+                       clip: MockClipboard = MockClipboard(), login: MockLogin = MockLogin(), settings: AppSettings = AppSettings(modelPath: "/models/q", projectPath: "/tmp", startServerWhenOpens: false),
                        poll: Double? = nil, testMode: Bool = false) -> AppModel {
     AppModel(client: client, settings: settings, clock: clock, launcher: launcher, mcp: MockMcp(), loginItem: login,
-             clipboard: clip, persist: { _ in }, pollInterval: poll, testMode: testMode)
+             clipboard: clip, persist: { _ in }, pollInterval: poll, testMode: testMode,
+             modelDownloader: ModelDownloader(modelExists: { true }))
 }
 
 /// Emits a status event and waits until the model saw it: proves the SSE stream is subscribed.

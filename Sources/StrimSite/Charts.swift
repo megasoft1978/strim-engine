@@ -3,8 +3,8 @@ import Foundation
 // SVG charts rendered from site/data/headline.json (the parsed PyJSON in SiteBuilder.H). No JS, no external requests.
 // Colour is never the only carrier: verdicts are printed as WIN / TIE / LOSS text, engines also differ by marker shape (circle, diamond) and bar order.
 
-let HV_LIGHT = "--hv-fg:#15123A;--hv-mu:#5D5A85;--hv-ru:rgba(21,18,58,.18);--hv-bg:#F6F4FF;--hv-s:#E0309E;--hv-r:#4F4BFF;--hv-v:#7B78A8;--hv-q:#B45309;--hv-p:#0B6FA4;--hv-w:#6F2BD9;--hv-l:#5D5A85;--hv-t:#5D5A85;--hv-wb:#EDE3FF;--hv-lb:#E7E4F4;--hv-tb:#ECE8FF;--hv-hl:#ECE8FF;--hv-a:#4F4BFF;--hv-b:#9240FF;--hv-c:#E0309E;--hv-gl:rgba(21,18,58,.1)"
-let HV_DARK = "--hv-fg:#F1EFFF;--hv-mu:#A29FC8;--hv-ru:rgba(255,255,255,.16);--hv-bg:#0F0D2B;--hv-s:#FF4FD0;--hv-r:#7C7BFF;--hv-v:#B7B4E0;--hv-q:#FFB454;--hv-p:#5CC8FF;--hv-w:#D9B8FF;--hv-l:#A29FC8;--hv-t:#A29FC8;--hv-wb:#2A1B52;--hv-lb:#1C1A3D;--hv-tb:#1C1A3D;--hv-hl:#181640;--hv-a:#7C7BFF;--hv-b:#B25CFF;--hv-c:#FF4FD0;--hv-gl:rgba(255,255,255,.1)"
+let HV_LIGHT = "--hv-fg:#131419;--hv-mu:#595C68;--hv-ru:#E1E3E8;--hv-bg:#FFFFFF;--hv-s:#4F46E5;--hv-r:#8E919C;--hv-v:#7E818C;--hv-q:#626571;--hv-p:#474A55;--hv-w:#131419;--hv-l:#595C68;--hv-t:#595C68;--hv-wb:#F1F2F5;--hv-lb:#F1F2F5;--hv-tb:#F1F2F5;--hv-hl:#F1F2F5;--hv-a:#4F46E5;--hv-b:#4F46E5;--hv-c:#4F46E5;--hv-gl:#FFFFFF"
+let HV_DARK = "--hv-fg:#ECEDEF;--hv-mu:#A3A6B1;--hv-ru:#2A2C34;--hv-bg:#14151A;--hv-s:#7C7CF5;--hv-r:#686B76;--hv-v:#7A7D88;--hv-q:#9699A4;--hv-p:#B3B6BF;--hv-w:#ECEDEF;--hv-l:#A3A6B1;--hv-t:#A3A6B1;--hv-wb:#1B1C22;--hv-lb:#1B1C22;--hv-tb:#1B1C22;--hv-hl:#1B1C22;--hv-a:#7C7CF5;--hv-b:#7C7CF5;--hv-c:#7C7CF5;--hv-gl:#14151A"
 
 let HV_RULES = """
 .hv text{font:12px -apple-system,"Helvetica Neue",Arial,system-ui,sans-serif;fill:var(--hv-fg)}
@@ -14,12 +14,13 @@ let HV_RULES = """
 .hv .bd{fill:var(--hv-ru);opacity:.5}.hv .o{stroke:var(--hv-fg);stroke-width:1.3}
 .hv .fg{fill:var(--hv-fg)}.hv .fs{fill:var(--hv-s)}.hv .fr{fill:var(--hv-r)}.hv .fv{fill:var(--hv-v)}.hv .fq{fill:var(--hv-q)}.hv .fp{fill:var(--hv-p)}
 .hv .ls{stroke:var(--hv-s)}.hv .lr{stroke:var(--hv-r);stroke-width:1.6}.hv .lv{stroke:var(--hv-v);stroke-width:1.6}.hv .lq{stroke:var(--hv-q);stroke-width:1.6}.hv .lp{stroke:var(--hv-p);stroke-width:1.6}
-.hv .pw rect{fill:var(--hv-wb);stroke:var(--hv-w)}.hv .pl rect{fill:var(--hv-lb);stroke:var(--hv-l);stroke-dasharray:3 2}.hv .pt rect{fill:var(--hv-tb);stroke:var(--hv-t)}
+.hv .pw rect,.hv .pl rect,.hv .pt rect{fill:var(--hv-wb);stroke:var(--hv-ru)}.hv .pl rect{stroke-dasharray:3 2}
 .hv .pw text{fill:var(--hv-w)}.hv .pl text{fill:var(--hv-l)}.hv .pt text{fill:var(--hv-t)}
 .hv .pw text,.hv .pl text,.hv .pt text{font-size:11px;font-weight:700}
 .hv .hh{font-size:13px;font-weight:700}.hv .hv1{font-weight:700}
-.hv .nltk{stroke:var(--hv-mu);opacity:.55}.hv .nlld{stroke:var(--hv-mu);stroke-width:1;opacity:.5;stroke-dasharray:2 3}.hv .nlld.hot{stroke:var(--hv-c);opacity:.8}
-.hv .nldot{fill:var(--hv-bg);stroke:var(--hv-fg);stroke-width:2}.hv .nlspec{fill:#fff;opacity:.5}
+.hv .nltk{stroke:var(--hv-mu);opacity:.55}.hv .nlld{stroke:var(--hv-mu);stroke-width:1;opacity:.5;stroke-dasharray:2 3}.hv .nlld.hot{stroke:var(--hv-a);opacity:.8}
+.hv .nlaxis{stroke:var(--hv-ru);stroke-width:1.5}.hv .strim-dot{fill:var(--hv-a);stroke:var(--hv-a);stroke-width:2}.hv .strim-track{stroke:var(--hv-a);opacity:1}
+.hv .nldot{fill:var(--hv-bg);stroke:var(--hv-mu);stroke-width:2}.hv .nlspec{fill:var(--hv-fg);opacity:.5}
 .hv .nlwk{stroke:var(--hv-mu);stroke-width:2.5;opacity:.6;stroke-linecap:round}
 .hv .nlv{font-size:17px;font-weight:600}.hv .nln{font-size:12.5px;fill:var(--hv-mu)}.hv .nln.hot{fill:var(--hv-fg);font-weight:600;font-size:14px}
 .hv .nlv.hot{font-family:"Space Grotesk",-apple-system,"Helvetica Neue",Arial,sans-serif;font-size:54px;font-weight:700;letter-spacing:-.04em}
@@ -44,12 +45,10 @@ func hvRulesLiteral(_ palette: String) -> String {
 /// Standalone SVG (README, direct viewing): always the night palette (GitHub themes differ; the glass card carries its own background), literal colours.
 func hvCSSStandalone() -> String { hvRulesLiteral(HV_DARK) }
 
-/// Page-only rules: web fonts, the slow reveal of the engine beads.
+/// Page-only rules: web fonts and chart sizing.
 let HV_PAGE_EXTRA = """
 .hv text{font-family:var(--sans)}.hv .mo{font-family:var(--mono)}.hv .nlv.hot{font-family:var(--sans)}
-@media (prefers-reduced-motion:reduce){.js .rev,.js .rev:not(.in){opacity:1!important;transform:none!important;transition:none!important}.js .rev .gv,.js .rev:not(.in) .gv{stroke-dashoffset:0!important;transition:none!important}}
 .hv.nl{max-height:520px}.hv.nl.vn{max-height:none;max-width:30rem;margin:0 auto}
-@media (min-width:56rem){.landing #field .glass{min-height:420px}}
 """
 
 /// Page CSS block kept in site/assets/style.css between markers: follows the page theme switch as well.

@@ -1,14 +1,11 @@
 import Foundation
 
-/// site/assets/site.js: copy buttons, theme toggle, screenshot lightbox, reveal-on-scroll with count-up, active nav section, scroll progress, window tilt.
-/// Everything is progressive enhancement: with JS off the page shows its final state. Written to stay under 6 KB.
+/// Copy buttons, theme toggle, screenshot lightbox, and current section marker.
 let SITE_JS = #"""
 (function () {
   var d = document, root = d.documentElement;
   var $ = (s, c) => Array.from((c || d).querySelectorAll(s));
-  var rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var isDark = () => (root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches && 'dark')) === 'dark';
-  root.classList.add('js');
 
   function copyText(t, done) {
     function fb() {
@@ -81,49 +78,13 @@ let SITE_JS = #"""
     if (q && items.length) { open(items[Math.min(+q[1] - 1, items.length - 1)]); }
   }
 
-  function count(el) {
-    var to = parseFloat(el.getAttribute('data-count')), dp = (el.getAttribute('data-count').split('.')[1] || '').length, suf = el.getAttribute('data-suffix') || '';
-    if (rm || isNaN(to)) { return; }
-    var t0 = null;
-    (function tick(t) {
-      if (t0 === null) { t0 = t; }
-      var p = Math.min(1, (t - t0) / 1100), e = 1 - Math.pow(1 - p, 3);
-      el.textContent = (to * e).toFixed(dp) + suf;
-      if (p !== 1) { requestAnimationFrame(tick); } else { el.textContent = to.toFixed(dp) + suf; }
-    })(performance.now());
-  }
-  var rv = $('.rev');
-  var enter = function (el) { el.classList.add('in'); $('[data-count]', el).forEach(count); };
-  var showAll = () => rv.forEach(el => el.classList.add('in'));
-  if ('IntersectionObserver' in window && !rm) {
-    try {
-      var io = new IntersectionObserver(function (es) {
-        es.forEach(function (e) { if (e.isIntersecting) { enter(e.target); io.unobserve(e.target); } });
-      }, { threshold: 0.25 });
-      rv.forEach(function (el) { io.observe(el); });
-      setTimeout(showAll, 1200);
-    } catch (e) { showAll(); }
-  } else { showAll(); }
-
   var links = $('nav a[href^="#"]');
   var secs = links.map(function (a) { return d.getElementById(a.getAttribute('href').slice(1)); });
-  var bar = d.getElementById('prog');
   var onScroll = function () {
-    var y = window.scrollY, h = root.scrollHeight - window.innerHeight;
-    if (bar && h > 0) { bar.style.transform = 'scaleX(' + Math.min(1, y / h) + ')'; }
     var at = -1;
     secs.forEach(function (s, i) { if (s && s.getBoundingClientRect().top < window.innerHeight * 0.4) { at = i; } });
     links.forEach(function (a, i) { if (i === at) { a.setAttribute('aria-current', 'true'); } else { a.removeAttribute('aria-current'); } });
   };
   window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
-
-  var w = d.querySelector('.macwin');
-  if (w && !rm && window.matchMedia('(pointer: fine)').matches) {
-    w.addEventListener('pointermove', function (e) {
-      var r = w.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-      w.style.transform = 'perspective(1400px) rotateY(' + (x * 3).toFixed(2) + 'deg) rotateX(' + (-y * 2.4).toFixed(2) + 'deg)';
-    });
-    w.addEventListener('pointerleave', function () { w.style.transform = ''; });
-  }
 })();
 """#

@@ -16,7 +16,7 @@ enum MainTab: String, CaseIterable, Identifiable {
     }
 }
 
-/// Window content: custom header (mark, nav pill, state pill) over the aurora background. The real window hides its
+/// Window content: custom header (mark, nav pill, state pill) over the flat window background. The real window hides its
 /// title bar, so the traffic lights sit in the header's leading inset (`MainWindow.lightsInset`).
 struct MainWindow: View {
     @ObservedObject var model: AppModel
@@ -42,6 +42,7 @@ struct MainWindow: View {
         }
         .background(StrimBackground())
         .foregroundStyle(Strim.C.text)
+        .onAppear { model.checkModelAvailability() }
     }
 
     private var header: some View {
@@ -99,6 +100,7 @@ struct StatusTab: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Strim.S.lg) {
+                ModelDownloadCard(model: model)
                 OfflineBannerView(model: model)
                 TokenWarningView(model: model)
                 NoticeView(model: model)
@@ -132,7 +134,7 @@ struct StatusTab: View {
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
                             Text(String(format: "%.1f", s.decodeTPS))
                                 .font(.system(size: numeralSize, weight: .bold, design: .rounded).monospacedDigit())
-                                .tracking(-2).gradientFill().lineLimit(1).minimumScaleFactor(0.5)
+                                .tracking(-2).foregroundStyle(Strim.C.accent).lineLimit(1).minimumScaleFactor(0.5)
                             Text("tok/s").font(Strim.F.mono(.title3, weight: .medium)).foregroundStyle(Strim.C.muted)
                         }
                         Text("decode  ·  prefill \(StatsFormat.tps(s.prefillTPS))")
@@ -143,7 +145,7 @@ struct StatusTab: View {
                         Text(heroDetail(orb, s)).font(.callout).foregroundStyle(Strim.C.muted)
                             .fixedSize(horizontal: false, vertical: true)
                         if case .loading(let p) = orb {
-                            ProgressView(value: p).tint(Strim.C.violet).padding(.top, 4)
+                            ProgressView(value: p).tint(Strim.C.accent).padding(.top, 4)
                         }
                     }
                 }
@@ -423,7 +425,7 @@ struct JobCard: View {
         .background(selected ? Strim.C.glassStrong : Strim.C.glass, in: RoundedRectangle(cornerRadius: Strim.R.card, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: Strim.R.card, style: .continuous)
-                .strokeBorder(selected ? AnyShapeStyle(Strim.gradient) : AnyShapeStyle(Strim.C.hairline), lineWidth: selected ? 1.5 : 1)
+                .strokeBorder(selected ? AnyShapeStyle(Strim.C.accent) : AnyShapeStyle(Strim.C.hairline), lineWidth: selected ? 1.5 : 1)
         )
         .contentShape(RoundedRectangle(cornerRadius: Strim.R.card, style: .continuous))
     }
@@ -585,7 +587,7 @@ struct DiffView: View {
         }
     }
     private func prefix(_ k: DiffLine.Kind) -> String { k == .added ? "+" : k == .removed ? "-" : " " }
-    private func color(_ k: DiffLine.Kind) -> Color { k == .added ? Strim.C.indigo.opacity(0.20) : k == .removed ? Strim.C.coralFill : .clear }
+    private func color(_ k: DiffLine.Kind) -> Color { k == .added ? Strim.C.accentFill : k == .removed ? Strim.C.coralFill : .clear }
     private func kindTone(_ k: ChangeKind) -> PillTone {
         switch k { case .modified: .neutral; case .added: .accent; case .deleted: .error; default: .warn }
     }

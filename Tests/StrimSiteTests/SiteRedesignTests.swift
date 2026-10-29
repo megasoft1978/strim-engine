@@ -48,7 +48,7 @@ import Testing
         #expect(r.html.contains("All losses: <a href=\"benchmarks.html\">benchmarks</a>."))
         #expect(r.readme.contains("All losses: [benchmarks](site/benchmarks.html)."))
         #expect(b.lossLine().contains("c=4 512-token aggregate") && b.lossLine().contains("c=8 512-token p95 first token"))
-        #expect(Self.matches("<article class=\"card rev loss\"", in: r.html).count == b.speedLosses().count, "a loss card is drawn")
+        #expect(Self.matches("<article class=\"card loss\"", in: r.html).count == b.speedLosses().count, "a loss card is drawn")
         #expect(r.html.contains("honest loss"))
         #expect(!r.readme.lowercased().contains("fastest overall"))
     }
@@ -127,7 +127,7 @@ import Testing
         #expect(Self.matches(#"\d+\.\d+|\d+%|\d+(\.\d+)?×"#, in: text).isEmpty, "untraced numbers: \(Self.matches(#".{20}(\d+\.\d+|\d+%)"#, in: text))")
         // 3. every gauge shows exactly the computed ratio of Strim over the best rival
         let expected = GLANCE.compactMap { id in b.bestRival(id).map { ratioLabel($0.ratio) } }
-        #expect(Self.matches(#"(?<=<b class="gen" data-count="[0-9.]{1,6}" data-suffix="x">)\d+\.\d+x(?=</b>)"#, in: r.html) == expected)
+        #expect(Self.matches(#"(?<=<b class="gen">)\d+\.\d+x(?=</b>)"#, in: r.html) == expected)
         #expect(expected.count == 6)
     }
 
@@ -143,8 +143,8 @@ import Testing
     }
 }
 
-/// Ratio maths, gauge geometry and the colour rules of the Aurora redesign.
-@Suite struct SiteAuroraTests {
+/// Ratio maths and gauge geometry of the quiet modern redesign.
+@Suite struct SiteQuietModernTests {
     static func builder(_ cellsJSON: String) throws -> SiteBuilder {
         let b = SiteBuilder(root: repoRoot)
         b.H = try PyJSONParser.parse("{\"cells\": \(cellsJSON)}")
@@ -187,9 +187,9 @@ import Testing
     }
 
     /// Arc gauge: the 1.0x tick sits left of centre on a 0.5x to 3.2x log scale; wins sweep right, losses sweep left.
-    @Test func gaugeSweepsWithTheRatio() throws {
+    @Test func gaugeArcReflectsTheRatio() throws {
         let b = try Self.builder("[]")
-        let win = b.gaugeSVGInner(1.5, gradId: "g"), loss = b.gaugeSVGInner(0.9, gradId: "g")
+        let win = b.gaugeSVGInner(1.5), loss = b.gaugeSVGInner(0.9)
         #expect(win.contains("A32 32 0 0 1 ") && !win.contains("lose"))
         #expect(loss.contains("A32 32 0 0 0 ") && loss.contains("gv lose"))
         #expect(win.contains("M27.6 10.5A32 32"), "the arc starts at the 1.0x tick")
@@ -200,7 +200,7 @@ import Testing
         b.log = { _ in }
         _ = try b.run(SiteOptions(check: true))
         let svg = b.numberLineSVG(narrow: false, standalone: true)
-        #expect(Self.count("class=\"nldot\"", in: svg) == 4 && Self.count("class=\"nldot earlier-run\"", in: svg) == 2 && svg.contains("fill=\"url(#nlso)\""))
+        #expect(Self.count("class=\"nldot\"", in: svg) == 4 && Self.count("class=\"nldot earlier-run\"", in: svg) == 2 && svg.contains("class=\"strim-dot\""))
         #expect(svg.contains(b.wideNumeral()) && b.wideBars().count == 7)
         let narrow = b.numberLineSVG(narrow: true, standalone: false)
         #expect(Self.count("class=\"nldot\"", in: narrow) == 4 && Self.count("class=\"nldot earlier-run\"", in: narrow) == 2)
@@ -210,7 +210,7 @@ import Testing
 
     @Test func noGreenAnywhere() throws {
         #expect(!greenColours(in: "a{color:#00aa55}").isEmpty && !greenColours(in: "#3c9").isEmpty && !greenColours(in: "fill=\"#4cc9b0\"").isEmpty)
-        #expect(greenColours(in: "#7C7BFF #B25CFF #FF4FD0 #0A0920 #F1EFFF #A29FC8 #4F4BFF #E0309E").isEmpty, "the gradient and text colours are blue, violet and pink")
+        #expect(greenColours(in: "#7C7CF5 #9393FF #0C0D10 #ECEDEF #A3A6B1 #4F46E5 #FAFAFB #131419").isEmpty, "the palette contains no green")
         for rel in ["site/assets/style.css", "site/assets/banner.svg", "site/assets/logo.svg", "site/assets/favicon.svg", "site/assets/h2h-hero.svg", "site/assets/h2h-ratio.svg",
                     "site/assets/h2h-speedup.svg", "site/assets/h2h-memory.svg", "site/assets/h2h-latency.svg", "site/assets/app-icon.svg", "site/index.html", "site/benchmarks.html"] {
             #expect(greenColours(in: readString(repoRoot + "/" + rel)).isEmpty, "\(rel) contains a green colour")

@@ -72,6 +72,7 @@ final class PullMeter: @unchecked Sendable {
     private var fileDone: Int64 = 0
     private var fileFetched: Int64 = 0
     private var fileBegan = Date()
+    private var lastEventTime = Date.distantPast
     init(total: Int64, alreadyHave: Int64, options: PullOptions) { self.total = total; self.done = alreadyHave; self.options = options }
     var fetchedBytes: Int64 { lock.lock(); defer { lock.unlock() }; return fetched }
     func beginFile(_ label: String, size: Int64, resumedFrom: Int64, eventFile: String) {
@@ -94,12 +95,16 @@ final class PullMeter: @unchecked Sendable {
         let now = Date()
         let due = options.interactive && now.timeIntervalSince(lastPrint) >= 0.5
         if due { lastPrint = now }
+        let emitEvent = now.timeIntervalSince(lastEventTime) >= 0.25 || done >= total
+        if emitEvent { lastEventTime = now }
         let (d, f, l) = (done, fetched, fileLabel)
         let jsonFile = eventFile
         lock.unlock()
         let overallRate = Double(f) / max(now.timeIntervalSince(began), 0.001)
-        options.event(.progress(file: jsonFile, doneBytes: d, totalBytes: total, bytesPerSec: overallRate,
-                                etaSec: overallRate > 0 ? Double(max(0, total - d)) / overallRate : nil))
+        if emitEvent {
+            options.event(.progress(file: jsonFile, doneBytes: d, totalBytes: total, bytesPerSec: overallRate,
+                                    etaSec: overallRate > 0 ? Double(max(0, total - d)) / overallRate : nil))
+        }
         guard due else { return }
         let el = max(now.timeIntervalSince(began), 0.001)
         let rate = Double(f) / el

@@ -2,28 +2,30 @@ import SwiftUI
 import AppKit
 import StrimAppCore
 
+/// Compact native popover: status row, key metrics, actions. `.regularMaterial` is used only here.
 struct MenuContent: View {
     @ObservedObject var model: AppModel
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         let orb = OrbState(model.connection)
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                StrimOrb(orb, size: 46).padding(4)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                StrimOrb(orb, size: 28)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(model.menuTitle).font(.headline).foregroundStyle(Strim.C.text)
                     if let s = model.status, orb.isLive {
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
-                            Text(String(format: "%.1f", s.decodeTPS)).font(.system(.title2, design: .rounded, weight: .bold).monospacedDigit()).gradientFill()
+                            Text(String(format: "%.1f", s.decodeTPS)).font(Strim.F.mono(.title3, weight: .semibold)).foregroundStyle(Strim.C.accent)
                             Text("tok/s").font(Strim.F.mono(.caption)).foregroundStyle(Strim.C.muted)
                         }.fixedSize()
-                    } else {
+                    } else if orb != .offline {
                         Text(orb.word).font(Strim.F.mono(.caption)).foregroundStyle(Strim.C.muted)
                     }
                 }
                 Spacer()
             }
+            ModelDownloadCard(model: model, compact: true)
             OfflineBannerView(model: model)
             TokenWarningView(model: model)
             NoticeView(model: model)
@@ -48,9 +50,9 @@ struct MenuContent: View {
                 Button("Quit") { NSApp.terminate(nil) }.keyboardShortcut("q").buttonStyle(StrimButtonStyle(.secondary))
             }
         }
-        .padding(16)
-        .frame(width: 360)
-        .background(StrimBackground())
+        .padding(14)
+        .frame(width: 340)
+        .background(.regularMaterial)
         .foregroundStyle(Strim.C.text)
     }
 }

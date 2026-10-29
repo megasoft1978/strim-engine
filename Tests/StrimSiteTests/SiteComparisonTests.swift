@@ -56,7 +56,7 @@ import Testing
             #expect(svg.contains("<title") && svg.contains("<desc") && svg.contains("role=\"img\""))
             #expect(!svg.contains("<script") && !svg.contains("href=") && !svg.contains("url("))
             #expect(!svg.replacingOccurrences(of: "http://www.w3.org/2000/svg", with: "").contains("http"))
-            #expect(!svg.contains("prefers-color-scheme") && svg.contains("#0F0D2B"), "standalone charts carry their own night glass background, whatever the GitHub theme")
+            #expect(!svg.contains("prefers-color-scheme") && svg.contains("#14151A") && !svg.contains("url(#"), "standalone charts use flat dark surfaces and no gradients")
             var p = LinkScan(); p.feed(svg)
             #expect(p.errors.isEmpty && p.stack.isEmpty, "\(name): \(p.errors) \(p.stack)")
         }

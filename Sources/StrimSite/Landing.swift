@@ -254,7 +254,7 @@ extension SiteBuilder {
         guard appLive("app-hero-live.png") else { return "" }
         var o = "<section id=\"app\" aria-labelledby=\"h-app\"><div class=\"sh\"><p class=\"kick\">Menu-bar app</p><h2 id=\"h-app\">The <span>app.</span></h2></div>"
         let heroAlt = "The Strim menu-bar app with a running server: decode speed, MTP acceptance and memory, from a live session"
-        o += "<figure class=\"appfig\"><div class=\"macwin rev\"><div class=\"mbar\" aria-hidden=\"true\"><i></i><i></i><i></i></div>" + zoomTile(base: "app-hero-live", light: nil, alt: heroAlt, cap: "Menu-bar app, live session", w: 1072, h: 628, cls: "apphero") + "</div><figcaption class=\"cap\">\(Self.APP_CAPTION)</figcaption></figure>"
+        o += "<figure class=\"appfig\"><div class=\"macwin\"><div class=\"mbar\" aria-hidden=\"true\"><i></i><i></i><i></i></div>" + zoomTile(base: "app-hero-live", light: nil, alt: heroAlt, cap: "Menu-bar app, live session", w: 1072, h: 628, cls: "apphero") + "</div><figcaption class=\"cap\">\(Self.APP_CAPTION)</figcaption></figure>"
         let strip: [(String, String, Int, Int)] = [("status", "Status", 800, 707), ("chat", "Chat", 754, 800), ("jobs", "Jobs", 800, 683)]
         if strip.allSatisfy({ appLive("\($0.0)-dark.png") && appLive("\($0.0)-light.png") }) {
             o += "<div class=\"appstrip\">" + strip.map { "<figure>\(zoomTile(base: $0.0, light: $0.0 + "-light", alt: "Strim app, \($0.1.lowercased()) view, real session", cap: "\($0.1) view", w: $0.2, h: $0.3, cls: "tile"))<figcaption class=\"cap\">\($0.1)</figcaption></figure>" }.joined() + "</div>"
@@ -278,7 +278,7 @@ extension SiteBuilder {
         o += "</section>\n\n"
 
         o += "<section id=\"field\" aria-labelledby=\"h-field\"><div class=\"sh\"><p class=\"kick\">Decode speed &middot; \(engines) current engines</p><h2 id=\"h-field\">The wide field, on <span>one line.</span></h2></div>"
-        o += "<div class=\"glass rev\"><div class=\"hvwrap\">\(numberLineSVG(narrow: false, standalone: false))\(numberLineSVG(narrow: true, standalone: false))</div>"
+        o += "<div class=\"surface\"><div class=\"hvwrap\">\(numberLineSVG(narrow: false, standalone: false))\(numberLineSVG(narrow: true, standalone: false))</div>"
         o += "<p class=\"cap gen\"><span class=\"earlier-legend\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 18 18\" aria-hidden=\"true\"><circle cx=\"9\" cy=\"9\" r=\"5\" fill=\"none\" stroke=\"currentColor\" stroke-dasharray=\"2 2\"/></svg>Hollow dashed beads: llama.cpp and Ollama, earlier run.</span> \(esc(wideCaption())) <a href=\"benchmarks.html#wide\">Full results</a>.</p></div></section>\n\n"
 
         o += "<section id=\"ratios\" aria-labelledby=\"h-ratios\"><div class=\"sh\"><p class=\"kick\">Strim today &middot; right of the line is faster</p><h2 id=\"h-ratios\">The honest <span>ratios.</span></h2></div>"

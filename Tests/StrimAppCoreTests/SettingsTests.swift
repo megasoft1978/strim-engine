@@ -4,6 +4,7 @@ import Testing
 
 @Suite struct SettingsTests {
     @Test func defaultsAndRoundTrip() throws {
+        #expect(AppSettings().startServerWhenOpens)
         let dir = NSTemporaryDirectory() + "strim-app-\(UUID().uuidString)"
         defer { try? FileManager.default.removeItem(atPath: dir) }
         let path = dir + "/app.json"
@@ -17,6 +18,7 @@ import Testing
         try Data(#"{"model_path":"/only"}"#.utf8).write(to: URL(fileURLWithPath: path))
         let partial = AppSettings.load(path: path)
         #expect(partial.modelPath == "/only" && partial.hostURL == AppPaths.defaultHostURL)
+        #expect(partial.startServerWhenOpens)
     }
     @Test func hostCommand() {
         var s = AppSettings(); s.modelPath = "/models/Qwen 27B"; s.mtpPath = "/models/mtp"

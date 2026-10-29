@@ -125,18 +125,13 @@ import Testing
     @Test func styleHooksAreProgressiveAndDataDriven() throws {
         let b = SiteBuilder(root: repoRoot); b.log = { _ in }
         let r = try b.run(SiteOptions(check: true))
-        // count-up targets equal the printed ratio, so the no-JS page already shows the end state
-        let re = try NSRegularExpression(pattern: #"data-count="([0-9.]+)" data-suffix="x">([0-9.]+)x</b>"#)
-        let ms = re.matches(in: r.html, range: NSRange(r.html.startIndex..., in: r.html))
-        #expect(!ms.isEmpty)
-        for m in ms { #expect(String(r.html[Range(m.range(at: 1), in: r.html)!]) == String(r.html[Range(m.range(at: 2), in: r.html)!])) }
-        #expect(r.html.contains("class=\"aurora\"") && r.html.contains("id=\"prog\"") && r.html.contains("<footer>"))
+        #expect(r.html.contains("class=\"surface\"") && !r.html.contains("class=\"aurora\"") && !r.html.contains("id=\"prog\"") && r.html.contains("<footer>"))
         #expect(r.html.contains("Not affiliated with Qwen, Alibaba or Apple"))
         for page in [r.html, r.generated["site/benchmarks.html"] ?? ""] { #expect(page.contains("<header class=\"site\">") && page.contains("assets/site.js") && page.contains("class=\"fgrid\"")) }
-        #expect(SITE_JS.contains("setTimeout(showAll, 1200)"))
-        #expect(HV_PAGE_EXTRA.contains("prefers-reduced-motion:reduce") && HV_PAGE_EXTRA.contains("min-height:420px"))
+        #expect(!SITE_JS.contains("data-count") && !SITE_JS.contains("IntersectionObserver") && !SITE_JS.contains("pointermove"))
+        #expect(!HV_PAGE_EXTRA.contains(".rev") && HV_PAGE_EXTRA.contains(".hv.nl"))
         let css = readString(repoRoot + "/site/assets/style.css")
-        for need in ["prefers-reduced-motion: reduce", ".aurora i { animation: none; }", ".js .rev:not(.in)", "position: sticky", "::selection", "details.faq::details-content"] { #expect(css.contains(need), "style.css lacks \(need)") }
+        for need in ["prefers-reduced-motion: reduce", "position: sticky", "::selection", "details.faq::details-content"] { #expect(css.contains(need), "style.css lacks \(need)") }
         #expect(!css.contains("https://"), "no external requests from the stylesheet")
     }
 

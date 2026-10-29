@@ -21,6 +21,7 @@ enum SnapshotMode {
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
         NSApp.setActivationPolicy(.accessory)
         if let tr = SnapshotMode.value("--from-transcript") { await runTranscript((tr as NSString).expandingTildeInPath, into: dir); exit(0) }
+        if CommandLine.arguments.contains("--offline-menu") { await runOfflineMenu(into: dir); exit(0) }
         if let live = LiveOptions.parse() { await runLive(live, into: dir); exit(0) }
 
         let running = await scenario(status: runningStatus(), jobs: sampleJobs())
@@ -28,6 +29,10 @@ enum SnapshotMode {
         let jobs = await scenario(status: runningStatus(), jobs: sampleJobs(), details: sampleDetails(), select: "j_bcdefghi34")
         let chat = await scenario(status: runningStatus(), chat: true)
         let settings = await scenario(status: runningStatus())
+        let downloadBase = HostStatus(state: .stopped, memory: MemoryStats(weightsGB: 0, prefixTrieGB: 0, mlxCacheGB: 0, headroomGB: 64), uptimeSeconds: 0, jobsPaused: false)
+        let needsDownload = await scenario(status: downloadBase, downloadState: .needsDownload(sizeBytes: 15_200_000_000, freeBytes: 24_800_000_000, resumable: false))
+        let downloading = await scenario(status: downloadBase, downloadState: .downloading(.init(file: "qwen38-4bit/model-00017-of-00032.safetensors", doneBytes: 6_384_000_000, totalBytes: 15_200_000_000, bytesPerSec: 28_400_000, etaSec: 310)))
+        let downloaded = await scenario(status: runningStatus(), downloadState: .done)
 
         let W: CGFloat = 940
         for scheme in [ColorScheme.dark, .light] {
@@ -37,9 +42,12 @@ enum SnapshotMode {
             shoot(MainWindow(model: jobs, tab: .jobs), "jobs-\(s)", W, 640, scheme, dir)
             shoot(MainWindow(model: chat, tab: .chat, expandChat: true), "chat-\(s)", W, 700, scheme, dir)
             shoot(MainWindow(model: settings, tab: .settings), "settings-\(s)", W, 730, scheme, dir)
+            shoot(MainWindow(model: needsDownload), "fixture-needs-download-\(s)", W, 760, scheme, dir)
+            shoot(MainWindow(model: downloading), "fixture-downloading-42-\(s)", W, 760, scheme, dir)
+            shoot(MainWindow(model: downloaded), "fixture-done-\(s)", W, 812, scheme, dir)
             shootPlain(MenuContent(model: running).fixedSize().clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Strim.C.hairline))
-                .shadow(color: .black.opacity(0.3), radius: 24, y: 12).padding(40).frame(maxHeight: .infinity, alignment: .top),
+                .shadow(color: .black.opacity(0.06), radius: 2, y: 1).padding(40).frame(maxHeight: .infinity, alignment: .top),
                        "menu-\(s)", CGSize(width: 440, height: 600), scheme, dir)
         }
         glyphs(dir)
@@ -91,7 +99,8 @@ enum SnapshotMode {
     }
 
     @MainActor
-    static func scenario(status: HostStatus, jobs: [JobSummary] = [], details: [JobDetail] = [], chat: Bool = false, select: String? = nil) async -> AppModel {
+    static func scenario(status: HostStatus, jobs: [JobSummary] = [], details: [JobDetail] = [], chat: Bool = false,
+                         select: String? = nil, downloadState: ModelDownloadState? = nil) async -> AppModel {
         let fake = FakeControlClient(status: status)
         await fake.setJobs(jobs)
         for d in details { await fake.setDetail(d) }
@@ -107,8 +116,9 @@ enum SnapshotMode {
         var settings = AppSettings(modelPath: "/Users/me/models/Qwen3.8-27B-4bit", mtpPath: "/Users/me/models/Qwen3.8-27B-mtp",
                                    controlTokenPath: "/Users/me/.strim/control-token", projectPath: project)
         settings.recentProjects = [project]
+        let downloader = downloadState.map { ModelDownloader(modelExists: { false }, initialState: $0) }
         let model = AppModel(client: fake, settings: settings, persist: { _ in }, pollInterval: nil,
-                             tokenStatus: { _ in .ok }, modelScan: { [] })
+                             tokenStatus: { _ in .ok }, modelScan: { [] }, modelDownloader: downloader)
         model.start()
         for _ in 0..<200 where !(model.connection.isConnected && model.packInfo != nil) { try? await Task.sleep(for: .milliseconds(10)) }
         await model.refreshJobs(); await model.refreshModels()
@@ -135,7 +145,7 @@ enum SnapshotMode {
 
     // MARK: rendering
 
-    /// Window content inside a drawn macOS window: rounded corners, hairline, traffic lights, soft shadow, transparent backdrop.
+    /// Window content inside a drawn macOS window: rounded corners, hairline, traffic lights, subtle shadow, transparent backdrop.
     @MainActor
     static func shoot<V: View>(_ content: V, _ name: String, _ w: CGFloat, _ h: CGFloat, _ scheme: ColorScheme, _ dir: String) {
         let framed = windowFrame(content, w, h, scheme).padding(.horizontal, 64).padding(.top, 48).padding(.bottom, 84)
@@ -147,14 +157,44 @@ enum SnapshotMode {
             .overlay(alignment: .topLeading) { TrafficLights().padding(.leading, 10).padding(.top, 8) }
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(scheme == .dark ? Color.white.opacity(0.18) : Color.black.opacity(0.14), lineWidth: 1))
-            .shadow(color: .black.opacity(scheme == .dark ? 0.55 : 0.22), radius: 36, y: 22)
-            .shadow(color: .black.opacity(0.25), radius: 3, y: 1)
+            .shadow(color: .black.opacity(0.06), radius: 2, y: 1)
     }
 
     @MainActor
     static func shootPlain<V: View>(_ view: V, _ name: String, _ size: CGSize, _ scheme: ColorScheme, _ dir: String) {
         guard let rep = bitmap(view, size, scheme, scale: 2), let png = rep.representation(using: .png, properties: [:]) else { return }
         try? png.write(to: URL(fileURLWithPath: dir).appendingPathComponent(name + ".png"))
+    }
+
+    /// Offline menu rendered through the same AppModel and HTTP client after the host has stopped.
+    @MainActor
+    static func runOfflineMenu(into dir: String) async {
+        let args = CommandLine.arguments
+        func value(_ flag: String, _ fallback: String) -> String {
+            args.firstIndex(of: flag).flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil } ?? fallback
+        }
+        let host = value("--live", "http://127.0.0.1:8231")
+        let token = (value("--token-file", "~/.strim/control-token") as NSString).expandingTildeInPath
+        let settings = AppSettings(hostURL: host, strimBinary: nil, controlTokenPath: token)
+        let model = AppModel(settings: settings, makeClient: { HTTPControlClient.make(settings: $0) },
+                             persist: { _ in }, pollInterval: nil)
+        model.start()
+        for _ in 0..<200 where model.offlineBanner == nil { try? await Task.sleep(for: .milliseconds(10)) }
+        guard model.offlineBanner != nil else {
+            FileHandle.standardError.write(Data("snapshot --offline-menu: host still reachable at \(host)\n".utf8))
+            model.stop()
+            exit(1)
+        }
+        for scheme in [ColorScheme.dark, .light] {
+            let suffix = scheme == .dark ? "dark" : "light"
+            let content = MenuContent(model: model).fixedSize()
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Strim.C.hairline))
+                .shadow(color: .black.opacity(0.06), radius: 2, y: 1)
+                .padding(40).frame(maxHeight: .infinity, alignment: .top)
+            shootPlain(content, "menu-live-offline-\(suffix)", CGSize(width: 440, height: 360), scheme, dir)
+        }
+        model.stop()
     }
 
     @MainActor
@@ -192,7 +232,7 @@ enum SnapshotMode {
         }
     }
 
-    /// 1600x1000 composition: chat window behind, status window in front, on an aurora backdrop.
+    /// 1600x1000 composition: chat window behind, status window in front, on a flat backdrop.
     @MainActor
     static func hero(_ dir: String, live: Bool = false) {
         let sfx = live ? "-live" : ""
@@ -200,7 +240,6 @@ enum SnapshotMode {
         guard let status = img("status\(sfx)-dark"), let chat = img("chat\(sfx)-dark") else { return }
         let view = ZStack {
             StrimBackground()
-            RadialGradient(colors: [Strim.C.violet.opacity(0.30), .clear], center: UnitPoint(x: 0.5, y: 0.95), startRadius: 0, endRadius: 700)
             Image(nsImage: chat).resizable().interpolation(.high).aspectRatio(contentMode: .fit).frame(width: live ? 900 : 960)
                 .offset(x: live ? 350 : 290, y: live ? 0 : -125)
             Image(nsImage: status).resizable().interpolation(.high).aspectRatio(contentMode: .fit).frame(width: live ? 780 : 1020)
@@ -216,8 +255,8 @@ enum SnapshotMode {
 struct TrafficLights: View {
     var body: some View {
         HStack(spacing: 8) {
-            ForEach([0xFF5F57, 0xFEBC2E, 0x28C840], id: \.self) { c in
-                Circle().fill(Strim.hex(UInt32(c))).frame(width: 12, height: 12)
+            ForEach(0..<3, id: \.self) { _ in
+                Circle().fill(Strim.C.muted.opacity(0.72)).frame(width: 12, height: 12)
                     .overlay(Circle().strokeBorder(.black.opacity(0.18), lineWidth: 0.5))
             }
         }
@@ -313,6 +352,19 @@ extension SnapshotMode {
         }
         if let d = try? JSONEncoder().encode(model.jobs) { try? d.write(to: URL(fileURLWithPath: dir).appendingPathComponent("live-jobs.json")) }
 
+        if CommandLine.arguments.contains("--menu-only") {
+            for scheme in [ColorScheme.dark, .light] {
+                let s = scheme == .dark ? "dark" : "light"
+                let content = MenuContent(model: model).fixedSize().clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Strim.C.hairline))
+                    .shadow(color: .black.opacity(0.06), radius: 2, y: 1).padding(40)
+                    .frame(maxHeight: .infinity, alignment: .top)
+                shootPlain(content, "menu-live-\(s)", CGSize(width: 440, height: 520), scheme, dir)
+            }
+            model.stop()
+            return
+        }
+
         let W: CGFloat = 940
         for scheme in [ColorScheme.dark, .light] {
             let s = scheme == .dark ? "dark" : "light"
@@ -320,11 +372,11 @@ extension SnapshotMode {
             shoot(MainWindow(model: model, tab: .jobs), "jobs-live-\(s)", W, 780, scheme, dir)
             shoot(MainWindow(model: model, tab: .chat, expandChat: false), "chat-live-\(s)", W, 1000, scheme, dir)
             shoot(MainWindow(model: model, tab: .chat, expandChat: true), "chat-live-expanded-\(s)", W, 1700, scheme, dir)
-            if scheme == .dark { shoot(MainWindow(model: model, tab: .settings), "settings-live-dark", W, 730, scheme, dir) }
+            shoot(MainWindow(model: model, tab: .settings), "settings-live-\(s)", W, 730, scheme, dir)
             shootPlain(MenuContent(model: model).fixedSize().clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Strim.C.hairline))
-                .shadow(color: .black.opacity(0.3), radius: 24, y: 12).padding(40).frame(maxHeight: .infinity, alignment: .top),
-                       "menu-live-\(s)", CGSize(width: 440, height: 600), scheme, dir)
+                .shadow(color: .black.opacity(0.06), radius: 2, y: 1).padding(40).frame(maxHeight: .infinity, alignment: .top),
+                       "menu-live-\(s)", CGSize(width: 440, height: 520), scheme, dir)
         }
         hero(dir, live: true)
         model.stop()

@@ -5,12 +5,12 @@ import StrimAPI
 
 @MainActor
 private func make(_ client: StrimControlClient, clip: MockClipboard = MockClipboard(),
-                  settings: AppSettings = AppSettings(modelPath: "/models/q", projectPath: "/tmp"),
+                  settings: AppSettings = AppSettings(modelPath: "/models/q", projectPath: "/tmp", startServerWhenOpens: false),
                   persisted: Locked<[AppSettings]> = Locked([]),
                   scan: @escaping @Sendable () -> [LocalModel] = { [] }) -> AppModel {
     AppModel(client: client, settings: settings, clock: RecordingClock(auto: 100), launcher: MockLauncher(.needsModel), mcp: MockMcp(),
              loginItem: MockLogin(), clipboard: clip, persist: { s in persisted.with { $0.append(s) } }, pollInterval: nil,
-             modelScan: scan)
+             modelScan: scan, modelDownloader: ModelDownloader(modelExists: { true }))
 }
 
 /// Connected, connect-time fetches done and the event stream subscribed (so `setFailNext` hits the next real call).
