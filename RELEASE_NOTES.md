@@ -3,7 +3,8 @@
 ## What's in 0.1.1
 
 - Fixed parsing of responses with a stray `</think>` tag.
-- Redesigned the menu bar app and added live screenshots.
+- Redesigned the app: a sidebar window with Status, Jobs and per-project chats (one thread list per folder, like a coding agent), a responsive layout, and a first-run download flow for the model.
+- Redesigned the menu bar popover and added live screenshots of the real app.
 - Redesigned the website and README.
 - Added `strim pull` for downloading model files with pinned revisions, resume support, and hash verification.
 - Added a macOS DMG and Homebrew cask for the app.
