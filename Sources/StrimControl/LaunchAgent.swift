@@ -82,6 +82,10 @@ public enum LaunchAgent {
     /// Refuses temp directories and group/world-writable files or directories on the path unless `allowUnsafe`.
     /// Returns the resolved (symlink-free) path.
     public static func validateBinary(_ path: String, allowUnsafe: Bool) throws -> String {
+        try validateBinary(path, allowUnsafe: allowUnsafe, temporaryRoots: nil, directoryBoundary: nil)
+    }
+
+    static func validateBinary(_ path: String, allowUnsafe: Bool, temporaryRoots: [String]?, directoryBoundary: String?) throws -> String {
         var buf = [CChar](repeating: 0, count: Int(PATH_MAX))
         guard realpath(path, &buf) != nil else { throw LaunchAgentError("binary \(path) does not exist") }
         let real = String(decoding: buf.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self)
@@ -95,19 +99,20 @@ public enum LaunchAgent {
         if realpath(NSTemporaryDirectory(), &tbuf) != nil {
             temps.append(String(decoding: tbuf.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self))
         }
-        for t in temps where real == t || real.hasPrefix(t.hasSuffix("/") ? t : t + "/") {
+        for t in temporaryRoots ?? temps where real == t || real.hasPrefix(t.hasSuffix("/") ? t : t + "/") {
             throw LaunchAgentError("\(real) is in a temporary directory; install the binary somewhere stable or pass --allow-unsafe-binary")
         }
         if st.st_mode & 0o022 != 0 {
             throw LaunchAgentError("\(real) is group/world-writable; pass --allow-unsafe-binary to use it anyway")
         }
         var dir = (real as NSString).deletingLastPathComponent
+        let boundary = directoryBoundary.map { URL(fileURLWithPath: $0).resolvingSymlinksInPath().path }
         while true {
             var ds = stat()
             if stat(dir, &ds) == 0, ds.st_mode & 0o002 != 0, ds.st_mode & S_ISVTX == 0 || true {
                 throw LaunchAgentError("directory \(dir) is world-writable; pass --allow-unsafe-binary to use \(real) anyway")
             }
-            if dir == "/" || dir.isEmpty { break }
+            if dir == boundary || dir == "/" || dir.isEmpty { break }
             dir = (dir as NSString).deletingLastPathComponent
         }
         return real

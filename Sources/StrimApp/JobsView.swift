@@ -24,6 +24,15 @@ extension JobStatusDTO {
     }
 }
 
+/// Reference time for relative labels ("1m ago"). Nil (the app) reads the wall clock at render; snapshot tests inject a fixed instant.
+private struct StrimNowKey: EnvironmentKey { static let defaultValue: Date? = nil }
+extension EnvironmentValues {
+    var strimNow: Date? {
+        get { self[StrimNowKey.self] }
+        set { self[StrimNowKey.self] = newValue }
+    }
+}
+
 /// Jobs: native list (300 pt) beside the detail.
 struct JobsView: View {
     @ObservedObject var model: AppModel
@@ -37,7 +46,7 @@ struct JobsView: View {
                 if selection == nil { list } else { JobDetailView(model: model).frame(maxWidth: .infinity, maxHeight: .infinity) }
             } else {
                 HSplitView {
-                    list.frame(minWidth: 240, idealWidth: 300, maxWidth: 420)
+                    list.frame(minWidth: PaneWidths.jobListMin, idealWidth: PaneWidths.jobListIdeal, maxWidth: PaneWidths.jobListMax)
                     JobDetailView(model: model).frame(minWidth: 320, maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
@@ -74,13 +83,13 @@ struct JobsView: View {
                 .listStyle(.inset)
                 .scrollContentBackground(.hidden)
             }
-            if view.total > 0 {
+            if let footer = model.jobListFooter {
                 HStack {
-                    Text(model.showAllJobs ? "\(view.total) jobs" : "\(view.shown.count) of \(view.total) jobs")
+                    Text(footer.countText)
                         .font(.system(size: 11)).foregroundStyle(Strim.C.tertiary)
                     Spacer()
-                    if model.showAllJobs || view.hidden > 0 {
-                        Button(model.showAllJobs ? "Recent only" : "Show all (+\(view.hidden))") { model.showAllJobs.toggle() }
+                    if let title = footer.toggleTitle {
+                        Button(title) { model.toggleShowAllJobs() }
                             .buttonStyle(.plain).font(.system(size: 11)).foregroundStyle(Strim.C.accent)
                             .help("Default view: active jobs and the last 24 hours.")
                     }
@@ -96,12 +105,13 @@ struct JobsView: View {
 struct JobRow: View {
     let job: JobSummary
     @Environment(\.backgroundProminence) private var prominence
+    @Environment(\.strimNow) private var strimNow
     private var selected: Bool { prominence == .increased }
     var body: some View {
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(Self.firstSentence(job.title ?? job.id)).font(.system(size: 13, weight: .medium)).lineLimit(1)
-                Text("\(job.source.rawValue) · \(StatsFormat.relative(Date(timeIntervalSince1970: job.started), now: Date()))")
+                Text("\(job.source.rawValue) · \(StatsFormat.relative(Date(timeIntervalSince1970: job.started), now: strimNow ?? Date()))")
                     .font(.system(size: 11)).foregroundStyle(selected ? AnyShapeStyle(.secondary) : AnyShapeStyle(Strim.C.muted)).lineLimit(1)
             }
             Spacer(minLength: 4)
@@ -145,7 +155,6 @@ struct JobDetailView: View {
         let av = model.applyAvailability(for: d)
         let rejectAv = model.approveAvailability(for: d)
         let analysis = model.selectedAnalysis
-        let cancel = model.cancelJobAvailability(for: d.summary)
         return ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 Text(d.summary.title ?? d.id).font(.system(size: 15, weight: .semibold)).lineLimit(2).textSelection(.enabled)
@@ -158,7 +167,7 @@ struct JobDetailView: View {
                     if let c = d.summary.cwd { meta("Folder") { Text((c as NSString).abbreviatingWithTildeInPath).font(.system(size: 12, design: .monospaced)).lineLimit(1).truncationMode(.head) } }
                 }
                 .font(.system(size: 12))
-                if cancel.enabled, d.summary.status == .running || d.summary.status == .queued {
+                if model.showsCancelButton(for: d) {
                     Button("Cancel job", role: .destructive) { Task { await model.cancelJob(d.id) } }.buttonStyle(StrimButtonStyle(.danger))
                 }
                 if let r = d.resultSummary { Text(r).font(.system(size: 13)).textSelection(.enabled).fixedSize(horizontal: false, vertical: true) }

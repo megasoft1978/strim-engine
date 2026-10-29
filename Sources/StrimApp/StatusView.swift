@@ -9,6 +9,7 @@ struct StatusView: View {
     @State private var contentWidth: CGFloat = 840
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.layoutClass) private var layout
+    @Environment(\.strimNow) private var strimNow
 
     private var maxContentWidth: CGFloat? {
         switch layout { case .wide: 1080; case .regular: 880; case .compact: nil }
@@ -204,7 +205,7 @@ struct StatusView: View {
                 KeyValueRow(label: "Last crash", value: s.lastCrash ?? "none")
                 group("Diagnostics").padding(.top, 8)
                 KeyValueRow(label: "State", value: model.rawState)
-                KeyValueRow(label: "Last event", value: StatsFormat.relative(model.lastEventTime, now: Date()))
+                KeyValueRow(label: "Last event", value: StatsFormat.relative(model.lastEventTime, now: strimNow ?? Date()))
                 KeyValueRow(label: "Error", value: model.lastError ?? "none")
             }
             .padding(.leading, 16)

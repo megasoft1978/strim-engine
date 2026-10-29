@@ -204,6 +204,7 @@ public final class FileChatStore: ChatPersisting, @unchecked Sendable {
     private var indexPath: String { root + "/index.json" }
     private var threadsDir: String { root + "/threads" }
     private func threadPath(_ id: String) -> String { threadsDir + "/" + id + ".jsonl" }
+    private var corruptPath: String { root + "/index.corrupt-\(UUID().uuidString).json" }
 
     public func load() -> ChatIndex {
         lock.lock(); defer { lock.unlock() }
@@ -221,10 +222,12 @@ public final class FileChatStore: ChatPersisting, @unchecked Sendable {
             return idx
         }
         guard var idx = try? JSONDecoder().decode(ChatIndex.self, from: data) else {
-            let stamp = Int(Date().timeIntervalSince1970)
-            try? FileManager.default.moveItem(atPath: indexPath, toPath: root + "/index.corrupt-\(stamp).json")
+            let backedUp: Bool
+            do { try FileManager.default.moveItem(atPath: indexPath, toPath: corruptPath); backedUp = true }
+            catch { backedUp = false }
             var rebuilt = rebuild(reason: "corrupt")
-            rebuilt.notice = "Chat index was damaged and has been rebuilt (\(rebuilt.threads.count) chats recovered)."
+            rebuilt.readOnly = !backedUp
+            rebuilt.notice = backedUp ? "Chat index was damaged and has been rebuilt (\(rebuilt.threads.count) chats recovered)." : "Chat index was damaged and could not be backed up; history is read-only."
             return rebuilt
         }
         idx.threads = idx.threads.filter { ChatCodec.validID($0.id) }
@@ -260,6 +263,12 @@ public final class FileChatStore: ChatPersisting, @unchecked Sendable {
     public func save(_ index: ChatIndex) throws {
         lock.lock(); defer { lock.unlock() }
         guard !index.readOnly else { return }
+        if FileManager.default.fileExists(atPath: indexPath) {
+            let data = try Data(contentsOf: URL(fileURLWithPath: indexPath))
+            if (try? JSONDecoder().decode(ChatIndex.self, from: data)) == nil {
+                try SecureFS.writeAtomically(data, to: corruptPath)
+            }
+        }
         let enc = JSONEncoder(); enc.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         try SecureFS.writeAtomically(try enc.encode(index), to: indexPath)
     }
@@ -277,7 +286,19 @@ public final class FileChatStore: ChatPersisting, @unchecked Sendable {
         let path = threadPath(id)
         let h = try SecureFS.openAppend(path)
         defer { try? h.close() }
-        try h.write(contentsOf: try ChatCodec.lines(messages))
+        var data = try ChatCodec.lines(messages)
+        var st = stat()
+        guard fstat(h.fileDescriptor, &st) == 0 else { throw SecureFSError(message: "cannot stat \(path)") }
+        if st.st_size > 0 {
+            let fd = open(path, O_RDONLY | O_NOFOLLOW)
+            guard fd >= 0 else { throw SecureFSError(message: "cannot read \(path)") }
+            var last: UInt8 = 0
+            let n = pread(fd, &last, 1, st.st_size - 1)
+            close(fd)
+            guard n == 1 else { throw SecureFSError(message: "cannot read \(path)") }
+            if last != 0x0A { data.insert(0x0A, at: 0) }
+        }
+        try h.write(contentsOf: data)
         let size = ((try? FileManager.default.attributesOfItem(atPath: path))?[.size] as? Int) ?? 0
         if size > maxThreadBytes {
             let all = ChatCodec.parse(FileManager.default.contents(atPath: path) ?? Data()).messages

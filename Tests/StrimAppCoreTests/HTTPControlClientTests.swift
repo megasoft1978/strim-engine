@@ -111,7 +111,8 @@ private let statusJSON = #"{"state":"ready","model":"m","memory":{"weights_gb":1
         do { try await c.load(LoadRequest(model: "m")); Issue.record("expected throw") }
         catch let e as ControlClientError {
             #expect(e == .http(status: 409, api: APIError(code: "conflict", message: "loading")))
-            #expect(e.localizedDescription == "conflict: loading (409)")
+            // User-facing text is the host message, without the wire code (raw codes are not shown to users).
+            #expect(e.localizedDescription == "Loading.")
         }
     }
     @Test func postBodiesAndRoutes() async throws {

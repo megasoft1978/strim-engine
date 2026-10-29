@@ -50,6 +50,12 @@ private struct SmokeError: Error, CustomStringConvertible {
         p.waitUntilExit()
         return p.terminationStatus == 1 && output.fileHandleForReading.readDataToEndOfFile().isEmpty && errors.fileHandleForReading.readDataToEndOfFile().isEmpty
     }
+    /// Same path as QuitHandler.applicationShouldTerminate: requestQuit, then wait for the reply.
+    static func quit(_ coordinator: LifecycleCoordinator) async {
+        await withCheckedContinuation { (k: CheckedContinuation<Void, Never>) in
+            if coordinator.requestQuit(reply: { k.resume() }) == .now { k.resume() }
+        }
+    }
     static func git(_ args: [String], cwd: String) throws {
         let p = Process(); p.executableURL = URL(fileURLWithPath: "/usr/bin/git"); p.arguments = args
         p.currentDirectoryURL = URL(fileURLWithPath: cwd); p.standardOutput = FileHandle.nullDevice; p.standardError = FileHandle.nullDevice
@@ -59,7 +65,7 @@ private struct SmokeError: Error, CustomStringConvertible {
         var report = Dictionary(uniqueKeysWithValues: (1...8).map { ("S\($0)", "not run after earlier failure") })
         let base = URL(fileURLWithPath: NSTemporaryDirectory()).resolvingSymlinksInPath().appendingPathComponent("strim-e2e-" + UUID().uuidString).path
         let outside = base + "-outside", state = base + "/state", project = base + "/project", chats = base + "/chats"
-        var model: AppModel?; var pid: Int32?; var port: UInt16 = 0; var stage = "S1"
+        var model: AppModel?; var quitCoordinator: LifecycleCoordinator?; var pid: Int32?; var port: UInt16 = 0; var stage = "S1"
         defer {
             if let pid, kill(pid, 0) == 0 { _ = kill(pid, SIGTERM) }
             try? FileManager.default.removeItem(atPath: base)
@@ -86,6 +92,9 @@ private struct SmokeError: Error, CustomStringConvertible {
                              pollInterval: 0.2, testMode: true, modelDownloader: downloader, discoverHostProcess: false,
                              chatStore: FileChatStore(root: chats), scratchRoot: base + "/scratch")
             model = m; m.thinkingEnabled = false
+            // Same wiring as StrimApp.init, with the app-host record and host.lock kept in the temp state dir.
+            quitCoordinator = LifecycleCoordinator(target: m, table: SystemProcessTable(lockPath: state + "/host.lock"),
+                                                   store: FileOwnedHostStore(path: state + "/app-host.json"), expectedBinary: { binary })
             await m.startServer(); pid = m.hostProcessPID
             try check(pid != nil, "startServer did not launch: \(m.lastError ?? m.notice ?? "no reason")")
             let ready = await wait(60) { m.status?.state == .ready && m.status?.model == "qwen38-4bit" }
@@ -139,13 +148,14 @@ private struct SmokeError: Error, CustomStringConvertible {
             try check(metricsReady && liveStatus?.model == "qwen38-4bit" && (liveStatus?.uptimeSeconds ?? 0) > 0 && (liveStatus?.decodeTPS ?? 0) > 0, "missing model, uptime or decode speed: \(String(describing: liveStatus))")
             report[stage] = "PASS"
         } catch { report[stage] = "FAIL: \(error)" }
-        if let model {
-            let stopStarted = Date()
-            await model.stopOwnedServerOnQuit(); model.stop()
-            let remaining = max(0, 5 - Date().timeIntervalSince(stopStarted))
-            let exited = await wait(remaining) { pid.map { kill($0, 0) != 0 } ?? false }
+        if let quitCoordinator {
+            let quitStarted = Date()
+            await quit(quitCoordinator)
+            let quitSeconds = Date().timeIntervalSince(quitStarted)
+            let exited = await wait(2) { pid.map { kill($0, 0) != 0 } ?? false }
             let free = portIsFree(port)
-            report["S7"] = exited && free ? "PASS" : "FAIL: pid=\(pid.map(String.init) ?? "nil"), exited=\(exited), port=\(port), free=\(free)"
+            let quickly = quitSeconds <= 4
+            report["S7"] = exited && free && quickly ? "PASS" : "FAIL: pid=\(pid.map(String.init) ?? "nil"), exited=\(exited), port=\(port), free=\(free), quit=\(String(format: "%.2f", quitSeconds))s (limit 4s)"
             if exited { pid = nil }
             else if let child = pid {
                 _ = kill(child, SIGKILL)

@@ -3,7 +3,7 @@ import Testing
 import StrimAPI
 @testable import StrimAppCore
 
-private func delta(_ sid: String, _ k: ChatDeltaKind, _ t: String) -> StrimEvent { .chatDelta(ChatDelta(sessionID: sid, kind: k, text: t)) }
+private func delta(_ sid: String, _ k: ChatDeltaKind, _ t: String, status: ChatTurnStatus? = nil) -> StrimEvent { .chatDelta(ChatDelta(sessionID: sid, kind: k, text: t, status: status)) }
 
 private func appendsReach(_ fake: FakeControlClient, _ n: Int) async -> Bool {
     for _ in 0..<600 { if await fake.appends.count >= n { return true }; try? await Task.sleep(for: .milliseconds(5)) }
@@ -321,6 +321,80 @@ private struct Rig {
         rig.model.thinkingEnabled = false
         await rig.model.send("hello", in: ta)
         #expect(rig.model.thread(ta)?.thinking == false)
+        rig.model.stop()
+    }
+}
+
+@MainActor
+@Suite struct ChatDoneSummaryTests {
+    @Test func doneSummaryRendersWhenNoAssistantTextArrived() async {
+        let rig = await Rig.make()
+        guard let (t, s) = await rig.open(0) else { Issue.record("no session"); return }
+        await rig.fake.emit(delta(s, .done, "hello", status: .done))
+        #expect(await waitFor { rig.model.messages[t]?.last?.text == "hello" })
+        #expect(rig.model.messages[t]?.last?.role == .assistant)
+        rig.model.stop()
+    }
+
+    @Test func declinedSummaryRendersWhenNoAssistantTextArrived() async {
+        let rig = await Rig.make()
+        guard let (t, s) = await rig.open(0) else { Issue.record("no session"); return }
+        await rig.fake.emit(delta(s, .done, "cannot do that", status: .declined))
+        #expect(await waitFor { rig.model.messages[t]?.last?.text == "cannot do that" })
+        #expect(rig.model.messages[t]?.last?.role == .assistant)
+        rig.model.stop()
+    }
+
+    @Test func doneWithoutStatusDoesNotAddSummaryAsReply() async {
+        // New hosts send the summary as text themselves; a status-less done must not add a second copy.
+        let rig = await Rig.make()
+        guard let (t, s) = await rig.open(0) else { Issue.record("no session"); return }
+        await rig.model.send("go", in: t)
+        await rig.fake.emit(delta(s, .done, "hello"))
+        #expect(await waitFor { rig.model.generatingThreadID == nil })
+        #expect(rig.model.messages[t]?.contains { $0.role == .assistant } == false)
+        rig.model.stop()
+    }
+
+    @Test(arguments: [ChatTurnStatus.failed, .cancelled, .limit])
+    func nonAnswerTurnSummaryIsNotShownAsReply(_ status: ChatTurnStatus) async {
+        // Error and step-limit summaries describe the turn; they are not the assistant's reply.
+        let rig = await Rig.make()
+        guard let (t, s) = await rig.open(0) else { Issue.record("no session"); return }
+        await rig.model.send("go", in: t)
+        await rig.fake.emit(delta(s, .done, "step limit reached", status: status))
+        #expect(await waitFor { rig.model.generatingThreadID == nil })
+        #expect(rig.model.messages[t]?.contains { $0.role == .assistant } == false)
+        rig.model.stop()
+    }
+
+    @Test func doneDeltaDecodesWithOrWithoutStatus() throws {
+        // Old hosts omit `status`; the field is additive and must not break decoding.
+        let old = try JSONDecoder().decode(ChatDelta.self, from: Data(#"{"session_id":"s","kind":"done","text":"ok"}"#.utf8))
+        #expect(old == ChatDelta(sessionID: "s", kind: .done, text: "ok"))
+        #expect(old.status == nil)
+        let new = try JSONDecoder().decode(ChatDelta.self, from: Data(#"{"session_id":"s","kind":"done","text":"x","status":"failed"}"#.utf8))
+        #expect(new.status == .failed)
+    }
+
+    @Test func doneSummaryAfterToolRendersEvenWithEarlierText() async {
+        let rig = await Rig.make()
+        guard let (t, s) = await rig.open(0) else { Issue.record("no session"); return }
+        await rig.fake.emit(delta(s, .text, "Looking."))
+        await rig.fake.emit(delta(s, .toolCall, "ls -a"))
+        await rig.fake.emit(delta(s, .toolResult, "ls: 2 entries"))
+        await rig.fake.emit(delta(s, .done, "found 2", status: .done))
+        #expect(await waitFor { rig.model.messages[t]?.last?.text == "found 2" })
+        rig.model.stop()
+    }
+
+    @Test func doneSummaryIsNotDuplicatedWhenTextStreamed() async {
+        let rig = await Rig.make()
+        guard let (t, s) = await rig.open(0) else { Issue.record("no session"); return }
+        await rig.fake.emit(delta(s, .text, "hello"))
+        await rig.fake.emit(delta(s, .done, "hello", status: .done))
+        #expect(await waitFor { rig.model.generatingThreadID == nil && rig.model.messages[t]?.last?.text == "hello" })
+        #expect(rig.model.messages[t]?.filter { $0.role == .assistant }.count == 1)
         rig.model.stop()
     }
 }

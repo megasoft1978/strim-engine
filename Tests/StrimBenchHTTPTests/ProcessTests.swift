@@ -139,7 +139,9 @@ import Testing
         #expect(!Net.portFree(Int(s.port)))
         let p = Int(s.port)
         s.stop()
-        Thread.sleep(forTimeInterval: 0.1)
+        // The listener closes asynchronously; under load 0.1 s was not enough. Wait on the condition, bounded.
+        let deadline = Date().addingTimeInterval(5)
+        while !Net.portFree(p) && Date() < deadline { Thread.sleep(forTimeInterval: 0.05) }
         #expect(Net.portFree(p))
     }
 

@@ -496,10 +496,22 @@ extension AppModel {
                 messages[tid, default: []].append(ChatMessage(role: .tool, text: d.text, tool: ToolCard(name: r.name, result: r.summary, isError: r.isError)))
             }
         case .done:
+            // The host sends the finish summary as text for done/declined turns; this is only a fallback for hosts that do not.
+            // Failed, cancelled and limit summaries describe the turn, not the assistant's reply, so they are never appended.
+            let summary = d.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !summary.isEmpty, d.status == .done || d.status == .declined, !assistantTextThisTurn(tid) { appendStreamed(tid, .assistant, summary) }
             flushPending(tid, final: true)
             b.rawBase = nil
             finishTurn(tid)
         }
+    }
+
+    /// True when assistant text arrived after the last tool call (or the user message) of the running turn, flushed or still pending.
+    private func assistantTextThisTurn(_ tid: String) -> Bool {
+        let b = buffer(tid)
+        if b.pendingRole == .assistant, !b.pendingText.isEmpty { return true }
+        guard let last = messages[tid]?.last(where: { $0.role != .reasoning }) else { return false }
+        return last.role == .assistant && !last.text.isEmpty
     }
 
     private func appendStreamed(_ tid: String, _ role: ChatMessage.Role, _ text: String) {

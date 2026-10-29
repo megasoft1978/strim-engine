@@ -78,7 +78,7 @@ public enum OfflineBanner {
             case .unauthorized(let present):
                 return present ? "Host at \(hostURL) rejected the control token in ~/.strim/control-token (401). Restart the host to regenerate it."
                                : "Host at \(hostURL) requires a control token but ~/.strim/control-token is missing or unusable (401). Start the host once so it creates ~/.strim/control-token."
-            case .forbidden: return "Host at \(hostURL) refused this client (403, loopback only)."
+            case .forbidden: return "Host at \(hostURL) refused this request (403)."
             case .invalidConfig(let d): return "\(d). Fix it in Settings or ~/.strim/app.json."
             default: return "Host at \(hostURL): \(e.localizedDescription)."
             }

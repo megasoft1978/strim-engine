@@ -186,11 +186,13 @@ extension HarnessRunner {
                 result.summary += " [patch collection failed: \(error)]"
             }
         }
+        let closing = String(Redactor.redact(result.summary).prefix(1500))
+        if let t = mapper.closingText(status: result.status, summary: closing) { cont.yield(.textDelta(t)) }
         // Ready for the next turn before the client can see the end of this one.
         cs.turnActive = false
         cs.turnTask = nil
         cont.yield(.turnFinished(ChatTurnResult(userTurn: userTurn, status: result.status,
-                                                summary: String(Redactor.redact(result.summary).prefix(1500)),
+                                                summary: closing,
                                                 usage: result.usage, totalUsage: cs.conversation.totalUsage)))
         cont.finish()
     }

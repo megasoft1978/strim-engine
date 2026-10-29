@@ -104,7 +104,17 @@ public final class AppModel: ObservableObject {
     public let modelDownloader: ModelDownloader
     @Published public private(set) var hostProcessPID: Int32?
     /// Set only when this app launched the server, so quitting stops that one and never one started elsewhere.
-    private var ownedHostPID: Int32?
+    public private(set) var ownedHostPID: Int32? { didSet { if ownedHostPID != oldValue { onOwnedHostChange?(ownedHostPID) } } }
+    /// Lets the lifecycle coordinator persist who owns the running server (for adoption after a relaunch).
+    public var onOwnedHostChange: ((Int32?) -> Void)?
+    @Published private var hostStarting = false
+    @Published private var hostStopping = false
+    private let hostProcessRunning: @Sendable (Int32) -> Bool
+    private let terminateHostProcess: @Sendable (Int32) -> Void
+    private let hostFailureDetail: @Sendable () -> String?
+    private let hostLogPath: String?
+    private var hostLogOffset: UInt64 = 0
+    private var hostLaunchTask: Task<Void, Never>?
 
     public let testMode: Bool
     public let logLimit = 200
@@ -124,6 +134,7 @@ public final class AppModel: ObservableObject {
     private let discoverHostProcess: Bool
     private let tokenStatus: @Sendable (AppSettings) -> TokenFileStatus
     private var loop: Task<Void, Never>?
+    private var loopID = UUID()
     let chatStore: ChatPersisting
     let scratchRoot: String
     /// Least-recently-used first.
@@ -132,7 +143,8 @@ public final class AppModel: ObservableObject {
     var buffers: [String: TurnBuffer] = [:]
     var persistedCount: [String: Int] = [:]
 
-    public init(settings: AppSettings = .load(),
+    /// `settings` nil loads app.json now and shows its load notice; an explicit `settings` shows `loadNotice` (if any).
+    public init(settings: AppSettings? = nil, loadNotice: String? = nil,
                 makeClient: @escaping @Sendable (AppSettings) -> StrimControlClient,
                 clock: AppClock = SystemClock(),
                 launcher: HostLauncher = ProcessHostLauncher(),
@@ -146,18 +158,25 @@ public final class AppModel: ObservableObject {
                 modelScan: @escaping @Sendable () -> [LocalModel] = { LocalModelScanner.scan() },
                 modelDownloader: ModelDownloader? = nil, discoverHostProcess: Bool = true,
                 chatStore: ChatPersisting = MemoryChatStore(),
-                scratchRoot: String = AppModel.scratchDefault) {
+                scratchRoot: String = AppModel.scratchDefault,
+                hostProcessRunning: @escaping @Sendable (Int32) -> Bool = { $0 > 1 && kill($0, 0) == 0 },
+                terminateHostProcess: @escaping @Sendable (Int32) -> Void = { _ = kill($0, SIGTERM) },
+                hostFailureDetail: @escaping @Sendable () -> String? = { nil }) {
+        let launch = settings == nil ? AppSettings.loadReport() : nil
+        let resolved = settings ?? launch!.settings
+        self.hostProcessRunning = hostProcessRunning; self.terminateHostProcess = terminateHostProcess
+        self.hostFailureDetail = hostFailureDetail; self.hostLogPath = (launcher as? ProcessHostLauncher)?.logPath
         self.chatStore = chatStore; self.scratchRoot = scratchRoot
         self.modelScan = modelScan
-        self.settings = settings; self.makeClient = makeClient; self.client = makeClient(settings)
+        self.settings = resolved; self.makeClient = makeClient; self.client = makeClient(resolved)
         self.clock = clock; self.launcher = launcher; self.mcp = mcp; self.loginItem = loginItem
         self.clipboard = clipboard; self.persist = persist; self.pollInterval = pollInterval
         self.testMode = testMode; self.launchAtLogin = loginItem.isEnabled; self.tokenStatus = tokenStatus
         self.discoverHostProcess = discoverHostProcess
-        self.tokenWarning = tokenStatus(settings).banner(path: settings.controlTokenPath)
+        self.tokenWarning = tokenStatus(resolved).banner(path: resolved.controlTokenPath)
         let downloader = modelDownloader ?? ModelDownloader(
             binary: {
-                if case .found(let path) = HostCommand.resolveBinary(settings: settings) { return path }
+                if case .found(let path) = HostCommand.resolveBinary(settings: resolved) { return path }
                 return nil
             })
         self.modelDownloader = downloader
@@ -166,7 +185,9 @@ public final class AppModel: ObservableObject {
             Task { @MainActor in self?.modelDownloadState = state }
         }
         downloader.setAutostartHandler { [weak self] in self?.scheduleServerAutostart() }
+        self.thinkingEnabled = resolved.thinkingEnabled
         loadChats()
+        notice = launch?.notice ?? loadNotice
     }
 
     /// Fixed-client convenience (tests, previews).
@@ -189,8 +210,8 @@ public final class AppModel: ObservableObject {
 
     // MARK: derived UI state
 
-    public var menuTitle: String { StatsFormat.menuTitle(connection) }
-    public var menuSymbol: String { StatsFormat.menuSymbol(connection) }
+    public var menuTitle: String { hostStarting && !connection.isConnected ? "Strim: loading" : StatsFormat.menuTitle(connection) }
+    public var menuSymbol: String { hostStarting && !connection.isConnected ? "hourglass" : StatsFormat.menuSymbol(connection) }
     public var status: HostStatus? { connection.status }
 
     public var offlineBanner: String? {
@@ -315,8 +336,11 @@ public final class AppModel: ObservableObject {
     /// The user looked at the updated patch now on screen: it becomes the reviewed one. Ticks do not carry over.
     public func acknowledgeUpdatedPatch() { reviewedDigest = selectedPatchDigest }
 
-    public var hostCanBeStarted: Bool { !connection.isConnected }
+    public var hostCanBeStarted: Bool { !connection.isConnected && ownedHostPID == nil && !hostStarting && !hostStopping }
     public var serverStartAvailability: Availability {
+        if hostStopping { return .no("Server is stopping") }
+        if hostStarting || hostLaunchTask != nil { return .no("Server is loading") }
+        if actionInFlight != nil { return .no("Another action is in progress") }
         switch modelDownloadState {
         case .needsDownload: return .no("Download the model first")
         case .confirming, .downloading, .verifying, .startingServer: return .no("Wait for the model download to finish")
@@ -327,6 +351,8 @@ public final class AppModel: ObservableObject {
         }
     }
     public var serverStopAvailability: Availability {
+        if hostStopping { return .no("Server is stopping") }
+        if ownedHostPID != nil || hostLaunchTask != nil { return .yes }
         guard connection.isConnected else { return .no("Server is offline") }
         guard status?.state != .stopped else { return .no("Server is stopped") }
         return .yes
@@ -336,43 +362,52 @@ public final class AppModel: ObservableObject {
 
     public func start() {
         guard loop == nil else { return }
-        loop = Task { [weak self] in await self?.runLoop() }
+        let id = UUID(); loopID = id
+        loop = Task { [weak self] in await self?.runLoop(id: id) }
         if !testMode, case .idle = modelDownloader.state { modelDownloader.inspect() }
     }
     public func checkModelAvailability() {
         if !testMode, case .idle = modelDownloader.state { modelDownloader.inspect() }
     }
-    public func stop() { loop?.cancel(); loop = nil }
+    public func stop() { loopID = UUID(); loop?.cancel(); loop = nil }
 
     /// Cancel any pending backoff and reconnect immediately.
     public func reconnectNow() {
         stop(); reconnectAttempts = 0; start()
     }
 
-    private func runLoop() async {
+    private func runLoop(id: UUID) async {
         var backoff = Backoff()
-        while !Task.isCancelled {
-            connection = .connecting
+        while !Task.isCancelled && loopID == id {
+            if connection != .connecting { connection = .connecting }
             refreshTokenWarning()
+            let sessionClient = client
             do {
-                let s = try await client.status()
+                let s = try await sessionClient.status()
+                guard !Task.isCancelled, loopID == id else { return }
+                _ = reapExitedHost()
+                if hostLaunchTask == nil { hostStarting = false }
                 backoff.reset(); reconnectAttempts = 0
-                lastError = nil
-                connection = .connected(s)
+                if lastError != nil { lastError = nil }
+                acceptStatus(s)
                 initialConnectionChecked = true
                 if discoverHostProcess, hostProcessPID == nil { hostProcessPID = findServerPID() }
                 log("connected: state=\(s.state.rawValue)")
                 await refreshJobs()
+                guard !Task.isCancelled, loopID == id else { return }
                 await refreshPack()
+                guard !Task.isCancelled, loopID == id else { return }
                 await reconcileFolders()
-                try await runSession()
-                if Task.isCancelled { return }
+                guard !Task.isCancelled, loopID == id else { return }
+                try await runSession(client: sessionClient, id: id)
+                if Task.isCancelled || loopID != id { return }
                 disconnect(OfflineBanner.streamEnded + " Reconnecting.")
             } catch {
-                if Task.isCancelled { return }
+                if Task.isCancelled || loopID != id { return }
                 disconnect(OfflineBanner.text(for: error, hostURL: settings.hostURL), error: error)
                 initialConnectionChecked = true
             }
+            if let failure = reapExitedHost() { lastError = failure; notice = failure }
             let delay = backoff.next()
             reconnectAttempts += 1
             log(String(format: "reconnect in %.0fs (attempt %d)", delay, reconnectAttempts))
@@ -392,42 +427,60 @@ public final class AppModel: ObservableObject {
     public func seedDecodeHistory(_ samples: [Double]) { decodeHistory = Array(samples.suffix(Self.decodeHistoryLimit)) }
 
     private func refreshTokenWarning() {
-        tokenWarning = tokenStatus(settings).banner(path: settings.controlTokenPath)
+        let warning = tokenStatus(settings).banner(path: settings.controlTokenPath)
+        if tokenWarning != warning { tokenWarning = warning }
+    }
+
+    private func acceptStatus(_ s: HostStatus) {
+        let next = ConnectionState.connected(s)
+        if connection != next { connection = next }
     }
 
     /// Runs until the event stream ends or the poll fails; throws on transport error.
-    private func runSession() async throws {
+    private func runSession(client: StrimControlClient, id: UUID) async throws {
         try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask { [self] in try await consumeEvents() }
+            group.addTask { [self] in try await consumeEvents(client: client, id: id) }
             if let p = pollInterval {
-                group.addTask { [self] in try await pollStatus(every: p) }
+                group.addTask { [self] in try await pollStatus(every: p, client: client, id: id) }
             }
             defer { group.cancelAll() }
             try await group.next()
         }
     }
 
-    private func consumeEvents() async throws {
+    private func consumeEvents(client: StrimControlClient, id: UUID) async throws {
         for try await ev in client.events() {
+            guard !Task.isCancelled, loopID == id else { return }
             handle(ev)
         }
     }
 
-    private func pollStatus(every seconds: Double) async throws {
-        while true {
+    private func pollStatus(every seconds: Double, client: StrimControlClient, id: UUID) async throws {
+        while !Task.isCancelled && loopID == id {
             try await clock.sleep(seconds: seconds)
+            try Task.checkCancellation()
             let s = try await client.status()
-            if case .connected = connection { connection = .connected(s) }
+            guard !Task.isCancelled, loopID == id else { return }
+            if case .connected = connection { acceptStatus(s) }
         }
     }
 
     private func disconnect(_ reason: String, error: Error? = nil) {
         if let g = generatingThreadID {
             if !queue.isEmpty { queue.removeAll(); notice = "Queued messages were discarded: the host went offline." }
-            flushPending(g); finishTurn(g)
+            flushPending(g)
+            messages[g, default: []].append(ChatMessage(role: .assistant, text: "Turn ended: host went offline. \(reason)"))
+            finishTurn(g)
         }
-        connection = .disconnected(reason: reason)
-        if let error { lastError = error.localizedDescription }
+        if !liveSessions.isEmpty { liveSessions.removeAll(); liveOrder.removeAll() }
+        if !jobs.isEmpty { jobs.removeAll() }
+        if packInfo != nil { packInfo = nil }
+        if hostFolders != nil { hostFolders = nil }
+        if lastEventTime != nil { lastEventTime = nil }
+        let next = ConnectionState.disconnected(reason: reason)
+        if connection != next { connection = next }
+        let message = error?.localizedDescription ?? reason
+        if lastError != message { lastError = message }
         log("disconnected: \(reason)")
     }
 
@@ -436,7 +489,7 @@ public final class AppModel: ObservableObject {
         switch ev {
         case .status(let s):
             if !connection.isConnected { log("connected via event") }
-            connection = .connected(s)
+            acceptStatus(s)
             log("status: \(s.state.rawValue)")
         case .jobEvent(let j):
             log("job \(j.jobID.prefix(8)): \(j.status.rawValue)" + (j.verify.map { " [\($0.rawValue)]" } ?? ""))
@@ -473,12 +526,12 @@ public final class AppModel: ObservableObject {
     }
 
     private func refreshStatus() async {
-        if let s = try? await client.status(), connection.isConnected { connection = .connected(s) }
+        if let s = try? await client.status(), !Task.isCancelled, connection.isConnected { acceptStatus(s) }
     }
 
     public func loadModel() async {
         guard loadAvailability.enabled, let m = settings.modelPath else { return }
-        let mtp = settings.mtpPath.flatMap { $0.isEmpty ? nil : $0 }
+        let mtp = settings.mtpDisabled ? nil : settings.mtpPath.flatMap { $0.isEmpty ? nil : $0 }
         await run("Load") { try await client.load(LoadRequest(model: m, mtp: mtp)); log("load requested: \(m)") }
         await refreshStatus()
     }
@@ -619,17 +672,36 @@ public final class AppModel: ObservableObject {
     }
 
     private func launchHostProcess() {
+        guard !hostStarting, !hostStopping, ownedHostPID == nil, hostLaunchTask == nil else { return }
         var launchSettings = settings
         if AppSettings.nonEmpty(launchSettings.modelPath) == nil { launchSettings.modelPath = AppPaths.home + "/.strim/models/qwen38-4bit" }
         if AppSettings.nonEmpty(launchSettings.mtpPath) == nil { launchSettings.mtpPath = AppPaths.home + "/.strim/models/qwen38-mtp-4bit" }
-        switch launcher.start(settings: launchSettings) {
+        hostStarting = true
+        let id = loopID
+        hostLaunchTask = Task {
+            let (result, offset) = await Task.detached { [launcher, launchSettings, hostLogPath] in
+                let offset = hostLogPath.flatMap { path in
+                    (try? FileManager.default.attributesOfItem(atPath: path)[.size] as? NSNumber)?.uint64Value
+                } ?? 0
+                return (launcher.start(settings: launchSettings), offset)
+            }.value
+            hostLogOffset = offset
+            hostLaunchTask = nil
+            finishHostLaunch(result, reconnect: loopID == id && !hostStopping)
+        }
+    }
+
+    private func finishHostLaunch(_ result: HostLaunchResult, reconnect: Bool) {
+        hostStarting = false
+        switch result {
         case .started(let pid):
             hostProcessPID = pid
             ownedHostPID = pid
+            hostStarting = !connection.isConnected
             modelDownloader.serverDidStart()
             notice = "Started strim serve (pid \(pid)). Log: ~/.strim/host.log"
             log("started host pid \(pid)")
-            reconnectNow()
+            if reconnect { reconnectNow() }
         case .binaryMissing(let cmd):
             clipboard.copy(cmd)
             notice = "strim binary not found. Command copied; paste it in Terminal: \(cmd)"
@@ -647,9 +719,12 @@ public final class AppModel: ObservableObject {
 
     /// Starts the local server, or loads its model when the server process is already open but idle.
     public func startServer() async {
+        guard serverStartAvailability.enabled else { return }
         if connection.isConnected, status?.state == .stopped {
+            hostStarting = true
+            defer { hostStarting = false }
             let modelPath = AppSettings.nonEmpty(settings.modelPath) ?? AppPaths.home + "/.strim/models/qwen38-4bit"
-            let mtpPath = AppSettings.nonEmpty(settings.mtpPath) ?? AppPaths.home + "/.strim/models/qwen38-mtp-4bit"
+            let mtpPath: String? = settings.mtpDisabled ? nil : (AppSettings.nonEmpty(settings.mtpPath) ?? AppPaths.home + "/.strim/models/qwen38-mtp-4bit")
             await run("Start server") {
                 try await client.load(LoadRequest(model: modelPath, mtp: mtpPath))
                 log("server model start requested: \(modelPath)")
@@ -657,13 +732,17 @@ public final class AppModel: ObservableObject {
             await refreshStatus()
         } else {
             launchHostProcess()
+            await hostLaunchTask?.value
         }
     }
 
     private func scheduleServerAutostart() {
         Task { @MainActor [weak self] in
             guard let self else { return }
-            while !initialConnectionChecked && !Task.isCancelled { try? await Task.sleep(for: .milliseconds(100)) }
+            while !initialConnectionChecked && !Task.isCancelled {
+                do { try await Task.sleep(for: .milliseconds(100)) } catch { return }
+            }
+            guard !Task.isCancelled, !hostStopping else { return }
             let downloadedNow: Bool = if case .startingServer = modelDownloadState { true } else { false }
             guard settings.startServerWhenOpens || downloadedNow else { return }
             if connection.isConnected {
@@ -671,34 +750,85 @@ public final class AppModel: ObservableObject {
                 if status?.state != .stopped { modelDownloader.serverDidStart() }
                 return
             }
-            launchHostProcess()
+            if serverStartAvailability.enabled || downloadedNow { launchHostProcess() }
         }
     }
 
-    /// On quit: stop the server this app started (it holds ~16 GB), leave any other server alone.
-    public func stopOwnedServerOnQuit() async {
-        await closeAllSessions()
-        guard let pid = ownedHostPID, kill(pid, 0) == 0 else { return }
-        _ = kill(pid, SIGTERM)
-        for _ in 0..<30 {
-            if kill(pid, 0) != 0 { break }
-            try? await Task.sleep(for: .milliseconds(100))
-        }
+    /// A failed child must not leave a stale PID (or a permanently disabled Start button).
+    private func reapExitedHost() -> String? {
+        guard let pid = ownedHostPID, !hostProcessRunning(pid) else { return nil }
         ownedHostPID = nil
-        hostProcessPID = nil
+        if hostProcessPID == pid { hostProcessPID = nil }
+        hostStarting = false
+        var detail = hostFailureDetail()
+        if detail == nil, let path = hostLogPath, let file = FileHandle(forReadingAtPath: path) {
+            defer { try? file.close() }
+            if let end = try? file.seekToEnd(), end > hostLogOffset {
+                try? file.seek(toOffset: max(hostLogOffset, end > 4096 ? end - 4096 : 0))
+                if let data = try? file.read(upToCount: 4096) {
+                    detail = String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+            }
+        }
+        return "Start server: process \(pid) exited." + (detail.flatMap { $0.isEmpty ? nil : " \($0)" } ?? " Check the host log for details.")
+    }
+
+    /// Quit step 1: no reconnects or relaunch, a running download ends (its .part files stay resumable, never
+    /// marked verified), live chat sessions close. Returns the pid this app owns, if any.
+    public var hostLaunchInFlight: Bool { hostLaunchTask != nil }
+
+    public func prepareForQuit() async -> Int32? {
+        hostStopping = true
+        stop()
+        switch modelDownloader.state {
+        case .downloading, .verifying, .confirming: modelDownloader.cancel()
+        default: break
+        }
+        await closeAllSessions()
+        await hostLaunchTask?.value
+        return ownedHostPID
+    }
+
+    /// The coordinator confirmed the owned process is gone.
+    public func hostExited(_ pid: Int32) {
+        if ownedHostPID == pid { ownedHostPID = nil }
+        if hostProcessPID == pid { hostProcessPID = nil }
+    }
+
+    /// A server left by a previous app instance that passed the coordinator's ownership checks.
+    public func adoptRunningHost(_ pid: Int32) {
+        guard ownedHostPID == nil, pid > 1, pid != getpid() else { return }
+        ownedHostPID = pid; hostProcessPID = pid
     }
 
     public func stopServer() async {
-        guard let pid = hostProcessPID ?? findServerPID() else {
-            lastError = "Stop server: could not identify the Strim server process."
+        guard !hostStopping else { return }
+        hostStopping = true
+        defer { hostStopping = false; reconnectNow() }
+        stop()
+        let wasLaunching = hostLaunchTask != nil
+        await hostLaunchTask?.value
+        guard let pid = ownedHostPID ?? hostProcessPID ?? (discoverHostProcess ? findServerPID() : nil) else {
+            if !wasLaunching { lastError = "Stop server: could not identify the Strim server process." }
             return
         }
         hostProcessPID = pid
         await closeAllSessions()
-        _ = kill(pid, SIGTERM)
-        for _ in 0..<40 {
-            if kill(pid, 0) != 0 { hostProcessPID = nil; reconnectNow(); return }
-            try? await Task.sleep(for: .milliseconds(100))
+        await stopHostProcess(pid, attempts: 40)
+    }
+
+    private func stopHostProcess(_ pid: Int32, attempts: Int) async {
+        guard pid > 1, pid != getpid() else { lastError = "Stop server: invalid process ID."; return }
+        hostStarting = false
+        if hostProcessRunning(pid) { terminateHostProcess(pid) }
+        for _ in 0..<attempts {
+            if !hostProcessRunning(pid) {
+                if ownedHostPID == pid { ownedHostPID = nil }
+                if hostProcessPID == pid { hostProcessPID = nil }
+                return
+            }
+            do { try await clock.sleep(seconds: 0.1) }
+            catch { lastError = "Stop server: interrupted while waiting for process \(pid)."; return }
         }
         lastError = "Stop server: process \(pid) did not exit after SIGTERM."
     }

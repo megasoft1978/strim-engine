@@ -247,7 +247,8 @@ private func delta(_ sid: String, _ k: ChatDeltaKind, _ t: String) -> StrimEvent
         let fake = FakeControlClient(status: HostStatus(state: .stopped, memory: MemoryStats(weightsGB: 0, prefixTrieGB: 0, mlxCacheGB: 0, headroomGB: 0)))
         await fake.setModels([LocalModel(name: "Qwen-27B", path: "/models/Qwen-27B", sizeGB: 15), LocalModel(name: "mtp-head", path: "/models/mtp-head", kind: "mtp")])
         let saved = Locked<[AppSettings]>([])
-        let m = make(fake, settings: AppSettings(), persisted: saved)
+        // startServerWhenOpens off: the default (on) auto-loads the model in the background and races these checks.
+        let m = make(fake, settings: AppSettings(startServerWhenOpens: false), persisted: saved)
         m.start()
         #expect(await waitFor { m.connection.isConnected })
         await m.refreshModels()
@@ -298,7 +299,7 @@ private func delta(_ sid: String, _ k: ChatDeltaKind, _ t: String) -> StrimEvent
     @Test func projectPickerValidatesAndKeepsRecents() async {
         let fake = FakeControlClient()
         let saved = Locked<[AppSettings]>([])
-        let m = make(fake, settings: AppSettings(), persisted: saved)
+        let m = make(fake, settings: AppSettings(startServerWhenOpens: false), persisted: saved)
         m.start()
         #expect(await waitFor { m.connection.isConnected })
         let a = tmp(), b = tmp()

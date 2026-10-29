@@ -130,21 +130,21 @@ struct LaunchAgentTests {
         // not executable
         let plain = tmpDir("bin2").path + "/x"; try "x".write(toFile: plain, atomically: true, encoding: .utf8)
         #expect(throws: LaunchAgentError.self) { try LaunchAgent.validateBinary(plain, allowUnsafe: true) }
-        // world-writable directory / group-writable file outside the temp dirs (under $HOME)
-        let home = NSHomeDirectory() + "/.strim-test-\(UUID().uuidString)"
+        // Exercise permission checks inside an isolated temporary root.
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("strim-test-\(UUID().uuidString)").path
         try FileManager.default.createDirectory(atPath: home, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(atPath: home) }
         let bin = home + "/strim"
         try FileManager.default.copyItem(atPath: "/usr/bin/true", toPath: bin); chmod(bin, 0o755)
-        #expect(try LaunchAgent.validateBinary(bin, allowUnsafe: false).hasSuffix("/strim"))
+        #expect(try LaunchAgent.validateBinary(bin, allowUnsafe: false, temporaryRoots: [], directoryBoundary: home).hasSuffix("/strim"))
         chmod(bin, 0o775)
-        #expect(throws: LaunchAgentError.self) { try LaunchAgent.validateBinary(bin, allowUnsafe: false) }
+        #expect(throws: LaunchAgentError.self) { try LaunchAgent.validateBinary(bin, allowUnsafe: false, temporaryRoots: [], directoryBoundary: home) }
         chmod(bin, 0o755); chmod(home, 0o777)
-        #expect(throws: LaunchAgentError.self) { try LaunchAgent.validateBinary(bin, allowUnsafe: false) }
+        #expect(throws: LaunchAgentError.self) { try LaunchAgent.validateBinary(bin, allowUnsafe: false, temporaryRoots: [], directoryBoundary: home) }
         // a relative symlink in a writable place resolves to its real target
         chmod(home, 0o755)
         try FileManager.default.createSymbolicLink(atPath: home + "/link", withDestinationPath: "strim")
-        #expect(try LaunchAgent.validateBinary(home + "/link", allowUnsafe: false) == (try LaunchAgent.validateBinary(bin, allowUnsafe: false)))
+        #expect(try LaunchAgent.validateBinary(home + "/link", allowUnsafe: false, temporaryRoots: [], directoryBoundary: home) == (try LaunchAgent.validateBinary(bin, allowUnsafe: false, temporaryRoots: [], directoryBoundary: home)))
     }
 
     @Test("currentExecutablePath is absolute and exists")

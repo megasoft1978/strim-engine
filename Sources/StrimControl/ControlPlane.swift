@@ -293,6 +293,10 @@ public final class StrimControlPlane: Sendable {
 
     func approve(_ req: Request) async throws -> Reply {
         let a = try ControlJSON.decode(ApprovalBody.self, from: req.body)
+        // A live job may reach approval before its initial record has been saved.
+        if (try? await jobs.status(a.jobID, waitS: 0).status) == .awaitingApproval {
+            await jobs.flush()
+        }
         let r = try await record(a.jobID)
         guard applying.withLock({ $0.insert(a.jobID).inserted }) else { throw ControlError.conflict("an approval for this job is running") }
         defer { applying.withLock { _ = $0.remove(a.jobID) } }

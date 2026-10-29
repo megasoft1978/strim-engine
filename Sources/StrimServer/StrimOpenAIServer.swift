@@ -1,5 +1,6 @@
 import Foundation
 import StrimAdmission
+import StrimAPI
 import StrimEngine
 import StrimHTTP
 import StrimTemplate
@@ -165,9 +166,9 @@ public final class StrimOpenAIServer: @unchecked Sendable {
     private func health(_ r: Responder) async throws {
         let st = engine.stats()
         if st.healthy {
-            try await sendJSON(r, .ordered([("status", .string("ok")), ("engine", .string("up"))]))
+            try await sendJSON(r, .ordered([("status", .string("ok")), ("engine", .string("up")), ("version", .string(StrimVersion.current))]))
         } else {
-            try await sendJSON(r, .ordered([("status", .string("unhealthy")), ("engine", .string("down"))]), status: 503)   // reason stays on guarded /metrics
+            try await sendJSON(r, .ordered([("status", .string("unhealthy")), ("engine", .string("down")), ("version", .string(StrimVersion.current))]), status: 503)   // reason stays on guarded /metrics
         }
     }
 

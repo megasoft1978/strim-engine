@@ -1,6 +1,39 @@
 import Foundation
 import ServiceManagement
 
+/// Any JSON value, used to carry unknown app.json keys through a load/save round trip.
+public enum SettingsJSON: Codable, Equatable, Sendable {
+    case null, bool(Bool), number(Double), string(String), array([SettingsJSON]), object([String: SettingsJSON])
+
+    struct AnyKey: CodingKey {
+        var stringValue: String
+        var intValue: Int? { nil }
+        init(_ s: String) { stringValue = s }
+        init?(stringValue: String) { self.stringValue = stringValue }
+        init?(intValue: Int) { nil }
+    }
+    public init(from d: Decoder) throws {
+        let c = try d.singleValueContainer()
+        if c.decodeNil() { self = .null }
+        else if let b = try? c.decode(Bool.self) { self = .bool(b) }
+        else if let n = try? c.decode(Double.self) { self = .number(n) }
+        else if let s = try? c.decode(String.self) { self = .string(s) }
+        else if let a = try? c.decode([SettingsJSON].self) { self = .array(a) }
+        else { self = .object(try c.decode([String: SettingsJSON].self)) }
+    }
+    public func encode(to e: Encoder) throws {
+        var c = e.singleValueContainer()
+        switch self {
+        case .null: try c.encodeNil()
+        case .bool(let v): try c.encode(v)
+        case .number(let v): try c.encode(v)
+        case .string(let v): try c.encode(v)
+        case .array(let v): try c.encode(v)
+        case .object(let v): try c.encode(v)
+        }
+    }
+}
+
 /// User settings in ~/.strim/app.json. All fields optional on disk.
 public struct AppSettings: Codable, Equatable, Sendable {
     public var hostURL: String
@@ -18,39 +51,76 @@ public struct AppSettings: Codable, Equatable, Sendable {
     public var showSpeedInMenuBar: Bool
     /// Recently chosen project folders, newest first (at most `maxRecents`).
     public var recentProjects: [String]
+    /// Default for new chats ("Default thinking" in Settings). A chat keeps the value it started with.
+    public var thinkingEnabled: Bool
+    /// The user chose "None" for the MTP head. A blank `mtp_path` alone means "use the default head", so "off" is explicit.
+    public var mtpDisabled: Bool
     public static let maxRecents = 8
 
     public init(hostURL: String = AppPaths.defaultHostURL, strimBinary: String? = nil, modelPath: String? = nil,
                 mtpPath: String? = nil, controlTokenPath: String = AppPaths.defaultControlTokenPath, projectPath: String? = nil,
-                recentProjects: [String] = [], startServerWhenOpens: Bool = true, showSpeedInMenuBar: Bool = true) {
+                recentProjects: [String] = [], startServerWhenOpens: Bool = true, showSpeedInMenuBar: Bool = true,
+                thinkingEnabled: Bool = true, mtpDisabled: Bool = false) {
         self.showSpeedInMenuBar = showSpeedInMenuBar
         self.recentProjects = recentProjects
         self.hostURL = hostURL; self.strimBinary = strimBinary; self.modelPath = modelPath
         self.mtpPath = mtpPath; self.controlTokenPath = controlTokenPath; self.projectPath = projectPath
         self.startServerWhenOpens = startServerWhenOpens
+        self.thinkingEnabled = thinkingEnabled; self.mtpDisabled = mtpDisabled
     }
-    enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey, CaseIterable {
         case hostURL = "host_url", strimBinary = "strim_binary", modelPath = "model_path"
         case mtpPath = "mtp_path", controlTokenPath = "control_token_path", projectPath = "project_path"
         case recentProjects = "recent_projects", startServerWhenOpens = "start_server_when_opens"
         case showSpeedInMenuBar = "show_speed_in_menu_bar"
+        case thinkingEnabled = "thinking_enabled", mtpDisabled = "mtp_disabled"
     }
     /// A blank path in app.json (older builds could save one) means "use the default", never "unset".
     static func nonEmpty(_ s: String?) -> String? {
         guard let t = s?.trimmingCharacters(in: .whitespacesAndNewlines), !t.isEmpty else { return nil }
         return t
     }
+    /// Keys this build does not know (older `token_path`, or written by a newer build). Kept and written back on save.
+    public var unknownKeys: [String: SettingsJSON] = [:]
+
+    /// Each key decodes on its own: a value of the wrong type (a string for a bool, a number for a path) falls back to
+    /// that key's default instead of discarding the whole file.
     public init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
-        hostURL = try c.decodeIfPresent(String.self, forKey: .hostURL) ?? AppPaths.defaultHostURL
-        strimBinary = try c.decodeIfPresent(String.self, forKey: .strimBinary)
-        modelPath = Self.nonEmpty(try c.decodeIfPresent(String.self, forKey: .modelPath))
-        mtpPath = Self.nonEmpty(try c.decodeIfPresent(String.self, forKey: .mtpPath))
-        controlTokenPath = try c.decodeIfPresent(String.self, forKey: .controlTokenPath) ?? AppPaths.defaultControlTokenPath
-        projectPath = try c.decodeIfPresent(String.self, forKey: .projectPath)
-        recentProjects = try c.decodeIfPresent([String].self, forKey: .recentProjects) ?? []
-        startServerWhenOpens = try c.decodeIfPresent(Bool.self, forKey: .startServerWhenOpens) ?? true
-        showSpeedInMenuBar = try c.decodeIfPresent(Bool.self, forKey: .showSpeedInMenuBar) ?? true
+        func get<T: Decodable>(_ k: CodingKeys) -> T? { (try? c.decodeIfPresent(T.self, forKey: k)) ?? nil }
+        hostURL = get(.hostURL) ?? AppPaths.defaultHostURL
+        strimBinary = Self.nonEmpty(get(.strimBinary))
+        modelPath = Self.nonEmpty(get(.modelPath))
+        mtpPath = Self.nonEmpty(get(.mtpPath))
+        controlTokenPath = get(.controlTokenPath) ?? AppPaths.defaultControlTokenPath
+        projectPath = Self.nonEmpty(get(.projectPath))
+        recentProjects = get(.recentProjects) ?? []
+        startServerWhenOpens = get(.startServerWhenOpens) ?? true
+        showSpeedInMenuBar = get(.showSpeedInMenuBar) ?? true
+        thinkingEnabled = get(.thinkingEnabled) ?? true
+        mtpDisabled = get(.mtpDisabled) ?? false
+        if let all = try? d.container(keyedBy: SettingsJSON.AnyKey.self) {
+            let known = Set(CodingKeys.allCases.map(\.rawValue))
+            for k in all.allKeys where !known.contains(k.stringValue) {
+                if let v = try? all.decode(SettingsJSON.self, forKey: k) { unknownKeys[k.stringValue] = v }
+            }
+        }
+    }
+    public func encode(to e: Encoder) throws {
+        var c = e.container(keyedBy: SettingsJSON.AnyKey.self)
+        for (k, v) in unknownKeys { try c.encode(v, forKey: .init(k)) }
+        // Known keys last so they always win over a same-named unknown entry.
+        try c.encode(hostURL, forKey: .init(CodingKeys.hostURL.rawValue))
+        try c.encodeIfPresent(strimBinary, forKey: .init(CodingKeys.strimBinary.rawValue))
+        try c.encodeIfPresent(modelPath, forKey: .init(CodingKeys.modelPath.rawValue))
+        try c.encodeIfPresent(mtpPath, forKey: .init(CodingKeys.mtpPath.rawValue))
+        try c.encode(controlTokenPath, forKey: .init(CodingKeys.controlTokenPath.rawValue))
+        try c.encodeIfPresent(projectPath, forKey: .init(CodingKeys.projectPath.rawValue))
+        try c.encode(recentProjects, forKey: .init(CodingKeys.recentProjects.rawValue))
+        try c.encode(startServerWhenOpens, forKey: .init(CodingKeys.startServerWhenOpens.rawValue))
+        try c.encode(showSpeedInMenuBar, forKey: .init(CodingKeys.showSpeedInMenuBar.rawValue))
+        try c.encode(thinkingEnabled, forKey: .init(CodingKeys.thinkingEnabled.rawValue))
+        try c.encode(mtpDisabled, forKey: .init(CodingKeys.mtpDisabled.rawValue))
     }
 
     /// nil when `host_url` is not a plain loopback http URL with a port.
@@ -60,11 +130,31 @@ public struct AppSettings: Codable, Equatable, Sendable {
     public var url: URL { validatedURL ?? URL(string: AppPaths.defaultHostURL)! }
     public var port: Int { url.port ?? 8203 }
 
-    /// Missing or unreadable file yields defaults.
+    /// Result of reading app.json: the settings plus a notice when the file was unusable.
+    public struct LoadReport: Sendable {
+        public var settings: AppSettings
+        /// Set when the file was corrupt: names the backup the bad file was moved to.
+        public var notice: String?
+        public var backupPath: String?
+    }
+    /// Missing file yields defaults. A corrupt file is moved to `<path>.bad-<timestamp>` (so the next save cannot destroy
+    /// the user's settings), defaults are used, and the report carries the notice for the caller to show.
     public static func load(path: String = AppPaths.settingsPath) -> AppSettings {
-        guard let d = FileManager.default.contents(atPath: path),
-              let s = try? JSONDecoder().decode(AppSettings.self, from: d) else { return AppSettings() }
-        return s
+        loadReport(path: path).settings
+    }
+    public static func loadReport(path: String = AppPaths.settingsPath, now: Date = Date()) -> LoadReport {
+        guard let d = FileManager.default.contents(atPath: path) else { return LoadReport(settings: AppSettings()) }
+        if let s = try? JSONDecoder().decode(AppSettings.self, from: d) { return LoadReport(settings: s) }
+        // Not a JSON object (truncated, binary, or an array): keep the bytes aside, never overwrite them.
+        let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "yyyyMMdd-HHmmss"
+        var bad = path + ".bad-" + f.string(from: now)
+        var n = 1
+        while FileManager.default.fileExists(atPath: bad) { n += 1; bad = path + ".bad-" + f.string(from: now) + "-\(n)" }
+        if (try? SecureFS.writeAtomically(d, to: bad)) != nil {
+            try? FileManager.default.removeItem(atPath: path)
+            return LoadReport(settings: AppSettings(), notice: "Settings file was unreadable; using defaults. The old file was kept as \(bad).", backupPath: bad)
+        }
+        return LoadReport(settings: AppSettings(), notice: "Settings file was unreadable and could not be backed up; using defaults. The old file is still at app.json until settings are next saved.", backupPath: nil)
     }
     /// 0600 file in a 0700 directory, written atomically.
     public func save(path: String = AppPaths.settingsPath) throws {
@@ -164,13 +254,21 @@ public protocol HostLauncher: Sendable {
 }
 
 public enum HostCommand {
+    /// `~` and `~/x` expand to the home directory; a relative path is taken relative to home (the app has no meaningful cwd).
+    public static func expandPath(_ p: String, home: String = AppPaths.home) -> String {
+        let t = p.trimmingCharacters(in: .whitespacesAndNewlines)
+        if t == "~" { return home }
+        if t.hasPrefix("~/") { return home + String(t.dropFirst(1)) }
+        if t.hasPrefix("/") || t.hasPrefix("-") { return t }
+        return (home as NSString).appendingPathComponent(t)
+    }
     /// Arguments after the binary: `serve <model> [mtp] --port N`. Option-like paths are refused.
     public static func arguments(settings: AppSettings, stateDir: String? = nil) -> [String]? {
-        guard let m = settings.modelPath, !m.isEmpty, !m.hasPrefix("-") else { return nil }
-        var a = ["serve", m]
-        if let t = settings.mtpPath, !t.isEmpty {
+        guard let m = AppSettings.nonEmpty(settings.modelPath), !m.hasPrefix("-") else { return nil }
+        var a = ["serve", expandPath(m)]
+        if !settings.mtpDisabled, let t = AppSettings.nonEmpty(settings.mtpPath) {
             guard !t.hasPrefix("-") else { return nil }
-            a.append(t)
+            a.append(expandPath(t))
         }
         a += ["--port", String(settings.port)]
         if let stateDir {
@@ -185,21 +283,38 @@ public enum HostCommand {
         guard let a = arguments(settings: settings, stateDir: stateDir) else { return nil }
         return ([binary] + a).map(shellQuote).joined(separator: " ")
     }
-    public static func defaultBinaries() -> [String] {
+    /// Candidates in order: bundled `Contents/Resources/strim`, a `strim` next to the app executable, `~/.strim/bin`,
+    /// every absolute `$PATH` entry, then the Homebrew locations. The arguments exist so tests can inject them.
+    public static func defaultBinaries(resourcePath: String? = Bundle.main.bundleIdentifier == "dev.strim.Strim" ? Bundle.main.resourcePath : nil,
+                                       executableDir: String? = Bundle.main.executableURL?.deletingLastPathComponent().path,
+                                       path: String? = ProcessInfo.processInfo.environment["PATH"],
+                                       home: String = AppPaths.home,
+                                       fallbacks: [String] = ["/opt/homebrew/bin/strim", "/usr/local/bin/strim"]) -> [String] {
         // Strim.app ships the CLI at Contents/Resources/strim (packaging/app/make-app.sh); try it first so the
         // app works without Homebrew. Absent when running from `swift run`.
         var c: [String] = []
-        if let r = Bundle.main.resourcePath, Bundle.main.bundleIdentifier == "dev.strim.Strim" { c.append(r + "/strim") }
-        return c + [AppPaths.home + "/.strim/bin/strim", "/opt/homebrew/bin/strim", "/usr/local/bin/strim"]
+        if let r = resourcePath { c.append(r + "/strim") }
+        if let e = executableDir { c.append(e + "/strim") }
+        c.append(home + "/.strim/bin/strim")
+        for dir in (path ?? "").split(separator: ":") where dir.hasPrefix("/") { c.append((String(dir) as NSString).appendingPathComponent("strim")) }
+        c += fallbacks
+        var seen = Set<String>()
+        return c.filter { seen.insert($0).inserted }
     }
     public enum Resolution: Equatable, Sendable { case found(String), missing, invalid(String) }
     /// A configured `strim_binary` is used only if valid (never silently replaced); otherwise the first valid default.
-    public static func resolveBinary(settings: AppSettings) -> Resolution {
-        if let b = settings.strimBinary, !b.isEmpty {
-            if let why = BinaryValidator.validate(b) { return .invalid(why) }
+    /// When no default is usable but one exists on disk (for example not executable), that is reported instead of "missing".
+    public static func resolveBinary(settings: AppSettings, candidates: [String]? = nil) -> Resolution {
+        if let b = AppSettings.nonEmpty(settings.strimBinary) {
+            if let why = BinaryValidator.validate(b) { return .invalid("\(b) \(why)") }
             return .found(b)
         }
-        for c in defaultBinaries() where BinaryValidator.validate(c) == nil { return .found(c) }
+        var firstProblem: String?
+        for c in candidates ?? defaultBinaries() {
+            guard let why = BinaryValidator.validate(c) else { return .found(c) }
+            if firstProblem == nil, why != "does not exist" { firstProblem = "\(c) \(why)" }
+        }
+        if let p = firstProblem { return .invalid(p) }
         return .missing
     }
 }
@@ -207,25 +322,67 @@ public enum HostCommand {
 /// Runs `strim serve` as a detached child writing to ~/.strim/host.log (0600). Never needs a login.
 public struct ProcessHostLauncher: HostLauncher {
     public let stateDir: String?
-    public init(stateDir: String? = nil) { self.stateDir = stateDir }
+    /// A process that exits within this many seconds is reported as a failed start with the last log lines.
+    /// A healthy start therefore returns after about this long.
+    public let startupGrace: Double
+    /// Overrides binary discovery (tests); nil uses `HostCommand.defaultBinaries()`.
+    public let binaryCandidates: [String]?
+    public init(stateDir: String? = nil, startupGrace: Double = 1.0, binaryCandidates: [String]? = nil) {
+        self.stateDir = stateDir; self.startupGrace = startupGrace; self.binaryCandidates = binaryCandidates
+    }
     public var logPath: String { stateDir.map { ($0 as NSString).appendingPathComponent("host.log") } ?? AppPaths.hostLogPath }
+
+    /// Last `count` non-empty lines of the log written at or after `offset`.
+    static func tail(of path: String, from offset: UInt64, count: Int = 8) -> String {
+        guard let h = FileHandle(forReadingAtPath: path) else { return "" }
+        defer { try? h.close() }
+        try? h.seek(toOffset: offset)
+        let text = String(decoding: (try? h.readToEnd()) ?? Data(), as: UTF8.self)
+        return text.split(whereSeparator: \.isNewline).map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }.suffix(count).joined(separator: "\n")
+    }
+
     public func start(settings: AppSettings) -> HostLaunchResult {
         guard let args = HostCommand.arguments(settings: settings, stateDir: stateDir) else { return .needsModel }
         let manual = HostCommand.commandLine(binary: "strim", settings: settings, stateDir: stateDir) ?? "strim serve"
         let bin: String
-        switch HostCommand.resolveBinary(settings: settings) {
+        switch HostCommand.resolveBinary(settings: settings, candidates: binaryCandidates) {
         case .missing: return .binaryMissing(command: manual)
         case .invalid(let why): return .binaryInvalid(reason: why, command: manual)
         case .found(let b): bin = b
         }
+        // A doomed server (missing weights) would only fail later with an opaque log line; say so up front.
+        var launchArgs = args
+        var isDir: ObjCBool = false
+        let model = args[1]
+        guard FileManager.default.fileExists(atPath: model, isDirectory: &isDir) else {
+            return .failed("model not found at \(model). Choose a model in Settings or let Strim download one.")
+        }
+        // `strim serve` takes the model as a folder (EngineConfig modelDir); a plain file can never load.
+        guard isDir.boolValue else {
+            return .failed("model not found at \(model): it is not a model folder. Choose a model in Settings or let Strim download one.")
+        }
+        // The MTP head is optional for `strim serve [mtpHead]`: without it the server runs plain decoding. Drop a
+        // missing one rather than refuse to start; the note goes to the log.
+        var note: String?
+        if args.count > 2, args[2] != "--port", !FileManager.default.fileExists(atPath: args[2]) {
+            note = "strim app: MTP head not found at \(args[2]); starting without MTP (slower decoding)."
+            launchArgs.remove(at: 2)
+        }
         let p = Process()
         p.executableURL = URL(fileURLWithPath: bin)
-        p.arguments = args
+        p.arguments = launchArgs
         do {
             let log = try SecureFS.openAppend(logPath)
-            log.seekToEndOfFile()
+            let offset = log.seekToEndOfFile()
+            if let note { log.write(Data((note + "\n").utf8)) }
             p.standardOutput = log; p.standardError = log; p.standardInput = FileHandle.nullDevice
+            let exited = DispatchSemaphore(value: 0)
+            p.terminationHandler = { _ in exited.signal() }
             try p.run()
+            if startupGrace > 0, exited.wait(timeout: .now() + startupGrace) == .success {
+                let why = Self.tail(of: logPath, from: offset)
+                return .failed("strim exited with status \(p.terminationStatus) right after starting." + (why.isEmpty ? " Log: \(logPath)" : "\n" + why))
+            }
             return .started(pid: p.processIdentifier)
         } catch { return .failed(error.localizedDescription) }
     }

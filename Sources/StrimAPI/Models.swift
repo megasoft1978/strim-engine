@@ -247,15 +247,21 @@ public enum ChatDeltaKind: String, Codable, Sendable, Equatable {
     case text, reasoning, toolCall = "tool_call", toolResult = "tool_result", done
 }
 
+/// Terminal status of a chat turn, carried on `done` deltas only (nil from hosts that predate it).
+public enum ChatTurnStatus: String, Codable, Sendable, Equatable {
+    case done, failed, cancelled, limit, declined
+}
+
 /// Streaming chunk of a chat turn.
 public struct ChatDelta: Codable, Sendable, Equatable {
     public var sessionID: String
     public var kind: ChatDeltaKind
     public var text: String
-    public init(sessionID: String, kind: ChatDeltaKind, text: String) {
-        self.sessionID = sessionID; self.kind = kind; self.text = text
+    public var status: ChatTurnStatus?
+    public init(sessionID: String, kind: ChatDeltaKind, text: String, status: ChatTurnStatus? = nil) {
+        self.sessionID = sessionID; self.kind = kind; self.text = text; self.status = status
     }
-    enum CodingKeys: String, CodingKey { case sessionID = "session_id", kind, text }
+    enum CodingKeys: String, CodingKey { case sessionID = "session_id", kind, text, status }
 }
 
 /// One SSE frame. Wire form: `{"type":"<case>","data":{...}}`; the SSE `event:` name equals `type`.

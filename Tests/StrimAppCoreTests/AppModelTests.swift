@@ -160,7 +160,8 @@ private func awaitSubscribed(_ m: AppModel, _ fake: FakeControlClient) async -> 
 
     @Test func loadFallsBackToDefaultWithoutModelPath() async {
         let fake = FakeControlClient(status: status(.stopped, model: nil))
-        let m = makeModel(fake, settings: AppSettings())
+        // Autostart off: otherwise the default-model autostart races the availability check under load.
+        let m = makeModel(fake, settings: AppSettings(startServerWhenOpens: false))
         m.start()
         #expect(await waitFor { m.connection.isConnected })
         #expect(m.loadAvailability.enabled == true, "no saved path means the default model, not a manual step")
@@ -273,22 +274,25 @@ private func awaitSubscribed(_ m: AppModel, _ fake: FakeControlClient) async -> 
         m.start()
         #expect(await waitFor { m.offlineBanner != nil })
         m.startHost()
+        #expect(await waitFor(timeout: 3) { m.notice?.contains("4242") == true })
         #expect(launcher.calls.value == 1)
         #expect(m.notice?.contains("4242") == true)
         m.stop()
     }
 
-    @Test func startHostWithMissingBinaryCopiesCommand() {
+    @Test func startHostWithMissingBinaryCopiesCommand() async {
         let clip = MockClipboard()
         let m = makeModel(FakeControlClient(), launcher: MockLauncher(.binaryMissing(command: "strim serve /models/q --port 8203")), clip: clip)
         m.startHost()
+        #expect(await waitFor(timeout: 3) { m.notice?.contains("Terminal") == true })
         #expect(clip.copied.value == ["strim serve /models/q --port 8203"])
         #expect(m.notice?.contains("Terminal") == true)
     }
 
-    @Test func startHostNeedsModel() {
+    @Test func startHostNeedsModel() async {
         let m = makeModel(FakeControlClient(), launcher: MockLauncher(.needsModel))
         m.startHost()
+        #expect(await waitFor(timeout: 3) { m.notice?.contains("download the model") == true })
         #expect(m.notice?.contains("download the model") == true)
     }
 

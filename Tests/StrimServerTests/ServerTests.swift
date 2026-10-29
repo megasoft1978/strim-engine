@@ -3,6 +3,7 @@ import Testing
 import StrimEngine
 import StrimHTTP
 import StrimTemplate
+import StrimAPI
 @testable import StrimServer
 
 private let token = "test-token-123"
@@ -74,6 +75,16 @@ private func finish(_ chunk: Any) -> String? {
 
 @Suite("StrimServer", .serialized)
 struct ServerTests {
+    @Test("health reports the release version")
+    func healthVersion() async throws {
+        let h = try await Harness.start(); defer { h.server.stop() }
+        let (healthyCode, healthy) = try await h.json(h.request("/health", method: "GET", auth: nil))
+        #expect(healthyCode == 200 && healthy["version"] as? String == StrimVersion.current)
+        h.engine.unhealthy = "test"
+        let (unhealthyCode, unhealthy) = try await h.json(h.request("/health", method: "GET", auth: nil))
+        #expect(unhealthyCode == 503 && unhealthy["version"] as? String == StrimVersion.current)
+    }
+
     @Test("stream chunk shapes, reasoning, usage chunk, [DONE]")
     func streamShapes() async throws {
         let h = try await Harness.start(); defer { h.server.stop() }

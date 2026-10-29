@@ -5,6 +5,8 @@ import StrimEngine
 import StrimHarness
 import StrimHost
 import StrimJobs
+import StrimServer
+
 @testable import StrimControl
 
 private struct Boom: Error, CustomStringConvertible { var description: String { "weights missing" } }
@@ -241,5 +243,43 @@ struct ControlJobsTests {
         #expect((try await r.jobs.status(b, waitS: 5)).status == .cancelled)
         let again = await r.call("POST", "/v1/strim/jobs/approve", body: #"{"job_id":"\#(a)","action":"apply"}"#)
         #expect(again.status == 409 || again.status == 400)
+    }
+}
+
+private actor DelayedApprovalStore: JobStore {
+    private let base = InMemoryJobStore()
+    private var first = true
+    func save(_ record: JobRecord) async throws {
+        if first { first = false; try await Task.sleep(for: .seconds(1)) }
+        await base.save(record)
+    }
+    func load(_ id: JobID) async throws -> JobRecord? { await base.load(id) }
+    func list() async throws -> [JobRecord] { await base.list() }
+    func remove(_ id: JobID) async throws { await base.remove(id) }
+    func appendEvent(_ id: JobID, _ event: StrimJobs.JobEvent) async throws { await base.appendEvent(id, event) }
+    func events(_ id: JobID) async throws -> [StrimJobs.JobEvent] { await base.events(id) }
+}
+
+extension ControlJobsTests {
+    @Test("pre-run rejection waits for the initial job record")
+    func approvalBeforePersistence() async throws {
+        let r = try await Rig.make(); defer { r.stop() }
+        let store = DelayedApprovalStore()
+        let jobs = JobManager(executor: { _, _, _ in HarnessJobResult(status: .done, summary: "ok") },
+                              store: store, requireApproval: true)
+        let plane = StrimControlPlane(slot: r.slot, jobs: jobs, store: store, jobsRoot: r.jobsRoot,
+                                      policy: HostPolicy(maxAccess: .write, allowedRoots: []),
+                                      auth: ControlAuth(controlToken: r.control, apiToken: r.token))
+        let server = StrimOpenAIServer(engine: r.slot.client, config: ServerConfig(modelId: "m", bearerToken: r.token))
+        plane.register(on: server)
+        let port = try await server.start(port: 0)
+        defer { server.stop() }
+        let id = try await jobs.submit(HarnessJobSpec(task: "b", cwd: "/tmp"), priority: .normal)
+        while try await jobs.status(id, waitS: 0).status != .awaitingApproval { await Task.yield() }
+        let x = await Raw.exchange(port: port, method: "POST", path: "/v1/strim/jobs/approve", host: "127.0.0.1",
+                                   headers: ["Authorization": "Bearer \(r.control)", "Content-Type": "application/json"],
+                                   body: #"{"job_id":"\#(id)","action":"reject"}"#)
+        #expect(x.status == 200, "\(x.body)")
+        #expect((try await jobs.status(id, waitS: 5)).status == .cancelled)
     }
 }

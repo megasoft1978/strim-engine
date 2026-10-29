@@ -3,6 +3,15 @@ import AppKit
 import StrimAppCore
 
 @main
+enum StrimEntry {
+    @MainActor static func main() async {
+        if CommandLine.arguments.contains("--selftest") {
+            exit(await SelfTest.run())
+        }
+        StrimMenuApp.main()
+    }
+}
+
 struct StrimMenuApp: App {
     @NSApplicationDelegateAdaptor(QuitHandler.self) private var quitHandler
     @StateObject private var model: AppModel
@@ -16,7 +25,12 @@ struct StrimMenuApp: App {
         }
         let m = AppModel(makeClient: { s in HTTPControlClient.make(settings: s) }, chatStore: FileChatStore())
         _model = StateObject(wrappedValue: m)
-        QuitHandler.model = m
+        let coordinator = LifecycleCoordinator(target: m, expectedBinary: {
+            if case .found(let path) = HostCommand.resolveBinary(settings: m.settings) { return path }
+            return nil
+        })
+        coordinator.adoptOnLaunch()   // before start(): a server left by the previous run is adopted, never duplicated
+        QuitHandler.coordinator = coordinator
         m.start()
     }
 
@@ -62,21 +76,21 @@ struct MenuBarLabel: View {
     }
 }
 
-/// On quit: ends open chat sessions and stops the server this app started (best effort, at most 4 s).
+/// Quit / logout / shutdown / wake. All decisions live in `LifecycleCoordinator` (StrimAppCore, unit-tested).
 final class QuitHandler: NSObject, NSApplicationDelegate {
-    @MainActor static var model: AppModel?
+    @MainActor static var coordinator: LifecycleCoordinator?
+
+    @MainActor func applicationDidFinishLaunching(_ notification: Notification) {
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated { Self.coordinator?.systemDidWake() }
+        }
+    }
 
     @MainActor func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard let model = Self.model else { return .terminateNow }
-        Task { @MainActor in
-            await withTaskGroup(of: Void.self) { g in
-                g.addTask { await model.stopOwnedServerOnQuit() }
-                g.addTask { try? await Task.sleep(for: .seconds(4)) }
-                _ = await g.next()
-                g.cancelAll()
-            }
-            NSApp.reply(toApplicationShouldTerminate: true)
+        guard let c = Self.coordinator else { return .terminateNow }
+        switch c.requestQuit(reply: { NSApp.reply(toApplicationShouldTerminate: true) }) {
+        case .now: return .terminateNow
+        case .later: return .terminateLater
         }
-        return .terminateLater
     }
 }

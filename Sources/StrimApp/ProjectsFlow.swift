@@ -31,23 +31,11 @@ final class ProjectsFlow: ObservableObject {
     /// Adds each folder; selects a chat in the first one that works, shows the first failure.
     @discardableResult
     func add(_ paths: [String], _ model: AppModel, then: @escaping () -> Void = {}) -> Bool {
-        var opened = false, failure: String?
-        for path in paths {
-            var isDir: ObjCBool = false
-            guard FileManager.default.fileExists(atPath: path, isDirectory: &isDir), isDir.boolValue else {
-                failure = failure ?? "“\((path as NSString).lastPathComponent)” is not a folder."
-                continue
-            }
-            switch model.requestProject(path) {
-            case .added(let p):
-                if !opened { _ = model.newThread(projectID: p.id); opened = true }
-            case .needsConsent: afterConsent = then   // the consent sheet is up; Allow adds the project, Cancel adds nothing
-            case .failed(let e): failure = failure ?? e.message
-            }
-        }
-        if let failure { fail(failure) } else { error = nil }
-        if opened { then() }
-        return opened
+        let result = model.addFolders(paths)
+        if result.needsConsent { afterConsent = then }   // the consent sheet is up; Allow adds the project, Cancel adds nothing
+        if let failure = result.failure { fail(failure) } else { error = nil }
+        if result.opened { then() }
+        return result.opened
     }
 }
 
@@ -55,22 +43,14 @@ extension ProjectsFlow {
     /// Allow in the consent sheet.
     func allow(_ model: AppModel) {
         let then = afterConsent
-        Task {
-            let wasAdd = model.pendingConsent.map { c -> Bool in if case .add = c.kind { return true } else { return false } } ?? false
-            if await model.confirmConsent() != nil, wasAdd { then?() }
-        }
+        Task { if await model.allowPendingConsent() { then?() } }
     }
 }
 
 enum Finder {
     /// Shows the folder in Finder; a folder that does not exist yet (lazy scratch) falls back to its parent.
     static func reveal(_ path: String) {
-        var url = URL(fileURLWithPath: path)
-        while !FileManager.default.fileExists(atPath: url.path), url.path != "/" { url.deleteLastPathComponent() }
-        NSWorkspace.shared.activateFileViewerSelecting([url])
-    }
-    static func copy(_ s: String) {
-        NSPasteboard.general.clearContents(); NSPasteboard.general.setString(s, forType: .string)
+        NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: FinderTarget.revealPath(path))])
     }
 }
 
@@ -80,5 +60,5 @@ enum Finder {
     panel.canChooseDirectories = true; panel.canChooseFiles = false; panel.allowsMultipleSelection = false
     panel.prompt = "Locate"; panel.message = "Choose the folder this project moved to."
     guard panel.runModal() == .OK, let url = panel.url else { return }
-    Task { if case .failed(let e) = await model.requestRelocate(projectID, path: url.path) { flow.fail(e.message) } }
+    Task { if let failure = await model.locateProject(projectID, to: url.path) { flow.fail(failure) } }
 }

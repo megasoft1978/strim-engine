@@ -3,21 +3,6 @@ import AppKit
 import StrimAPI
 import StrimAppCore
 
-enum AppSection: String, CaseIterable, Identifiable {
-    case status, chat, jobs
-    var id: String { rawValue }
-    var title: String { rawValue.capitalized }
-    var icon: String {
-        switch self {
-        case .status: "gauge.with.dots.needle.33percent"
-        case .chat: "bubble.left.and.bubble.right"
-        case .jobs: "list.bullet.rectangle"
-        }
-    }
-    /// Rows above the Projects section. Chat has no row of its own: its chats live under their projects.
-    static let sidebar: [AppSection] = [.status, .jobs]
-}
-
 /// Main window: sidebar (state row, Status, Jobs, Projects with their chats), unified toolbar (Start/Stop, overflow menu) and the
 /// section content. First-run states collapse the sidebar and replace the content with the download flow.
 struct MainWindow: View {
@@ -78,7 +63,7 @@ struct MainWindow: View {
         NavigationSplitView(columnVisibility: $visibility) {
             Sidebar(model: model, section: $section)
                 .environmentObject(flow)
-                .navigationSplitViewColumnWidth(min: 180, ideal: 200, max: 240)
+                .navigationSplitViewColumnWidth(min: PaneWidths.sidebarMin, ideal: PaneWidths.sidebarIdeal, max: PaneWidths.sidebarMax)
         } detail: {
             Group {
                 if firstRun { FirstRunView(model: model) }
@@ -130,29 +115,27 @@ struct MainWindow: View {
         }
     }
 
-    /// ⌘1 Status, ⌘2 Jobs, ⌘3 last chat, ⌘N new chat, ⇧⌘O open folder, ⌘[ / ⌘] previous / next chat, ⌘R toggles the server.
+    /// ⌘1 Status, ⌘2 Jobs, ⌘3 last chat, ⌘N new chat, ⇧⌘O open folder, ⌘[ / ⌘] previous / next chat.
+    /// (No Cmd-R: the hidden-button binding never fired, so it was removed; Start/Stop stays in the toolbar and the menus.)
     private var shortcuts: some View {
         Group {
-            Button("Status") { section = .status }.keyboardShortcut("1", modifiers: .command)
-            Button("Jobs") { section = .jobs }.keyboardShortcut("2", modifiers: .command)
-            Button("Last chat") {
-                if let id = model.lastThreadID { model.selectThread(id) }
-                section = .chat
-            }.keyboardShortcut("3", modifiers: .command)
-            Button("New chat") { if model.newThread() != nil { section = .chat } }.keyboardShortcut("n", modifiers: .command)
-            Button("Open folder") { flow.openFolderPanel(model) { section = .chat } }.keyboardShortcut("o", modifiers: [.command, .shift])
-            Button("Previous chat") { step(-1) }.keyboardShortcut("[", modifiers: .command)
-            Button("Next chat") { step(1) }.keyboardShortcut("]", modifiers: .command)
-            Button("Toggle server") {
-                if model.serverIsUp { Task { await model.stopServer() } } else { Task { await model.startServer() } }
-            }.keyboardShortcut("r", modifiers: .command)
+            Button(WindowCommand.status.title) { run(.status) }.keyboardShortcut("1", modifiers: .command)
+            Button(WindowCommand.jobs.title) { run(.jobs) }.keyboardShortcut("2", modifiers: .command)
+            Button(WindowCommand.lastChat.title) { run(.lastChat) }.keyboardShortcut("3", modifiers: .command)
+            Button(WindowCommand.newChat.title) { run(.newChat) }.keyboardShortcut("n", modifiers: .command)
+            Button(WindowCommand.openFolder.title) { run(.openFolder) }.keyboardShortcut("o", modifiers: [.command, .shift])
+            Button(WindowCommand.previousChat.title) { run(.previousChat) }.keyboardShortcut("[", modifiers: .command)
+            Button(WindowCommand.nextChat.title) { run(.nextChat) }.keyboardShortcut("]", modifiers: .command)
         }
         .opacity(0).frame(width: 0, height: 0).accessibilityHidden(true)
     }
 
-    private func step(_ by: Int) {
-        guard let id = model.adjacentThread(from: section == .chat ? model.selectedThreadID : nil, step: by) else { return }
-        model.selectThread(id); section = .chat
+    private func run(_ command: WindowCommand) {
+        switch model.perform(command, from: section) {
+        case .show(let s): section = s
+        case .stay: break
+        case .chooseFolder: flow.openFolderPanel(model) { section = .chat }
+        }
     }
 }
 
@@ -177,24 +160,26 @@ struct OverflowMenu: View {
     @ObservedObject var model: AppModel
     /// Narrow windows (< 700 pt) move Start/Stop here as the first item.
     var includeServerToggle = false
+    /// Same dialog and rule as ServerToggleButton (Components.swift): stopping with jobs running asks first.
+    @State private var confirmStop = false
     var body: some View {
         Menu {
             if includeServerToggle {
-                let up = model.serverIsUp
-                Button(up ? "Stop server" : "Start server") {
-                    if up { Task { await model.stopServer() } } else { Task { await model.startServer() } }
+                Button(model.serverToggleTitle) {
+                    if model.serverStopNeedsConfirmation { confirmStop = true } else { Task { await model.toggleServer() } }
                 }
-                .disabled(!(up ? model.serverStopAvailability : model.serverStartAvailability).enabled)
+                .disabled(!model.serverToggleAvailability.enabled)
                 Divider()
             }
             Button(model.pauseButtonTitle) { Task { await model.togglePause() } }
-                .disabled(!model.pauseAvailability.enabled || !model.serverIsUp)
+                .disabled(!model.pauseMenuEnabled)
             Divider()
-            Button("Copy endpoint") { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(model.endpointURL, forType: .string) }
+            Button("Copy endpoint") { model.copyText(model.endpointURL) }
             Button("Copy MCP registration commands") { Task { await model.copyMCPCommands() } }
         } label: { Image(systemName: "ellipsis.circle") }
         .menuIndicator(.hidden)
         .help("More actions")
         .accessibilityLabel("More actions")
+        .stopServerDialog(model: model, isPresented: $confirmStop)
     }
 }

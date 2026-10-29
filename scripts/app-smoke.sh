@@ -17,6 +17,17 @@ if ! nice -n 19 swift build --product strim --scratch-path "$scratch" >"$tmp/bui
 fi
 binary="$scratch/debug/strim"
 if [[ ! -x "$binary" ]]; then echo "FAIL: built binary missing at $binary"; exit 1; fi
+# Servers the tests launched from this scratch binary must never outlive the run, even when a scenario fails.
+stop_test_servers() {
+  local pids
+  pids=$(pgrep -f "^$binary serve" || true)
+  [[ -z "$pids" ]] && return
+  kill -TERM $pids 2>/dev/null
+  for _ in 1 2 3 4 5 6; do pgrep -f "^$binary serve" >/dev/null || return; sleep 0.5; done
+  echo "WARN: leaked test server(s) $pids still alive; sending SIGKILL"
+  kill -KILL $(pgrep -f "^$binary serve") 2>/dev/null
+}
+trap 'stop_test_servers; rm -rf "$tmp"' EXIT
 result=0
 STRIM_E2E=1 STRIM_BIN="$binary" nice -n 19 swift test --scratch-path "$scratch" --filter StrimAppE2ETests >"$tmp/tests.log" 2>&1 || result=$?
 awk '/^[✔✘] Test / {print}' "$tmp/tests.log"

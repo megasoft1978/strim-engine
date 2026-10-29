@@ -54,7 +54,9 @@ fi
 build="$(cd "$build" && pwd)"
 strim_check_build "$build" || exit 1
 [ -x "$build/StrimApp" ] || { echo "no executable $build/StrimApp (use --build)" >&2; exit 1; }
-version="$(strim_version "$build")" || exit 1
+version="$(cat "$root/VERSION")" || exit 1
+version="${version//[[:space:]]/}"
+[ -n "$version" ] || { echo "VERSION is empty" >&2; exit 1; }
 
 app="$out/Strim.app"
 mkdir -p "$out"

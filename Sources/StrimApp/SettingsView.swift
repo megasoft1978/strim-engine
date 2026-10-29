@@ -47,59 +47,42 @@ struct SettingsView: View {
     }
 }
 
-private func binding<T>(_ model: AppModel, _ kp: WritableKeyPath<AppSettings, T>) -> Binding<T> {
-    Binding(get: { model.settings[keyPath: kp] }, set: { v in var s = model.settings; s[keyPath: kp] = v; model.update(settings: s) })
-}
 
 struct GeneralPane: View {
     @ObservedObject var model: AppModel
     var body: some View {
         Form {
             Toggle("Launch at login", isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
-            Toggle("Start server when Strim opens", isOn: binding(model, \.startServerWhenOpens))
-            Toggle("Show speed in menu bar", isOn: binding(model, \.showSpeedInMenuBar))
+            Toggle("Start server when Strim opens", isOn: Binding(get: { model.settings.startServerWhenOpens }, set: { model.setStartServerWhenOpens($0) }))
+            Toggle("Show speed in menu bar", isOn: Binding(get: { model.settings.showSpeedInMenuBar }, set: { model.setShowSpeedInMenuBar($0) }))
         }
     }
 }
 
 struct ModelPane: View {
     @ObservedObject var model: AppModel
-    private var models: [LocalModel] { model.availableModels.filter { $0.kind == "model" } }
-    private var mtps: [LocalModel] { model.availableModels.filter { $0.kind == "mtp" } }
-
-    /// The explicit choice, else the loaded model matched by name, else the only model on disk.
-    private var effectiveModelPath: String? {
-        if let p = model.settings.modelPath, !p.isEmpty { return p }
-        if let n = model.status?.model, let m = models.first(where: { $0.name == n }) { return m.path }
-        return models.count == 1 ? models[0].path : nil
-    }
-    private var effectiveMTPPath: String? {
-        if let p = model.settings.mtpPath, !p.isEmpty { return p }
-        if let n = model.status?.mtp, let m = mtps.first(where: { $0.name == n }) { return m.path }
-        return mtps.count == 1 ? mtps[0].path : nil
-    }
+    private var models: [LocalModel] { model.localModels }
+    private var mtps: [LocalModel] { model.mtpHeads }
+    private var effectiveModelPath: String? { model.effectiveModelPath }
+    private var effectiveMTPPath: String? { model.effectiveMTPPath }
 
     var body: some View {
         Form {
             Section {
-                Picker("Model", selection: Binding<String?>(get: { effectiveModelPath }, set: { p in
-                    if let m = models.first(where: { $0.path == p }) { model.selectModel(m) }
-                })) {
+                Picker("Model", selection: Binding<String?>(get: { effectiveModelPath }, set: { model.pickModel(path: $0) })) {
                     if effectiveModelPath == nil { Text("Choose a model").tag(String?.none) }
-                    ForEach(models) { m in Text(m.name + (m.sizeGB.map { String(format: " (%.1f GB)", $0) } ?? "")).tag(Optional(m.path)) }
+                    ForEach(models) { m in Text(m.menuLabel).tag(Optional(m.path)) }
                     if let p = effectiveModelPath, !models.contains(where: { $0.path == p }) { Text((p as NSString).lastPathComponent).tag(Optional(p)) }
                 }
-                Picker("MTP head", selection: Binding<String?>(get: { effectiveMTPPath }, set: { p in
-                    if let m = mtps.first(where: { $0.path == p }) { model.selectModel(m) }
-                })) {
+                Picker("MTP head", selection: Binding<String?>(get: { effectiveMTPPath }, set: { model.pickMTP(path: $0) })) {
                     Text("None").tag(String?.none)
                     ForEach(mtps) { m in Text(m.name).tag(Optional(m.path)) }
                     if let p = effectiveMTPPath, !mtps.contains(where: { $0.path == p }) { Text((p as NSString).lastPathComponent).tag(Optional(p)) }
                 }
             }
             Section("Paths") {
-                pathRow("Model", effectiveModelPath) { choose { p in var s = model.settings; s.modelPath = p; model.update(settings: s) } }
-                pathRow("MTP head", effectiveMTPPath) { choose { p in var s = model.settings; s.mtpPath = p; model.update(settings: s) } }
+                pathRow("Model", effectiveModelPath) { choose { model.setModelPath($0) } }
+                pathRow("MTP head", effectiveMTPPath) { choose { model.setMTPPath($0) } }
             }
             Section {
                 HStack {
@@ -162,8 +145,7 @@ struct ServerPane: View {
             }
             Section("Advanced") {
                 LabeledContent("Strim binary") {
-                    TextField("Strim binary", text: Binding(get: { model.settings.strimBinary ?? "" }, set: { v in
-                        var s = model.settings; s.strimBinary = v.isEmpty ? nil : v; model.update(settings: s) }),
+                    TextField("Strim binary", text: Binding(get: { model.settings.strimBinary ?? "" }, set: { model.setStrimBinary($0) }),
                         prompt: Text("auto: ~/.strim/bin, /opt/homebrew/bin"))
                         .labelsHidden().font(.system(size: 12, design: .monospaced)).multilineTextAlignment(.trailing)
                 }
@@ -171,17 +153,9 @@ struct ServerPane: View {
         }
         .onAppear { portText = Self.port(model.settings.hostURL) }
     }
-    private func applyPort() {
-        guard let n = Int(portText), (1...65535).contains(n), var c = URLComponents(string: model.settings.hostURL) else { portText = Self.port(model.settings.hostURL); return }
-        c.port = n
-        var s = model.settings; s.hostURL = c.string ?? s.hostURL; model.update(settings: s)
-    }
-    static func port(_ url: String) -> String { URL(string: url)?.port.map(String.init) ?? "" }
-    static func mask(_ path: String) -> String {
-        let name = (path as NSString).lastPathComponent
-        let dir = ((path as NSString).deletingLastPathComponent as NSString).abbreviatingWithTildeInPath
-        return dir + "/" + String(repeating: "•", count: max(6, min(name.count, 14)))
-    }
+    private func applyPort() { portText = model.applyPort(portText) }
+    static func port(_ url: String) -> String { SettingsText.port(url) }
+    static func mask(_ path: String) -> String { SettingsText.mask(path) }
 }
 
 struct ChatPane: View {
@@ -190,7 +164,7 @@ struct ChatPane: View {
     var body: some View {
         Form {
             Section {
-                Toggle("Default thinking", isOn: $model.thinkingEnabled)
+                Toggle("Default thinking", isOn: Binding(get: { model.thinkingEnabled }, set: { model.setDefaultThinking($0) }))
                 Text("Applies to new chats. A chat keeps the setting it started with.").font(.system(size: 11)).foregroundStyle(.secondary)
             }
             Section("Scratch chats") {

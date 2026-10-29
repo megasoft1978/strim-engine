@@ -49,8 +49,6 @@ public enum FolderMessages {
 
     /// The host's own explanation when it gave one.
     public static func text(_ error: Error) -> String {
-        if case ControlClientError.http(_, let api?) = error, !api.message.isEmpty { return api.message }
-        if let a = error as? APIError, !a.message.isEmpty { return a.message }
         return error.localizedDescription
     }
 

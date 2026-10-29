@@ -12,6 +12,7 @@ enum SidebarItem: Hashable {
 struct Sidebar: View {
     @ObservedObject var model: AppModel
     @EnvironmentObject var flow: ProjectsFlow
+    @Environment(\.strimNow) private var strimNow
     @Binding var section: AppSection
     @State private var collapsed = Set<String>()
     @State private var showAll = Set<String>()
@@ -21,18 +22,18 @@ struct Sidebar: View {
     @State private var deleteThread: ChatThread?
     @State private var removeProject: ChatProject?
 
-    static let collapsedLimit = 5
+    static let collapsedLimit = ThreadListWindow.collapsedLimit
     private let rowInsets = EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10)
 
     private func select(_ item: SidebarItem) {
         switch item {
         case .section(let s): section = s
-        case .thread(let id): model.selectThread(id); section = .chat
+        case .thread(let id): section = model.openThread(id)
         }
     }
 
     var body: some View {
-        let now = Date().timeIntervalSince1970
+        let now = (strimNow ?? Date()).timeIntervalSince1970
         let missing = Set(model.projects.filter { model.folderMissing($0.id) }.map(\.id))
         // No List selection: the system's emphasised (blue) highlight cannot be themed, so rows draw the accent pill themselves.
         List {
@@ -74,14 +75,14 @@ struct Sidebar: View {
             Button("Delete Chat", role: .destructive) { Task { await model.deleteThread(t.id) } }
             Button("Cancel", role: .cancel) {}
         } message: { _ in Text("This chat is deleted from this Mac. It cannot be undone.") }
-        .confirmationDialog(removeProject.map { "Remove “\($0.name)”?" } ?? "Remove project?", isPresented: Binding(get: { removeProject != nil }, set: { if !$0 { removeProject = nil } }),
+        .confirmationDialog(removeProject.map { model.removalPlan(for: $0).title } ?? "Remove project?", isPresented: Binding(get: { removeProject != nil }, set: { if !$0 { removeProject = nil } }),
                             titleVisibility: .visible, presenting: removeProject) { p in
             Button("Remove Project", role: .destructive) { Task { await model.removeProject(p.id) } }
-            if model.folderAccessRoot(p) != nil {
+            if model.removalPlan(for: p).offersRevoke {
                 Button("Remove and Revoke Access", role: .destructive) { Task { await model.removeProject(p.id, revokeAccess: true) } }
             }
             Button("Cancel", role: .cancel) {}
-        } message: { p in Text("Deletes its \(model.threads(in: p.id).count) chats from this Mac. The folder itself is not touched.") }
+        } message: { p in Text(model.removalPlan(for: p).message) }
     }
 
     private var activeJobs: Int { model.status?.activeJobs ?? 0 }
@@ -95,13 +96,13 @@ struct Sidebar: View {
         let open = !collapsed.contains(p.id)
         ProjectRow(project: p, missing: missing, open: open, granted: model.folderAccessRoot(p) != nil)
             .contentShape(Rectangle())
-            .onTapGesture { if open { collapsed.insert(p.id) } else { collapsed.remove(p.id) } }
+            .onTapGesture { collapsed.flip(p.id) }
             .contextMenu { projectMenu(p, missing: missing) }
             .listRowInsets(rowInsets)
         if open {
             ForEach(visible) { t in
                 ThreadRow(thread: t, badge: model.threadBadge(t.id), selected: section == .chat && model.selectedThreadID == t.id, now: now,
-                          renaming: $renaming, renameText: $renameText, commit: { model.renameThread(t.id, to: $0) })
+                          renaming: $renaming, renameText: $renameText, commit: { model.commitRename(t.id, draft: $0) })
                     .contentShape(Rectangle())
                     .onTapGesture { select(.thread(t.id)) }
                     .accessibilityAddTraits(section == .chat && model.selectedThreadID == t.id ? [.isButton, .isSelected] : .isButton)
@@ -110,7 +111,7 @@ struct Sidebar: View {
                     .listRowInsets(rowInsets)
             }
             if hidden > 0 || (showAll.contains(p.id) && all.count > Self.collapsedLimit) {
-                Button { if showAll.contains(p.id) { showAll.remove(p.id) } else { showAll.insert(p.id) } } label: {
+                Button { showAll.flip(p.id) } label: {
                     Text(showAll.contains(p.id) ? "Show less" : "Show \(hidden) more").font(.system(size: 11)).foregroundStyle(Strim.C.tertiary)
                         .padding(.leading, 16)
                 }
@@ -126,37 +127,34 @@ struct Sidebar: View {
         }
     }
 
-    /// The first five chats (plus the selected one when it is further down), and how many stay hidden.
     static func visible(_ all: [ChatThread], selected: String?, showAll: Bool) -> ([ChatThread], Int) {
-        guard !showAll, all.count > collapsedLimit else { return (all, 0) }
-        var out = Array(all.prefix(collapsedLimit))
-        if let selected, !out.contains(where: { $0.id == selected }), let t = all.first(where: { $0.id == selected }) { out.append(t) }
-        return (out, all.count - out.count)
+        ThreadListWindow.visible(all, selected: selected, showAll: showAll)
     }
 
     private func startChat(in p: ChatProject) {
         collapsed.remove(p.id)
-        if model.newThread(projectID: p.id) != nil { section = .chat }
+        if model.startChat(inProject: p.id) { section = .chat }
     }
 
     @ViewBuilder private func projectMenu(_ p: ChatProject, missing: Bool) -> some View {
-        Button("New Chat") { startChat(in: p) }.disabled(missing)
+        let state = model.projectMenuState(for: p, missing: missing)
+        Button("New Chat") { startChat(in: p) }.disabled(!state.newChatEnabled)
         Divider()
-        Button("Reveal in Finder") { Finder.reveal(p.path) }.disabled(missing)
-        Button("Copy Path") { Finder.copy(p.path) }
-        if missing { Button("Locate…") { locateProject(model, p.id, flow: flow) } }
-        if model.folderAccessRoot(p) != nil {
+        Button("Reveal in Finder") { Finder.reveal(p.path) }.disabled(!state.revealEnabled)
+        Button("Copy Path") { model.copyText(p.path) }
+        if state.showsLocate { Button("Locate…") { locateProject(model, p.id, flow: flow) } }
+        if state.showsRevokeAccess {
             Button("Revoke Folder Access") { Task { await model.revokeFolderAccess(projectID: p.id) } }
         }
         Divider()
-        Button(p.isScratch ? "Delete Scratch Chats…" : "Remove Project…", role: .destructive) { removeProject = p }
+        Button(state.removeTitle, role: .destructive) { removeProject = p }
     }
 
     @ViewBuilder private func threadMenu(_ t: ChatThread) -> some View {
         Button("Rename") { renameText = t.title; renaming = t.id }
-        Button("Duplicate") { if model.duplicateThread(t.id) != nil { section = .chat } }
-        Button("Reveal Folder in Finder") { if let dir = model.cwd(for: t) { Finder.reveal(dir) } }
-            .disabled(model.folderProblem(for: t.id) != nil)
+        Button("Duplicate") { if model.duplicate(thread: t.id) { section = .chat } }
+        Button("Reveal Folder in Finder") { if let dir = model.revealPath(for: t) { Finder.reveal(dir) } }
+            .disabled(model.revealPath(for: t) == nil)
         Divider()
         Button("Delete…", role: .destructive) { deleteThread = t }
     }
@@ -312,7 +310,7 @@ struct ThreadRow: View {
     private func finish() {
         let t = renameText
         renaming = nil
-        if !t.trimmingCharacters(in: .whitespaces).isEmpty, t != thread.title { commit(t) }
+        commit(t)   // the model ignores a blank or unchanged title
     }
 
     @ViewBuilder private var trailing: some View {

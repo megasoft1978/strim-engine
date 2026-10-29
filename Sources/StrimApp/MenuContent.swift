@@ -30,7 +30,7 @@ struct MenuContent: View {
             if !model.modelDownloadState.isBlockingFirstRun {
                 HStack(spacing: 8) {
                     ServerToggleButton(model: model, fullWidth: true)
-                    if (model.status?.activeJobs ?? 0) > 0 || model.jobsPaused {
+                    if model.showsPauseInPopover {
                         Button { Task { await model.togglePause() } } label: { Text(model.pauseButtonTitle).frame(maxWidth: .infinity) }
                             .buttonStyle(StrimButtonStyle(.secondary))
                     }
@@ -39,9 +39,9 @@ struct MenuContent: View {
                 Divider()
             }
             VStack(spacing: 0) {
-                MenuRow(title: "Open Strim", shortcut: "⌘O") { openMain() }.keyboardShortcut("o")
-                MenuRow(title: "Settings…", shortcut: "⌘,") { NSApp.activate(); openSettings() }.keyboardShortcut(",")
-                MenuRow(title: "Quit Strim", shortcut: "⌘Q") { NSApp.terminate(nil) }.keyboardShortcut("q")
+                MenuRow(title: MenuCommand.openMain.title, shortcut: MenuCommand.openMain.shortcut) { run(.openMain) }.keyboardShortcut("o")
+                MenuRow(title: MenuCommand.settings.title, shortcut: MenuCommand.settings.shortcut) { run(.settings) }.keyboardShortcut(",")
+                MenuRow(title: MenuCommand.quit.title, shortcut: MenuCommand.quit.shortcut) { run(.quit) }.keyboardShortcut("q")
             }
             .padding(.horizontal, 6).padding(.vertical, 6)
         }
@@ -51,7 +51,13 @@ struct MenuContent: View {
         .animation(.easeOut(duration: 0.18), value: model.modelDownloadState)
     }
 
-    private func openMain() { openWindow(id: "main"); NSApp.activate() }
+    private func run(_ command: MenuCommand) {
+        switch command.route {
+        case .openWindow(let id): openWindow(id: id); NSApp.activate()
+        case .openSettings: NSApp.activate(); openSettings()
+        case .terminate: NSApp.terminate(nil)
+        }
+    }
 
     private var stateWord: String {
         switch model.modelDownloadState {
@@ -109,7 +115,7 @@ struct MenuContent: View {
         .accessibilityElement(children: .combine)
     }
 
-    private var endpoint: some View { EndpointRow(url: model.endpointURL) }
+    private var endpoint: some View { EndpointRow(url: model.endpointURL, copy: { model.copyText($0) }) }
 
     /// First-run: progress row (when downloading) and a hint; all actions live in the window.
     @ViewBuilder private var setupSection: some View {
@@ -137,13 +143,14 @@ struct MenuContent: View {
 
 struct EndpointRow: View {
     let url: String
+    let copy: (String) -> Void
     @State private var copied = false
     var body: some View {
         HStack(spacing: 6) {
             Text(url).font(.system(size: 12, design: .monospaced)).foregroundStyle(Strim.C.text).lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 4)
             Button {
-                NSPasteboard.general.clearContents(); NSPasteboard.general.setString(url, forType: .string)
+                copy(url)
                 copied = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { copied = false }
             } label: {

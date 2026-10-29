@@ -72,14 +72,14 @@ enum ControlMapping {
 
     /// ChatEvent -> wire events (docs/CHAT-CORE.md).
     static func events(_ e: ChatEvent, sessionID id: String) -> [StrimEvent] {
-        func delta(_ k: ChatDeltaKind, _ t: String) -> [StrimEvent] { [.chatDelta(ChatDelta(sessionID: id, kind: k, text: t))] }
+        func delta(_ k: ChatDeltaKind, _ t: String, status: ChatTurnStatus? = nil) -> [StrimEvent] { [.chatDelta(ChatDelta(sessionID: id, kind: k, text: t, status: status))] }
         func harness(_ k: String, _ t: String) -> [StrimEvent] { [.harnessEvent(HarnessEvent(jobID: id, kind: k, text: t))] }
         switch e {
         case .textDelta(let t): return delta(.text, t)
         case .reasoningDelta(let t): return delta(.reasoning, t)
         case let .toolCallStarted(name, summary): return delta(.toolCall, "\(name) \(summary)")
         case let .toolCallFinished(name, summary, isError): return delta(.toolResult, "\(name)\(isError ? " ERROR" : ""): \(summary)")
-        case .turnFinished(let r): return delta(.done, r.summary)
+        case .turnFinished(let r): return delta(.done, r.summary, status: ChatTurnStatus(rawValue: r.status.rawValue))
         case .stepStarted(let n): return harness("turn", "\(n)")
         case let .usage(p, c, o): return harness("usage", "\(p)/\(c)/\(o)")
         case .compaction(let s): return harness("compaction", s)

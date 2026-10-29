@@ -1,4 +1,5 @@
 import Foundation
+import StrimAPI
 import StrimCore
 import StrimPull
 
@@ -6,7 +7,7 @@ import StrimPull
 // strim doctor [--dir ~/.strim/models]: version, runtime config, the GPU smoke test (device + tiny matmul) and the model dir status.
 
 func runVersion(_ args: [String]) {
-    print("strim 0.1.5")
+    print("strim \(StrimVersion.current)")
 }
 
 /// Runtime config, printed once by `strim doctor` (not by `--version`).
@@ -22,11 +23,16 @@ private func printRuntimeConfig() {
 
 func runDoctor(_ args: [String]) {
     var dir = "~/.strim/models"
+    var strict = false
+    var port: UInt16 = 8203
     var i = 2
     while i < args.count {
         if args[i] == "--dir", i + 1 < args.count { dir = args[i + 1]; i += 1 }
         else if args[i].hasPrefix("--dir=") { dir = String(args[i].dropFirst("--dir=".count)) }
-        else { FileHandle.standardError.write(Data("usage: strim doctor [--dir DIR=~/.strim/models]\n".utf8)); exit(2) }
+        else if args[i] == "--strict" { strict = true }
+        else if args[i] == "--port", i + 1 < args.count, let value = UInt16(args[i + 1]), value > 0 { port = value; i += 1 }
+        else if args[i].hasPrefix("--port="), let value = UInt16(args[i].dropFirst("--port=".count)), value > 0 { port = value }
+        else { FileHandle.standardError.write(Data("usage: strim doctor [--dir DIR=~/.strim/models] [--port N=8203] [--strict]\n".utf8)); exit(2) }
         i += 1
     }
     let root = URL(fileURLWithPath: (dir as NSString).expandingTildeInPath)
@@ -53,5 +59,9 @@ func runDoctor(_ args: [String]) {
         print("  \(t.name): " + state.joined(separator: ", "))
     }
     if anyMissing { print("missing the default 4bit model: run `strim pull`") }
-    exit(ok ? 0 : 1)
+    let findings = InstallCheck.findings(probe: SystemInstallProbe(port: port), cliVersion: StrimVersion.current)
+    print("install:")
+    if findings.isEmpty { print("  no install issues detected") }
+    for finding in findings { print("  \(finding.message) — fix: `\(finding.fix)`") }
+    exit(ok && (!strict || findings.isEmpty) ? 0 : 1)
 }

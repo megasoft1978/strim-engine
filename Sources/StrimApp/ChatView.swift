@@ -30,14 +30,14 @@ struct ChatTab: View {
         .padding(layout == .compact ? 16 : Strim.S.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Strim.C.bg)
-        .confirmationDialog(removeProject.map { "Remove “\($0.name)”?" } ?? "Remove project?", isPresented: Binding(get: { removeProject != nil }, set: { if !$0 { removeProject = nil } }),
+        .confirmationDialog(removeProject.map { model.removalPlan(for: $0).title } ?? "Remove project?", isPresented: Binding(get: { removeProject != nil }, set: { if !$0 { removeProject = nil } }),
                             titleVisibility: .visible, presenting: removeProject) { p in
             Button("Remove Project", role: .destructive) { Task { await model.removeProject(p.id) } }
-            if model.folderAccessRoot(p) != nil {
+            if model.removalPlan(for: p).offersRevoke {
                 Button("Remove and Revoke Access", role: .destructive) { Task { await model.removeProject(p.id, revokeAccess: true) } }
             }
             Button("Cancel", role: .cancel) {}
-        } message: { p in Text("Deletes its \(model.threads(in: p.id).count) chats from this Mac. The folder itself is not touched.") }
+        } message: { p in Text(model.removalPlan(for: p).message) }
     }
 
     private func emptyHint(_ t: ChatThread) -> String {
@@ -168,7 +168,7 @@ struct ModelMenu: View {
             let models = model.availableModels.filter { $0.kind == "model" }
             if models.isEmpty { Text("No local models found") }
             ForEach(models) { m in
-                Button(m.name + (m.sizeGB.map { String(format: " (%.1f GB)", $0) } ?? "")) { model.selectModel(m) }
+                Button(m.menuLabel) { model.selectModel(m) }
             }
         } label: {
             if iconOnly {
@@ -297,11 +297,10 @@ struct ChatComposer: View {
 
     /// Before the first message the toggle edits the default; afterwards it shows what the chat uses (the host reads it once).
     private var thinking: Binding<Bool> {
-        thread.messageCount == 0 ? $model.thinkingEnabled : .constant(thread.thinking)
+        thread.messageCount == 0 ? Binding(get: { model.thinkingEnabled }, set: { model.setDefaultThinking($0) }) : .constant(thread.thinking)
     }
 
     var body: some View {
-        let empty = draft.trimmingCharacters(in: .whitespaces).isEmpty
         let queued = model.queuedText(for: thread.id) != nil
         let locked = thread.messageCount > 0
         HStack(spacing: 8) {
@@ -325,7 +324,7 @@ struct ChatComposer: View {
                 }
                 .buttonStyle(.plain).keyboardShortcut(".", modifiers: .command).help("Stop generating (Cmd-.)").accessibilityLabel("Stop generating")
             } else {
-                let off = empty || queued || !available
+                let off = !AppModel.canSend(draft: draft, queued: queued, available: available)
                 Button(action: send) {
                     Image(systemName: "arrow.up").font(.system(size: 12, weight: .bold))
                         .foregroundStyle(off ? Strim.C.tertiary : Strim.C.onAccent)
@@ -342,9 +341,8 @@ struct ChatComposer: View {
     }
     private func send() {
         let t = draft
-        guard !t.trimmingCharacters(in: .whitespaces).isEmpty, available else { return }
+        guard model.submitDraft(t, in: thread.id, available: available) != nil else { return }
         draft = ""
-        Task { await model.send(t, in: thread.id) }
     }
 }
 

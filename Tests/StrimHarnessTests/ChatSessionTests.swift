@@ -507,3 +507,53 @@ private struct FakeTool: HarnessTool {
         }
     }
 }
+
+@Suite struct ChatFinishSummaryTests {
+    private func finish(_ s: String) -> [FakeEngine.Step] { gen(call("finish", [("summary", .string(s))]))  }
+
+    @Test func finishOnlyTurnEmitsSummaryAsAssistantText() async throws {
+        let f = try makeFixture(); defer { f.remove() }
+        let e = FakeEngine(); e.script(finish("hello"))
+        let hr = runner(e, f)
+        try await hr.openSession(spec: writeSpec(f), sessionID: "fin1")
+        let c = await drain(try await hr.appendUserTurn(sessionID: "fin1", text: "say hello"))
+        #expect(c.text == "hello")
+        #expect(c.finished.first?.summary == "hello" && c.finished.first?.status == .done)
+        // text precedes the closing event
+        let kinds = c.all.map { if case .textDelta = $0 { "text" } else if case .turnFinished = $0 { "done" } else { "other" } }
+        #expect(kinds.filter { $0 != "other" } == ["text", "done"])
+        _ = await hr.closeSession(sessionID: "fin1")
+    }
+
+    @Test func textThenFinishDoesNotDuplicate() async throws {
+        let f = try makeFixture(); defer { f.remove() }
+        let e = FakeEngine(); e.script(gen([.event(.tokens([1], "hello there"))] + call("finish", [("summary", .string("hello there"))])))
+        let hr = runner(e, f)
+        try await hr.openSession(spec: writeSpec(f), sessionID: "fin2")
+        let c = await drain(try await hr.appendUserTurn(sessionID: "fin2", text: "hi"))
+        #expect(c.text == "hello there")
+        _ = await hr.closeSession(sessionID: "fin2")
+    }
+
+    @Test func textBeforeToolsThenFinishOnlyStillShowsSummary() async throws {
+        let f = try makeFixture(); defer { f.remove() }
+        let e = FakeEngine()
+        e.script(gen([.event(.tokens([1], "Let me look."))] + call("list_files")))
+        e.script(finish("the answer"))
+        let hr = runner(e, f)
+        try await hr.openSession(spec: writeSpec(f), sessionID: "fin3")
+        let c = await drain(try await hr.appendUserTurn(sessionID: "fin3", text: "q"))
+        #expect(c.text.hasSuffix("the answer") && c.text.contains("Let me look."))
+        _ = await hr.closeSession(sessionID: "fin3")
+    }
+
+    @Test func proseReplyIsNotRepeated() async throws {
+        let f = try makeFixture(); defer { f.remove() }
+        let e = FakeEngine(); e.script(say("just prose"))
+        let hr = runner(e, f)
+        try await hr.openSession(spec: writeSpec(f), sessionID: "fin4")
+        let c = await drain(try await hr.appendUserTurn(sessionID: "fin4", text: "hi"))
+        #expect(c.text == "just prose")
+        _ = await hr.closeSession(sessionID: "fin4")
+    }
+}

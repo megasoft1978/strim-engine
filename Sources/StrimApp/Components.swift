@@ -78,7 +78,7 @@ struct ServerToggleButton: View {
         let up = model.serverIsUp
         Button {
             if up {
-                if (model.status?.activeJobs ?? 0) > 0 { confirmStop = true } else { Task { await model.stopServer() } }
+                if model.serverStopNeedsConfirmation { confirmStop = true } else { Task { await model.stopServer() } }
             } else { Task { await model.startServer() } }
         } label: {
             if iconOnly {
@@ -93,7 +93,14 @@ struct ServerToggleButton: View {
         .disabled(!(up ? model.serverStopAvailability : model.serverStartAvailability).enabled)
         .accessibilityLabel(up ? "Stop server" : "Start server")
         .help(up ? "Frees about \(model.modelWeightsText) of memory" : (model.serverStartAvailability.reason ?? "Start the Strim server"))
-        .confirmationDialog("Stop the Strim server?", isPresented: $confirmStop, titleVisibility: .visible) {
+        .stopServerDialog(model: model, isPresented: $confirmStop)
+    }
+}
+
+/// The one stop-server confirmation (toolbar button, popover, overflow menu). Gate it with `model.serverStopNeedsConfirmation`.
+extension View {
+    func stopServerDialog(model: AppModel, isPresented: Binding<Bool>) -> some View {
+        confirmationDialog("Stop the Strim server?", isPresented: isPresented, titleVisibility: .visible) {
             Button("Stop server", role: .destructive) { Task { await model.stopServer() } }
             Button("Cancel", role: .cancel) {}
         } message: { Text("Active jobs will be interrupted.") }

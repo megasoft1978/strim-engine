@@ -13,19 +13,56 @@ public enum ControlClientError: Error, Equatable, LocalizedError {
     case badResponse
     case invalidConfig(String)
     case redirectRefused
+    case transport(String)
+    case cancelled
 
     public var errorDescription: String? {
         switch self {
         case .hostUnreachable(let d): "Strim server isn't responding\(d.isEmpty ? "" : " on \(d)"). Start it from the menu bar."
         case .timeout: "Strim server didn't respond in time. Check that it is running (menu bar)."
-        case .unauthorized(let present): present ? "host rejected the token (401)" : "host requires a token but none was found (401)"
-        case .forbidden: "host refused the request (403, loopback only)"
+        case .unauthorized(let present): present ? "The Strim server rejected the control token. Restart the server and check the token in settings." : "The Strim server requires a control token. Start the server to create one."
+        case .forbidden: "The Strim server refused this request (403). Check server access settings."
         case .notImplemented: "not implemented by this host (501)"
-        case .http(let s, let a): a.map { "\($0.code): \($0.message) (\(s))" } ?? "HTTP \(s)"
-        case .decoding(let d): "unexpected response (\(d))"
+        case .http(let s, let a): Self.httpMessage(status: s, api: a)
+        case .decoding: "The Strim server returned an invalid response. Try again."
         case .badResponse: "invalid HTTP response"
         case .invalidConfig(let d): d
         case .redirectRefused: "host answered with a redirect, which is refused"
+        case .transport(let message): message
+        case .cancelled: "The request was cancelled."
+        }
+    }
+
+    private static func httpMessage(status: Int, api: APIError?) -> String {
+        if let api {
+            let chatCodes = ["session_not_found", "turn_in_progress", "session_closed", "idle_timeout", "max_sessions", "empty_text", "text_too_long", "unknown_profile"]
+            let prefix = api.message.components(separatedBy: ":").first ?? ""
+            let code = chatCodes.contains(prefix) ? prefix : api.code
+            switch code {
+            case "turn_in_progress": return "A response is already in progress. Wait for it to finish, then try again."
+            case "max_sessions": return "Too many chats are open. Close one and try again."
+            case "session_not_found", "session_closed", "idle_timeout": return "This chat session has ended. Open a new chat and try again."
+            case "empty_text": return "Enter a message before sending."
+            case "text_too_long": return "The message is too long. Shorten it and try again."
+            case "unknown_profile": return "The selected chat profile is unavailable. Check the server configuration."
+            default: break
+            }
+            if !api.message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                // Host refusal text is shown verbatim: the app detects folder refusals by the phrase "outside the allowed roots".
+                if status == 403 { return api.message }
+                return api.localizedDescription
+            }
+        }
+        switch status {
+        case 400: return "The Strim server rejected the request. Check the input and try again."
+        case 404: return "The requested item was not found. Refresh and try again."
+        case 409: return "The request conflicts with the current state. Refresh and try again."
+        case 413: return "The request is too large. Reduce its size and try again."
+        case 429: return "The Strim server is handling too many requests. Try again later."
+        case 500: return "The Strim server encountered an error. Try again."
+        case 502: return "The Strim server received an invalid upstream response. Try again."
+        case 503: return "The Strim server is unavailable. Try again later."
+        default: return "The Strim server returned HTTP \(status). Try again."
         }
     }
 }
@@ -244,9 +281,17 @@ public struct HTTPControlClient: StrimControlClient {
 
     private func mapTransport(_ error: Error) -> ControlClientError {
         if let e = error as? ControlClientError { return e }
+        if error is CancellationError { return .cancelled }
         if let u = error as? URLError {
             switch u.code {
             case .timedOut: return .timeout
+            case .cancelled: return .cancelled
+            case .cannotFindHost, .dnsLookupFailed:
+                return .transport("The Strim server address could not be found. Check host_url in settings.")
+            case .badURL, .unsupportedURL:
+                return .transport("The Strim server address is invalid. Check host_url in settings.")
+            case .secureConnectionFailed, .serverCertificateHasBadDate, .serverCertificateUntrusted, .serverCertificateHasUnknownRoot, .serverCertificateNotYetValid, .clientCertificateRejected, .clientCertificateRequired:
+                return .transport("A secure connection to the Strim server failed. Check host_url in settings.")
             default: return .hostUnreachable(hostLabel)
             }
         }

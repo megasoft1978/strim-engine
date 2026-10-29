@@ -5,6 +5,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+version="$(cat "$ROOT/VERSION")"; version="${version//[[:space:]]/}"; [ -n "$version" ] || { echo "VERSION is empty" >&2; exit 1; }
 CONFIG="${CONFIG:-release}"
 SCRATCH="${SCRATCH:-.build}"
 BUILD_DIR="${BUILD_DIR:-build}"
@@ -28,7 +29,7 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/Strim"
 cp "$BUILD_DIR/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 
-cat > "$APP/Contents/Info.plist" <<'PLIST'
+cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -36,8 +37,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>CFBundleName</key><string>Strim</string>
   <key>CFBundleDisplayName</key><string>Strim</string>
   <key>CFBundleIdentifier</key><string>local.strim.app</string>
-  <key>CFBundleVersion</key><string>0.2.0</string>
-  <key>CFBundleShortVersionString</key><string>0.2.0</string>
+  <key>CFBundleVersion</key><string>$version</string>
+  <key>CFBundleShortVersionString</key><string>$version</string>
   <key>CFBundleExecutable</key><string>Strim</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>

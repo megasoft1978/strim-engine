@@ -200,6 +200,8 @@ final class ChatEventMapper: @unchecked Sendable {
     private var text = StreamRedactor()
     private var reasoning = StreamRedactor()
     private let streamsDeltas: Bool
+    /// Assistant text emitted since the last tool call (or the start of the turn).
+    private var textSinceTool = false
 
     init(streamsDeltas: Bool) { self.streamsDeltas = streamsDeltas }
 
@@ -209,6 +211,7 @@ final class ChatEventMapper: @unchecked Sendable {
             case let .textDelta(t):
                 guard streamsDeltas else { return [] }
                 let o = text.push(t)
+                if !o.isEmpty { textSinceTool = true }
                 return o.isEmpty ? [] : [.textDelta(o)]
             case let .reasoningDelta(t):
                 guard streamsDeltas else { return [] }
@@ -219,6 +222,7 @@ final class ChatEventMapper: @unchecked Sendable {
                 switch e {
                 case let .turn(n): out.append(.stepStarted(n))
                 case let .toolCall(name, args):
+                    if name != "finish" { textSinceTool = false }
                     out.append(.toolCallStarted(name: Self.name(name), summary: Self.summary("\(name) \(args)")))
                 case let .toolResult(name, output, isError):
                     if name == "_compaction" { out.append(.compaction(Self.summary(output))) } else {
@@ -233,6 +237,11 @@ final class ChatEventMapper: @unchecked Sendable {
         }
     }
 
+    /// A turn that ended through `finish` (or a non-streaming reply) has no assistant text on the wire: the closing summary is the answer.
+    func closingText(status: HarnessStatus, summary: String) -> String? {
+        lock.withLock { (status == .done || status == .declined) && !textSinceTool && !summary.isEmpty ? summary : nil }
+    }
+
     /// Releases held-back text (call before the turn's closing events).
     func flush() -> [ChatEvent] { lock.withLock { flushLocked() } }
 
@@ -241,7 +250,7 @@ final class ChatEventMapper: @unchecked Sendable {
         let r = reasoning.flush()
         if !r.isEmpty { out.append(.reasoningDelta(r)) }
         let t = text.flush()
-        if !t.isEmpty { out.append(.textDelta(t)) }
+        if !t.isEmpty { out.append(.textDelta(t)); textSinceTool = true }
         return out
     }
 

@@ -1,6 +1,20 @@
-# Strim 0.1.5
+# Strim 0.1.6
 
-## What's in 0.1.5
+## What's in 0.1.6
+
+Stability release: every release now goes through one automated gate (all tests, a headless end-to-end run, a clean build, and a self-test of the packaged app with the real model).
+
+- Chat: a reply that ends through the agent's finish step no longer shows up empty.
+- Server start: clear messages for a missing model or binary, an early crash shows its log lines, no duplicate servers, the window stays responsive while starting.
+- Settings: a corrupt `~/.strim/app.json` is backed up instead of lost; one bad value no longer resets everything; "Default thinking" and "MTP: None" are saved.
+- Quit: stops only the server this app started (verified before any signal), force-stops a hung server, cancels downloads, finishes within 4 seconds; relaunch never starts a second server.
+- Errors: accurate messages for every server and network error (no raw codes, no misleading "loopback only").
+- Chat history: corrupt files are backed up, a truncated history keeps every complete message.
+- `strim doctor` checks your install: duplicate or stale Strim.app copies, version mismatches, an app or server running from the wrong place.
+- `Strim --selftest <dir>`: headless self-check of the installed app.
+- Fixed a race that could make approving a job fail under load.
+
+## Also in 0.1.5
 
 - Folder access: a project can live anywhere on disk. Opening a folder outside your home folder asks once ("Allow Strim to read, change files and run commands in this folder?"). Strim still works in an isolated copy and every change comes back as a patch you review in Jobs. Granted folders show a lock, can be revoked from the project menu or Settings, and survive restarts. Only the app can grant access; agents and MCP clients cannot. Credential folders (`~/.ssh`, `~/.aws`, `~/.gnupg`, `~/.strim`) and system folders are always refused.
 - Starting a second `strim serve` no longer kills the first one's running job processes.
