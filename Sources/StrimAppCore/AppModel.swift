@@ -216,7 +216,6 @@ public final class AppModel: ObservableObject {
         if actionInFlight != nil { return .no("Another action is in progress") }
         if s.state == .loading { return .no("Model is loading") }
         if (s.state == .ready || s.state == .busy), s.model != nil { return .no("Model already loaded") }
-        guard let m = settings.modelPath, !m.isEmpty else { return .no("Set model_path in Settings (~/.strim/app.json)") }
         return .yes
     }
     public var unloadAvailability: Availability {
@@ -611,8 +610,8 @@ public final class AppModel: ObservableObject {
 
     private func launchHostProcess() {
         var launchSettings = settings
-        if launchSettings.modelPath == nil { launchSettings.modelPath = AppPaths.home + "/.strim/models/qwen38-4bit" }
-        if launchSettings.mtpPath == nil { launchSettings.mtpPath = AppPaths.home + "/.strim/models/qwen38-mtp-4bit" }
+        if AppSettings.nonEmpty(launchSettings.modelPath) == nil { launchSettings.modelPath = AppPaths.home + "/.strim/models/qwen38-4bit" }
+        if AppSettings.nonEmpty(launchSettings.mtpPath) == nil { launchSettings.mtpPath = AppPaths.home + "/.strim/models/qwen38-mtp-4bit" }
         switch launcher.start(settings: launchSettings) {
         case .started(let pid):
             hostProcessPID = pid
@@ -629,7 +628,7 @@ public final class AppModel: ObservableObject {
             notice = "strim_binary was not run (\(why)). Command copied; paste it in Terminal: \(cmd)"
             log("strim_binary rejected: \(why)")
         case .needsModel:
-            notice = "Set model_path in ~/.strim/app.json (Settings tab) before starting the server."
+            notice = "No model to start. Open Strim and let it download the model, or choose one in Settings."
         case .failed(let e):
             lastError = "Start server: \(e)"
         }
@@ -638,8 +637,8 @@ public final class AppModel: ObservableObject {
     /// Starts the local server, or loads its model when the server process is already open but idle.
     public func startServer() async {
         if connection.isConnected, status?.state == .stopped {
-            let modelPath = settings.modelPath ?? AppPaths.home + "/.strim/models/qwen38-4bit"
-            let mtpPath = settings.mtpPath ?? AppPaths.home + "/.strim/models/qwen38-mtp-4bit"
+            let modelPath = AppSettings.nonEmpty(settings.modelPath) ?? AppPaths.home + "/.strim/models/qwen38-4bit"
+            let mtpPath = AppSettings.nonEmpty(settings.mtpPath) ?? AppPaths.home + "/.strim/models/qwen38-mtp-4bit"
             await run("Start server") {
                 try await client.load(LoadRequest(model: modelPath, mtp: mtpPath))
                 log("server model start requested: \(modelPath)")

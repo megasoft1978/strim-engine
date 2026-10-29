@@ -6,7 +6,7 @@ import StrimPull
 // strim doctor [--dir ~/.strim/models]: version, runtime config, the GPU smoke test (device + tiny matmul) and the model dir status.
 
 func runVersion(_ args: [String]) {
-    print("strim 0.1.2")
+    print("strim 0.1.3")
 }
 
 /// Runtime config, printed once by `strim doctor` (not by `--version`).

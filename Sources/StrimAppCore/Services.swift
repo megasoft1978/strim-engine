@@ -35,12 +35,17 @@ public struct AppSettings: Codable, Equatable, Sendable {
         case recentProjects = "recent_projects", startServerWhenOpens = "start_server_when_opens"
         case showSpeedInMenuBar = "show_speed_in_menu_bar"
     }
+    /// A blank path in app.json (older builds could save one) means "use the default", never "unset".
+    static func nonEmpty(_ s: String?) -> String? {
+        guard let t = s?.trimmingCharacters(in: .whitespacesAndNewlines), !t.isEmpty else { return nil }
+        return t
+    }
     public init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
         hostURL = try c.decodeIfPresent(String.self, forKey: .hostURL) ?? AppPaths.defaultHostURL
         strimBinary = try c.decodeIfPresent(String.self, forKey: .strimBinary)
-        modelPath = try c.decodeIfPresent(String.self, forKey: .modelPath)
-        mtpPath = try c.decodeIfPresent(String.self, forKey: .mtpPath)
+        modelPath = Self.nonEmpty(try c.decodeIfPresent(String.self, forKey: .modelPath))
+        mtpPath = Self.nonEmpty(try c.decodeIfPresent(String.self, forKey: .mtpPath))
         controlTokenPath = try c.decodeIfPresent(String.self, forKey: .controlTokenPath) ?? AppPaths.defaultControlTokenPath
         projectPath = try c.decodeIfPresent(String.self, forKey: .projectPath)
         recentProjects = try c.decodeIfPresent([String].self, forKey: .recentProjects) ?? []

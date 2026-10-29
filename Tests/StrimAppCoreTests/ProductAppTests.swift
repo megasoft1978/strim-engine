@@ -252,7 +252,7 @@ private func delta(_ sid: String, _ k: ChatDeltaKind, _ t: String) -> StrimEvent
         #expect(await waitFor { m.connection.isConnected })
         await m.refreshModels()
         #expect(m.availableModels.count == 2)
-        #expect(m.loadAvailability == .no("Set model_path in Settings (~/.strim/app.json)"))
+        #expect(m.loadAvailability == .yes, "no saved model path falls back to the default model, no manual step")
         m.selectModel(m.availableModels[0])
         #expect(m.settings.modelPath == "/models/Qwen-27B")
         #expect(saved.value.last?.modelPath == "/models/Qwen-27B")
@@ -376,5 +376,18 @@ private func delta(_ sid: String, _ k: ChatDeltaKind, _ t: String) -> StrimEvent
         await m.refreshPack()
         #expect(m.packInfo == PackInfo(), "the last known value stays")
         m.stop()
+    }
+}
+
+@Suite struct BlankModelPathTests {
+    @Test func blankPathsInAppJsonDecodeAsUnset() throws {
+        let json = #"{"model_path": "", "mtp_path": "  "}"#.data(using: .utf8)!
+        let s = try JSONDecoder().decode(AppSettings.self, from: json)
+        #expect(s.modelPath == nil && s.mtpPath == nil)
+    }
+    @Test func realPathsSurvive() throws {
+        let json = #"{"model_path": " /m/qwen "}"#.data(using: .utf8)!
+        let s = try JSONDecoder().decode(AppSettings.self, from: json)
+        #expect(s.modelPath == "/m/qwen")
     }
 }

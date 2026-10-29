@@ -158,13 +158,12 @@ private func awaitSubscribed(_ m: AppModel, _ fake: FakeControlClient) async -> 
         m.stop()
     }
 
-    @Test func loadDisabledWithoutModelPath() async {
+    @Test func loadFallsBackToDefaultWithoutModelPath() async {
         let fake = FakeControlClient(status: status(.stopped, model: nil))
         let m = makeModel(fake, settings: AppSettings())
         m.start()
         #expect(await waitFor { m.connection.isConnected })
-        #expect(m.loadAvailability.enabled == false)
-        #expect(m.loadAvailability.reason?.contains("model_path") == true)
+        #expect(m.loadAvailability.enabled == true, "no saved path means the default model, not a manual step")
         m.stop()
     }
 
@@ -290,7 +289,7 @@ private func awaitSubscribed(_ m: AppModel, _ fake: FakeControlClient) async -> 
     @Test func startHostNeedsModel() {
         let m = makeModel(FakeControlClient(), launcher: MockLauncher(.needsModel))
         m.startHost()
-        #expect(m.notice?.contains("model_path") == true)
+        #expect(m.notice?.contains("download the model") == true)
     }
 
     @Test func mcpCommandsCopiedWithoutToken() async {
