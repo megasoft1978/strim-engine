@@ -84,29 +84,29 @@ import Testing
     @Test func appSectionShowsRealCapturesWithBothThemes() throws {
         let b = SiteBuilder(root: repoRoot); b.log = { _ in }
         let r = try b.run(SiteOptions(check: true))
-        #expect(r.html.contains("id=\"app\"") && r.html.contains("assets/app/app-hero-live.png"))
-        for n in ["status", "chat", "jobs"] {
+        #expect(r.html.contains("id=\"app\"") && r.html.contains("assets/app/hero-window-dark.png") && r.html.contains("assets/app/hero-window-m-dark.png"))
+        for n in ["status", "chat", "jobs", "menu"] {
             for t in ["dark", "light"] {
-                #expect(r.html.contains("assets/app/\(n)-\(t).png"))
-                #expect(FileManager.default.fileExists(atPath: repoRoot + "/site/assets/app/\(n)-\(t).png"))
+                #expect(r.html.contains("assets/app/gallery-\(n)-\(t).png"))
+                #expect(FileManager.default.fileExists(atPath: repoRoot + "/site/assets/app/gallery-\(n)-\(t).png"))
             }
         }
-        #expect(r.html.contains("Captured from the running app against a live server on a 64 GB M5 Max; real numbers."))
-        #expect(r.html.contains("loading=\"lazy\"") && r.html.contains("width=\"1072\" height=\"628\""))
-        #expect(r.readme.contains("site/assets/app/app-hero-live.png"))
-        #expect(r.readme.split(separator: "\n", omittingEmptySubsequences: false).count <= 30)
-        let sz = (try FileManager.default.attributesOfItem(atPath: repoRoot + "/site/assets/app/app-hero-live.png")[.size] as? Int) ?? 0
-        #expect(sz < 600_000, "hero capture is \(sz) bytes")
+        #expect(r.html.contains("Live captures of the running app against a real server on <span class=\"gen\">Apple M5 Max, 64 GB</span>."))
+        #expect(r.html.contains("loading=\"lazy\"") && r.html.contains("assets/app/gallery-status-dark.png\" alt=") && r.html.contains({ let d = SiteRound2Tests.pngSize(repoRoot + "/site/assets/app/gallery-status-dark.png")!; return "width=\"\(d.0)\" height=\"\(d.1)\"" }()) && r.html.contains("fetchpriority=\"high\""))
+        #expect(r.readme.contains("site/assets/app/readme-hero-dark.png") && r.readme.contains("site/assets/app/readme-hero-light.png"))
+        #expect(r.readme.split(separator: "\n", omittingEmptySubsequences: false).count <= 45)
+        let sz = (try FileManager.default.attributesOfItem(atPath: repoRoot + "/site/assets/app/readme-hero-dark.png")[.size] as? Int) ?? 0
+        #expect(sz < 400_000, "hero capture is \(sz) bytes")
     }
 
     @Test func everyAppFigureOpensInAnAccessibleLightbox() throws {
         let b = SiteBuilder(root: repoRoot); b.log = { _ in }
         let r = try b.run(SiteOptions(check: true))
-        let tiles = r.html.components(separatedBy: "<button type=\"button\" class=\"zoom\"").dropFirst()
-        #expect(tiles.count == 4, "hero plus three strip tiles")
+        let tiles = r.html.components(separatedBy: "<button type=\"button\" class=\"zoom").dropFirst()
+        #expect(tiles.count == 6, "hero window and popover plus four gallery tabs")
         for t in tiles {
             let tag = String(t.prefix(while: { $0 != ">" }))
-            #expect(tag.contains("data-full=\"assets/app/full/") && tag.contains("data-alt=\"") && tag.contains("aria-label=\"Expand"))
+            #expect(tag.contains("data-full=\"assets/app/gallery-") && tag.contains("data-alt=\"") && tag.contains("aria-label=\"Expand"))
             #expect(t.contains(" alt=\""))
             if let m = tag.range(of: #"data-full="([^"]+)""#, options: .regularExpression) {
                 let p = String(tag[m]).dropFirst(11).dropLast()
@@ -125,7 +125,7 @@ import Testing
     @Test func styleHooksAreProgressiveAndDataDriven() throws {
         let b = SiteBuilder(root: repoRoot); b.log = { _ in }
         let r = try b.run(SiteOptions(check: true))
-        #expect(r.html.contains("class=\"surface\"") && !r.html.contains("class=\"aurora\"") && !r.html.contains("id=\"prog\"") && r.html.contains("<footer>"))
+        #expect(r.html.contains("class=\"fig1\"") && !r.html.contains("class=\"aurora\"") && !r.html.contains("id=\"prog\"") && r.html.contains("<footer>"))
         #expect(r.html.contains("Not affiliated with Qwen, Alibaba or Apple"))
         for page in [r.html, r.generated["site/benchmarks.html"] ?? ""] { #expect(page.contains("<header class=\"site\">") && page.contains("assets/site.js") && page.contains("class=\"fgrid\"")) }
         #expect(!SITE_JS.contains("data-count") && !SITE_JS.contains("IntersectionObserver") && !SITE_JS.contains("pointermove"))

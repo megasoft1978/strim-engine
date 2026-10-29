@@ -3,72 +3,180 @@ import AppKit
 import StrimAPI
 import StrimAppCore
 
-/// Grouped glass sections. The control token file path is masked until revealed; the token itself is never read here.
-struct SettingsTab: View {
-    @ObservedObject var model: AppModel
-    @State private var draft = AppSettings()
-    @State private var revealToken = false
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: Strim.S.lg) {
-              HStack(alignment: .top, spacing: Strim.S.lg) {
-                VStack(alignment: .leading, spacing: Strim.S.lg) {
-                ModelPickerSection(model: model, draft: $draft)
-                PackSection(model: model)
-                }.frame(maxWidth: .infinity, alignment: .top)
-                VStack(alignment: .leading, spacing: Strim.S.lg) {
-                SettingsGroup("Connection", icon: "network") {
-                    SettingsField("Host URL", text: $draft.hostURL, prompt: "http://127.0.0.1:8765")
-                    HStack(spacing: 6) {
-                        SectionLabel("Port")
-                        StrimPill(Self.port(draft.hostURL), icon: "number")
-                        Text("loopback only").font(Strim.F.mono(.caption2)).foregroundStyle(Strim.C.muted)
-                    }
-                    if let p = draft.hostURLProblem { Label(p, systemImage: "exclamationmark.triangle.fill").font(.caption).foregroundStyle(Strim.C.coral) }
-                }
-                SettingsGroup("Server", icon: "power") {
-                    Toggle("Start server when Strim opens", isOn: $draft.startServerWhenOpens)
-                        .toggleStyle(StrimToggleStyle())
-                    Text("The server starts after the model is available.").font(.caption).foregroundStyle(Strim.C.muted)
-                }
-                ProjectPickerSection(model: model, draft: $draft)
-                SettingsGroup("Paths and tokens", icon: "key") {
-                    SettingsField("strim binary", text: Binding(get: { draft.strimBinary ?? "" }, set: { draft.strimBinary = $0.isEmpty ? nil : $0 }),
-                                  prompt: "auto: ~/.strim/bin, /opt/homebrew/bin, /usr/local/bin")
-                    VStack(alignment: .leading, spacing: 5) {
-                        SectionLabel("Control token file")
-                        HStack {
-                            Text(revealToken ? draft.controlTokenPath : Self.mask(draft.controlTokenPath))
-                                .font(Strim.F.mono(.callout)).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
-                            Spacer()
-                            Button { revealToken.toggle() } label: {
-                                Image(systemName: revealToken ? "eye.slash" : "eye").frame(width: 24, height: 20)
-                            }
-                            .buttonStyle(.plain).foregroundStyle(Strim.C.accentText)
-                            .help(revealToken ? "Hide path" : "Show path").accessibilityLabel(revealToken ? "Hide token path" : "Show token path")
-                        }
-                        .padding(.horizontal, 10).padding(.vertical, 7)
-                        .background(Strim.C.field, in: RoundedRectangle(cornerRadius: Strim.R.control, style: .continuous))
-                        Text("Read-only. The MCP token is never used by this app.").font(.caption).foregroundStyle(Strim.C.muted)
-                    }
-                }
-                }.frame(maxWidth: .infinity, alignment: .top)
-              }
-                HStack(spacing: 8) {
-                    Button("Save") { model.update(settings: draft) }.buttonStyle(StrimButtonStyle(.primary)).disabled(draft == model.settings)
-                    Button("Revert") { draft = model.settings }.buttonStyle(StrimButtonStyle(.secondary)).disabled(draft == model.settings)
-                    Text("stored in ~/.strim/app.json").font(Strim.F.mono(.caption)).foregroundStyle(Strim.C.muted)
-                }
-            }
-            .padding(Strim.S.xl)
-            .frame(maxWidth: 900, alignment: .leading)
-            .frame(maxWidth: .infinity)
+enum SettingsPane: String, CaseIterable, Identifiable {
+    case general, model, server, chat, about
+    var id: String { rawValue }
+    var title: String { rawValue.capitalized }
+    var icon: String {
+        switch self {
+        case .general: "gearshape"
+        case .model: "cpu"
+        case .server: "network"
+        case .chat: "bubble.left"
+        case .about: "info.circle"
         }
-        .onAppear { draft = model.settings }
-        .onChange(of: model.settings) { _, new in draft = new }
+    }
+}
+
+/// Separate Settings scene (⌘,). Grouped forms; every change applies immediately.
+struct SettingsView: View {
+    @ObservedObject var model: AppModel
+    @State var pane: SettingsPane = .general
+
+    var body: some View {
+        TabView(selection: $pane) {
+            ForEach(SettingsPane.allCases) { p in
+                Group {
+                    switch p {
+                    case .general: GeneralPane(model: model)
+                    case .model: ModelPane(model: model)
+                    case .server: ServerPane(model: model)
+                    case .chat: ChatPane(model: model)
+                    case .about: AboutPane(model: model)
+                    }
+                }
+                .formStyle(.grouped)
+                .tabItem { Label(p.title, systemImage: p.icon) }
+                .tag(p)
+            }
+        }
+        .frame(width: 520)
+        .frame(minHeight: 340)
+        .tint(Strim.C.accent)
+        .task { await model.refreshModels(); await model.refreshPack() }
+    }
+}
+
+private func binding<T>(_ model: AppModel, _ kp: WritableKeyPath<AppSettings, T>) -> Binding<T> {
+    Binding(get: { model.settings[keyPath: kp] }, set: { v in var s = model.settings; s[keyPath: kp] = v; model.update(settings: s) })
+}
+
+struct GeneralPane: View {
+    @ObservedObject var model: AppModel
+    var body: some View {
+        Form {
+            Toggle("Launch at login", isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
+            Toggle("Start server when Strim opens", isOn: binding(model, \.startServerWhenOpens))
+            Toggle("Show speed in menu bar", isOn: binding(model, \.showSpeedInMenuBar))
+        }
+    }
+}
+
+struct ModelPane: View {
+    @ObservedObject var model: AppModel
+    private var models: [LocalModel] { model.availableModels.filter { $0.kind == "model" } }
+    private var mtps: [LocalModel] { model.availableModels.filter { $0.kind == "mtp" } }
+
+    /// The explicit choice, else the loaded model matched by name, else the only model on disk.
+    private var effectiveModelPath: String? {
+        if let p = model.settings.modelPath, !p.isEmpty { return p }
+        if let n = model.status?.model, let m = models.first(where: { $0.name == n }) { return m.path }
+        return models.count == 1 ? models[0].path : nil
+    }
+    private var effectiveMTPPath: String? {
+        if let p = model.settings.mtpPath, !p.isEmpty { return p }
+        if let n = model.status?.mtp, let m = mtps.first(where: { $0.name == n }) { return m.path }
+        return mtps.count == 1 ? mtps[0].path : nil
     }
 
-    static func port(_ url: String) -> String { URL(string: url)?.port.map(String.init) ?? "?" }
+    var body: some View {
+        Form {
+            Section {
+                Picker("Model", selection: Binding<String?>(get: { effectiveModelPath }, set: { p in
+                    if let m = models.first(where: { $0.path == p }) { model.selectModel(m) }
+                })) {
+                    if effectiveModelPath == nil { Text("Choose a model").tag(String?.none) }
+                    ForEach(models) { m in Text(m.name + (m.sizeGB.map { String(format: " (%.1f GB)", $0) } ?? "")).tag(Optional(m.path)) }
+                    if let p = effectiveModelPath, !models.contains(where: { $0.path == p }) { Text((p as NSString).lastPathComponent).tag(Optional(p)) }
+                }
+                Picker("MTP head", selection: Binding<String?>(get: { effectiveMTPPath }, set: { p in
+                    if let m = mtps.first(where: { $0.path == p }) { model.selectModel(m) }
+                })) {
+                    Text("None").tag(String?.none)
+                    ForEach(mtps) { m in Text(m.name).tag(Optional(m.path)) }
+                    if let p = effectiveMTPPath, !mtps.contains(where: { $0.path == p }) { Text((p as NSString).lastPathComponent).tag(Optional(p)) }
+                }
+            }
+            Section("Paths") {
+                pathRow("Model", effectiveModelPath) { choose { p in var s = model.settings; s.modelPath = p; model.update(settings: s) } }
+                pathRow("MTP head", effectiveMTPPath) { choose { p in var s = model.settings; s.mtpPath = p; model.update(settings: s) } }
+            }
+            Section {
+                HStack {
+                    let load = model.loadAvailability
+                    Button("Start with selected model") { Task { await model.loadModel() } }.disabled(!load.enabled)
+                    Button("Refresh") { Task { await model.refreshModels() } }
+                    Spacer()
+                    if let r = load.reason { Text(r).font(.system(size: 11)).foregroundStyle(.secondary) }
+                }
+                if let n = model.modelListNote { Text(n).font(.system(size: 11)).foregroundStyle(.secondary) }
+            }
+        }
+    }
+
+    private func pathRow(_ label: String, _ path: String?, choose: @escaping () -> Void) -> some View {
+        LabeledContent(label) {
+            HStack {
+                Text(path.map { ($0 as NSString).abbreviatingWithTildeInPath } ?? "Not set")
+                    .font(.system(size: 12, design: .monospaced)).foregroundStyle(.secondary)
+                    .lineLimit(1).truncationMode(.head).textSelection(.enabled)
+                Button("Choose…", action: choose)
+            }
+        }
+    }
+    private func choose(_ apply: (String) -> Void) {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true; panel.canChooseFiles = false; panel.allowsMultipleSelection = false
+        panel.directoryURL = URL(fileURLWithPath: NSHomeDirectory() + "/.strim/models")
+        if panel.runModal() == .OK, let url = panel.url { apply(url.path) }
+    }
+}
+
+struct ServerPane: View {
+    @ObservedObject var model: AppModel
+    @State private var portText = ""
+    @State private var reveal = false
+    var body: some View {
+        Form {
+            Section {
+                LabeledContent("Host URL") { Text(model.settings.hostURL).font(.system(size: 12, design: .monospaced)).textSelection(.enabled) }
+                LabeledContent("Port") {
+                    TextField("", text: $portText).multilineTextAlignment(.trailing).frame(width: 80)
+                        .font(.system(size: 12, design: .monospaced)).onSubmit(applyPort)
+                }
+                if let p = model.settings.hostURLProblem {
+                    Label(p, systemImage: "exclamationmark.triangle.fill").font(.system(size: 11)).foregroundStyle(Strim.C.danger)
+                }
+                Toggle("Loopback only (127.0.0.1)", isOn: .constant(true)).disabled(true)
+            }
+            Section("Control token") {
+                LabeledContent("File") {
+                    HStack {
+                        Text(reveal ? model.settings.controlTokenPath : Self.mask(model.settings.controlTokenPath))
+                            .font(.system(size: 12, design: .monospaced)).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+                        Button { reveal.toggle() } label: { Image(systemName: reveal ? "eye.slash" : "eye") }
+                            .buttonStyle(.borderless).help(reveal ? "Hide path" : "Show path").accessibilityLabel(reveal ? "Hide token path" : "Show token path")
+                    }
+                }
+                Text("Read-only. The MCP token is never used by this app.").font(.system(size: 11)).foregroundStyle(.secondary)
+            }
+            Section("Advanced") {
+                LabeledContent("Strim binary") {
+                    TextField("Strim binary", text: Binding(get: { model.settings.strimBinary ?? "" }, set: { v in
+                        var s = model.settings; s.strimBinary = v.isEmpty ? nil : v; model.update(settings: s) }),
+                        prompt: Text("auto: ~/.strim/bin, /opt/homebrew/bin"))
+                        .labelsHidden().font(.system(size: 12, design: .monospaced)).multilineTextAlignment(.trailing)
+                }
+            }
+        }
+        .onAppear { portText = Self.port(model.settings.hostURL) }
+    }
+    private func applyPort() {
+        guard let n = Int(portText), (1...65535).contains(n), var c = URLComponents(string: model.settings.hostURL) else { portText = Self.port(model.settings.hostURL); return }
+        c.port = n
+        var s = model.settings; s.hostURL = c.string ?? s.hostURL; model.update(settings: s)
+    }
+    static func port(_ url: String) -> String { URL(string: url)?.port.map(String.init) ?? "" }
     static func mask(_ path: String) -> String {
         let name = (path as NSString).lastPathComponent
         let dir = ((path as NSString).deletingLastPathComponent as NSString).abbreviatingWithTildeInPath
@@ -76,153 +184,80 @@ struct SettingsTab: View {
     }
 }
 
-struct SettingsGroup<Content: View>: View {
-    let title: String, icon: String
-    @ViewBuilder var content: () -> Content
-    init(_ title: String, icon: String, @ViewBuilder content: @escaping () -> Content) { self.title = title; self.icon = icon; self.content = content }
-    var body: some View {
-        VStack(alignment: .leading, spacing: Strim.S.md) {
-            Label { SectionLabel(title) } icon: { Image(systemName: icon).foregroundStyle(Strim.C.accentText) }
-            content()
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .glassCard()
-    }
-}
-
-struct SettingsField: View {
-    let label: String
-    @Binding var text: String
-    var prompt = ""
-    init(_ label: String, text: Binding<String>, prompt: String = "") { self.label = label; _text = text; self.prompt = prompt }
-    var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(label).font(.caption.weight(.medium)).foregroundStyle(Strim.C.muted)
-            TextField("", text: $text, prompt: Text(prompt).foregroundStyle(Strim.C.muted.opacity(0.8)))
-                .textFieldStyle(.plain).font(Strim.F.mono(.callout)).autocorrectionDisabled()
-                .padding(.horizontal, 10).padding(.vertical, 7)
-                .background(Strim.C.field, in: RoundedRectangle(cornerRadius: Strim.R.control, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: Strim.R.control, style: .continuous).strokeBorder(Strim.C.hairline, lineWidth: 1))
-        }
-    }
-}
-
-/// A menu styled as a field (label, current value, chevron).
-struct MenuField<Items: View>: View {
-    let label: String, value: String
-    @ViewBuilder var items: () -> Items
-    var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(label).font(.caption.weight(.medium)).foregroundStyle(Strim.C.muted)
-            Menu(content: items) {
-                HStack {
-                    Text(value).font(Strim.F.mono(.callout)).lineLimit(1).truncationMode(.middle).foregroundStyle(Strim.C.text)
-                    Spacer()
-                    Image(systemName: "chevron.up.chevron.down").font(.system(size: 9, weight: .bold)).foregroundStyle(Strim.C.muted)
-                }
-                .padding(.horizontal, 10).padding(.vertical, 7)
-                .background(Strim.C.field, in: RoundedRectangle(cornerRadius: Strim.R.control, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: Strim.R.control, style: .continuous).strokeBorder(Strim.C.hairline, lineWidth: 1))
-                .contentShape(Rectangle())
-            }
-            .menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden)
-        }
-    }
-}
-
-/// Picking a model only records the choice; the host loads it on the explicit Start action (Status tab).
-struct ModelPickerSection: View {
+struct ChatPane: View {
     @ObservedObject var model: AppModel
-    @Binding var draft: AppSettings
+    @State private var confirmDelete = false
     var body: some View {
-        let models = model.availableModels.filter { $0.kind == "model" }
-        let mtps = model.availableModels.filter { $0.kind == "mtp" }
-        SettingsGroup("Model", icon: "cpu") {
-            HStack(alignment: .bottom, spacing: 8) {
-                MenuField(label: "Local models", value: Self.name(model.settings.modelPath, models: models, none: "Choose a model")) {
-                    ForEach(models) { m in
-                        Button(m.name + (m.sizeGB.map { String(format: " (%.1f GB)", $0) } ?? "")) { model.selectModel(m) }
+        Form {
+            Section {
+                Toggle("Default thinking", isOn: $model.thinkingEnabled)
+                Text("Applies to new chats. A chat keeps the setting it started with.").font(.system(size: 11)).foregroundStyle(.secondary)
+            }
+            Section("Scratch chats") {
+                LabeledContent("Folder") {
+                    HStack {
+                        Text(PathDisplay.tilde(AppModel.scratchDefault)).font(.system(size: 12, design: .monospaced)).foregroundStyle(.secondary)
+                            .lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+                        Button("Reveal") { Finder.reveal(AppModel.scratchDefault) }
                     }
                 }
-                Button { Task { await model.refreshModels() } } label: { Image(systemName: "arrow.clockwise").frame(width: 28, height: 20) }
-                    .buttonStyle(StrimButtonStyle(.secondary)).help("Rescan models").accessibilityLabel("Rescan models")
+                Text("Chats without a project work in their own folder here.").font(.system(size: 11)).foregroundStyle(.secondary)
             }
-            MenuField(label: "MTP head", value: Self.name(model.settings.mtpPath, models: mtps, none: "None")) {
-                ForEach(mtps) { m in Button(m.name) { model.selectModel(m) } }
-            }
-            SettingsField("Model path", text: Binding(get: { draft.modelPath ?? "" }, set: { draft.modelPath = $0.isEmpty ? nil : $0 }))
-            SettingsField("MTP head path", text: Binding(get: { draft.mtpPath ?? "" }, set: { draft.mtpPath = $0.isEmpty ? nil : $0 }))
-            if let n = model.modelSelectionNote { Text(n).font(.caption).foregroundStyle(Strim.C.muted) }
-            if let n = model.modelListNote { Text(n).font(.caption).foregroundStyle(Strim.C.muted) }
-            HStack {
-                let load = model.loadAvailability
-                Button { Task { await model.loadModel() } } label: { Label("Start with selected model", systemImage: "play.fill") }
-                    .buttonStyle(StrimButtonStyle(.primary)).disabled(!load.enabled).help(load.reason ?? "")
-                if let r = load.reason { Text(r).font(.caption).foregroundStyle(Strim.C.muted) }
+            Section("History") {
+                Button("Delete all chat history…", role: .destructive) { confirmDelete = true }
+                    .disabled(model.projects.isEmpty && model.threads.isEmpty)
             }
         }
-        .task { await model.refreshModels() }
-    }
-    static func name(_ path: String?, models: [LocalModel], none: String) -> String {
-        guard let path, !path.isEmpty else { return none }
-        return models.first(where: { $0.path == path })?.name ?? (path as NSString).lastPathComponent
+        .confirmationDialog("Delete all chat history?", isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button("Delete All Chats", role: .destructive) { Task { await model.deleteAllChatHistory() } }
+            Button("Cancel", role: .cancel) {}
+        } message: { Text("Removes every chat and project from this list and ends open chat sessions. Your folders are not touched.") }
     }
 }
 
-struct ProjectPickerSection: View {
+struct AboutPane: View {
     @ObservedObject var model: AppModel
-    @Binding var draft: AppSettings
-    var body: some View {
-        SettingsGroup("Project folder (chat)", icon: "folder") {
-            HStack(spacing: 8) {
-                Text(model.settings.projectPath.map { ($0 as NSString).abbreviatingWithTildeInPath } ?? "None chosen")
-                    .font(Strim.F.mono(.callout))
-                    .foregroundStyle(model.settings.projectPath == nil ? Strim.C.muted : Strim.C.text)
-                    .lineLimit(1).truncationMode(.head).textSelection(.enabled)
-                    .padding(.horizontal, 10).padding(.vertical, 7).frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Strim.C.field, in: RoundedRectangle(cornerRadius: Strim.R.control, style: .continuous))
-                Button("Choose...") { chooseProject(model) }.buttonStyle(StrimButtonStyle(.secondary))
-                Menu {
-                    let recents = model.validRecentProjects
-                    if recents.isEmpty { Text("No recent projects") }
-                    ForEach(recents, id: \.self) { p in
-                        Button((p as NSString).abbreviatingWithTildeInPath) { _ = model.setProject(p) }
-                    }
-                } label: { Text("Recent") }.menuStyle(.button).buttonStyle(StrimButtonStyle(.secondary)).menuIndicator(.visible).fixedSize()
-            }
-            Text("Never your home folder. Changing it starts a new chat.").font(.caption).foregroundStyle(Strim.C.muted)
-        }
+    private var version: String {
+        let i = Bundle.main.infoDictionary
+        return (i?["CFBundleShortVersionString"] as? String) ?? "dev"
     }
-}
-
-/// Read-only: the adopted pack fingerprint and the newest `strim evolve` record from `~/.strim/packs`.
-struct PackSection: View {
-    @ObservedObject var model: AppModel
+    private var build: String { (Bundle.main.infoDictionary?["CFBundleVersion"] as? String) ?? "–" }
     var body: some View {
-        SettingsGroup("About", icon: "info.circle") {
-            if let p = model.packInfo {
-                row("Active pack", p.activeFingerprint ?? "none (built-in defaults)")
-                row("Packs on disk", "\(p.packCount)")
-                if let e = p.lastEvolve {
-                    row("Last evolve", e.createdAt + (e.dryRun ? " (dry run)" : ""))
-                    row("Candidate", e.fingerprint)
-                    if let g = e.valGainPP { row("Validation gain", String(format: "%+.1f pp", g)) }
-                    if let r = e.round { row("Round", "\(r)") }
+        Form {
+            Section {
+                row("Version", version); row("Build", build)
+            }
+            Section {
+                Text("Chats stay on this Mac in ~/.strim/chats and go only to your local Strim host.")
+                    .font(.system(size: 11)).foregroundStyle(.secondary)
+            }
+            Section("Pack") {
+                if let p = model.packInfo {
+                    row("Active pack", p.activeFingerprint.map { String($0.prefix(8)) } ?? "built-in defaults")
+                    row("Packs on disk", "\(p.packCount)")
+                    if let e = p.lastEvolve {
+                        row("Last evolve", Self.evolveDate(e.createdAt) + (e.dryRun ? " (dry run)" : ""))
+                        if let g = e.valGainPP { row("Validation gain", String(format: "%+.1f pp", g)) }
+                    } else { Text("No evolve run recorded yet.").font(.system(size: 11)).foregroundStyle(.secondary) }
                 } else {
-                    Text("No evolve run recorded yet.").font(.caption).foregroundStyle(Strim.C.muted)
+                    Text(model.connection.isConnected ? "Pack info is not available from this server." : "Server offline.")
+                        .font(.system(size: 11)).foregroundStyle(.secondary)
                 }
-            } else {
-                Text(model.connection.isConnected ? "Pack info is not available from this host." : "Engine offline.")
-                    .font(.caption).foregroundStyle(Strim.C.muted)
             }
-            Button("Refresh") { Task { await model.refreshPack() } }.buttonStyle(StrimButtonStyle(.secondary)).disabled(!model.connection.isConnected)
+            if let s = model.status {
+                Section("Fingerprint") {
+                    row("Weights hash", StatusView.shortHash(s.quantFingerprint, 0))
+                    row("MTP hash", StatusView.shortHash(s.quantFingerprint, 1))
+                }
+            }
         }
+    }
+    static func evolveDate(_ iso: String) -> String {
+        let f = ISO8601DateFormatter()
+        guard let d = f.date(from: iso) ?? { f.formatOptions.insert(.withFractionalSeconds); return f.date(from: iso) }() else { return iso }
+        return d.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened))
     }
     private func row(_ k: String, _ v: String) -> some View {
-        HStack {
-            Text(k).font(.callout).foregroundStyle(Strim.C.muted)
-            Spacer()
-            Text(v).font(Strim.F.mono(.callout, weight: .medium)).textSelection(.enabled).lineLimit(1).truncationMode(.middle)
-        }
+        LabeledContent(k) { Text(v).font(.system(size: 12, design: .monospaced)).textSelection(.enabled).lineLimit(1).truncationMode(.middle) }
     }
 }

@@ -20,8 +20,17 @@ public enum ModelDownloadState: Equatable, Sendable {
     case confirming
     case downloading(ModelDownloadProgress)
     case verifying(file: String)
+    case startingServer
     case done
     case failed(message: String, resumable: Bool)
+
+    /// States that replace the normal Status dashboard with the focused first-run flow.
+    public var isBlockingFirstRun: Bool {
+        switch self {
+        case .needsDownload, .confirming, .downloading, .verifying, .startingServer, .failed: true
+        case .idle, .done: false
+        }
+    }
 }
 
 public enum PullJSONEvent: Equatable, Sendable {
@@ -129,6 +138,8 @@ public final class ModelDownloader: ObservableObject {
     private var activeRunID = UUID()
     private var parser = PullJSONParser()
     private var resumable = false
+    /// Fraction reached when the user paused; shown as "Paused at 42%".
+    @Published public private(set) var pausedFraction: Double?
     private var cancelRequested = false
     private var hasConfirmed = false
     private var modelReadyReported = false
@@ -141,11 +152,12 @@ public final class ModelDownloader: ObservableObject {
                     if case .found(let path) = HostCommand.resolveBinary(settings: AppSettings()) { path } else { nil }
                 },
                 freeSpace: @escaping (URL) -> Int64 = { ModelDisk.freeBytes(at: $0) },
-                modelExists: (() -> Bool)? = nil, initialState: ModelDownloadState = .idle,
+                modelExists: (() -> Bool)? = nil, initialState: ModelDownloadState = .idle, pausedFraction: Double? = nil,
                 autostart: @escaping @MainActor () -> Void = {}) {
         self.process = process; self.directory = directory; self.binary = binary; self.freeSpace = freeSpace; self.autostart = autostart
         self.modelExists = modelExists ?? { ModelDisk.hasRequiredFiles(at: directory) }
         self.state = initialState
+        self.pausedFraction = pausedFraction
         self.resumable = ModelDisk.hasPartialFiles(at: directory)
     }
     public func inspect() {
@@ -156,6 +168,11 @@ public final class ModelDownloader: ObservableObject {
         }
         let free = freeSpace(URL(fileURLWithPath: directory))
         state = .needsDownload(sizeBytes: Self.modelBytes, freeBytes: free, resumable: resumable)
+    }
+    public var availableFreeBytes: Int64 { freeSpace(URL(fileURLWithPath: directory)) }
+    public func serverDidStart() {
+        guard case .startingServer = state else { return }
+        state = .done
     }
     public func setAutostartHandler(_ handler: @escaping @MainActor () -> Void) { autostart = handler }
     public func confirm() {
@@ -169,6 +186,7 @@ public final class ModelDownloader: ObservableObject {
     public func beginDownload() {
         guard case .confirming = state else { return }
         hasConfirmed = true
+        pausedFraction = nil
         let free = freeSpace(URL(fileURLWithPath: directory))
         let needed = Self.modelBytes + Self.reserveBytes
         guard free >= needed else {
@@ -199,7 +217,7 @@ public final class ModelDownloader: ObservableObject {
                     state = .failed(message: message, resumable: true)
                     resumable = true
                 } else if case .failed = state {} else {
-                    state = .done; resumable = false
+                    state = .startingServer; resumable = false
                     if !modelReadyReported { modelReadyReported = true; autostart() }
                 }
             } catch {
@@ -213,6 +231,7 @@ public final class ModelDownloader: ObservableObject {
         state = .downloading(.init(file: "Preparing download", doneBytes: 0, totalBytes: Self.modelBytes, bytesPerSec: 0, etaSec: nil))
     }
     public func cancel() {
+        if case .downloading(let p) = state { pausedFraction = p.fraction }
         cancelRequested = true; activeRunID = UUID(); process.cancel(); resumable = true; task?.cancel(); task = nil
         state = .needsDownload(sizeBytes: Self.modelBytes, freeBytes: freeSpace(URL(fileURLWithPath: directory)), resumable: true)
     }

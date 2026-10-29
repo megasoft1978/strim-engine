@@ -25,7 +25,7 @@ let HV_RULES = """
 .hv .nlv{font-size:17px;font-weight:600}.hv .nln{font-size:12.5px;fill:var(--hv-mu)}.hv .nln.hot{fill:var(--hv-fg);font-weight:600;font-size:14px}
 .hv .nlv.hot{font-family:"Space Grotesk",-apple-system,"Helvetica Neue",Arial,sans-serif;font-size:54px;font-weight:700;letter-spacing:-.04em}
 .hv .tk{font-size:12px;fill:var(--hv-mu)}
-.hv .gcard{fill:var(--hv-gl);stroke:var(--hv-ru)}.hv .gcard.loss{stroke-dasharray:5 4}
+.hv .gcard{fill:var(--hv-gl);stroke:var(--hv-ru)}
 .hv .gb{fill:none;stroke:var(--hv-ru);stroke-width:5;stroke-linecap:round}.hv .gv{fill:none;stroke-width:5;stroke-linecap:round}.hv .gv.lose{stroke:var(--hv-mu)}
 .hv .g1{stroke:var(--hv-fg);stroke-width:1.5;opacity:.6}.hv .gd{fill:var(--hv-fg)}.hv .gd.lose{fill:var(--hv-mu)}
 .hv .gnum{font-size:30px;font-weight:700;letter-spacing:-.04em}.hv .gnum.lose{fill:var(--hv-mu)}

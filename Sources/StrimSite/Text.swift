@@ -168,3 +168,8 @@ public func pyContains(_ hay: String, _ needle: String) -> Bool {
     }
     return false
 }
+
+/// Escaped command text for display with soft break opportunities after "=" and before "megasoft1978/" (data-copy keeps the plain text).
+public func escCmd(_ s: String) -> String {
+    esc(s).replacingOccurrences(of: "=", with: "=<wbr>").replacingOccurrences(of: "megasoft1978/", with: "<wbr>megasoft1978/")
+}

@@ -16,6 +16,14 @@ public actor FakeControlClient: StrimControlClient {
     public private(set) var packValue = PackInfo()
     /// Full chat append requests (including `enableThinking`), in order.
     public private(set) var appends: [ChatAppendRequest] = []
+    /// Session ids passed to `chatClose`, in order.
+    public private(set) var closedSessions: [String] = []
+    /// When true every `chatOpen` returns a fresh session id ("s1", "s2", ...) instead of the fixed one.
+    public private(set) var uniqueSessions = false
+    private var openCount = 0
+    /// When set, `chatOpen` throws `max_sessions` while that many sessions are open (like the host).
+    public private(set) var maxSessions: Int?
+    public private(set) var openSessions: Set<String> = []
     /// When set, the next call to any method throws it (then clears).
     public var failNext: Error?
 
@@ -38,6 +46,8 @@ public actor FakeControlClient: StrimControlClient {
     public func setModels(_ m: [LocalModel]) { modelList = ModelList(models: m) }
     public func setPack(_ p: PackInfo) { packValue = p }
     public func setFailNext(_ e: Error?) { failNext = e }
+    public func setUniqueSessions(_ on: Bool) { uniqueSessions = on }
+    public func setMaxSessions(_ n: Int?) { maxSessions = n }
 
     /// Events emitted before any subscriber exists are replayed to the first one.
     public func emit(_ e: StrimEvent) {
@@ -88,13 +98,21 @@ public actor FakeControlClient: StrimControlClient {
     }
     public func chatOpen(_ request: ChatOpenRequest) async throws -> ChatSession {
         try check(); calls.append("chat_open:\(request.cwd)")
-        var s = session; s.cwd = request.cwd; s.profile = request.profile; return s
+        var s = session; s.cwd = request.cwd; s.profile = request.profile
+        if uniqueSessions { openCount += 1; s.sessionID = "s\(openCount)"; s.jobID = "j-s\(openCount)" }
+        if let m = maxSessions, openSessions.count >= m { throw APIError(code: "max_sessions", message: "too many chat sessions") }
+        openSessions.insert(s.sessionID)
+        return s
     }
     public func chatAppend(_ request: ChatAppendRequest) async throws {
         try check(); calls.append("chat_append:\(request.sessionID):\(request.text)"); appends.append(request)
     }
     public func chatCancel(_ request: ChatCancelRequest) async throws {
         try check(); calls.append("chat_cancel:\(request.sessionID)")
+    }
+
+    public func chatClose(sessionID: String) async throws {
+        try check(); calls.append("chat_close:\(sessionID)"); closedSessions.append(sessionID); openSessions.remove(sessionID)
     }
 
     public func pauseJobs(_ request: PauseRequest) async throws -> JobsPauseState {

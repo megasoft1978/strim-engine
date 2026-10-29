@@ -7,7 +7,7 @@ import StrimAdmission
 import StrimHost
 import StrimServer
 
-// strim serve <model> [mtpHead] [--port N=8203] [--token-file PATH] [--no-auth] [--model-dir DIR]...
+// strim serve <model> [mtpHead] [--port N=8203] [--token-file PATH] [--state-dir DIR] [--no-auth] [--model-dir DIR]...
 //                              [--max-inflight N] [--max-background N] [--no-admission]
 //                              [--prefix-disk] [--prefix-disk-dir DIR]
 //
@@ -20,6 +20,7 @@ func runServe(_ args: [String]) {
     var positional: [String] = []
     var port: UInt16 = 8203
     var tokenPath = TokenStore.defaultPath
+    var stateDir = NSHomeDirectory() + "/.strim"
     var noAuth = false
     var modelDirs: [String] = []
     var admission = AdmissionOptions()
@@ -43,6 +44,7 @@ func runServe(_ args: [String]) {
             guard let p = UInt16(value()) else { fail("bad --port") }
             port = p
         } else if a == "--token-file" || a.hasPrefix("--token-file=") { tokenPath = value() }
+        else if a == "--state-dir" || a.hasPrefix("--state-dir=") { stateDir = (value() as NSString).expandingTildeInPath }
         else if AdmissionOptions.owns(a) {
             do { try admission.parse(a, value: value) } catch { fail("\(error)") }
         }
@@ -51,7 +53,7 @@ func runServe(_ args: [String]) {
         i += 1
     }
     guard let model = positional.first, positional.count <= 2 else {
-        fail("usage: strim serve <model> [mtpHead] [--port N=8203] [--token-file PATH] [--no-auth] [--model-dir DIR]... "
+        fail("usage: strim serve <model> [mtpHead] [--port N=8203] [--token-file PATH] [--state-dir DIR] [--no-auth] [--model-dir DIR]... "
              + "[--max-inflight N] [--max-background N] [--no-admission] [--prefix-disk] [--prefix-disk-dir DIR]")
     }
     let head = positional.count > 1 ? positional[1] : nil
@@ -67,7 +69,7 @@ func runServe(_ args: [String]) {
 
     Task {
         do {
-            let paths = HostPaths(tokenPath: tokenPath)
+            let paths = HostPaths(root: URL(fileURLWithPath: stateDir, isDirectory: true), tokenPath: tokenPath)
             let loadedConfig = try HostConfig.load(from: paths.config)
             let (hostConfig, rootsDefaulted) = loadedConfig.withProductionDefaults()
             if rootsDefaulted {
@@ -96,7 +98,8 @@ func runServe(_ args: [String]) {
                 engine: slot.client,
                 serverConfig: ServerConfig(modelId: modelId, defaults: SamplingDefaults.load(modelDir: model),
                                            maxSessions: maxSessions, bearerToken: token, admission: gate),
-                hostConfig: hostConfig, paths: paths, lock: lock)
+                hostConfig: hostConfig, paths: paths, lock: lock,
+                isolationBaseDir: paths.root.appendingPathComponent("worktrees", isDirectory: true))
             var copts = StrimControlPlane.Options()
             // Models the control API may load: ~/models, next to the model/head this host started with, --model-dir.
             copts.modelRoots = [NSHomeDirectory() + "/models", (model as NSString).deletingLastPathComponent]

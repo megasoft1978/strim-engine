@@ -12,6 +12,7 @@ public enum StrimRoutes {
     public static let chatOpen = "/v1/strim/chat/open"       // POST (write)
     public static let chatAppend = "/v1/strim/chat/append"   // POST (write)
     public static let chatCancel = "/v1/strim/chat/cancel"   // POST (write)
+    public static let chatClose = "/v1/strim/chat/close"     // POST (write); body {"session_id"}
 
     /// Path for one job: `/v1/strim/jobs/{id}`.
     public static func job(_ id: String) -> String { jobs + "/" + id }

@@ -31,6 +31,16 @@ public struct ToolCard: Equatable, Sendable {
     }
 }
 
+/// Tool output shown verbatim: first `maxLines` lines, the rest behind a "N more lines" affordance.
+public enum ToolResultPreview {
+    public static func split(_ text: String, maxLines: Int = 8) -> (shown: String, hidden: Int) {
+        var lines = text.replacingOccurrences(of: "\r\n", with: "\n").split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+        while lines.last?.trimmingCharacters(in: .whitespaces).isEmpty == true { lines.removeLast() }
+        guard lines.count > maxLines else { return (lines.joined(separator: "\n"), 0) }
+        return (lines.prefix(maxLines).joined(separator: "\n"), lines.count - maxLines)
+    }
+}
+
 /// Token accounting of one chat turn. `local` tokens are the ones the local model generated.
 public struct TokenLedger: Equatable, Sendable {
     public var prompt = 0
@@ -54,14 +64,14 @@ public struct TokenLedger: Equatable, Sendable {
         return n.count == 3 ? (n[0], n[1], n[2]) : nil
     }
 
-    /// e.g. `prompt 1,204 (cached 900) | completion 87 | local 87 | 41.2 tok/s`
+    /// e.g. `prompt 1,204 (cached 900) · completion 87 · local 87 · 41.2 tok/s`
     public var summary: String {
         var parts = ["prompt \(StatsFormat.tokens(prompt))"]
         if cached > 0 { parts[0] += " (cached \(StatsFormat.tokens(cached)))" }
         parts.append("completion \(StatsFormat.tokens(completion))")
         parts.append("local \(StatsFormat.tokens(local))")
         if let t = tokensPerSecond { parts.append(StatsFormat.tps(t)) }
-        return parts.joined(separator: " | ")
+        return parts.joined(separator: " · ")
     }
 }
 
@@ -74,7 +84,9 @@ public struct ChatMessage: Identifiable, Equatable, Sendable {
     public var tool: ToolCard?
     /// Set on the last message of a finished turn.
     public var ledger: TokenLedger?
-    public init(role: Role, text: String, tool: ToolCard? = nil, ledger: TokenLedger? = nil) {
-        self.role = role; self.text = text; self.tool = tool; self.ledger = ledger
+    /// Set for divider rows (session ended, earlier messages trimmed); their `text` is the divider copy.
+    public var marker: ChatMarker?
+    public init(role: Role, text: String, tool: ToolCard? = nil, ledger: TokenLedger? = nil, marker: ChatMarker? = nil) {
+        self.role = role; self.text = text; self.tool = tool; self.ledger = ledger; self.marker = marker
     }
 }

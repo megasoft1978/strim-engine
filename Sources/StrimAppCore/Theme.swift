@@ -23,16 +23,22 @@ public enum Strim {
 
     /// Raw palette values (dark, light) so tests can check contrast without resolving dynamic colours.
     public enum Palette {
-        public static let bg: (dark: UInt32, light: UInt32) = (0x0C0D10, 0xFAFAFB)
-        public static let surface: (dark: UInt32, light: UInt32) = (0x14151A, 0xFFFFFF)
-        public static let surface2: (dark: UInt32, light: UInt32) = (0x1B1C22, 0xF1F2F5)
-        public static let hairline: (dark: UInt32, light: UInt32) = (0x2A2C34, 0xE1E3E8)
+        public static let bg: (dark: UInt32, light: UInt32) = (0x131417, 0xF5F5F7)
+        public static let surface: (dark: UInt32, light: UInt32) = (0x1A1B20, 0xFFFFFF)
+        public static let surface2: (dark: UInt32, light: UInt32) = (0x22232A, 0xF0F1F4)
+        public static let hairline: (dark: UInt32, light: UInt32) = (0x2C2E36, 0xE2E3E8)
+        /// Increase Contrast variant of the hairline.
+        public static let hairlineStrong: (dark: UInt32, light: UInt32) = (0x3A3C45, 0xC9CAD1)
         public static let text: (dark: UInt32, light: UInt32) = (0xECEDEF, 0x131419)
         public static let muted: (dark: UInt32, light: UInt32) = (0xA3A6B1, 0x595C68)
+        /// Captions only.
+        public static let tertiary: (dark: UInt32, light: UInt32) = (0x8A8D99, 0x6B6E7A)
         public static let accent: (dark: UInt32, light: UInt32) = (0x7C7CF5, 0x4F46E5)
         public static let onAccent: (dark: UInt32, light: UInt32) = (0x0C0D10, 0xFFFFFF)
         public static let accentHover: (dark: UInt32, light: UInt32) = (0x9393FF, 0x4338CA)
         public static let focus: (dark: UInt32, light: UInt32) = (0x9393FF, 0x4F46E5)
+        /// App errors and destructive actions only.
+        public static let danger: (dark: UInt32, light: UInt32) = (0xFF7A7A, 0xC62828)
     }
 
     public enum C {
@@ -47,32 +53,27 @@ public enum Strim {
         public static let text = p(Palette.text)
         /// Secondary text (AA on bg, surface and surface2 in both themes).
         public static let muted = p(Palette.muted)
-        public static let hairline = p(Palette.hairline)
-        /// Flat card fill (was the glass fill).
-        public static let glass = surface
-        /// Raised / selected fill.
-        public static let glassStrong = surface2
+        /// Captions and chart legends only.
+        public static let tertiary = p(Palette.tertiary)
+        public static let hairline = Color(nsColor: NSColor(name: nil) { ap in
+            let hc = NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast
+            let dark = ap.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            let t = hc ? Palette.hairlineStrong : Palette.hairline
+            return ns(dark ? t.dark : t.light)
+        })
         public static let field = surface2
         public static let track = hairline
         public static let accent = p(Palette.accent)
         public static let accentHover = p(Palette.accentHover)
         public static let focus = p(Palette.focus)
         public static let onAccent = p(Palette.onAccent)
-        public static let indigo = accent
-        /// Accent for small text and icons on the base (AA on both).
-        public static let accentText = accent
-        /// Errors, warnings and destructive actions stay neutral; their icon and label carry state.
-        public static let coral = muted
-        public static let coralFill = surface2
-        public static let amber = muted
-        public static let amberFill = surface2
-        /// Flat backing for selected or informational content.
-        public static let accentFill = surface2
+        /// Errors and destructive actions (the only red in the app).
+        public static let danger = p(Palette.danger)
     }
 
     // MARK: metrics
 
-    public enum R { public static let card: CGFloat = 12, control: CGFloat = 8, tile: CGFloat = 10 }
+    public enum R { public static let card: CGFloat = 10, control: CGFloat = 6, tile: CGFloat = 10 }
     public enum S { public static let xs: CGFloat = 4, sm: CGFloat = 8, md: CGFloat = 12, lg: CGFloat = 16, xl: CGFloat = 24 }
 
     // MARK: type
@@ -94,19 +95,18 @@ public struct StrimBackground: View {
     public var body: some View { Strim.C.bg.ignoresSafeArea() }
 }
 
-public struct GlassCard: ViewModifier {
+public struct CardStyle: ViewModifier {
     var padding: CGFloat
-    var strong: Bool
     public func body(content: Content) -> some View {
         content
             .padding(padding)
-            .background(strong ? Strim.C.surface2 : Strim.C.surface, in: RoundedRectangle(cornerRadius: Strim.R.card, style: .continuous))
+            .background(Strim.C.surface, in: RoundedRectangle(cornerRadius: Strim.R.card, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: Strim.R.card, style: .continuous).strokeBorder(Strim.C.hairline, lineWidth: 1))
     }
 }
 public extension View {
-    /// Flat card: surface fill plus a 1 px hairline.
-    func glassCard(padding: CGFloat = Strim.S.lg, strong: Bool = false) -> some View { modifier(GlassCard(padding: padding, strong: strong)) }
+    /// Flat card: surface fill plus a 1 px hairline, no shadow.
+    func card(padding: CGFloat = Strim.S.lg) -> some View { modifier(CardStyle(padding: padding)) }
 }
 
 /// Small muted label ("Engine", "Memory"), sentence case.
@@ -122,26 +122,21 @@ public struct SectionLabel: View {
 
 public enum PillTone { case neutral, accent, warn, error }
 
+/// Small outlined tag: icon plus word, neutral unless it reports an error.
 public struct StrimPill: View {
     let text: String
     var icon: String?
     var tone: PillTone
     public init(_ text: String, icon: String? = nil, tone: PillTone = .neutral) { self.text = text; self.icon = icon; self.tone = tone }
     public var body: some View {
-        let (fg, bg): (Color, Color) = switch tone {
-        case .neutral: (Strim.C.muted, Strim.C.surface2)
-        case .accent: (Strim.C.accentText, Strim.C.accentFill)
-        case .warn: (Strim.C.amber, Strim.C.amberFill)
-        case .error: (Strim.C.coral, Strim.C.coralFill)
-        }
+        let fg: Color = tone == .error ? Strim.C.danger : Strim.C.muted
         HStack(spacing: 4) {
             if let icon { Image(systemName: icon).font(.system(size: 9, weight: .bold)) }
-            Text(text).font(Strim.F.mono(.caption2, weight: .medium)).lineLimit(1)
+            Text(text).font(.system(size: 11, weight: .medium)).lineLimit(1)
         }
         .foregroundStyle(fg)
-        .padding(.horizontal, 8).padding(.vertical, 3)
-        .background(bg, in: Stadium())
-        .overlay(Stadium().strokeBorder(Strim.C.hairline, lineWidth: 1))
+        .padding(.horizontal, 7).padding(.vertical, 2)
+        .overlay(RoundedRectangle(cornerRadius: 5, style: .continuous).strokeBorder(Strim.C.hairline, lineWidth: 1))
     }
 }
 
@@ -151,12 +146,13 @@ public enum StrimButtonKind { case primary, secondary, danger }
 
 public struct StrimButtonStyle: ButtonStyle {
     var kind: StrimButtonKind
+    var large: Bool
     @Environment(\.isEnabled) private var enabled
-    public init(_ kind: StrimButtonKind = .secondary) { self.kind = kind }
+    public init(_ kind: StrimButtonKind = .secondary, large: Bool = false) { self.kind = kind; self.large = large }
     public func makeBody(configuration: Configuration) -> some View {
         let shape = RoundedRectangle(cornerRadius: Strim.R.control, style: .continuous)
-        let label = configuration.label.font(.callout.weight(.semibold)).lineLimit(1)
-            .padding(.horizontal, 14).padding(.vertical, 7)
+        let label = configuration.label.font(.system(size: large ? 14 : 13, weight: .semibold)).lineLimit(1)
+            .padding(.horizontal, large ? 18 : 12).padding(.vertical, large ? 9 : 6)
         Group {
             switch kind {
             case .primary:
@@ -165,8 +161,8 @@ public struct StrimButtonStyle: ButtonStyle {
                 label.foregroundStyle(Strim.C.text).background(Strim.C.surface2, in: shape)
                     .overlay(shape.strokeBorder(Strim.C.hairline, lineWidth: 1))
             case .danger:
-                label.foregroundStyle(Strim.C.coral).background(Strim.C.coralFill, in: shape)
-                    .overlay(shape.strokeBorder(Strim.C.coral.opacity(0.4), lineWidth: 1))
+                label.foregroundStyle(Strim.C.danger).background(Strim.C.surface2, in: shape)
+                    .overlay(shape.strokeBorder(Strim.C.danger.opacity(0.45), lineWidth: 1))
             }
         }
         .opacity(enabled ? (configuration.isPressed && kind != .primary ? 0.8 : 1) : 0.4)
@@ -174,63 +170,43 @@ public struct StrimButtonStyle: ButtonStyle {
     }
 }
 
-/// Capsule switch. State is conveyed by the knob side and the check / minus icon as well as the fill.
-public struct StrimToggleStyle: ToggleStyle {
-    public init() {}
-    public func makeBody(configuration: Configuration) -> some View {
-        Button { configuration.isOn.toggle() } label: {
-            HStack(spacing: 8) {
-                configuration.label.font(.callout.weight(.medium)).foregroundStyle(Strim.C.text)
-                ZStack(alignment: configuration.isOn ? .trailing : .leading) {
-                    Stadium().fill(configuration.isOn ? Strim.C.accent : Strim.C.surface2)
-                        .overlay(Stadium().strokeBorder(Strim.C.hairline, lineWidth: 1))
-                    Circle().fill(configuration.isOn ? Strim.C.onAccent : Strim.C.muted).padding(2.5)
-                        .overlay(Image(systemName: configuration.isOn ? "checkmark" : "minus").font(.system(size: 7, weight: .heavy))
-                            .foregroundStyle(configuration.isOn ? Strim.C.accent : Strim.C.surface))
-                }
-                .frame(width: 36, height: 20)
-            }
-        }
-        .buttonStyle(.plain)
-        .accessibilityValue(configuration.isOn ? "on" : "off")
-    }
-}
-
-/// The S of four token capsules (logo-c.svg, viewBox 64x64): one S path, stroked with a dash pattern and round caps.
+/// The paired-stream S (site Mark.swift, viewBox 64x64): two offset capsule strokes, 10 wide, round caps, ink x 12..52, y 9..55.
 public struct StrimSPath: Shape {
+    public static let strokeWidth: CGFloat = 10
     public init() {}
     public func path(in rect: CGRect) -> Path {
-        let k = 0.5523 * 8.5, r = 8.5
+        let r = 9.0, k = 0.5523 * r
         var p = Path()
-        p.move(to: CGPoint(x: 46, y: 19))
-        p.addLine(to: CGPoint(x: 28, y: 19))
-        p.addCurve(to: CGPoint(x: 28 - r, y: 27.5), control1: CGPoint(x: 28 - k, y: 19), control2: CGPoint(x: 28 - r, y: 27.5 - k))
-        p.addCurve(to: CGPoint(x: 28, y: 36), control1: CGPoint(x: 28 - r, y: 27.5 + k), control2: CGPoint(x: 28 - k, y: 36))
-        p.addLine(to: CGPoint(x: 36, y: 36))
-        p.addCurve(to: CGPoint(x: 36 + r, y: 44.5), control1: CGPoint(x: 36 + k, y: 36), control2: CGPoint(x: 36 + r, y: 44.5 - k))
-        p.addCurve(to: CGPoint(x: 36, y: 53), control1: CGPoint(x: 36 + r, y: 44.5 + k), control2: CGPoint(x: 36 + k, y: 53))
-        p.addLine(to: CGPoint(x: 17, y: 53))
+        // upper stream: right to left, turning down to the middle bar
+        p.move(to: CGPoint(x: 47, y: 14))
+        p.addLine(to: CGPoint(x: 27, y: 14))
+        p.addCurve(to: CGPoint(x: 27 - r, y: 23), control1: CGPoint(x: 27 - k, y: 14), control2: CGPoint(x: 27 - r, y: 23 - k))
+        p.addCurve(to: CGPoint(x: 27, y: 32), control1: CGPoint(x: 27 - r, y: 23 + k), control2: CGPoint(x: 27 - k, y: 32))
+        p.addLine(to: CGPoint(x: 34, y: 32))
+        // lower stream: from the middle, turning down and out to the left
+        p.move(to: CGPoint(x: 30, y: 32))
+        p.addLine(to: CGPoint(x: 37, y: 32))
+        p.addCurve(to: CGPoint(x: 37 + r, y: 41), control1: CGPoint(x: 37 + k, y: 32), control2: CGPoint(x: 37 + r, y: 41 - k))
+        p.addCurve(to: CGPoint(x: 37, y: 50), control1: CGPoint(x: 37 + r, y: 41 + k), control2: CGPoint(x: 37 + k, y: 50))
+        p.addLine(to: CGPoint(x: 17, y: 50))
         let s = min(rect.width, rect.height) / 64
-        return p.applying(CGAffineTransform(scaleX: s, y: s).translatedBy(x: 0, y: 0))
+        return p.applying(CGAffineTransform(scaleX: s, y: s))
             .offsetBy(dx: rect.minX, dy: rect.minY)
     }
 }
 
 
-/// App mark: flat indigo tile, four capsules in two tints (viewBox 64x64). `size` is the tile edge.
+/// App mark: near-black tile with the packaged accent paired-stream S (same viewBox bounds as the app icon). `size` is the tile edge.
 public struct StrimMarkView: View {
     var size: CGFloat
     public init(size: CGFloat = 28) { self.size = size }
-    private func dash(_ phase: CGFloat) -> StrokeStyle {
-        let s = size / 64
-        return StrokeStyle(lineWidth: 8.5 * s, lineCap: .round, dash: [14.5 * s, 36.5 * s], dashPhase: phase * s)
-    }
     public var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: size * 0.25, style: .continuous).fill(Strim.C.surface2)
-            RoundedRectangle(cornerRadius: size * 0.25 - 0.5, style: .continuous).strokeBorder(Strim.C.hairline, lineWidth: 1)
-            StrimSPath().stroke(Strim.C.accent, style: dash(-1))
-            StrimSPath().stroke(Strim.C.accentHover, style: dash(-1 - 25.5))
+            RoundedRectangle(cornerRadius: size * 0.2237, style: .continuous).fill(Strim.C.surface2)
+            RoundedRectangle(cornerRadius: size * 0.2237 - 0.5, style: .continuous).strokeBorder(Strim.C.hairline, lineWidth: 1)
+            StrimSPath()
+                .stroke(Strim.C.accent, style: StrokeStyle(lineWidth: StrimSPath.strokeWidth * size / 64, lineCap: .round))
+                .scaleEffect(0.49 * 64 / 46)
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)
@@ -279,48 +255,9 @@ public enum OrbState: Equatable, Sendable {
     }
 }
 
-/// Flat status dot inside a thin ring. Shape carries the state: filled dot (running), dot + waveform (generating),
-/// progress arc (loading), square (stopped), exclamation (error), dashed ring (offline). No glow, no animation.
-public struct StrimOrb: View {
-    let state: OrbState
-    var size: CGFloat
-    public init(_ state: OrbState, size: CGFloat = 88) { self.state = state; self.size = size }
-
-    public var body: some View {
-        let ring = max(1.5, size * 0.04)
-        ZStack {
-            switch state {
-            case .running, .busy:
-                Circle().strokeBorder(Strim.C.accent, lineWidth: ring)
-                Circle().fill(Strim.C.accent).padding(size * 0.2)
-                Image(systemName: state.icon).font(.system(size: size * 0.26, weight: .bold)).foregroundStyle(Strim.C.onAccent)
-            case .loading(let p):
-                Circle().strokeBorder(Strim.C.hairline, lineWidth: ring)
-                Circle().trim(from: 0, to: max(0.04, p)).stroke(Strim.C.accent, style: StrokeStyle(lineWidth: ring, lineCap: .round))
-                    .rotationEffect(.degrees(-90)).padding(ring / 2)
-                Image(systemName: state.icon).font(.system(size: size * 0.30, weight: .semibold)).foregroundStyle(Strim.C.muted)
-            case .stopped:
-                Circle().strokeBorder(Strim.C.muted, lineWidth: ring)
-                RoundedRectangle(cornerRadius: size * 0.04, style: .continuous).fill(Strim.C.muted).frame(width: size * 0.26, height: size * 0.26)
-            case .error:
-                Circle().strokeBorder(Strim.C.coral, lineWidth: ring)
-                Circle().fill(Strim.C.coralFill).padding(size * 0.12)
-                Image(systemName: state.icon).font(.system(size: size * 0.40, weight: .heavy)).foregroundStyle(Strim.C.coral)
-            case .offline:
-                Circle().strokeBorder(Strim.C.muted, style: StrokeStyle(lineWidth: ring, dash: [3, 3]))
-                Image(systemName: state.icon).font(.system(size: size * 0.30, weight: .semibold)).foregroundStyle(Strim.C.muted)
-            }
-        }
-        .frame(width: size, height: size)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Engine \(state.word)")
-    }
-}
-
 // MARK: - menu bar glyph
 
-/// Monochrome template image of the S capsule mark, 18 pt, optionally with a small state shape in the corner
-/// (filled dot = running, ring = stopped or loading, diamond = error). A cut-out keeps the shape legible over the S.
+/// Pure-alpha template image of the paired-stream S mark at 18 pt. Connection state is exposed separately by badge(for:).
 public enum MenuBarGlyph {
     public enum Badge: Equatable, Sendable { case none, dot, ring, diamond }
 
@@ -340,35 +277,26 @@ public enum MenuBarGlyph {
     public static func image(badge: Badge = .none, points: CGFloat = 18) -> NSImage {
         let img = NSImage(size: NSSize(width: points, height: points), flipped: true) { rect in
             guard let ctx = NSGraphicsContext.current?.cgContext else { return false }
-            // logo-c viewBox crop x 11..55, y 12..60, scaled into the left/top of the image so the badge has room.
-            let s = points * 0.84 / 48
-            let ox = -11 * s + points * 0.02, oy = -12 * s + points * 0.04
+            // Scale the mark to 84% of the 18 pt glyph box, centred with balanced optical padding.
+            let s = points * 0.84 / 56
+            let ox = points / 2 - 32 * s, oy = points / 2 - 32 * s
             let sp = StrimSPath().path(in: CGRect(x: 0, y: 0, width: 64, height: 64))
             var t = CGAffineTransform(translationX: ox, y: oy).scaledBy(x: s, y: s)
             guard let cg = sp.cgPath.copy(using: &t) else { return false }
-            ctx.setStrokeColor(NSColor.black.cgColor)
-            ctx.setLineWidth(8.5 * s); ctx.setLineCap(.round)
-            ctx.setLineDash(phase: -1 * s, lengths: [14.5 * s, 11 * s])
+            ctx.setStrokeColor(NSColor.black.withAlphaComponent(badge == .ring ? 0.5 : 1).cgColor)
+            ctx.setLineWidth(StrimSPath.strokeWidth * s); ctx.setLineCap(.round)
             ctx.addPath(cg); ctx.strokePath()
-            ctx.setLineDash(phase: 0, lengths: [])
-            if badge != .none {
-                let c = CGPoint(x: points - 3.6, y: points - 3.6), r: CGFloat = 3.1
-                ctx.saveGState()
-                ctx.setBlendMode(.clear)
-                ctx.fillEllipse(in: CGRect(x: c.x - r - 1.3, y: c.y - r - 1.3, width: 2 * (r + 1.3), height: 2 * (r + 1.3)))
-                ctx.restoreGState()
-                ctx.setFillColor(NSColor.black.cgColor); ctx.setStrokeColor(NSColor.black.cgColor)
-                switch badge {
-                case .dot: ctx.fillEllipse(in: CGRect(x: c.x - r, y: c.y - r, width: 2 * r, height: 2 * r))
-                case .ring:
-                    ctx.setLineWidth(1.3)
-                    ctx.strokeEllipse(in: CGRect(x: c.x - r + 0.65, y: c.y - r + 0.65, width: 2 * r - 1.3, height: 2 * r - 1.3))
-                case .diamond:
-                    ctx.move(to: CGPoint(x: c.x, y: c.y - r - 0.4)); ctx.addLine(to: CGPoint(x: c.x + r + 0.4, y: c.y))
-                    ctx.addLine(to: CGPoint(x: c.x, y: c.y + r + 0.4)); ctx.addLine(to: CGPoint(x: c.x - r - 0.4, y: c.y))
-                    ctx.closePath(); ctx.fillPath()
-                case .none: break
+            if badge == .diamond {
+                // Error: knock a 7 pt diamond out of the bottom-right of the S, then fill a 5 pt diamond in the gap.
+                func diamond(_ w: CGFloat) -> CGPath {
+                    let k = w / 2 * points / 18, cx = points - 4.5 * points / 18, cy = points - 4.5 * points / 18
+                    let p = CGMutablePath()
+                    p.move(to: CGPoint(x: cx, y: cy - k)); p.addLine(to: CGPoint(x: cx + k, y: cy))
+                    p.addLine(to: CGPoint(x: cx, y: cy + k)); p.addLine(to: CGPoint(x: cx - k, y: cy)); p.closeSubpath()
+                    return p
                 }
+                ctx.saveGState(); ctx.setBlendMode(.clear); ctx.addPath(diamond(8)); ctx.fillPath(); ctx.restoreGState()
+                ctx.setFillColor(NSColor.black.cgColor); ctx.addPath(diamond(5.5)); ctx.fillPath()
             }
             return true
         }

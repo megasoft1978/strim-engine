@@ -27,10 +27,13 @@ import StrimAPI
     }
 
     @Test func menuBarGlyphIsTemplate18pt() {
+        let base = MenuBarGlyph.image(badge: .none).tiffRepresentation
         for b in [MenuBarGlyph.Badge.none, .dot, .ring, .diamond] {
             let img = MenuBarGlyph.image(badge: b)
             #expect(img.isTemplate)
             #expect(img.size == NSSize(width: 18, height: 18))
+            // none and dot are the plain S; stopped (ring) is dimmed and error (diamond) carries a mark.
+            if b == .none || b == .dot { #expect(img.tiffRepresentation == base) } else { #expect(img.tiffRepresentation != base) }
         }
         #expect(MenuBarGlyph.badge(for: status(.ready)) == .dot)
         #expect(MenuBarGlyph.badge(for: status(.stopped)) == .ring)
@@ -56,7 +59,9 @@ import StrimAPI
     private func pick(_ t: (dark: UInt32, light: UInt32), _ dark: Bool) -> UInt32 { dark ? t.dark : t.light }
 
     @Test func palettePinnedToSpec() {
-        #expect(P.bg.dark == 0x0C0D10 && P.bg.light == 0xFAFAFB)
+        #expect(P.bg.dark == 0x131417 && P.bg.light == 0xF5F5F7)
+        #expect(P.surface.dark == 0x1A1B20 && P.surface.light == 0xFFFFFF)
+        #expect(P.tertiary.dark == 0x8A8D99 && P.tertiary.light == 0x6B6E7A)
         #expect(P.accent.dark == 0x7C7CF5 && P.accent.light == 0x4F46E5)
         #expect(P.onAccent.dark == 0x0C0D10 && P.onAccent.light == 0xFFFFFF)
     }
@@ -75,6 +80,16 @@ import StrimAPI
         }
     }
 
+    /// Tertiary is for captions only (>= 4.5 on the card and the window base) and danger text is AA on both.
+    @Test func tertiaryAndDangerMeetAA() {
+        for dark in [true, false] {
+            for surface in [P.bg, P.surface] {
+                #expect(ratio(pick(P.tertiary, dark), pick(surface, dark)) >= 4.5)
+                #expect(ratio(pick(P.danger, dark), pick(surface, dark)) >= 4.5)
+            }
+        }
+    }
+
     @Test func largeTextAndMarksMeet3() {
         for dark in [true, false] {
             for surface in [P.bg, P.surface, P.surface2] {
@@ -88,8 +103,8 @@ import StrimAPI
 
     @Test func noSemanticThemeTokenUsesGreenAsItsSignal() {
         let colors: [(dark: UInt32, light: UInt32)] = [
-            P.bg, P.surface, P.surface2, P.hairline, P.text, P.muted, P.accent,
-            P.onAccent, P.accentHover, P.focus,
+            P.bg, P.surface, P.surface2, P.hairline, P.hairlineStrong, P.text, P.muted, P.tertiary, P.accent,
+            P.onAccent, P.accentHover, P.focus, P.danger,
         ]
         for pair in colors {
             for color in [pair.dark, pair.light] {

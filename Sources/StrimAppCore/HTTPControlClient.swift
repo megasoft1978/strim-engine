@@ -16,8 +16,8 @@ public enum ControlClientError: Error, Equatable, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .hostUnreachable(let d): "host unreachable (\(d))"
-        case .timeout: "host did not respond in time"
+        case .hostUnreachable(let d): "Strim server isn't responding\(d.isEmpty ? "" : " on \(d)"). Start it from the menu bar."
+        case .timeout: "Strim server didn't respond in time. Check that it is running (menu bar)."
         case .unauthorized(let present): present ? "host rejected the token (401)" : "host requires a token but none was found (401)"
         case .forbidden: "host refused the request (403, loopback only)"
         case .notImplemented: "not implemented by this host (501)"
@@ -237,15 +237,20 @@ public struct HTTPControlClient: StrimControlClient {
         return r
     }
 
+    private var hostLabel: String {
+        guard let h = baseURL.host else { return "" }
+        return baseURL.port.map { "\(h):\($0)" } ?? h
+    }
+
     private func mapTransport(_ error: Error) -> ControlClientError {
         if let e = error as? ControlClientError { return e }
         if let u = error as? URLError {
             switch u.code {
             case .timedOut: return .timeout
-            default: return .hostUnreachable(u.localizedDescription)
+            default: return .hostUnreachable(hostLabel)
             }
         }
-        return .hostUnreachable(error.localizedDescription)
+        return .hostUnreachable(hostLabel)
     }
 
     private func mapStatus(_ status: Int, body: Data) -> ControlClientError {
@@ -298,6 +303,7 @@ public struct HTTPControlClient: StrimControlClient {
     }
     public func chatAppend(_ request: ChatAppendRequest) async throws { _ = try await post(StrimRoutes.chatAppend, request) }
     public func chatCancel(_ request: ChatCancelRequest) async throws { _ = try await post(StrimRoutes.chatCancel, request) }
+    public func chatClose(sessionID: String) async throws { _ = try await post(StrimRoutes.chatClose, ChatCancelRequest(sessionID: sessionID)) }
 
     public func pauseJobs(_ request: PauseRequest) async throws -> JobsPauseState {
         try decode(JobsPauseState.self, try await post(StrimRoutes.pause, request))
@@ -367,6 +373,7 @@ struct InvalidConfigClient: StrimControlClient {
     func chatOpen(_ request: ChatOpenRequest) async throws -> ChatSession { throw err }
     func chatAppend(_ request: ChatAppendRequest) async throws { throw err }
     func chatCancel(_ request: ChatCancelRequest) async throws { throw err }
+    func chatClose(sessionID: String) async throws { throw err }
     func pauseJobs(_ request: PauseRequest) async throws -> JobsPauseState { throw err }
     func resumeJobs() async throws -> JobsPauseState { throw err }
     func cancelJob(_ request: JobCancelRequest) async throws -> JobCancelResult { throw err }

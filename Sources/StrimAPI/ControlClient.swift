@@ -13,6 +13,8 @@ public protocol StrimControlClient: Sendable {
     func chatOpen(_ request: ChatOpenRequest) async throws -> ChatSession
     func chatAppend(_ request: ChatAppendRequest) async throws
     func chatCancel(_ request: ChatCancelRequest) async throws
+    /// Ends a host session (its worktree patch then appears in Jobs). Frees a `max_sessions` slot.
+    func chatClose(sessionID: String) async throws
     // Product additions. Defaults throw `not_implemented` so older conformers keep compiling.
     func pauseJobs(_ request: PauseRequest) async throws -> JobsPauseState
     func resumeJobs() async throws -> JobsPauseState
@@ -22,6 +24,7 @@ public protocol StrimControlClient: Sendable {
 }
 
 public extension StrimControlClient {
+    func chatClose(sessionID: String) async throws { throw APIError(code: "not_implemented", message: "chat close") }
     func pauseJobs(_ request: PauseRequest) async throws -> JobsPauseState { throw APIError(code: "not_implemented", message: "pause") }
     func resumeJobs() async throws -> JobsPauseState { throw APIError(code: "not_implemented", message: "resume") }
     func cancelJob(_ request: JobCancelRequest) async throws -> JobCancelResult { throw APIError(code: "not_implemented", message: "cancel") }

@@ -12,25 +12,54 @@ let BR_MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"
 let SITE_URL = "https://megasoft1978.github.io/strim-engine/"
 let REPO_URL = "https://github.com/megasoft1978/strim-engine"
 
-/// The S of four indigo token capsules: one dashed, round-capped path.
-let MARK_PATH = "M46 19H28A8.5 8.5 0 0 0 28 36H36A8.5 8.5 0 0 1 36 53H17"
+let BR_ACCENT_LIGHT = "#4F46E5"
+let BR_TEXT_LIGHT = "#131419"
+let BR_APP_TILE = "#14151A"
 
-/// The mark as a rounded navy tile with the capsule S, as an SVG fragment (defs + shapes) to place in a 64x64 box. `p` makes the ids unique.
-func markInner(_ p: String, rx: Double = 16) -> String {
-    "<rect width=\"64\" height=\"64\" rx=\"\(fnum(rx))\" fill=\"#14151A\"/><rect x=\".5\" y=\".5\" width=\"63\" height=\"63\" rx=\"\(fnum(rx - 0.5))\" fill=\"none\" stroke=\"#2A2C34\"/>"
-        + "<path d=\"\(MARK_PATH)\" fill=\"none\" stroke=\"#9393FF\" stroke-width=\"8.5\" stroke-linecap=\"round\" stroke-dasharray=\"14.5 11\" stroke-dashoffset=\"-1\"/>"
+/// Approved mark (candidate A): a flat paired-stream S of two offset round-capped capsule strokes in a 64x64 box, centred on (32 32), 10 wide, ink x 12..52, y 9..55.
+/// The upper stream runs right to left and turns down, the lower one turns down from the middle and runs out to the left; they overlap on the middle bar.
+let MARK_STREAMS = ["M47 14H27A9 9 0 0 0 27 32H34", "M30 32H37A9 9 0 0 1 37 50H17"]
+let MARK_STROKE = 10.0
+
+/// "strim" outlined from site/assets/fonts/space-grotesk-var.woff2 at wght 600 (CoreText, 1000 units per em, baseline y 0, y down), advances tracked -0.02em.
+/// The i is the dotless stem; its accent capsule is `WORDMARK_DOT`. Ink x 44.1..2340.4, y -653.2..14.0.
+let WORDMARK_PATH = "M276.9 14.0Q181.5 14.0 119.4 -28.0Q57.3 -70.0 44.1 -151.3L150.1 -178.0Q157.3 -139.8 175.2 -118.0Q193.1 -96.2 219.5 -86.9Q246.0 -77.6 276.9 -77.6Q323.7 -77.6 347.4 -94.7Q371.1 -111.8 371.1 -138.2Q371.1 -164.9 348.6 -178.2Q326.0 -191.5 279.8 -199.8L248.6 -205.4Q197.7 -215.0 155.7 -232.4Q113.8 -249.7 88.5 -280.1Q63.3 -310.6 63.3 -358.4Q63.3 -430.5 116.5 -469.4Q169.8 -508.2 256.7 -508.2Q339.7 -508.2 393.9 -471.2Q448.1 -434.1 464.4 -372.2L358.1 -340.3Q349.8 -381.8 323.0 -399.2Q296.2 -416.7 256.7 -416.7Q217.4 -416.7 195.9 -402.7Q174.5 -388.7 174.5 -363.3Q174.5 -336.5 196.2 -323.8Q218.0 -311.1 255.1 -304.6L286.3 -299.0Q341.2 -289.4 385.8 -273.1Q430.3 -256.8 456.3 -226.7Q482.2 -196.6 482.2 -145.7Q482.2 -69.2 426.5 -27.6Q370.8 14.0 276.9 14.0ZM765.4 0.0Q718.2 0.0 689.6 -28.7Q661.0 -57.3 661.0 -105.7L661.0 -399.0L531.4 -399.0L531.4 -494.2L661.0 -494.2L661.0 -653.2L775.4 -653.2L775.4 -494.2L917.4 -494.2L917.4 -399.0L775.4 -399.0L775.4 -125.2Q775.4 -95.2 803.8 -95.2L902.9 -95.2L902.9 0.0ZM1014.9 0.0L1014.9 -494.2L1127.3 -494.2L1127.3 -437.4L1144.3 -437.4Q1155.8 -467.9 1181.7 -482.1Q1207.5 -496.2 1244.2 -496.2L1303.6 -496.2L1303.6 -394.0L1241.3 -394.0Q1192.0 -394.0 1160.7 -367.6Q1129.3 -341.1 1129.3 -285.8L1129.3 0.0ZM1386.2 0.0L1386.2 -494.2L1500.6 -494.2L1500.6 0.0ZM1626.9 0.0L1626.9 -494.2L1739.4 -494.2L1739.4 -438.5L1756.3 -438.5Q1769.7 -463.8 1800.2 -483.2Q1830.7 -502.6 1881.8 -502.6Q1935.9 -502.6 1968.7 -481.0Q2001.4 -459.3 2018.3 -425.5L2035.2 -425.5Q2052.2 -458.5 2084.1 -480.5Q2116.0 -502.6 2174.4 -502.6Q2221.1 -502.6 2258.5 -482.9Q2295.9 -463.2 2318.1 -424.3Q2340.4 -385.3 2340.4 -327.2L2340.4 0.0L2225.9 0.0L2225.9 -318.8Q2225.9 -361.7 2203.1 -384.1Q2180.2 -406.5 2138.9 -406.5Q2093.3 -406.5 2067.1 -377.3Q2040.9 -348.0 2040.9 -293.3L2040.9 0.0L1926.4 0.0L1926.4 -318.8Q1926.4 -361.7 1903.6 -384.1Q1880.7 -406.5 1839.4 -406.5Q1793.8 -406.5 1767.6 -377.3Q1741.4 -348.0 1741.4 -293.3L1741.4 0.0Z"
+let WORDMARK_DOT = (x: 1386.2, y: -715.0, w: 114.4, h: 130.0)
+
+/// The S mark as stroked paths (no tile). `stroke` is an SVG colour attribute value or, when `css` is set, a CSS colour in a style declaration.
+func markStreams(stroke: String, css: Bool = false) -> String {
+    let paint = css ? "style=\"stroke:\(stroke)\"" : "stroke=\"\(stroke)\""
+    return MARK_STREAMS.map { "<path d=\"\($0)\" fill=\"none\" \(paint) stroke-width=\"\(fnum(MARK_STROKE))\" stroke-linecap=\"round\"/>" }.joined()
 }
 
-/// Standalone mark SVG (logo.svg, favicon.svg); `inline` gives an aria-hidden fragment for the page header.
-func markSVG(_ p: String = "m", rx: Double = 16, standalone: Bool = true, title: String = "Strim") -> String {
+/// Outlined lowercase wordmark with the accent capsule as the i dot, placed so the baseline origin is (x, y) at font size `size`.
+func wordmarkInner(x: Double, y: Double, size: Double, letters: String, accent: String) -> String {
+    let d = WORDMARK_DOT
+    return "<g transform=\"translate(\(fnum(x)) \(fnum(y))) scale(\(fnum(size / 1000)))\"><path d=\"\(WORDMARK_PATH)\" fill=\"\(letters)\"/>"
+        + "<rect x=\"\(fnum(d.x))\" y=\"\(fnum(d.y))\" width=\"\(fnum(d.w))\" height=\"\(fnum(d.h))\" rx=\"\(fnum(d.w / 2))\" fill=\"\(accent)\"/></g>"
+}
+
+/// Inline outlined wordmark lockup; colors follow the site theme tokens.
+func wordmarkSVG() -> String {
+    "<svg class=\"brand-wordmark\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -715 2341 730\" aria-hidden=\"true\"><path d=\"\(WORDMARK_PATH)\" fill=\"var(--fg)\"/><rect x=\"1386.2\" y=\"-715\" width=\"114.4\" height=\"130\" rx=\"57.2\" fill=\"var(--a)\"/></svg>"
+}
+
+/// Standalone mark SVG (logo.svg, favicon.svg) with a light-scheme accent; `inline` (standalone false) gives an aria-hidden fragment that follows the page accent `--a`.
+func markSVG(_ p: String = "m", standalone: Bool = true, title: String = "Strim") -> String {
     let ns = standalone ? " xmlns=\"http://www.w3.org/2000/svg\" width=\"64\" height=\"64\"" : ""
     let role = title.isEmpty ? " aria-hidden=\"true\"" : " role=\"img\" aria-label=\"\(esc(title))\""
-    return "<svg\(ns) viewBox=\"0 0 64 64\"\(role)>" + (title.isEmpty ? "" : "<title>\(esc(title))</title>") + markInner(p, rx: rx) + "</svg>"
+    let head = title.isEmpty ? "" : "<title>\(esc(title))</title>"
+    if !standalone {
+        return "<svg viewBox=\"0 0 64 64\"\(role)>" + head + markStreams(stroke: "var(--a,\(BR_ACCENT))", css: true) + "</svg>"
+    }
+    let style = "<style>@media (prefers-color-scheme:light){path{stroke:\(BR_ACCENT_LIGHT)}}</style>"
+    return "<svg\(ns) viewBox=\"0 0 64 64\"\(role)>" + head + style + markStreams(stroke: BR_ACCENT) + "</svg>"
 }
 
-/// macOS app icon source: the mark as a 824 px rounded square on a transparent 1024 px canvas (no filters).
+/// macOS app icon source: full-bleed #14151A square for the system squircle mask, accent S with 20% vertical optical padding, no filters.
 func appIconSVG() -> String {
-    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1024 1024\" width=\"1024\" height=\"1024\"><g transform=\"translate(100 100) scale(12.875)\">\(markInner("ai", rx: 14.4))</g></svg>"
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1024 1024\" width=\"1024\" height=\"1024\"><rect width=\"1024\" height=\"1024\" fill=\"\(BR_APP_TILE)\"/>"
+        + "<g transform=\"translate(160.914 160.914) scale(10.971429)\">" + markStreams(stroke: BR_ACCENT) + "</g></svg>"
 }
 
 /// Hex colours (#rgb, #rrggbb) in a CSS or SVG text whose hue is green (70 to 170 degrees) and clearly coloured: the owner does not want green anywhere.
@@ -80,8 +109,8 @@ extension SiteBuilder {
         func X(_ v: Double) -> Double { 110 + v / top * 1060 }
         let sans = "font-family=\"\(BR_SANS)\"", mono = "font-family=\"\(BR_MONO)\""
         var b = "<rect width=\"1280\" height=\"640\" fill=\"\(BR_NIGHT)\"/>"
-        b += "<g transform=\"translate(80 70) scale(1.125)\">\(markInner("bm"))</g>"
-        b += "<text x=\"168\" y=\"122\" \(sans) font-size=\"44\" font-weight=\"700\" letter-spacing=\"-1.5\" fill=\"\(BR_TEXT)\">strim</text>"
+        b += "<g transform=\"translate(80 62)\">\(markStreams(stroke: BR_ACCENT))</g>"
+        b += wordmarkInner(x: 157, y: 117, size: 72, letters: BR_TEXT, accent: BR_ACCENT)
         b += "<text x=\"80\" y=\"256\" \(sans) font-size=\"92\" font-weight=\"700\" letter-spacing=\"-4\" fill=\"\(BR_TEXT)\">Your Mac, now a</text>"
         b += "<text x=\"80\" y=\"350\" \(sans) font-size=\"92\" font-weight=\"700\" letter-spacing=\"-4\" fill=\"\(BR_TEXT)\">local AI server.</text>"
         b += "<rect x=\"80\" y=\"396\" width=\"1120\" height=\"170\" rx=\"12\" fill=\"#14151A\" stroke=\"#2A2C34\"/>"

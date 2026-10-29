@@ -1,7 +1,7 @@
 import Foundation
 
 /// The README must stay a short front page; `strim site check` fails above this.
-let README_MAX_LINES = 30
+let README_MAX_LINES = 45
 
 extension SiteBuilder {
     /// (id, label, unit, better) of every generated head-to-head cell, in summary order.
@@ -58,6 +58,16 @@ extension SiteBuilder {
         if name == "app_figure" {
             return appLive("app-hero-live.png") ? "![The Strim menu-bar app with a running server, captured from a live session on a 64 GB M5 Max](\(Self.APP_DIR)app-hero-live.png)" : ""
         }
+        if name == "why" { return readmeWhy() }
+        if name == "mintable" { return readmeMiniTable() }
+        if name == "hero_image" {
+            return appLive("readme-hero.png") ? "<a href=\"\(SITE_URL)\"><img src=\"\(Self.APP_DIR)readme-hero.png\" alt=\"The Strim app: a status window with live decode speed beside a chat window running an agent against the local model\" width=\"1200\"></a>" : ""
+        }
+        if name == "table" { return readmeTable() }
+        if name == "caption" { return readmeCaption() }
+        if name == "live_caption" { return readmeLiveCaption() }
+        if name == "hardware" { return readmeHardware() }
+        if name == "decode_alt" { return readmeDecodeAlt() }
         if name == "scoreboard" { return scoreboardMarkdown() }
         if name == "banner_alt" { return bannerAlt() }
         if name == "ratio_alt" { return speedAlt() }
@@ -98,5 +108,40 @@ extension SiteBuilder {
         if u == "x" { return t + "x" }
         if u == "%" { return t + "%" }
         return t + (u.isEmpty ? "" : " " + u)
+    }
+}
+
+extension SiteBuilder {
+    private func plain(_ html: String) -> String { html.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression) }
+
+    /// Four bullets, every number from the run data and only for claim-eligible wins.
+    func readmeWhy() -> String {
+        var out: [String] = []
+        if let v = num("final.d4k.strim") {
+            var s = "- **Fast decode.** \(fmtFixed(v, 1)) tok/s at 4K context"
+            if let r = claimedRatio("d4k") { s += ", \(plain(r.num))x the closest rival (\(r.rival))" }
+            out.append(s + ".")
+        }
+        if let r = claimedRatio("aw5") { out.append("- **Agents share work.** Four agents on one 16K prefix run \(plain(r.num))x faster than the closest rival (\(r.rival)), because the prefix is cached once.") }
+        var local = "- **Local and lean.** The server binds `127.0.0.1` only; nothing leaves your Mac."
+        if let m = peakMemoryRange() {
+            local += " Peak memory \(fmtFixed(m.mine, 1)) GB, against \(fmtFixed(m.lo.v, 1)) GB for \(WIDE_NAMES[m.lo.rv] ?? m.lo.rv)."
+        }
+        out.append(local)
+        out.append("- **Built for agents.** MTP speculative decoding, an exact prefix cache and a sandboxed tool harness, behind OpenAI, Anthropic and Responses APIs plus MCP.")
+        return out.joined(separator: "\n")
+    }
+
+    /// Three rows: decode at 4K, shared-prefix agents, cold 32K first token (the honest loss). Ratios only where claimable.
+    func readmeMiniTable() -> String {
+        var rows = ["| Measurement | Strim | Closest rival | Strim vs rival |", "|---|---:|---:|:---:|"]
+        for id in ["d4k", "aw5", "c32k_tt"] {
+            guard let c = hCell(id), let b = bestRival(id), let unit = c["unit"]?.pyStr else { continue }
+            let sv = D.text(fid(id, "strim")), rv = D.text(fid(id, b.rival))
+            let verdict = c["verdict"]?[b.rival]?.str ?? "n/a"
+            let res = b.claimable && ["WIN", "LOSS", "TIE"].contains(verdict) ? "\(ratioLabel(b.ratio)) \(verdict)" : "not claimable"
+            rows.append("| \(HERO_TITLE[id] ?? id) (\(unit)\(c["better"]?.str == "lower" ? ", lower is better" : "")) | \(sv) | \(rv) (\(WIDE_NAMES[b.rival] ?? b.rival)) | \(res) |")
+        }
+        return rows.joined(separator: "\n")
     }
 }

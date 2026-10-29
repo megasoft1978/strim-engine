@@ -26,27 +26,34 @@ var data: Data
 switch args[1] {
 case "icon":
     data = render(1024, 1024) { c in
-        // Quiet modern: neutral tile and the four capsule segments of the S mark in two flat indigo tints.
-        let r = CGRect(x: 100, y: 100, width: 824, height: 824)
-        let path = CGPath(roundedRect: r, cornerWidth: 184, cornerHeight: 184, transform: nil)
-        c.addPath(path); c.clip()
-        c.setFillColor(CGColor(red: 0.078, green: 0.082, blue: 0.102, alpha: 1))
-        c.fill(r)
-        c.setStrokeColor(CGColor(red: 0.165, green: 0.173, blue: 0.204, alpha: 1))
-        c.setLineWidth(3)
-        c.addPath(path); c.strokePath()
+        // Full-bleed neutral field; macOS applies the app-icon squircle mask.
+        c.setFillColor(CGColor(red: 20 / 255, green: 21 / 255, blue: 26 / 255, alpha: 1))
+        c.fill(CGRect(x: 0, y: 0, width: 1024, height: 1024))
 
-        let indigo = CGColor(red: 0.486, green: 0.486, blue: 0.961, alpha: 1)
-        let indigoTint = CGColor(red: 0.400, green: 0.408, blue: 0.820, alpha: 1)
-        c.setLineWidth(104); c.setLineCap(.round)
-        c.setStrokeColor(indigo)
-        c.move(to: CGPoint(x: 710, y: 686)); c.addLine(to: CGPoint(x: 465, y: 686)); c.strokePath()
-        c.setStrokeColor(indigoTint)
-        c.addArc(center: CGPoint(x: 465, y: 512), radius: 174, startAngle: .pi / 2, endAngle: 3 * .pi / 2, clockwise: false); c.strokePath()
-        c.addArc(center: CGPoint(x: 565, y: 279), radius: 59, startAngle: .pi / 2, endAngle: -.pi / 2, clockwise: true); c.strokePath()
-        c.setStrokeColor(indigo)
-        // Run beneath the lower curve so rasterization cannot leave a pinhole at the join.
-        c.move(to: CGPoint(x: 620, y: 220)); c.addLine(to: CGPoint(x: 220, y: 220)); c.strokePath()
+        // Candidate A, matching StrimSite/Mark.swift: paired offset capsules form one flat S.
+        let capsules = CGMutablePath()
+        capsules.move(to: CGPoint(x: 47, y: 14))
+        capsules.addLine(to: CGPoint(x: 27, y: 14))
+        capsules.addCurve(to: CGPoint(x: 18, y: 23), control1: CGPoint(x: 22.0294, y: 14), control2: CGPoint(x: 18, y: 18.0294))
+        capsules.addCurve(to: CGPoint(x: 27, y: 32), control1: CGPoint(x: 18, y: 27.9706), control2: CGPoint(x: 22.0294, y: 32))
+        capsules.addLine(to: CGPoint(x: 34, y: 32))
+        capsules.move(to: CGPoint(x: 30, y: 32))
+        capsules.addLine(to: CGPoint(x: 37, y: 32))
+        capsules.addCurve(to: CGPoint(x: 46, y: 41), control1: CGPoint(x: 41.9706, y: 32), control2: CGPoint(x: 46, y: 36.0294))
+        capsules.addCurve(to: CGPoint(x: 37, y: 50), control1: CGPoint(x: 46, y: 45.9706), control2: CGPoint(x: 41.9706, y: 50))
+        capsules.addLine(to: CGPoint(x: 17, y: 50))
+
+        // Fit the 56-unit ink height (including the 10-unit stroke) to 60% of the 1024 grid.
+        let scale = 614.4 / 56
+        var fit = CGAffineTransform(a: scale, b: 0, c: 0, d: -scale,
+                                    tx: 512 - 32 * scale, ty: 512 + 32 * scale)
+        guard let fitted = capsules.copy(using: &fit) else { return }
+        c.setStrokeColor(CGColor(red: 124 / 255, green: 124 / 255, blue: 245 / 255, alpha: 1))
+        c.setLineWidth(10 * scale)
+        c.setLineCap(.round)
+        c.setLineJoin(.round)
+        c.addPath(fitted)
+        c.strokePath()
     }
 case "background":
     data = render(660, 400) { c in

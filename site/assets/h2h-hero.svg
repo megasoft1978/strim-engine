@@ -16,7 +16,7 @@
 .hv .nlv{font-size:17px;font-weight:600}.hv .nln{font-size:12.5px;fill:#A3A6B1}.hv .nln.hot{fill:#ECEDEF;font-weight:600;font-size:14px}
 .hv .nlv.hot{font-family:"Space Grotesk",-apple-system,"Helvetica Neue",Arial,sans-serif;font-size:54px;font-weight:700;letter-spacing:-.04em}
 .hv .tk{font-size:12px;fill:#A3A6B1}
-.hv .gcard{fill:#14151A;stroke:#2A2C34}.hv .gcard.loss{stroke-dasharray:5 4}
+.hv .gcard{fill:#14151A;stroke:#2A2C34}
 .hv .gb{fill:none;stroke:#2A2C34;stroke-width:5;stroke-linecap:round}.hv .gv{fill:none;stroke-width:5;stroke-linecap:round}.hv .gv.lose{stroke:#A3A6B1}
 .hv .g1{stroke:#ECEDEF;stroke-width:1.5;opacity:.6}.hv .gd{fill:#ECEDEF}.hv .gd.lose{fill:#A3A6B1}
 .hv .gnum{font-size:30px;font-weight:700;letter-spacing:-.04em}.hv .gnum.lose{fill:#A3A6B1}

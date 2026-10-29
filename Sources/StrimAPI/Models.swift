@@ -201,10 +201,22 @@ public struct ChatCancelRequest: Codable, Sendable, Equatable {
 }
 
 /// Error body returned with any non-2xx: `{"error":{"code":"...","message":"..."}}`.
-public struct APIError: Codable, Sendable, Equatable, Error {
+public struct APIError: Codable, Sendable, Equatable, Error, LocalizedError {
     public var code: String
     public var message: String
     public init(code: String, message: String) { self.code = code; self.message = message }
+    /// Human text for UI (`error.localizedDescription`); `code` and `message` stay the wire fields.
+    public var errorDescription: String? {
+        let m = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        let sentence = m.isEmpty ? "" : (m.prefix(1).uppercased() + m.dropFirst() + (m.hasSuffix(".") ? "" : "."))
+        switch code {
+        case "not_found": return sentence.isEmpty ? "That item no longer exists." : "Not found: \(m)."
+        case "max_sessions": return "Too many chats are open. Close one and try again."
+        case "load_failed": return sentence.isEmpty ? "The model failed to load." : sentence + " Try again in a moment."
+        case "not_implemented": return "This Strim server doesn't support that yet."
+        default: return sentence.isEmpty ? "The Strim server returned an error (\(code))." : sentence
+        }
+    }
 }
 public struct APIErrorEnvelope: Codable, Sendable, Equatable {
     public var error: APIError

@@ -41,6 +41,7 @@ extension SiteBuilder {
         F = try loadFeatures()
         generated["site/data/headline.json"] = PyJSONWriter.dumps(H) + "\n"
         for (name, svg) in chartAssets() { generated["site/assets/" + name] = svg + "\n" }
+        for (rel, svg) in readmeAssets() { generated[rel] = svg + "\n" }
         let htmlText = buildLandingHTML()
         let benchText = buildBenchmarksHTML()
         if let failure { throw SiteError(failure) }
@@ -51,7 +52,10 @@ extension SiteBuilder {
         for (rel, content) in generated.sorted(by: { $0.key < $1.key }) {
             let old = readText(root + "/" + rel)
             if old != content {
-                if opts.check { syncErr.append("\(rel) is out of sync (run strim site build)") } else { try write(root + "/" + rel, content) }
+                if opts.check { syncErr.append("\(rel) is out of sync (run strim site build)") } else {
+                    try? FileManager.default.createDirectory(atPath: (root + "/" + rel as NSString).deletingLastPathComponent, withIntermediateDirectories: true)
+                    try write(root + "/" + rel, content)
+                }
             }
         }
         let readme = try buildReadme()

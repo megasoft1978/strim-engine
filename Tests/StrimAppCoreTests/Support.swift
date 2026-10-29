@@ -59,6 +59,7 @@ struct FailingClient: StrimControlClient {
     func chatOpen(_ r: ChatOpenRequest) async throws -> ChatSession { throw error }
     func chatAppend(_ r: ChatAppendRequest) async throws { throw error }
     func chatCancel(_ r: ChatCancelRequest) async throws { throw error }
+    func chatClose(sessionID: String) async throws { throw error }
 }
 
 @MainActor

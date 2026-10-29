@@ -18,23 +18,23 @@ import Testing
     @Test func readmeIsShortWithOneHeroChart() throws {
         let (_, r) = try Self.build()
         let lines = r.readme.split(separator: "\n", omittingEmptySubsequences: false).count
-        #expect(lines <= 30, "README has \(lines) lines")
+        #expect(lines <= 45, "README has \(lines) lines")
         #expect(lines >= 15)
-        #expect(Self.matches(#"\]\(site/assets/[^)]+\)"#, in: r.readme).count == 3, "banner, ratio chart, app capture")
-        #expect(r.readme.contains("](site/assets/banner.svg)") && r.readme.contains("](site/assets/h2h-ratio.svg)"))
-        #expect(!r.readme.contains("| Measurement") && !r.readme.contains("img.shields.io"))
+        #expect(r.readme.contains("site/assets/app/readme-hero-dark.png") && r.readme.contains("site/assets/app/readme-hero-light.png") && r.readme.contains("site/assets/readme/wordmark-dark.svg"), "themed hero screenshots and wordmark")
+        #expect(r.readme.contains("img.shields.io") && r.readme.contains("https://megasoft1978.github.io/strim-engine/"))
+        #expect(r.readme.contains("| Workload") && r.readme.contains("x, slower"), "the cold 32K loss row is in the table")
     }
 
     @Test func bothInstallPathsAndTheQuickstart() throws {
         let (_, r) = try Self.build()
         func at(_ s: String) -> String.Index { r.readme.range(of: s)!.lowerBound }
-        #expect(at("brew install megasoft1978/strim/strim") < at("packaging/install.sh | bash"))
-        #expect(at("packaging/install.sh | bash") < at("strim pull"))
+        #expect(at("brew install megasoft1978/strim/strim") < at("strim pull"))
+        #expect(r.readme.contains("not notarized yet"))
         #expect(at("strim pull") < at("strim serve ~/.strim/models"))
         #expect(r.readme.contains("--port 8203"))
         #expect(r.html.contains("inst-brew") && r.html.contains("inst-curl") && r.html.contains("inst-dmg"))
         #expect(r.html.contains("brew install --cask megasoft1978/strim/strim-app") && r.readme.contains("strim-app"))
-        #expect(r.html.contains("Not notarized yet: right-click Open"), "the DMG tab says so honestly")
+        #expect(r.html.contains("Not notarized yet: right-click &rarr; Open the first time."), "the DMG tab says so honestly")
         #expect(r.html.contains("brew install megasoft1978/strim/strim") && r.html.contains("packaging/install.sh | bash"))
     }
 
@@ -44,13 +44,13 @@ import Testing
         #expect(!losses.isEmpty, "the stand-in run has loss cells in the glance set")
         #expect(b.speedLosses().count == losses.count)
         #expect(b.allClaimLosses().count == 10, "all ten current claim-eligible losses are reported from results.json")
-        #expect(r.readme.contains(b.lossLine().replacingOccurrences(of: "All losses: benchmarks.", with: "All losses: [benchmarks](site/benchmarks.html).")))
         #expect(r.html.contains("All losses: <a href=\"benchmarks.html\">benchmarks</a>."))
-        #expect(r.readme.contains("All losses: [benchmarks](site/benchmarks.html)."))
         #expect(b.lossLine().contains("c=4 512-token aggregate") && b.lossLine().contains("c=8 512-token p95 first token"))
-        #expect(Self.matches("<article class=\"card loss\"", in: r.html).count == b.speedLosses().count, "a loss card is drawn")
-        #expect(r.html.contains("honest loss"))
+        let slow = b.ladderRows().filter { $0.verdict == "LOSS" }
+        #expect(!slow.isEmpty && Self.matches("<div class=\"lr slow\"", in: r.html).count == slow.count, "a loss row is drawn in the ratio ladder")
+        #expect(r.html.contains("Grey bars left of 1x are where Strim is slower"))
         #expect(!r.readme.lowercased().contains("fastest overall"))
+        #expect(r.readme.contains("Not a fit if you want many models"), "the why-not-Strim line")
     }
 
     @Test func runFactsAndValidityAreOnTheBenchmarksPage() throws {
@@ -68,7 +68,7 @@ import Testing
         let v = run?["validity"]
         #expect(v?["text"]?.pyStr.isEmpty == false)
         if v?["clean"]?.truthy == false {
-            #expect(page.contains("primary sessions were clean") && r.html.contains("primary sessions were clean"))
+            #expect(page.contains("primary sessions were clean") && r.html.contains("sessions were clean"))
             #expect(page.contains("#method") && page.contains("#r-final"))
         }
         #expect(!r.html.contains("Validity."), "the landing page only carries a one-line note")
@@ -85,8 +85,10 @@ import Testing
         let page = r.generated["site/benchmarks.html"] ?? ""
         #expect(page.contains("id=\"wide\"") && page.contains("oMLX") && page.contains("n/a"))
         #expect(page.contains("llama.cpp and Ollama from the 2026-10-26 run"))
-        #expect(r.html.contains(b.wideDate) && r.html.contains("earlier run"))
-        #expect(Self.matches("<svg class=\"hv nl vw\"", in: r.html).count == 1 && Self.matches("<svg class=\"hv nl vn\"", in: r.html).count == 1)
+        // landing FIG 1: the five current engines of the head-to-head run, sorted, Strim first, value labels from the cell values
+        let rows = Self.matches("<div class=\"r(?: strim)?\" role=\"listitem\">", in: r.html)
+        #expect(rows.count == b.ENGINES.count && rows.first == "<div class=\"r strim\" role=\"listitem\">")
+        #expect(r.html.contains("Method: medians of") && r.html.contains(b.runDate) && r.html.contains(b.runBuild))
         #expect(page.contains("class=\"hv nl vw\""), "the benchmarks page draws the wide field too")
     }
 
@@ -98,11 +100,13 @@ import Testing
     }
 
     @Test func landingIsShortAndHasTheTwoVisuals() throws {
-        let (_, r) = try Self.build()
-        #expect(Self.matches("<svg class=\"hv nl", in: r.html).count == 2)   // wide field: desktop and narrow variant
-        #expect(Self.matches("<article class=\"card", in: r.html).count == GLANCE.count)
-        #expect(Self.matches("<details class=\"faq\"", in: r.html).count == 3)
-        #expect(!r.html.contains("<table") && !r.html.contains("class=\"term\""))
+        let (b, r) = try Self.build()
+        #expect(Self.matches("<figure class=\"fig[12]\"", in: r.html).count == 2, "FIG 1 decode bars and FIG 2 ratio ladder")
+        #expect(Self.matches("<div class=\"lr(?: slow| tie)?\"", in: r.html).count == b.ladderRows().count)
+        #expect(!r.html.contains("<svg class=\"hv nl") && !r.html.contains("class=\"card"), "the dial cards and the number line are gone")
+        #expect(Self.matches("<details class=\"faq\"", in: r.html).count == 7)
+        #expect(Self.matches("<table", in: r.html).count == 1, "only the FIG 1 data table")
+        #expect(!r.html.contains("class=\"statement\"") && !r.html.contains("--wash") && !r.html.contains("dashed"))
         let top = String(r.html[r.html.range(of: "id=\"top\"")!.lowerBound..<r.html.range(of: "id=\"field\"")!.lowerBound])
         #expect(top.contains("brew install") && top.contains("Qwen3.8-27B"))
         #expect(r.html.count < 60_000)
@@ -120,15 +124,16 @@ import Testing
         }
         // 2. no decimal or percentage appears in the page text outside a cited element; the loss line is computed from the cells (checked in lossesStayVisible)
         var text = r.html
-        for strip in [#"(?s)<(b|p|i|span)[^>]*class="[^"]*\bgen\b[^"]*"[^>]*>.*?</\1>"#, #"(?s)<svg.*?</svg>"#, #"(?s)<span class="fig"[^>]*>.*?</span>"#, #"(?s)<p class="honest">.*?</p>"#, #"(?s)<code>.*?</code>"#, #"(?s)<script>.*?</script>"#, #"<[^>]+>"#] {
+        for strip in [#"FIG \d+\.\d+"#, #"(?s)<(b|p|i|span)[^>]*class="[^"]*\bgen\b[^"]*"[^>]*>.*?</\1>"#, #"(?s)<svg.*?</svg>"#, #"(?s)<span class="fig"[^>]*>.*?</span>"#, #"(?s)<p class="honest">.*?</p>"#, #"(?s)<code>.*?</code>"#, #"(?s)<script>.*?</script>"#, #"<[^>]+>"#] {
             text = text.replacingOccurrences(of: strip, with: " ", options: .regularExpression)
         }
         text = text.replacingOccurrences(of: #"Qwen3\.8|\d+\.\d+\.\d+|\d{4}-\d\d-\d\d"#, with: " ", options: .regularExpression)
         #expect(Self.matches(#"\d+\.\d+|\d+%|\d+(\.\d+)?×"#, in: text).isEmpty, "untraced numbers: \(Self.matches(#".{20}(\d+\.\d+|\d+%)"#, in: text))")
-        // 3. every gauge shows exactly the computed ratio of Strim over the best rival
-        let expected = GLANCE.compactMap { id in b.bestRival(id).map { ratioLabel($0.ratio) } }
-        #expect(Self.matches(#"(?<=<b class="gen">)\d+\.\d+x(?=</b>)"#, in: r.html) == expected)
-        #expect(expected.count == 6)
+        // 3. every ladder row shows exactly the computed ratio of Strim over the closest rival
+        let expected = b.ladderRows().map { ratioLabel($0.ratio) }
+        let shown = Self.matches(#"(?<=<span class="lv"><span class="gen">)\d+\.\d+x(?=</span>)"#, in: r.html)
+        #expect(shown == expected, "ladder shows \(shown), data says \(expected)")
+        #expect(expected.count == 8)
     }
 
     
@@ -218,9 +223,41 @@ import Testing
         #expect(!readString(repoRoot + "/site/assets/style.css").lowercased().contains("green"))
     }
 
+    /// Batch 3 README rules: 45 lines, no placeholders, no capitalised verdicts, 3 significant figures, every number from the run data.
+    @Test func readmeBatch3Rules() throws {
+        let (b, r) = try SiteRedesignTests.build()
+        #expect(r.readme.split(separator: "\n", omittingEmptySubsequences: false).count <= 45)
+        #expect(SiteRedesignTests.matches("\\{[a-z_0-9@.|]+\\}", in: r.readme).isEmpty, "no unfilled placeholders")
+        #expect(!r.readme.contains("WIN") && !r.readme.contains("LOSS"))
+        #expect(r.readme.contains("--port 8203") && r.readme.contains("ANTHROPIC_BASE_URL") && r.readme.contains("OPENAI_BASE_URL"))
+        let table = r.readme.split(separator: "\n").filter { $0.hasPrefix("|") }
+        #expect(table.count == 8, "header, rule and six rows (4 and 8 requests are separate rows)")
+        for tok in table.joined(separator: " ").split(whereSeparator: { !"0123456789.".contains($0) }) {
+            var digits = Array(tok.filter { $0.isNumber }.drop(while: { $0 == "0" }))
+            if !tok.contains(".") { while digits.last == "0" { digits.removeLast() } }
+            #expect(digits.count <= 3, "\(tok) has more than 3 significant figures")
+        }
+        #expect(sig3(75.34) == "75.3" && sig3(9.773) == "9.77" && sig3(0.958) == "0.958" && sig3(1.023) == "1.02" && sig3(37.06) == "37.1" && sig3(99.96) == "100" && sig3(1962) == "1960" && sig3(15260) == "15300")
+        let d = b.H["cells"]?.arr?.first { $0["id"]?.str == "d4k" }
+        #expect(r.readme.contains("| \(sig3(d?["values"]?["strim"]?.number ?? 0)) |"), "decode 4K comes from the run data")
+        #expect(r.readme.contains("macOS ") && r.readme.contains(b.H["run"]?["date"]?.pyStr ?? "?") && r.readme.contains("build \(b.H["run"]?["strim_build"]?.pyStr ?? "?")"))
+    }
+
+    @Test func readmeAssetsAreEmittedForBothThemes() throws {
+        let (_, r) = try SiteRedesignTests.build()
+        for n in ["wordmark-dark", "wordmark-light", "decode-dark", "decode-light"] {
+            let rel = "site/assets/readme/\(n).svg"
+            #expect(r.generated[rel] != nil && readString(repoRoot + "/" + rel) == r.generated[rel], "\(rel) is generated and in sync")
+            let s = r.generated[rel] ?? ""
+            #expect(greenColours(in: s).isEmpty && !s.contains("<filter") && (!n.hasPrefix("wordmark") || !s.contains("<text")), "\(rel)")
+            #expect(!s.contains("Space Grotesk") && !s.contains("href=\"http"))
+        }
+        #expect((r.generated["site/assets/readme/decode-dark.svg"] ?? "").contains("75.3"))
+    }
+
     /// README SVGs are shown by GitHub as images: system fonts only, no filters, no external references.
     @Test func readmeSVGsAreSelfContained() throws {
-        for rel in ["banner.svg", "h2h-ratio.svg", "h2h-hero.svg", "logo.svg"] {
+        for rel in ["banner.svg", "h2h-ratio.svg", "h2h-hero.svg", "logo.svg", "readme/wordmark-dark.svg", "readme/wordmark-light.svg", "readme/decode-dark.svg", "readme/decode-light.svg"] {
             let s = readString(repoRoot + "/site/assets/" + rel)
             #expect(!s.contains("<filter") && !s.contains("feGaussianBlur") && !s.contains("@import") && !s.contains("url(http") && !s.contains("href=\"http"), "\(rel)")
             #expect(!s.contains("Space Grotesk") || s.contains("-apple-system"), "\(rel): no web font dependency")

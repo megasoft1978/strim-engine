@@ -36,7 +36,13 @@ public struct SourceCount: Equatable, Sendable, Identifiable {
 /// exponential reconnect. Always exposes a visible state (`menuTitle`, `menuSymbol`).
 @MainActor
 public final class AppModel: ObservableObject {
-    @Published public private(set) var connection: ConnectionState = .connecting
+    @Published public private(set) var connection: ConnectionState = .connecting {
+        didSet { sampleDecode() }
+    }
+    /// Decode tok/s samples (at most one per second, newest last) for the Status sparkline.
+    @Published public private(set) var decodeHistory: [Double] = []
+    public static let decodeHistoryLimit = 60
+    private var lastDecodeSample: Date?
     @Published public private(set) var jobs: [JobSummary] = []
     /// Jobs list default: active jobs plus the last 24 h. The model (`jobs`) always keeps everything.
     @Published public var showAllJobs = false
@@ -51,12 +57,31 @@ public final class AppModel: ObservableObject {
     public var patchDirectory = AppPaths.home + "/.strim/patches"
     @Published public private(set) var eventLog: [String] = []
     @Published public private(set) var lastEventTime: Date?
-    @Published public private(set) var lastError: String?
-    @Published public private(set) var notice: String?
-    @Published public private(set) var chat: ChatState = .unknown
-    @Published public private(set) var chatMessages: [ChatMessage] = []
-    /// A user turn is running (between send and the `done` delta or a cancel).
-    @Published public private(set) var chatGenerating = false
+    @Published public internal(set) var lastError: String?
+    @Published public internal(set) var notice: String?
+    // Multi-chat state (logic in AppModel+Chat.swift). Setters are module-internal.
+    @Published public internal(set) var projects: [ChatProject] = []
+    @Published public internal(set) var threads: [ChatThread] = []
+    @Published public internal(set) var selectedThreadID: String?
+    /// Transcripts by thread id, loaded lazily on selection.
+    @Published public internal(set) var messages: [String: [ChatMessage]] = [:]
+    /// The one thread whose turn is running (app-wide). Set from send until `done`, cancel or failure.
+    @Published public internal(set) var generatingThreadID: String?
+    /// Messages waiting for the generating turn to finish (at most one per thread, FIFO).
+    @Published public internal(set) var queue: [QueuedSend] = []
+    /// Thread id -> open host session (LRU, at most `maxLiveSessions`).
+    @Published public internal(set) var liveSessions: [String: ChatSession] = [:]
+    @Published public internal(set) var chatUnavailable: [String: String] = [:]
+    /// Why chat cannot start when no thread is selected (e.g. no project folder).
+    @Published public internal(set) var chatProbeError: String?
+    /// Repair / read-only message from loading `~/.strim/chats`.
+    @Published public internal(set) var chatStoreNotice: String?
+    @Published public internal(set) var chatReadOnly = false
+    /// Thread id -> transcript lines that could not be read.
+    @Published public internal(set) var unreadableMessages: [String: Int] = [:]
+    public static let maxLiveSessions = 2
+    /// Where scratch chats get their per-thread folders (not under ~/Library or ~/.strim: the host refuses those).
+    public static var scratchDefault: String { NSHomeDirectory() + "/Documents/Strim Scratch" }
     /// Sent with every turn (`enable_thinking`).
     @Published public var thinkingEnabled = true
     @Published public private(set) var availableModels: [LocalModel] = []
@@ -75,13 +100,13 @@ public final class AppModel: ObservableObject {
     public let testMode: Bool
     public let logLimit = 200
 
-    private var client: StrimControlClient
+    var client: StrimControlClient
     private let makeClient: @Sendable (AppSettings) -> StrimControlClient
-    private let clock: AppClock
+    let clock: AppClock
     private let launcher: HostLauncher
     private let mcp: McpCommandProvider
     private let loginItem: LoginItemControlling
-    private let clipboard: ClipboardWriting
+    let clipboard: ClipboardWriting
     private let persist: @Sendable (AppSettings) throws -> Void
     private let pollInterval: Double?
     private let modelScan: @Sendable () -> [LocalModel]
@@ -90,14 +115,13 @@ public final class AppModel: ObservableObject {
     private let discoverHostProcess: Bool
     private let tokenStatus: @Sendable (AppSettings) -> TokenFileStatus
     private var loop: Task<Void, Never>?
-    private var pendingText = ""
-    private var pendingRole: ChatMessage.Role?
-    /// First message of the current assistant text run and its raw (tag-bearing) text; see `ThinkSplitter`.
-    private var rawBase: Int?
-    private var rawText = ""
-    private var flushTask: Task<Void, Never>?
-    private var turnLedger = TokenLedger()
-    private var turnStart: Date?
+    let chatStore: ChatPersisting
+    let scratchRoot: String
+    /// Least-recently-used first.
+    var liveOrder: [String] = []
+    var opening: Set<String> = []
+    var buffers: [String: TurnBuffer] = [:]
+    var persistedCount: [String: Int] = [:]
 
     public init(settings: AppSettings = .load(),
                 makeClient: @escaping @Sendable (AppSettings) -> StrimControlClient,
@@ -111,7 +135,10 @@ public final class AppModel: ObservableObject {
                 testMode: Bool = ProcessInfo.processInfo.environment["STRIM_APP_TEST"] == "1",
                 tokenStatus: @escaping @Sendable (AppSettings) -> TokenFileStatus = { TokenReader(path: $0.controlTokenPath).inspect() },
                 modelScan: @escaping @Sendable () -> [LocalModel] = { LocalModelScanner.scan() },
-                modelDownloader: ModelDownloader? = nil, discoverHostProcess: Bool = true) {
+                modelDownloader: ModelDownloader? = nil, discoverHostProcess: Bool = true,
+                chatStore: ChatPersisting = MemoryChatStore(),
+                scratchRoot: String = AppModel.scratchDefault) {
+        self.chatStore = chatStore; self.scratchRoot = scratchRoot
         self.modelScan = modelScan
         self.settings = settings; self.makeClient = makeClient; self.client = makeClient(settings)
         self.clock = clock; self.launcher = launcher; self.mcp = mcp; self.loginItem = loginItem
@@ -130,6 +157,7 @@ public final class AppModel: ObservableObject {
             Task { @MainActor in self?.modelDownloadState = state }
         }
         downloader.setAutostartHandler { [weak self] in self?.scheduleServerAutostart() }
+        loadChats()
     }
 
     /// Fixed-client convenience (tests, previews).
@@ -141,11 +169,13 @@ public final class AppModel: ObservableObject {
                             pollInterval: Double? = 5, testMode: Bool = false,
                             tokenStatus: @escaping @Sendable (AppSettings) -> TokenFileStatus = { _ in .ok },
                             modelScan: @escaping @Sendable () -> [LocalModel] = { [] },
-                            modelDownloader: ModelDownloader? = nil, discoverHostProcess: Bool = false) {
+                            modelDownloader: ModelDownloader? = nil, discoverHostProcess: Bool = false,
+                            chatStore: ChatPersisting = MemoryChatStore(),
+                            scratchRoot: String = AppModel.scratchDefault) {
         self.init(settings: settings, makeClient: { _ in client }, clock: clock, launcher: launcher, mcp: mcp,
                   loginItem: loginItem, clipboard: clipboard, persist: persist, pollInterval: pollInterval, testMode: testMode,
                   tokenStatus: tokenStatus, modelScan: modelScan, modelDownloader: modelDownloader,
-                  discoverHostProcess: discoverHostProcess)
+                  discoverHostProcess: discoverHostProcess, chatStore: chatStore, scratchRoot: scratchRoot)
     }
 
     // MARK: derived UI state
@@ -281,14 +311,17 @@ public final class AppModel: ObservableObject {
     public var serverStartAvailability: Availability {
         switch modelDownloadState {
         case .needsDownload: return .no("Download the model first")
-        case .confirming, .downloading, .verifying: return .no("Wait for the model download to finish")
+        case .confirming, .downloading, .verifying, .startingServer: return .no("Wait for the model download to finish")
         case .failed: return .no("Retry the model download first")
-        case .idle, .done: return hostCanBeStarted ? .yes : .no("Server is already running")
+        case .idle, .done:
+            if connection.isConnected, status?.state == .stopped { return .yes }
+            return hostCanBeStarted ? .yes : .no("Server is already running")
         }
     }
     public var serverStopAvailability: Availability {
         guard connection.isConnected else { return .no("Server is offline") }
-        return hostProcessPID == nil ? .no("Could not identify the Strim server process") : .yes
+        guard status?.state != .stopped else { return .no("Server is stopped") }
+        return .yes
     }
 
     // MARK: lifecycle
@@ -338,6 +371,17 @@ public final class AppModel: ObservableObject {
         }
     }
 
+    private func sampleDecode() {
+        guard case .connected(let s) = connection, s.state == .ready || s.state == .busy else { return }
+        let now = clock.now()
+        if let last = lastDecodeSample, now.timeIntervalSince(last) < 1 { return }
+        lastDecodeSample = now
+        decodeHistory.append(s.decodeTPS)
+        if decodeHistory.count > Self.decodeHistoryLimit { decodeHistory.removeFirst(decodeHistory.count - Self.decodeHistoryLimit) }
+    }
+    /// Fixtures and previews only.
+    public func seedDecodeHistory(_ samples: [Double]) { decodeHistory = Array(samples.suffix(Self.decodeHistoryLimit)) }
+
     private func refreshTokenWarning() {
         tokenWarning = tokenStatus(settings).banner(path: settings.controlTokenPath)
     }
@@ -369,7 +413,10 @@ public final class AppModel: ObservableObject {
     }
 
     private func disconnect(_ reason: String, error: Error? = nil) {
-        if chatGenerating { flushPending(); finishTurn() }
+        if let g = generatingThreadID {
+            if !queue.isEmpty { queue.removeAll(); notice = "Queued messages were discarded: the host went offline." }
+            flushPending(g); finishTurn(g)
+        }
         connection = .disconnected(reason: reason)
         if let error { lastError = error.localizedDescription }
         log("disconnected: \(reason)")
@@ -387,9 +434,9 @@ public final class AppModel: ObservableObject {
             Task { await refreshJobs(); if selectedJob?.id == j.jobID { await refreshSelectedJob() } }
         case .harnessEvent(let h):
             log("harness \(h.jobID.prefix(8)): \(h.kind)" + (h.text.map { " \($0.prefix(80))" } ?? ""))
-            if h.kind == "usage", case .ready(let s) = chat, s.sessionID == h.jobID, chatGenerating,
+            if h.kind == "usage", let tid = threadID(forSession: h.jobID), tid == generatingThreadID,
                let t = h.text, let (p, c, o) = TokenLedger.parse(t) {
-                turnLedger.add(prompt: p, cached: c, completion: o)
+                buffer(tid).ledger.add(prompt: p, cached: c, completion: o)
             }
         case .chatDelta(let d):
             applyDelta(d)
@@ -407,7 +454,7 @@ public final class AppModel: ObservableObject {
 
     // MARK: actions
 
-    private func run(_ name: String, _ body: () async throws -> Void) async {
+    func run(_ name: String, _ body: () async throws -> Void) async {
         actionInFlight = name
         defer { actionInFlight = nil }
         do { try await body() } catch {
@@ -480,7 +527,7 @@ public final class AppModel: ObservableObject {
         if let p = try? await client.pack() { packInfo = p }
     }
 
-    /// Validates with `ProjectFolder.resolve`, stores the folder and puts it first in the recents; starts a fresh chat.
+    /// Validates with `ProjectFolder.resolve`, stores the folder and puts it first in the recents; selects a fresh chat in it.
     @discardableResult
     public func setProject(_ raw: String) -> Bool {
         switch ProjectFolder.resolve(raw) {
@@ -492,7 +539,8 @@ public final class AppModel: ObservableObject {
             new.projectPath = dir
             new.recentProjects = ([dir] + new.recentProjects.filter { $0 != dir }).prefix(AppSettings.maxRecents).map { $0 }
             update(settings: new)
-            chat = .unknown; chatMessages = []; chatGenerating = false; rawBase = nil
+            chatProbeError = nil
+            if case .success(let p) = addProject(dir) { _ = newThread(projectID: p.id) }
             return true
         }
     }
@@ -558,12 +606,17 @@ public final class AppModel: ObservableObject {
 
     public func startHost() {
         guard serverStartAvailability.enabled else { return }
+        launchHostProcess()
+    }
+
+    private func launchHostProcess() {
         var launchSettings = settings
         if launchSettings.modelPath == nil { launchSettings.modelPath = AppPaths.home + "/.strim/models/qwen38-4bit" }
         if launchSettings.mtpPath == nil { launchSettings.mtpPath = AppPaths.home + "/.strim/models/qwen38-mtp-4bit" }
         switch launcher.start(settings: launchSettings) {
         case .started(let pid):
             hostProcessPID = pid
+            modelDownloader.serverDidStart()
             notice = "Started strim serve (pid \(pid)). Log: ~/.strim/host.log"
             log("started host pid \(pid)")
             reconnectNow()
@@ -576,9 +629,24 @@ public final class AppModel: ObservableObject {
             notice = "strim_binary was not run (\(why)). Command copied; paste it in Terminal: \(cmd)"
             log("strim_binary rejected: \(why)")
         case .needsModel:
-            notice = "Set model_path in ~/.strim/app.json (Settings tab) before starting the host."
+            notice = "Set model_path in ~/.strim/app.json (Settings tab) before starting the server."
         case .failed(let e):
-            lastError = "Start host: \(e)"
+            lastError = "Start server: \(e)"
+        }
+    }
+
+    /// Starts the local server, or loads its model when the server process is already open but idle.
+    public func startServer() async {
+        if connection.isConnected, status?.state == .stopped {
+            let modelPath = settings.modelPath ?? AppPaths.home + "/.strim/models/qwen38-4bit"
+            let mtpPath = settings.mtpPath ?? AppPaths.home + "/.strim/models/qwen38-mtp-4bit"
+            await run("Start server") {
+                try await client.load(LoadRequest(model: modelPath, mtp: mtpPath))
+                log("server model start requested: \(modelPath)")
+            }
+            await refreshStatus()
+        } else {
+            launchHostProcess()
         }
     }
 
@@ -586,8 +654,14 @@ public final class AppModel: ObservableObject {
         Task { @MainActor [weak self] in
             guard let self else { return }
             while !initialConnectionChecked && !Task.isCancelled { try? await Task.sleep(for: .milliseconds(100)) }
-            guard settings.startServerWhenOpens, !connection.isConnected else { return }
-            startHost()
+            let downloadedNow: Bool = if case .startingServer = modelDownloadState { true } else { false }
+            guard settings.startServerWhenOpens || downloadedNow else { return }
+            if connection.isConnected {
+                if status?.state == .stopped { await startServer() }
+                if status?.state != .stopped { modelDownloader.serverDidStart() }
+                return
+            }
+            launchHostProcess()
         }
     }
 
@@ -597,6 +671,7 @@ public final class AppModel: ObservableObject {
             return
         }
         hostProcessPID = pid
+        await closeAllSessions()
         _ = kill(pid, SIGTERM)
         for _ in 0..<40 {
             if kill(pid, 0) != 0 { hostProcessPID = nil; reconnectNow(); return }
@@ -657,120 +732,6 @@ public final class AppModel: ObservableObject {
     }
 
     public func dismissNotice() { notice = nil }
-
-    // MARK: chat
-
-    public func probeChat() async {
-        guard status != nil else { chat = .unavailable("Host offline"); return }
-        switch ProjectFolder.resolve(settings.projectPath) {
-        case .failure(let e):
-            chat = .unavailable(e.message)
-        case .success(let cwd):
-            do { chat = .ready(try await client.chatOpen(ChatOpenRequest(cwd: cwd, enableThinking: thinkingEnabled))) }
-            catch {
-                chat = .unavailable(isNotImplemented(error) ? ChatState.notAvailableYet : "Chat error: \(error.localizedDescription)")
-            }
-        }
-    }
-    public func sendChat(_ text: String) async {
-        guard case .ready(let s) = chat, !text.trimmingCharacters(in: .whitespaces).isEmpty, !chatGenerating else { return }
-        flushPending()
-        rawBase = nil
-        chatMessages.append(ChatMessage(role: .user, text: text))
-        chatGenerating = true; turnLedger = TokenLedger(); turnStart = clock.now()
-        await run("Chat") {
-            do { try await client.chatAppend(ChatAppendRequest(sessionID: s.sessionID, text: text, enableThinking: thinkingEnabled)) }
-            catch { chatGenerating = false; throw error }
-        }
-    }
-    public func cancelChat() async {
-        guard case .ready(let s) = chat, chatGenerating else { return }
-        await run("Cancel chat") { try await client.chatCancel(ChatCancelRequest(sessionID: s.sessionID)) }
-        flushPending()
-        finishTurn()
-    }
-
-    public func copyMessage(_ id: UUID) {
-        guard let m = chatMessages.first(where: { $0.id == id }) else { return }
-        let text = m.tool.map { "\($0.name) \($0.args)" + ($0.result.map { "\n\($0)" } ?? "") } ?? m.text
-        clipboard.copy(text)
-        notice = "Message copied."
-    }
-
-    /// Ends the turn: stamps the ledger onto the turn's last non-user message.
-    private func finishTurn() {
-        guard chatGenerating else { return }
-        chatGenerating = false
-        if let start = turnStart { turnLedger.seconds = max(0, clock.now().timeIntervalSince(start)) }
-        turnStart = nil
-        if let i = chatMessages.indices.last, chatMessages[i].role != .user { chatMessages[i].ledger = turnLedger }
-        turnLedger = TokenLedger()
-    }
-
-    /// Text deltas arrive many times per second; they are coalesced (~30 Hz) so SwiftUI redraws stay cheap.
-    private func applyDelta(_ d: ChatDelta) {
-        switch d.kind {
-        case .text: appendStreamed(.assistant, d.text)
-        case .reasoning: appendStreamed(.reasoning, d.text)
-        case .toolCall:
-            flushPending()
-            rawBase = nil
-            let card = ToolCard.call(d.text)
-            chatMessages.append(ChatMessage(role: .tool, text: d.text, tool: card))
-        case .toolResult:
-            flushPending()
-            rawBase = nil
-            let r = ToolCard.parseResult(d.text)
-            if let i = chatMessages.lastIndex(where: { $0.role == .tool && $0.tool?.finished == false && ($0.tool?.name == r.name || r.name.isEmpty) }) {
-                chatMessages[i].tool?.result = r.summary; chatMessages[i].tool?.isError = r.isError
-                chatMessages[i].text = d.text
-            } else {
-                chatMessages.append(ChatMessage(role: .tool, text: d.text, tool: ToolCard(name: r.name, result: r.summary, isError: r.isError)))
-            }
-        case .done:
-            flushPending(final: true)
-            rawBase = nil
-            finishTurn()
-        }
-    }
-
-    private func appendStreamed(_ role: ChatMessage.Role, _ text: String) {
-        if pendingRole != role { flushPending() }
-        pendingRole = role; pendingText += text
-        guard flushTask == nil else { return }
-        flushTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: 33_000_000)
-            self?.flushPending()
-        }
-    }
-
-    private func flushPending(final: Bool = false) {
-        flushTask?.cancel(); flushTask = nil
-        guard let role = pendingRole, !pendingText.isEmpty else { pendingRole = nil; pendingText = ""; if final { resplitAssistant(final: true) }; return }
-        let text = pendingText
-        pendingRole = nil; pendingText = ""
-        if role == .assistant { rawText = (rawBase == nil ? "" : rawText) + text; if rawBase == nil { rawBase = chatMessages.count }; resplitAssistant(final: final); return }
-        rawBase = nil
-        if let last = chatMessages.last, last.role == role {
-            chatMessages[chatMessages.count - 1].text += text
-        } else {
-            chatMessages.append(ChatMessage(role: role, text: text))
-        }
-    }
-
-    /// Rebuilds the messages of the current assistant run from its raw text: `<think>` blocks become reasoning messages.
-    private func resplitAssistant(final: Bool) {
-        guard let base = rawBase, base <= chatMessages.count else { return }
-        let segs = ThinkSplitter.split(rawText, final: final)
-        let old = Array(chatMessages[base...])
-        var rebuilt: [ChatMessage] = []
-        for (k, seg) in segs.enumerated() {
-            var m = ChatMessage(role: seg.isReasoning ? .reasoning : .assistant, text: seg.text)
-            if k < old.count, old[k].role == m.role { m.id = old[k].id }
-            rebuilt.append(m)
-        }
-        chatMessages.replaceSubrange(base..., with: rebuilt)
-    }
 }
 
 /// The folder a chat session works in. Never the home folder, `/` or anything that contains home.

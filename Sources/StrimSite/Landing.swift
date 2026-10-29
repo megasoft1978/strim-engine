@@ -98,7 +98,7 @@ extension SiteBuilder {
         let run = H["run"]
         let raw = "../" + esc(FINAL_REL)
         var o = "<dl class=\"facts runfacts\">"
-        o += "<div><dt>Run</dt><dd><a href=\"\(raw)/summary.md\">\(esc(rawDirName))</a> (<a href=\"\(raw)/results.json\">results.json</a>), \(esc(run?["date"]?.pyStr ?? ""))</dd></div>"
+        o += "<div><dt>Run</dt><dd><a href=\"\(raw)/summary.md\">\(esc(rawDirName))</a> (<a href=\"\(raw)/results.json\">results.json</a>), <span style=\"white-space:nowrap\">\(esc(run?["date"]?.pyStr ?? ""))</span></dd></div>"
         o += "<div><dt>Strim build</dt><dd>\(n("final.claim.build")), \(n("final.claim.passes")) passes of one rep, medians, \(esc(run?["tie_band_pct"]?.pyStr ?? "2"))% tie band</dd></div>"
         o += "<div><dt>Rivals</dt><dd>\(rivalsFactText())</dd></div>"
         o += "<div><dt>Machine</dt><dd>\(esc(D.meta["machine"]?.pyStr ?? "")); model \(esc(run?["model"]?.pyStr ?? ""))</dd></div>"
@@ -112,11 +112,12 @@ extension SiteBuilder {
     func claimPolicyHTML() -> String {
         guard let nc = D.raw["final"]?["not_claimable"]?.obj, !nc.keys.isEmpty else { return "" }
         var items = ""
+        var count = 0
         for (id, v) in nc.items {
             let label = cellLabel(id)
-            for (rv, why) in v.obj?.items ?? [] { items += "<li><strong>\(esc(label))</strong> vs \(esc(WIDE_NAMES[rv] ?? rv)): \(esc(why.pyStr))</li>" }
+            for (rv, why) in v.obj?.items ?? [] { count += 1; items += "<li><strong>\(esc(label))</strong> vs \(esc(WIDE_NAMES[rv] ?? rv)): \(esc(why.pyStr))</li>" }
         }
-        return "<div class=\"callout\" role=\"note\" id=\"claim-policy\"><p><strong>Not claimable.</strong> Verdicts are only printed for a cell when every pass of both engines is present, none was excluded (abort, memory guard, OOM, timeout) and every session was clean. The numbers below stay visible; no WIN or LOSS is attached to these comparisons:</p><ul>\(items)</ul></div>"
+        return "<div class=\"callout\" role=\"note\" id=\"claim-policy\"><details><summary><strong>Not claimable:</strong> \(count) comparisons excluded (open for the list)</summary><p> Verdicts are only printed for a cell when every pass of both engines is present, none was excluded (abort, memory guard, OOM, timeout) and every session was clean. The numbers below stay visible; no WIN or LOSS is attached to these comparisons:</p><ul>\(items)</ul></details></div>"
     }
 
     /// Claims block of the benchmarks page (data-driven cards, then the not-faster list).
@@ -198,20 +199,20 @@ extension SiteBuilder {
     /// Three install paths as tabs (text from packaging/INSTALL-SNIPPETS.md), each command with its own copy button.
     func installTabsHTML() -> String {
         func cmd(_ c: String, comment: String = "") -> String {
-            "<div class=\"cmd\"><code><span class=\"pr\">$</span> \(esc(c))\(comment.isEmpty ? "" : " <span class=\"cm\"># \(esc(comment))</span>")</code><button type=\"button\" class=\"copy\" data-copy=\"\(esc(c))\" hidden>Copy</button></div>"
+            "<div class=\"cmd\"><code><span class=\"pr\">$</span> \(escCmd(c))\(comment.isEmpty ? "" : " <span class=\"cm\"># \(esc(comment))</span>")</code><button type=\"button\" class=\"copy\" aria-label=\"Copy command\" data-copy=\"\(esc(c))\" hidden>Copy</button></div>"
         }
         var o = "<div class=\"tabs\">"
         o += "<input type=\"radio\" name=\"inst\" id=\"inst-brew\" checked><label for=\"inst-brew\">Homebrew</label>"
         o += "<input type=\"radio\" name=\"inst\" id=\"inst-curl\"><label for=\"inst-curl\">curl</label>"
         o += "<input type=\"radio\" name=\"inst\" id=\"inst-dmg\"><label for=\"inst-dmg\">DMG</label>"
         o += "<div class=\"panels\">"
-        o += "<div class=\"panel p-brew\">" + cmd(Self.BREW_CMD) + cmd(Self.CASK_CMD) + cmd(Self.PULL_CMD)
-            + "<p class=\"cap\">Installs the <code>strim</code> command. The menu-bar app (second line) is optional; it already contains the CLI.</p></div>"
+        o += "<div class=\"panel p-brew\">" + cmd(Self.BREW_CMD) + cmd(Self.PULL_CMD) + "<p class=\"cmdnote\"># optional: menu-bar app, includes the CLI</p>" + cmd(Self.CASK_CMD)
+            + "<p class=\"cap\">Installs the <code>strim</code> command, then downloads the model.</p></div>"
         o += "<div class=\"panel p-curl\">" + cmd(Self.CURL_CMD) + cmd(Self.PULL_CMD)
             + "<p class=\"cap\">No sudo. Installs to <code>~/.local/strim</code> and links <code>~/.local/bin/strim</code>. Checks the SHA-256 before installing.</p></div>"
         o += "<div class=\"panel p-dmg\"><div class=\"dmgrow\"><a class=\"btn\" href=\"\(REPO_URL)/releases/latest\">Download the DMG (arm64)</a>"
             + "<span class=\"cap\">Open the DMG. Drag Strim to Applications. Launch Strim from the menu bar.</span></div>"
-            + "<p class=\"warn\"><strong>Not notarized yet: right-click Open.</strong> macOS warns on first launch. Right-click Strim in Applications and choose Open, or click Open Anyway in System Settings, Privacy and Security, or run <code>\(esc(Self.XATTR_CMD))</code>. Homebrew avoids the warning.</p></div>"
+            + "<p class=\"warn\"><strong>Not notarized yet: right-click &rarr; Open the first time.</strong> macOS warns on first launch. Right-click Strim in Applications and choose Open, or click Open Anyway in System Settings, Privacy and Security, or run <code>\(esc(Self.XATTR_CMD))</code>. Homebrew avoids the warning.</p></div>"
         o += "</div></div>"
         return o
     }
@@ -222,24 +223,21 @@ extension SiteBuilder {
         o += item("Why only one model?", "<p>Everything is tuned for one dense model: its attention state, its speculative-decoding head and its prefix cache. That is why these numbers are possible, and why Strim will not run your other models. Others are on the <a href=\"benchmarks.html#roadmap\">roadmap</a>.</p>")
         o += item("Does it run on a 32 GB Mac or an M1?", "<p>Only a 64&nbsp;GB M5 Max has been tested. For 32&nbsp;GB the computed estimate is \(n("qt.t32")) of context (not measured); 16&nbsp;GB and below are unsupported. See <a href=\"benchmarks.html#scope\">supported scope</a>.</p>")
         o += item("Does speculative decoding change the output?", "<p>Draft tokens are verified by the full model, but batching can flip near-tie tokens. Greedy output over 8 fixed prompts and 64 tokens: Strim against itself \(n("final.agree.self")) identical, \(RIVALS.filter { D.figs["final.agree.\($0)"] != nil }.map { "against \(WIDE_NAMES[$0] ?? $0) \(n("final.agree.\($0)"))" }.joined(separator: ", ")). <a href=\"benchmarks.html#exact\">Quality and exactness</a>.</p>")
+        o += item("Does anything leave my Mac?", "<p>No prompts or files do. The server binds <code>127.0.0.1</code> only and requires a bearer token. The one network step is the model download from Hugging Face, with <code>strim pull</code> or on first launch of the app.</p>")
+        if let m = peakMemoryRange(), let mine = figRounded("final.mem.strim", digits: 1),
+           let loS = figRounded("final.mem.\(m.lo.rv)", digits: 1), let hiS = figRounded("final.mem.\(m.hi.rv)", digits: 1) {
+            o += item("How much memory does it need?", "<p>Measured peak over the whole benchmark run: \(mine)&nbsp;GB on \(esc(runHW)) (\(esc(m.others == "the others" ? "the rivals" : m.others)) peaked at \(loS)\(m.lo.rv == m.hi.rv ? "" : " to \(hiS)")&nbsp;GB). For 32&nbsp;GB the computed estimate is \(n("qt.t32")) of context, not measured; 16&nbsp;GB and below are unsupported.</p>")
+        }
+        o += item("Why use Ollama or LM Studio instead?", "<p>Use them if you want many models or a model browser: Strim runs one model, tuned for agent work. The current benchmark does not include them, so no comparison is claimed. See <a href=\"benchmarks.html#scope\">supported scope</a>.</p>")
+        o += item("Is the DMG notarized?", "<p>Not yet. The first time, right-click Strim in Applications and choose Open. Installing with Homebrew avoids the warning.</p>")
         return o
     }
 
-    /// Real-window captures of the running app (copied from docs/img/app-live/ into site/assets/app/, downscaled). The section renders only when the hero capture exists.
+    // MARK: Direction E landing sections
+
     static let APP_DIR = "site/assets/app/"
     func appLive(_ name: String) -> Bool { fileExists(root + "/" + Self.APP_DIR + name) }
-
-    static let APP_CAPTION = "Captured from the running app against a live server on a 64 GB M5 Max; real numbers."
-
-    /// Dark and light variants of one shot; the theme switch and prefers-color-scheme pick one in CSS. width/height keep the layout stable.
-    /// One expandable screenshot: a button holding the small embed (dark and light variants, CSS shows one) that opens the full-resolution original in the lightbox.
-    private func zoomTile(base: String, light: String?, alt: String, cap: String, w: Int, h: Int, cls: String) -> String {
-        func img(_ src: String, _ t: String?) -> String { "<img class=\"\(cls)\(t.map { " if-" + $0 } ?? "")\" src=\"assets/app/\(src).png\" alt=\"\(esc(alt))\" width=\"\(w)\" height=\"\(h)\" loading=\"lazy\" decoding=\"async\">" }
-        let full = light == nil ? "assets/app/full/\(base).png" : "assets/app/full/\(base)-dark.png"
-        let fl = light.map { " data-full-light=\"assets/app/full/\($0).png\"" } ?? ""
-        let imgs = light == nil ? img(base, nil) : img(base + "-dark", "dark") + img(base + "-light", "light")
-        return "<button type=\"button\" class=\"zoom\" data-full=\"\(full)\"\(fl) data-alt=\"\(esc(alt))\" data-cap=\"\(esc(cap))\" aria-label=\"Expand screenshot: \(esc(cap))\">\(imgs)<span class=\"xp\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" width=\"14\" height=\"14\"><path d=\"M9 2h5v5M7 14H2V9M14 2L9.5 6.5M2 14l4.5-4.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg></span></button>"
-    }
+    static let DMG_URL = REPO_URL + "/releases/latest"
 
     /// Modal viewer shared by every .zoom tile; the script in assets/site.js drives it (arrows, swipe, counter, caption).
     func lightboxHTML() -> String {
@@ -250,48 +248,46 @@ extension SiteBuilder {
         + "<button type=\"button\" id=\"lbn\" class=\"lbb\" aria-label=\"Next screenshot\">&rsaquo;</button></dialog>\n"
     }
 
-    func appSectionHTML() -> String {
-        guard appLive("app-hero-live.png") else { return "" }
-        var o = "<section id=\"app\" aria-labelledby=\"h-app\"><div class=\"sh\"><p class=\"kick\">Menu-bar app</p><h2 id=\"h-app\">The <span>app.</span></h2></div>"
-        let heroAlt = "The Strim menu-bar app with a running server: decode speed, MTP acceptance and memory, from a live session"
-        o += "<figure class=\"appfig\"><div class=\"macwin\"><div class=\"mbar\" aria-hidden=\"true\"><i></i><i></i><i></i></div>" + zoomTile(base: "app-hero-live", light: nil, alt: heroAlt, cap: "Menu-bar app, live session", w: 1072, h: 628, cls: "apphero") + "</div><figcaption class=\"cap\">\(Self.APP_CAPTION)</figcaption></figure>"
-        let strip: [(String, String, Int, Int)] = [("status", "Status", 800, 707), ("chat", "Chat", 754, 800), ("jobs", "Jobs", 800, 683)]
-        if strip.allSatisfy({ appLive("\($0.0)-dark.png") && appLive("\($0.0)-light.png") }) {
-            o += "<div class=\"appstrip\">" + strip.map { "<figure>\(zoomTile(base: $0.0, light: $0.0 + "-light", alt: "Strim app, \($0.1.lowercased()) view, real session", cap: "\($0.1) view", w: $0.2, h: $0.3, cls: "tile"))<figcaption class=\"cap\">\($0.1)</figcaption></figure>" }.joined() + "</div>"
-        }
-        return o + "</section>\n\n"
+    /// A cited figure rendered with `digits` decimals (the span title names the data id, so the number stays traceable).
+    func figRounded(_ id: String, digits: Int) -> String? {
+        guard let v = num(id) else { return nil }
+        return "<span class=\"fig\" title=\"\(esc(id))\">\(fmtFixed(v, digits))</span>"
+    }
+
+    /// Strim over the closest rival, only when the comparison is claim-eligible and a WIN. Returns (numeral html, rival name, figure id of the ratio).
+    func claimedRatio(_ cell: String) -> (num: String, rival: String)? {
+        guard let b = bestRival(cell), b.claimable, b.ratio > 1.02, hCell(cell)?["verdict"]?[b.rival]?.str == "WIN" else { return nil }
+        let id = "final.\(cell).ratio.\(b.rival)"
+        let t = ratioLabel(b.ratio).replacingOccurrences(of: "x", with: "")
+        let span = D.figs[id] != nil ? "<span class=\"fig\" title=\"\(esc(id))\">\(t)</span>" : "<span class=\"fig\">\(t)</span>"
+        return (span, WIDE_NAMES[b.rival] ?? b.rival)
     }
 
     func buildLandingHTML() -> String {
-        let engines = ENGINES.count
-        var o = pageHead(title: "Strim: Qwen3.8-27B on your Mac, like a server",
+        var o = pageHead(title: "Strim: the local model server built for coding agents",
                          desc: "Strim is a single-binary Swift engine that runs Qwen3.8-27B on Apple Silicon as a local backend for Claude Code and Codex. Measured against \(RIVALS.map { WIDE_NAMES[$0] ?? $0 }.joined(separator: ", ")), losses included.",
                          path: "", bodyClass: "landing")
-        o += headerHTML([("Install", "#install"), ("Speed", "#field"), ("Ratios", "#ratios"), ("App", "#app"), ("FAQ", "#faq"), ("Benchmarks", "benchmarks.html")], brandHref: "#top")
-        o += "<main id=\"main\"><div class=\"wrap\">\n\n"
-        o += "<section class=\"hero\" id=\"top\" aria-labelledby=\"h-hero\">"
-        o += "<p class=\"pill\"><i></i>Qwen3.8-27B &middot; one Swift binary &middot; Apple silicon</p>"
-        o += "<h1 id=\"h-hero\">Your Mac, now a <span>local AI server.</span></h1>"
-        o += "<p class=\"lede\"><b>Strim</b> runs Qwen3.8-27B as a local backend for Claude Code and Codex. Nothing leaves the machine.</p>"
-        o += "<div class=\"inst\" id=\"install\">" + installTabsHTML() + "</div>"
-        o += "<p class=\"sub\">Model weights (about 16&nbsp;GB) come separately with <code>strim pull</code>. Apple Silicon, macOS 14 or newer, tested on a 64&nbsp;GB M5 Max. MIT.</p>"
-        o += "</section>\n\n"
-
-        o += "<section id=\"field\" aria-labelledby=\"h-field\"><div class=\"sh\"><p class=\"kick\">Decode speed &middot; \(engines) current engines</p><h2 id=\"h-field\">The wide field, on <span>one line.</span></h2></div>"
-        o += "<div class=\"surface\"><div class=\"hvwrap\">\(numberLineSVG(narrow: false, standalone: false))\(numberLineSVG(narrow: true, standalone: false))</div>"
-        o += "<p class=\"cap gen\"><span class=\"earlier-legend\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 18 18\" aria-hidden=\"true\"><circle cx=\"9\" cy=\"9\" r=\"5\" fill=\"none\" stroke=\"currentColor\" stroke-dasharray=\"2 2\"/></svg>Hollow dashed beads: llama.cpp and Ollama, earlier run.</span> \(esc(wideCaption())) <a href=\"benchmarks.html#wide\">Full results</a>.</p></div></section>\n\n"
-
-        o += "<section id=\"ratios\" aria-labelledby=\"h-ratios\"><div class=\"sh\"><p class=\"kick\">Strim today &middot; right of the line is faster</p><h2 id=\"h-ratios\">The honest <span>ratios.</span></h2></div>"
-        o += ratioCardsHTML()
-        let loss = esc(lossLine()).replacingOccurrences(of: "All losses: benchmarks.", with: "All losses: <a href=\"benchmarks.html\">benchmarks</a>.")
-        o += "<p class=\"honest\">\(loss)</p>"
-        o += "<p class=\"note\">\(validityText { n($0) }) <a href=\"benchmarks.html#method\">Method</a> and <a href=\"benchmarks.html#r-final\">every cell</a>.</p>"
-        o += "</section>\n\n"
-
+        o += headerHTML([("Benchmarks", "benchmarks.html"), ("Features", "#features"), ("App", "#app"), ("Install", "#install"), ("FAQ", "#faq")], brandHref: "#top", cta: true)
+        o += "<main id=\"main\">\n"
+        o += "<section class=\"hero\" id=\"top\" aria-labelledby=\"h-hero\"><div class=\"wrap\">"
+        o += "<h1 id=\"h-hero\">The local model server <span>built for coding agents.</span></h1>"
+        let tps = figRounded("final.d4k.strim", digits: 1).map { " at \($0) tok/s" } ?? ""
+        o += "<p class=\"lede\">Qwen3.8-27B on Apple silicon\(tps). Point Claude Code or Codex at localhost. One Swift binary, a menu-bar app, and nothing leaves your Mac.</p>"
+        o += "<div class=\"actions\"><a class=\"btn big\" href=\"\(Self.DMG_URL)\">Download for Mac</a>"
+        o += "<div class=\"cmdchip\"><code><span class=\"pr\">$</span> \(escCmd(Self.BREW_CMD))</code><button type=\"button\" class=\"copy\" aria-label=\"Copy command\" data-copy=\"\(esc(Self.BREW_CMD))\" hidden>Copy</button></div></div>"
+        o += "<p class=\"meta\">macOS 14+ &middot; Apple silicon &middot; MIT &middot; <a href=\"#install\">Other install options</a></p>"
+        o += "</div>\(heroStageHTML())</section>\n\n"
+        o += "<div class=\"wrap\">\n"
+        o += "<section class=\"slim\" aria-label=\"Highlights\">\(proofStripHTML())</section>\n\n"
+        o += benchmarksSectionHTML()
+        o += "<section id=\"features\" aria-labelledby=\"h-features\">" + secHead("What is inside", id: "h-features") + featureBentoHTML() + "</section>\n\n"
+        o += "<section id=\"works\" aria-labelledby=\"h-works\">" + secHead("A minute with Strim", id: "h-works") + walkthroughHTML() + "</section>\n\n"
         o += appSectionHTML()
-        o += "<section id=\"faq\" aria-labelledby=\"h-faq\"><div class=\"sh\"><p class=\"kick\">FAQ</p><h2 id=\"h-faq\">Questions.</h2></div><div class=\"faqs\">" + faqHTML() + "</div></section>\n\n"
+        let req = "<p class=\"req\">Apple Silicon, macOS 14 or newer. The app downloads the model on first launch; with the command line, <code>strim pull</code> does it. Tested on \(esc(runHW)).</p>"
+        o += "<section id=\"install\" aria-labelledby=\"h-install\"><div class=\"split\"><div class=\"shd\"><h2 id=\"h-install\">Install</h2>\(req)</div><div class=\"sbody\"><div class=\"inst\">" + installTabsHTML() + "</div></div></div></section>\n\n"
+        o += "<section id=\"faq\" aria-labelledby=\"h-faq\"><div class=\"split\">" + secHead("Questions", id: "h-faq") + "<div class=\"sbody faqs\">" + faqHTML() + "</div></div></section>\n\n"
         o += "</div></main>\n"
-        if appLive("app-hero-live.png") { o += lightboxHTML() }
+        o += lightboxHTML()
         o += footerHTML()
         return o
     }

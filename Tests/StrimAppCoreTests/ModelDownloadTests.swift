@@ -63,6 +63,17 @@ private final class FakeModelDownloadProcess: ModelDownloadProcess, @unchecked S
     #expect(events[3] == .done)
 }
 
+@Test func modelDownloadStateSelectsFocusedFirstRunSections() {
+    let progress = ModelDownloadProgress(file: "weights.safetensors", doneBytes: 1, totalBytes: 2, bytesPerSec: 1)
+    for state: ModelDownloadState in [
+        .needsDownload(sizeBytes: 2, freeBytes: 3, resumable: false), .confirming,
+        .downloading(progress), .verifying(file: "weights.safetensors"), .startingServer,
+        .failed(message: "disk full", resumable: true),
+    ] { #expect(state.isBlockingFirstRun) }
+    #expect(!ModelDownloadState.idle.isBlockingFirstRun)
+    #expect(!ModelDownloadState.done.isBlockingFirstRun)
+}
+
 @Test @MainActor func downloaderConfirmsDownloadsAndAutostarts() async throws {
     let runner = FakeModelDownloadProcess()
     var started = 0
@@ -73,10 +84,12 @@ private final class FakeModelDownloadProcess: ModelDownloadProcess, @unchecked S
     downloader.confirm()
     #expect(downloader.state == .confirming)
     downloader.beginDownload()
-    await waitForDownload { downloader.state == .done && started == 1 }
-    #expect(downloader.state == .done)
+    await waitForDownload { downloader.state == .startingServer && started == 1 }
+    #expect(downloader.state == .startingServer)
     #expect(started == 1)
     #expect(runner.runs == 1)
+    downloader.serverDidStart()
+    #expect(downloader.state == .done)
 }
 
 @Test @MainActor func downloaderDiskPrecheckReportsExactShortfall() {
@@ -108,9 +121,11 @@ private final class FakeModelDownloadProcess: ModelDownloadProcess, @unchecked S
     if case .needsDownload(_, _, let resumable) = downloader.state { #expect(resumable) }
     else { Issue.record("expected resumable first-run state") }
     downloader.confirm(); downloader.beginDownload()
-    await waitForDownload { downloader.state == .done }
-    #expect(downloader.state == .done)
+    await waitForDownload { downloader.state == .startingServer }
+    #expect(downloader.state == .startingServer)
     #expect(runner.runs == 2)
+    downloader.serverDidStart()
+    #expect(downloader.state == .done)
 }
 
 @Test @MainActor func downloaderFailureCanRetry() async throws {
@@ -121,7 +136,9 @@ private final class FakeModelDownloadProcess: ModelDownloadProcess, @unchecked S
     await waitForDownload { if case .failed = downloader.state { true } else { false } }
     #expect(downloader.state == .failed(message: "network error: fixture failure", resumable: true))
     downloader.retry()
-    await waitForDownload { downloader.state == .done }
-    #expect(downloader.state == .done)
+    await waitForDownload { downloader.state == .startingServer }
+    #expect(downloader.state == .startingServer)
     #expect(runner.runs == 2)
+    downloader.serverDidStart()
+    #expect(downloader.state == .done)
 }

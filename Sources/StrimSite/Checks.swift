@@ -2,7 +2,7 @@ import Foundation
 
 /// Minimal tag scanner mirroring the LinkParser of the retired Python generator (balanced tags, duplicate ids, links, anchors).
 struct LinkScan {
-    static let void: Set<String> = ["meta", "link", "br", "hr", "img", "input", "rect", "path"]
+    static let void: Set<String> = ["meta", "link", "br", "hr", "img", "input", "rect", "path", "source", "wbr"]
     var stack: [String] = []
     var hrefs: [String] = []
     var ids: Set<String> = []
@@ -142,22 +142,31 @@ extension SiteBuilder {
         return errs
     }
 
-    /// README invariants of the redesign: short, one hero chart, install order, the not-faster line, loss rows visible.
+    /// README invariants (Batch 3): short, themed wordmark/hero/chart, install order, DMG note, agent quickstart, why-not line, explicit loss rows, 3 significant figures.
     func checkReadmeShape(_ readme: String) -> [String] {
         var errs: [String] = []
         let lines = readme.split(separator: "\n", omittingEmptySubsequences: false).count
         if lines > README_MAX_LINES { errs.append("README has \(lines) lines, limit is \(README_MAX_LINES)") }
-        let imgs = readme.components(separatedBy: "](site/assets/").count - 1 + readme.components(separatedBy: "](docs/img/").count - 1
-        let want = appLive("app-hero-live.png") ? 3 : 2   // banner, ratio chart, and the app capture when it exists
-        if imgs != want { errs.append("README must embed exactly \(want) images (banner, ratio chart\(want == 3 ? ", app capture" : "")), found \(imgs)") }
-        guard let brew = readme.range(of: "brew install megasoft1978/strim/strim"), let curl = readme.range(of: "packaging/install.sh | bash"),
-              let pull = readme.range(of: "strim pull"), let serve = readme.range(of: "strim serve ~/.strim/models") else {
-            return errs + ["README install block lacks brew, curl, strim pull or strim serve"]
+        for t in ["dark", "light"] where !readme.contains("site/assets/app/readme-hero-\(t).png") { errs.append("README must embed the hero screenshot site/assets/app/readme-hero-\(t).png") }
+        if !readme.contains("megasoft1978.github.io/strim-engine/") { errs.append("README must link the Pages site") }
+        guard let brew = readme.range(of: "brew install megasoft1978/strim/strim"), let pull = readme.range(of: "strim pull"), let serve = readme.range(of: "strim serve ~/.strim/models") else {
+            return errs + ["README install block lacks brew, strim pull or strim serve"]
         }
-        if !(brew.lowerBound < curl.lowerBound && curl.lowerBound < pull.lowerBound && pull.lowerBound < serve.lowerBound) {
-            errs.append("README install order must be brew, curl, strim pull, strim serve")
+        if !(brew.lowerBound < pull.lowerBound && pull.lowerBound < serve.lowerBound) { errs.append("README install order must be brew, strim pull, strim serve") }
+        if !readme.contains("not notarized yet") { errs.append("README must say the DMG is not notarized yet") }
+        if !readme.contains("ANTHROPIC_BASE_URL=http://127.0.0.1:8203") || !readme.contains("OPENAI_BASE_URL=http://127.0.0.1:8203/v1") { errs.append("README lacks the Claude Code / Codex quickstart on port 8203") }
+        if !readme.contains("Not a fit if you want many models") { errs.append("README lacks the \"why not Strim\" line") }
+        for t in ["wordmark", "decode"] { for th in ["dark", "light"] where !readme.contains("\(README_ASSET_DIR)\(t)-\(th).svg") { errs.append("README must reference \(README_ASSET_DIR)\(t)-\(th).svg") } }
+        if let r = bestRival("c32k_tt"), r.claimable, r.ratio <= 0.98, !readme.contains("x, slower") { errs.append("README table must show the cold 32K loss as \"slower\"") }
+        for bad in ["WIN", "LOSS"] where readme.contains(bad) { errs.append("README uses the capitalised verdict word \(bad)") }
+        for line in readme.split(separator: "\n", omittingEmptySubsequences: false) where line.hasPrefix("|") {
+            for tok in line.split(whereSeparator: { !"0123456789.".contains($0) }) where tok.contains(".") || tok.count > 3 {
+                var digits = Array(tok.filter(\.isNumber).drop(while: { $0 == "0" }))
+                if !tok.contains(".") { while digits.last == "0" { digits.removeLast() } }   // 1960 and 15300 are three significant figures
+                if digits.count > 3 { errs.append("README table number \(tok) has more than 3 significant figures") }
+            }
         }
-        if !readme.contains("Not faster:") { errs.append("README lacks the \"Not faster:\" line") }
+        if readme.range(of: "\\{[a-z_0-9@.|]+\\}", options: .regularExpression) != nil { errs.append("README has an unfilled {placeholder}") }
         return errs
     }
 
