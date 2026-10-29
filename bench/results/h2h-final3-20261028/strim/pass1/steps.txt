@@ -1,0 +1,33 @@
+session 22:00:17 id=1793220706-82660 engine=strim cells=agree,w3,w3_32k load={ 1.77 2.53 3.57 } swap=total = 4096.00M  used = 2883.38M  free = 1212.62M  (encrypted)
+[22:00:20] engine pid 91537 ready after 3s port 8203 tree=91537 
+[22:00:20] CELL warmup load={ 2.10 2.59 3.59 } timeout=900s
+[22:00:25] CELL warmup rc=0 5s memory_aborted=no
+[22:00:25] CELL agree load={ 2.02 2.56 3.57 } timeout=900s
+[22:00:33] CELL agree rc=0 8s memory_aborted=no
+[22:00:33] CELL w3 load={ 1.93 2.53 3.56 } timeout=900s
+[22:01:02] CELL w3 rc=0 29s memory_aborted=no
+[22:01:02] CELL w3_32k load={ 2.34 2.59 3.54 } timeout=900s
+[22:01:43] CELL w3_32k rc=0 41s memory_aborted=no
+[22:01:50] FLAG shutdown leftover_suspect pid 92796 bash /Users/user/.claude-work/skills/_shared/codex-exec.sh new /Users/user/Des
+end 22:01:50 load={ 2.01 2.48 3.45 } swap=total = 4096.00M  used = 2883.38M  free = 1212.62M  (encrypted)
+session 22:05:26 id=1793221315-94954 engine=strim cells=w4,w4s,w6 load={ 3.52 3.87 3.90 } swap=total = 4096.00M  used = 2883.38M  free = 1212.62M  (encrypted)
+[22:05:28] engine pid 26642 ready after 2s port 8203 tree=26642 
+[22:05:28] CELL warmup load={ 3.52 3.87 3.90 } timeout=900s
+[22:05:33] CELL warmup rc=0 5s memory_aborted=no
+[22:05:33] CELL w4 load={ 3.63 3.88 3.91 } timeout=900s
+[22:06:31] CELL w4 rc=0 58s memory_aborted=no
+[22:06:31] CELL w4s load={ 2.63 3.60 3.80 } timeout=900s
+[22:06:53] CELL w4s rc=0 22s memory_aborted=no
+[22:06:53] CELL w6 load={ 2.68 3.54 3.78 } timeout=900s
+[22:07:44] CELL w6 rc=0 51s memory_aborted=no
+[22:07:51] FLAG shutdown leftover_suspect pid 29621 sleep 30
+end 22:07:51 load={ 2.17 3.23 3.64 } swap=total = 4096.00M  used = 2883.38M  free = 1212.62M  (encrypted)
+session 22:08:27 id=1793221676-30159 engine=strim cells=w5,replay load={ 1.94 3.06 3.56 } swap=total = 4096.00M  used = 2883.38M  free = 1212.62M  (encrypted)
+[22:08:29] engine pid 30630 ready after 2s port 8203 tree=30630 
+[22:08:29] CELL warmup load={ 2.11 3.08 3.56 } timeout=900s
+[22:08:34] CELL warmup rc=0 5s memory_aborted=no
+[22:08:34] CELL w5 load={ 2.10 3.06 3.56 } timeout=900s
+[22:09:00] CELL w5 rc=0 26s memory_aborted=no
+[22:09:00] CELL replay load={ 2.44 3.07 3.54 } timeout=900s
+[22:09:55] CELL replay rc=0 55s memory_aborted=no
+end 22:10:02 load={ 2.30 2.88 3.44 } swap=total = 4096.00M  used = 2883.38M  free = 1212.62M  (encrypted)

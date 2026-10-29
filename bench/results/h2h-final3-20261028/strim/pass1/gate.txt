@@ -1,0 +1,34 @@
+# gate for cells=agree,w3,w3_32k start 21:51:46 threshold=4.5
+t=0s load=4.67 consec_ok=0 foreign=[26994  72.5 /usr/libexec/textunderstandingd]
+t=30s load=4.50 consec_ok=0 foreign=[]
+t=60s load=3.35 consec_ok=1 foreign=[]
+t=90s load=2.93 consec_ok=2 foreign=[]
+t=120s load=3.28 consec_ok=3 foreign=[]
+t=150s load=2.70 consec_ok=4 foreign=[]
+t=180s load=2.46 consec_ok=5 foreign=[]
+t=210s load=2.41 consec_ok=0 foreign=[86004  62.5 /opt/homebrew/Cellar/python@3.12/3.12.15/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Cont]
+t=240s load=2.71 consec_ok=1 foreign=[]
+t=270s load=2.78 consec_ok=2 foreign=[]
+t=300s load=2.22 consec_ok=3 foreign=[]
+t=330s load=1.78 consec_ok=0 foreign=[88314  62.8 /opt/homebrew/Cellar/python@3.12/3.12.15/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Cont]
+t=360s load=1.89 consec_ok=1 foreign=[]
+t=390s load=1.52 consec_ok=2 foreign=[]
+t=420s load=1.46 consec_ok=3 foreign=[]
+t=451s load=1.69 consec_ok=4 foreign=[]
+t=481s load=2.08 consec_ok=5 foreign=[]
+t=511s load=1.77 consec_ok=6 foreign=[]
+GATE PASSED after 511s
+# gate for cells=w4,w4s,w6 start 22:01:55 threshold=4.5
+t=0s load=1.93 consec_ok=0 foreign=[94890  72.1 /opt/homebrew/Cellar/python@3.12/3.12.15/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Cont]
+t=30s load=4.72 consec_ok=0 foreign=[  551 100.2 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Suppor | 16842  83.4 /opt/homebrew/Cellar/python@3.12/3.12.15/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Cont]
+t=60s load=7.76 consec_ok=0 foreign=[18447  99.6 /Users/user/codex-wt/impl-1793221332-7291/target/debug/deps/banner_band-b60b7bf5f2e66c98 | 18448  99.7 /Users/user/codex-wt/impl-1793221332-7291/target/debug/deps/banner_band-b60b7bf5f2e66c98]
+t=90s load=9.30 consec_ok=0 foreign=[  382 200.1 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Suppor | 19213  99.4 /Users/user/codex-wt/impl-1793221332-7291/target/debug/deps/solution_pages-aa890c3de09ed2ed | 19214  97.6 /Users/user/codex-wt/impl-1793221332-7291/target/debug/deps/solution_pages-aa890c3de09ed2ed]
+t=121s load=6.87 consec_ok=0 foreign=[]
+t=151s load=5.03 consec_ok=0 foreign=[]
+t=181s load=3.73 consec_ok=1 foreign=[]
+t=211s load=3.52 consec_ok=2 foreign=[]
+GATE PASSED after 211s
+# gate for cells=w5,replay start 22:07:57 threshold=4.5
+t=0s load=2.08 consec_ok=1 foreign=[]
+t=30s load=1.94 consec_ok=2 foreign=[]
+GATE PASSED after 30s

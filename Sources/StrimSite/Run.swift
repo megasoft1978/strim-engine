@@ -45,6 +45,7 @@ extension SiteBuilder {
         let benchText = buildBenchmarksHTML()
         if let failure { throw SiteError(failure) }
         generated["site/benchmarks.html"] = benchText
+        generated["site/assets/site.js"] = SITE_JS
         let cssPath = "site/assets/style.css"
         generated[cssPath] = styleWithChartBlock(readText(root + "/" + cssPath) ?? "")
         for (rel, content) in generated.sorted(by: { $0.key < $1.key }) {
@@ -60,6 +61,7 @@ extension SiteBuilder {
             log("wrote site/index.html (\(htmlText.unicodeScalars.count) bytes), site/benchmarks.html (\(benchText.unicodeScalars.count) bytes) and README.md")
         }
         var errs = syncErr + (try checkFigures())
+        for (rel, content) in generated where rel.hasSuffix(".svg") || rel.hasSuffix(".css") { let g = greenColours(in: content); if !g.isEmpty { errs.append("\(rel) uses green colours: \(g.prefix(5).joined(separator: ", "))") } }
         let (he, nl) = checkHTML(htmlText)
         errs += he
         let (be, bl) = checkHTML(benchText)

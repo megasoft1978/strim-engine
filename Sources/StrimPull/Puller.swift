@@ -55,16 +55,35 @@ final class PullMeter: @unchecked Sendable {
     private let began = Date()
     private var lastPrint = Date.distantPast
     private let options: PullOptions
-    var label = ""
+    // The file currently downloading (label empty between files).
+    private var fileLabel = ""
+    private var fileSize: Int64 = 0
+    private var fileDone: Int64 = 0
+    private var fileFetched: Int64 = 0
+    private var fileBegan = Date()
     init(total: Int64, alreadyHave: Int64, options: PullOptions) { self.total = total; self.done = alreadyHave; self.options = options }
     var fetchedBytes: Int64 { lock.lock(); defer { lock.unlock() }; return fetched }
+    func beginFile(_ label: String, size: Int64, resumedFrom: Int64) {
+        lock.lock(); defer { lock.unlock() }
+        fileLabel = label; fileSize = size; fileDone = resumedFrom; fileFetched = 0; fileBegan = Date()
+    }
+    func endFile() { lock.lock(); defer { lock.unlock() }; fileLabel = "" }
+    /// Non-TTY progress line for the active file (nil when none is active).
+    func progressLine() -> String? {
+        lock.lock(); defer { lock.unlock() }
+        guard !fileLabel.isEmpty else { return nil }
+        let rate = Double(fileFetched) / max(Date().timeIntervalSince(fileBegan), 0.001)
+        let eta = rate > 0 ? Double(fileSize - fileDone) / rate : .infinity
+        return String(format: "progress %@  %@ / %@  %.1f MB/s  eta %@", fileLabel, PullFormat.gb(fileDone), PullFormat.gb(fileSize),
+                      rate / 1e6, PullFormat.duration(eta))
+    }
     func add(_ n: Int64) {
         lock.lock()
-        done += n; fetched += n
+        done += n; fetched += n; fileDone += n; fileFetched += n
         let now = Date()
         let due = options.interactive && now.timeIntervalSince(lastPrint) >= 0.5
         if due { lastPrint = now }
-        let (d, f, l) = (done, fetched, label)
+        let (d, f, l) = (done, fetched, fileLabel)
         lock.unlock()
         guard due else { return }
         let el = max(now.timeIntervalSince(began), 0.001)
@@ -154,13 +173,22 @@ public final class Puller: Sendable {
         }
         var summary = PullSummary()
         let meter = PullMeter(total: total, alreadyHave: have, options: options)
+        // Non-TTY (logs, redirected output): a progress line for the active file at least every 30 s, even when stalled.
+        let ticker: Task<Void, Never>? = options.interactive ? nil : Task { [options] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 30_000_000_000)
+                if let line = meter.progressLine() { options.log(line) }
+            }
+        }
+        defer { ticker?.cancel() }
         for (repo, items) in plans {
             try fm.createDirectory(at: options.dir.appendingPathComponent(repo.name), withIntermediateDirectories: true)
             for (i, (f, action)) in items.enumerated() {
                 if action == .skip { summary.skippedFiles += 1; continue }
-                meter.label = "\(repo.name)/\(f.path) (\(i + 1)/\(items.count))"
+                meter.beginFile("\(repo.name)/\(f.path) (\(i + 1)/\(items.count))", size: f.size, resumedFrom: resumableBytes(repo, f))
                 let t0 = Date()
                 try await downloadFile(repo, f, meter: meter, singleConnection: false)
+                meter.endFile()
                 summary.downloadedFiles += 1
                 options.log(String(format: "ok  %@/%@  %@  %.1fs", repo.name, f.path, PullFormat.gb(f.size), Date().timeIntervalSince(t0)))
             }
@@ -182,8 +210,11 @@ public final class Puller: Sendable {
         try fm.createDirectory(at: dest.deletingLastPathComponent(), withIntermediateDirectories: true)
 
         var state: PullPartState
-        if let s = loadPartState(file, dest) { state = s }
-        else {
+        if let s = loadPartState(file, dest) {
+            state = s
+            let kept = s.segments.reduce(Int64(0)) { $0 + $1.done }
+            if kept > 0 { options.log("resuming \(repo.name)/\(file.path) from \(kept / 1_000_000) MB") }
+        } else {
             try? fm.removeItem(at: part); try? fm.removeItem(at: stateFile)
             let parts = (file.size >= options.splitThreshold && !singleConnection) ? options.connections : 1
             state = PullPartState(size: file.size, segments: PullPartState.split(from: 0, to: file.size, parts: parts))

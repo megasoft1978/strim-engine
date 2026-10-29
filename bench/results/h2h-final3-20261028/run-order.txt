@@ -1,0 +1,6 @@
+order: passes=1,2 engines=strim,rapid-mlx,mlx-vlm,mlx-lm,omlx groups=g1,g2,g3 cooldown=60s dryrun=0 start=2026-10-28T21:51:46
+pass 1 order: strim rapid-mlx mlx-vlm mlx-lm omlx
+pass 2 order: omlx mlx-lm mlx-vlm rapid-mlx strim 
+done 2026-10-29T00:10:52
+rerun of polluted sessions 2026-10-29T00:11:08
+rerun2 rapid-mlx pass1 agree,w3,w3_32k 2026-10-29T02:01:24 swap: total = 6144.00M  used = 5077.06M  free = 1066.94M  (encrypted)

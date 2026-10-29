@@ -72,15 +72,27 @@ import Testing
 
     @Test func summaryCellDisagreeingWithResultsJSONFails() throws {
         let sm = readString(repoRoot + Self.h2hSummary)
-        let broken = sm.replacingOccurrences(of: "| cold 4K prefill | tok/s | 982.1 |", with: "| cold 4K prefill | tok/s | 982.2 |")
+        let source = try PyJSONParser.parse(readString(repoRoot + "/" + FINAL_REL + "/results.json"))
+        let median = source["cells"]?.arr?.first(where: { $0["id"]?.str == "c4k_pf" })?["median"]?["strim"]?.number ?? 0
+        let line = try #require(try mdSec(mdSections(sm), "Results").first(where: { $0.hasPrefix("| cold 4K prefill |") }))
+        var columns = line.split(separator: "|", omittingEmptySubsequences: false).map { pyStrip(String($0)) }
+        columns[3] = "999.9"
+        let changedLine = columns.joined(separator: "|")
+        let broken = sm.replacingOccurrences(of: line, with: changedLine)
         #expect(broken != sm)
         guard case .threw(let m) = try Self.runCheck([FINAL_REL + "/summary.md": broken]) else { Issue.record("expected a failure"); return }
-        #expect(m.hasPrefix("cold 4K prefill/strim: summary.md says '982.2', results.json says 982.083"))
+        #expect(m.hasPrefix("cold 4K prefill/strim: summary.md says '999.9', results.json says \(pyRepr(median))"))
     }
 
     @Test func ratioDisagreeingWithResultsJSONFails() throws {
         let sm = readString(repoRoot + Self.h2hSummary)
-        let broken = sm.replacingOccurrences(of: "| 1.00x | 0.98x | TIE | TIE |", with: "| 0.90x | 0.98x | TIE | TIE |")
+        let resultSection = try mdSec(mdSections(sm), "Results (ratio =")
+        let line = try #require(resultSection.first(where: { $0.hasPrefix("| cold 4K prefill |") }))
+        var columns = line.split(separator: "|", omittingEmptySubsequences: false).map { pyStrip(String($0)) }
+        let header = try mdTable(resultSection).header
+        columns[header.firstIndex(of: "strim/rapid-mlx")! + 1] = "0.90x"
+        let changedLine = columns.joined(separator: "|")
+        let broken = sm.replacingOccurrences(of: line, with: changedLine)
         #expect(broken != sm)
         guard case .threw(let m) = try Self.runCheck([FINAL_REL + "/summary.md": broken]) else { Issue.record("expected a failure"); return }
         #expect(m.hasPrefix("cold 4K prefill: ratio 0.90x vs rival rapid-mlx disagrees with results.json"))
@@ -151,7 +163,10 @@ import Testing
         b.log = { lines.append($0) }
         let r = try b.run(SiteOptions(listFigures: true))
         #expect(r.exitCode == 0)
-        #expect(lines.count == 392)
-        #expect(lines.first?.hasPrefix("pc.4k.miss\t3.994\ts\t") == true)
+        let data = try SiteData(raw: PyJSONParser.parse(Self.resultsText()))
+        #expect(lines.count == data.order.count)
+        if let first = data.order.first, let figure = data.figs[first] {
+            #expect(lines.first?.hasPrefix("\(first)\t\(data.text(first))\t\(figure.unitJSON.pyStr)\t") == true)
+        }
     }
 }

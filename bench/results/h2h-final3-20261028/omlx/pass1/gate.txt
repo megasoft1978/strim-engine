@@ -1,0 +1,16 @@
+# gate for cells=agree,w3,w3_32k start 22:56:05 threshold=4.5
+t=0s load=1.03 consec_ok=1 foreign=[]
+t=30s load=1.28 consec_ok=2 foreign=[]
+t=60s load=1.28 consec_ok=3 foreign=[]
+t=90s load=1.04 consec_ok=4 foreign=[]
+t=120s load=1.35 consec_ok=5 foreign=[]
+t=150s load=1.26 consec_ok=6 foreign=[]
+GATE PASSED after 150s
+# gate for cells=w4,w4s,w6 start 23:00:40 threshold=4.5
+t=0s load=2.54 consec_ok=1 foreign=[]
+t=30s load=1.92 consec_ok=2 foreign=[]
+GATE PASSED after 30s
+# gate for cells=w5,replay start 23:04:39 threshold=4.5
+t=0s load=2.26 consec_ok=1 foreign=[]
+t=30s load=1.61 consec_ok=2 foreign=[]
+GATE PASSED after 30s

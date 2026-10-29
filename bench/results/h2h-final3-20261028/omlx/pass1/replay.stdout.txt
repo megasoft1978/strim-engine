@@ -1,0 +1,9 @@
+[omlx rep0 turn 1/8] ttft=4.478s prompt=4093 cached=0 flag=ok err=None
+[omlx rep0 turn 2/8] ttft=8.213s prompt=9348 cached=2048 flag=ok err=None
+[omlx rep0 turn 3/8] ttft=7.747s prompt=14629 cached=8192 flag=short err=None
+[omlx rep0 turn 4/8] ttft=7.142s prompt=19886 cached=14336 flag=short err=None
+[omlx rep0 turn 5/8] ttft=8.955s prompt=25158 cached=18432 flag=short err=None
+[omlx rep0 turn 6/8] ttft=8.365s prompt=30380 cached=24576 flag=short err=None
+[omlx rep0 turn 7/8] ttft=10.375s prompt=35639 cached=28672 flag=short err=None
+[omlx rep0 turn 8/8] ttft=9.645s prompt=40840 cached=34816 flag=short err=None
+wrote bench/results/h2h-final3-20261028/omlx/pass1/replay/raw.jsonl and bench/results/h2h-final3-20261028/omlx/pass1/replay/summary.md

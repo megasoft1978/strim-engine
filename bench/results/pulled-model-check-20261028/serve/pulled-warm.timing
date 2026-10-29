@@ -1,0 +1,5 @@
+load_avg_start: { 3.83 4.31 4.99 }
+serve_to_health_s: 1.459
+serve_to_first_token_s: 1.570
+first_request_after_health_s: .111
+load_avg_end: { 3.76 4.29 4.98 }

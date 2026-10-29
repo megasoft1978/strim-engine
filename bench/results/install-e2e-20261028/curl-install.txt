@@ -1,0 +1,12 @@
+Downloading strim 0.1.0
+Checksum OK
+strim 0.1.0
+
+Installed to /private/tmp/claude-501/strim-curl-prefix.tfdq/strim/0.1.0, command: /private/tmp/claude-501/strim-curl-prefix.tfdq/bin/strim
+Add to PATH:  echo 'export PATH="/private/tmp/claude-501/strim-curl-prefix.tfdq/bin:$PATH"' >> ~/.zshrc
+
+Next steps:
+  1. strim pull          # model + MTP head, about 15 GB, resumable (details: https://github.com/megasoft1978/strim-engine/blob/main/docs/INSTALL.md)
+  2. strim serve ~/.strim/models/qwen38-4bit ~/.strim/models/qwen38-mtp-4bit --port 8203
+Uninstall: rm -rf "/private/tmp/claude-501/strim-curl-prefix.tfdq/strim" "/private/tmp/claude-501/strim-curl-prefix.tfdq/bin/strim"   (state in ~/.strim is kept)
+/bin/bash $R/install.sh --prefix $P  0.20s user 0.15s system 0% cpu 58.733 total

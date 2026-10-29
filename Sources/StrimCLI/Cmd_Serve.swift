@@ -71,7 +71,8 @@ func runServe(_ args: [String]) {
             let loadedConfig = try HostConfig.load(from: paths.config)
             let (hostConfig, rootsDefaulted) = loadedConfig.withProductionDefaults()
             if rootsDefaulted {
-                FileHandle.standardError.write(Data("strim: mcp.allowedRoots is not set; delegated jobs are limited to \(NSHomeDirectory()) (credential directories such as ~/.strim, ~/.aws, ~/.ssh stay refused). Set mcp.allowedRoots in ~/.strim/config.json to narrow it.\n".utf8))
+                // Once per start, only when the default applied (MCP is mounted at /mcp whenever serve runs). The home default is kept.
+                FileHandle.standardError.write(Data("strim: MCP jobs are limited to \(NSHomeDirectory()) (mcp.allowedRoots not set; ~/.strim, ~/.aws, ~/.ssh stay refused).\n  To narrow: add {\"mcp\": {\"allowedRoots\": [\"/path/to/projects\"]}} to ~/.strim/config.json, then restart.\n".utf8))
             }
             // Lock before loading the model: a second host must fail fast, not after 27B weights are resident.
             let lock = try HostLock.acquire(at: paths.lock)

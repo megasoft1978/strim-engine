@@ -1,0 +1,3 @@
+[23:25:12] launch: /Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/mlx_lm.server --model models/qwen38-4bit --port 8654 --decode-concurrency 4 --prompt-concurrency 4
+[23:29:16] launch: /Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/mlx_lm.server --model models/qwen38-4bit --port 8654 --decode-concurrency 4 --prompt-concurrency 4
+[23:32:26] launch: /Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/mlx_lm.server --model models/qwen38-4bit --port 8654 --decode-concurrency 4 --prompt-concurrency 4

@@ -3,20 +3,32 @@ import Foundation
 // SVG charts rendered from site/data/headline.json (the parsed PyJSON in SiteBuilder.H). No JS, no external requests.
 // Colour is never the only carrier: verdicts are printed as WIN / TIE / LOSS text, engines also differ by marker shape (circle, diamond) and bar order.
 
-let HV_LIGHT = "--hv-fg:#15171a;--hv-mu:#565b62;--hv-ru:#d4d7d1;--hv-bg:#fbfbf9;--hv-s:#0a665a;--hv-r:#2c62b4;--hv-v:#8e3f93;--hv-w:#0a665a;--hv-l:#a8321e;--hv-t:#565b62;--hv-wb:#dff0eb;--hv-lb:#fbe6e1;--hv-tb:#ecede9;--hv-hl:#eaf3f0"
-let HV_DARK = "--hv-fg:#eceeee;--hv-mu:#a2a8ae;--hv-ru:#33383d;--hv-bg:#101214;--hv-s:#4cc9b0;--hv-r:#7fa8f0;--hv-v:#d69ddb;--hv-w:#4cc9b0;--hv-l:#ff9985;--hv-t:#a2a8ae;--hv-wb:#12302b;--hv-lb:#3a1a14;--hv-tb:#1d2125;--hv-hl:#16201e"
+let HV_LIGHT = "--hv-fg:#15123A;--hv-mu:#5D5A85;--hv-ru:rgba(21,18,58,.18);--hv-bg:#F6F4FF;--hv-s:#E0309E;--hv-r:#4F4BFF;--hv-v:#7B78A8;--hv-q:#B45309;--hv-p:#0B6FA4;--hv-w:#6F2BD9;--hv-l:#5D5A85;--hv-t:#5D5A85;--hv-wb:#EDE3FF;--hv-lb:#E7E4F4;--hv-tb:#ECE8FF;--hv-hl:#ECE8FF;--hv-a:#4F4BFF;--hv-b:#9240FF;--hv-c:#E0309E;--hv-gl:rgba(21,18,58,.1)"
+let HV_DARK = "--hv-fg:#F1EFFF;--hv-mu:#A29FC8;--hv-ru:rgba(255,255,255,.16);--hv-bg:#0F0D2B;--hv-s:#FF4FD0;--hv-r:#7C7BFF;--hv-v:#B7B4E0;--hv-q:#FFB454;--hv-p:#5CC8FF;--hv-w:#D9B8FF;--hv-l:#A29FC8;--hv-t:#A29FC8;--hv-wb:#2A1B52;--hv-lb:#1C1A3D;--hv-tb:#1C1A3D;--hv-hl:#181640;--hv-a:#7C7BFF;--hv-b:#B25CFF;--hv-c:#FF4FD0;--hv-gl:rgba(255,255,255,.1)"
 
 let HV_RULES = """
-.hv text{font:12px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;fill:var(--hv-fg)}
+.hv text{font:12px -apple-system,"Helvetica Neue",Arial,system-ui,sans-serif;fill:var(--hv-fg)}
+.hv .mo{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .hv .m{fill:var(--hv-mu)}.hv .b{font-weight:700}.hv .s{font-size:10.5px}.hv .c{text-anchor:middle}.hv .e{text-anchor:end}
-.hv .bg{fill:var(--hv-bg)}.hv .hl{fill:var(--hv-hl)}.hv .g{stroke:var(--hv-ru);stroke-width:1;fill:none}.hv .d{stroke-dasharray:3 3}
+.hv .bg{fill:var(--hv-bg);stroke:var(--hv-ru)}.hv .hl{fill:var(--hv-hl)}.hv .g{stroke:var(--hv-ru);stroke-width:1;fill:none}.hv .d{stroke-dasharray:3 3}
 .hv .bd{fill:var(--hv-ru);opacity:.5}.hv .o{stroke:var(--hv-fg);stroke-width:1.3}
-.hv .fg{fill:var(--hv-fg)}.hv .fs{fill:var(--hv-s)}.hv .fr{fill:var(--hv-r)}.hv .fv{fill:var(--hv-v)}
-.hv .ls{stroke:var(--hv-s)}.hv .lr{stroke:var(--hv-r);stroke-width:1.6}.hv .lv{stroke:var(--hv-v);stroke-width:1.6}
-.hv .pw rect{fill:var(--hv-wb);stroke:var(--hv-w)}.hv .pl rect{fill:var(--hv-lb);stroke:var(--hv-l)}.hv .pt rect{fill:var(--hv-tb);stroke:var(--hv-t)}
+.hv .fg{fill:var(--hv-fg)}.hv .fs{fill:var(--hv-s)}.hv .fr{fill:var(--hv-r)}.hv .fv{fill:var(--hv-v)}.hv .fq{fill:var(--hv-q)}.hv .fp{fill:var(--hv-p)}
+.hv .ls{stroke:var(--hv-s)}.hv .lr{stroke:var(--hv-r);stroke-width:1.6}.hv .lv{stroke:var(--hv-v);stroke-width:1.6}.hv .lq{stroke:var(--hv-q);stroke-width:1.6}.hv .lp{stroke:var(--hv-p);stroke-width:1.6}
+.hv .pw rect{fill:var(--hv-wb);stroke:var(--hv-w)}.hv .pl rect{fill:var(--hv-lb);stroke:var(--hv-l);stroke-dasharray:3 2}.hv .pt rect{fill:var(--hv-tb);stroke:var(--hv-t)}
 .hv .pw text{fill:var(--hv-w)}.hv .pl text{fill:var(--hv-l)}.hv .pt text{fill:var(--hv-t)}
 .hv .pw text,.hv .pl text,.hv .pt text{font-size:11px;font-weight:700}
 .hv .hh{font-size:13px;font-weight:700}.hv .hv1{font-weight:700}
+.hv .nltk{stroke:var(--hv-mu);opacity:.55}.hv .nlld{stroke:var(--hv-mu);stroke-width:1;opacity:.5;stroke-dasharray:2 3}.hv .nlld.hot{stroke:var(--hv-c);opacity:.8}
+.hv .nldot{fill:var(--hv-bg);stroke:var(--hv-fg);stroke-width:2}.hv .nlspec{fill:#fff;opacity:.5}
+.hv .nlwk{stroke:var(--hv-mu);stroke-width:2.5;opacity:.6;stroke-linecap:round}
+.hv .nlv{font-size:17px;font-weight:600}.hv .nln{font-size:12.5px;fill:var(--hv-mu)}.hv .nln.hot{fill:var(--hv-fg);font-weight:600;font-size:14px}
+.hv .nlv.hot{font-family:"Space Grotesk",-apple-system,"Helvetica Neue",Arial,sans-serif;font-size:54px;font-weight:700;letter-spacing:-.04em}
+.hv .tk{font-size:12px;fill:var(--hv-mu)}
+.hv .gcard{fill:var(--hv-gl);stroke:var(--hv-ru)}.hv .gcard.loss{stroke-dasharray:5 4}
+.hv .gb{fill:none;stroke:var(--hv-ru);stroke-width:5;stroke-linecap:round}.hv .gv{fill:none;stroke-width:5;stroke-linecap:round}.hv .gv.lose{stroke:var(--hv-mu)}
+.hv .g1{stroke:var(--hv-fg);stroke-width:1.5;opacity:.6}.hv .gd{fill:var(--hv-fg)}.hv .gd.lose{fill:var(--hv-mu)}
+.hv .gnum{font-size:30px;font-weight:700;letter-spacing:-.04em}.hv .gnum.lose{fill:var(--hv-mu)}
+.hv .chipr{fill:none;stroke:var(--hv-mu)}
 """
 
 /// HV_RULES with every var(--hv-x) replaced by the palette's literal value (renderers without custom-property support).
@@ -29,14 +41,20 @@ func hvRulesLiteral(_ palette: String) -> String {
     return out
 }
 
-/// Standalone SVG (README, direct viewing): colours follow prefers-color-scheme; literal colours, no custom properties.
-func hvCSSStandalone() -> String {
-    hvRulesLiteral(HV_LIGHT) + "\n@media (prefers-color-scheme:dark){\n" + hvRulesLiteral(HV_DARK) + "\n}"
-}
+/// Standalone SVG (README, direct viewing): always the night palette (GitHub themes differ; the glass card carries its own background), literal colours.
+func hvCSSStandalone() -> String { hvRulesLiteral(HV_DARK) }
+
+/// Page-only rules: web fonts, the slow reveal of the engine beads.
+let HV_PAGE_EXTRA = """
+.hv text{font-family:var(--sans)}.hv .mo{font-family:var(--mono)}.hv .nlv.hot{font-family:var(--sans)}
+@media (prefers-reduced-motion:reduce){.js .rev,.js .rev:not(.in){opacity:1!important;transform:none!important;transition:none!important}.js .rev .gv,.js .rev:not(.in) .gv{stroke-dashoffset:0!important;transition:none!important}}
+.hv.nl{max-height:520px}.hv.nl.vn{max-height:none;max-width:30rem;margin:0 auto}
+@media (min-width:56rem){.landing #field .glass{min-height:420px}}
+"""
 
 /// Page CSS block kept in site/assets/style.css between markers: follows the page theme switch as well.
 func hvCSSPage() -> String {
-    ".hv{\(HV_LIGHT)}\n@media (prefers-color-scheme:dark){:root:not([data-theme=\"light\"]) .hv{\(HV_DARK)}}\n:root[data-theme=\"dark\"] .hv{\(HV_DARK)}\n" + HV_RULES
+    ".hv{\(HV_LIGHT)}\n@media (prefers-color-scheme:dark){:root:not([data-theme=\"light\"]) .hv{\(HV_DARK)}}\n:root[data-theme=\"dark\"] .hv{\(HV_DARK)}\n" + HV_RULES + "\n" + HV_PAGE_EXTRA
 }
 
 let HV_BEGIN = "/* hv:begin (generated by strim site build, do not edit) */"
@@ -59,34 +77,72 @@ extension SiteBuilder {
         return "<g class=\"\(cls)\"><rect x=\"\(fnum(x))\" y=\"\(fnum(y))\" width=\"\(fnum(w))\" height=\"15\" rx=\"7.5\"/><text class=\"c\" x=\"\(fnum(x + w / 2))\" y=\"\(fnum(y + 11))\">\(esc(label))</text></g>"
     }
 
-    private func wrapSVG(_ id: String, _ w: Double, _ h: Double, _ title: String, _ desc: String, _ body: String, standalone: Bool) -> String {
+    func wrapSVG(_ id: String, _ w: Double, _ h: Double, _ title: String, _ desc: String, _ body: String, standalone: Bool) -> String {
         var s = "<svg class=\"hv\" viewBox=\"0 0 \(fnum(w)) \(fnum(h))\" role=\"img\" aria-labelledby=\"\(id)-t \(id)-d\""
         s += standalone ? " xmlns=\"http://www.w3.org/2000/svg\" width=\"\(fnum(w))\" height=\"\(fnum(h))\">" : ">"
         s += "<title id=\"\(id)-t\">\(esc(title))</title><desc id=\"\(id)-d\">\(esc(desc))</desc>"
         if standalone {
-            s += "<style>\(hvCSSStandalone())</style><rect class=\"bg\" width=\"\(fnum(w))\" height=\"\(fnum(h))\" rx=\"8\"/>"
+            s += "<style>\(hvCSSStandalone())</style><rect class=\"bg\" width=\"\(fnum(w))\" height=\"\(fnum(h))\" rx=\"18\"/>"
         }
         return s + body + "</svg>"
     }
 
-    private func legend(_ y: Double, x: Double = 8, marker: Bool) -> String {
+    /// Fill class of the engine at position `i` of the run (Strim first): pink, indigo, lavender, amber, sky. Never green.
+    func engCls(_ i: Int) -> String { ["fs", "fr", "fv", "fq", "fp"][min(i, 4)] }
+    func engLine(_ i: Int) -> String { ["ls", "lr", "lv", "lq", "lp"][min(i, 4)] }
+
+    /// Marker of rival number `j` (0-based among the rivals): circle, diamond, square, triangle; the shape carries the identity as well as the colour.
+    private func marker(_ j: Int, _ x: Double, _ y: Double, r: Double) -> String {
+        let cls = engCls(j + 1)
+        switch j % 4 {
+        case 0: return "<circle class=\"\(cls)\" cx=\"\(fnum(x))\" cy=\"\(fnum(y))\" r=\"\(fnum(r))\"/>"
+        case 1: return "<path class=\"\(cls)\" d=\"M\(fnum(x)) \(fnum(y - r * 1.25)) l\(fnum(r * 1.25)) \(fnum(r * 1.25)) -\(fnum(r * 1.25)) \(fnum(r * 1.25)) -\(fnum(r * 1.25)) -\(fnum(r * 1.25))z\"/>"
+        case 2: return "<rect class=\"\(cls)\" x=\"\(fnum(x - r))\" y=\"\(fnum(y - r))\" width=\"\(fnum(r * 2))\" height=\"\(fnum(r * 2))\"/>"
+        default: return "<path class=\"\(cls)\" d=\"M\(fnum(x)) \(fnum(y - r * 1.2)) l\(fnum(r * 1.2)) \(fnum(r * 2)) h-\(fnum(r * 2.4))z\"/>"
+        }
+    }
+
+    /// Legend over the engines of the run; wraps to a second line when it would pass x=590. Returns the markup and the number of lines.
+    private func legend(_ y: Double, x: Double = 8, marker mk: Bool) -> (svg: String, lines: Int) {
         var s = ""
-        var x = x
-        for (e, cls) in [("strim", "fs"), ("rapid-mlx", "fr"), ("mlx-vlm", "fv")] {
-            let label = marker && e == "strim" ? "Strim (the 1\u{00d7} line)" : (ENG_LABEL[e] ?? e)
-            if marker && e == "mlx-vlm" {
-                s += "<path d=\"M\(fnum(x + 5)) \(fnum(y - 10)) l5 5 -5 5 -5 -5z\" class=\"\(cls)\"/>"
-            } else if marker && e == "strim" {
+        var x = x, y = y, lines = 1
+        for (i, e) in ENGINES.enumerated() {
+            let label = mk && i == 0 ? "Strim (the 1\u{00d7} line)" : engLabel(e)
+            let w = 15 + Double(label.count) * 6.4 + 14
+            if x + w > 596 && x > 8 { x = 8; y += 16; lines += 1 }
+            let cls = engCls(i)
+            if mk && i == 0 {
                 s += "<rect x=\"\(fnum(x + 3))\" y=\"\(fnum(y - 12))\" width=\"2.6\" height=\"13\" class=\"fg\"/>"
-            } else if marker {
-                s += "<circle cx=\"\(fnum(x + 5))\" cy=\"\(fnum(y - 5))\" r=\"4.5\" class=\"\(cls)\"/>"
+            } else if mk {
+                s += marker(i - 1, x + 5, y - 5, r: 4.2)
             } else {
                 s += "<rect x=\"\(fnum(x))\" y=\"\(fnum(y - 10))\" width=\"10\" height=\"10\" rx=\"2\" class=\"\(cls)\"/>"
             }
             s += "<text x=\"\(fnum(x + 15))\" y=\"\(fnum(y))\">\(esc(label))</text>"
-            x += 15 + Double(label.count) * 6.4 + 14
+            x += w
         }
-        return s
+        return (s, lines)
+    }
+
+    /// The rival with the lowest claimable speed-up in a headline cell (the best rival), nil when no rival has a claimable ratio.
+    func bestRivalOf(_ c: PyJSON?) -> (rv: String, s: Double, verdict: String)? {
+        var best: (rv: String, s: Double, verdict: String)?
+        for rv in RIVALS {
+            let v = c?["verdict"]?[rv]?.str ?? "n/a"
+            guard v != "NC", let s = c?["speedup"]?[rv]?.number else { continue }
+            if best == nil || s < best!.s { best = (rv, s, v) }
+        }
+        return best
+    }
+
+    /// WIN/LOSS/TIE pill text and class for the best rival of a cell; "not claimable" when a rival has a ratio but no claim.
+    private func bestPill(_ c: PyJSON?, x: Double, y: Double, w: Double) -> String {
+        if let b = bestRivalOf(c) {
+            return pill(x, y, w, b.verdict, "\(b.verdict) \(fx(b.s))")
+                + "<text class=\"m s\" x=\"\(fnum(x + w + 5))\" y=\"\(fnum(y + 11))\">\(esc(WIDE_NAMES[b.rv] ?? b.rv))</text>"
+        }
+        if RIVALS.contains(where: { c?["verdict"]?[$0]?.str == "NC" }) { return pill(x, y, w, "TIE", "not claimable") }
+        return ""
     }
 
     // MARK: hero
@@ -102,10 +158,11 @@ extension SiteBuilder {
         let rows = H["hero"]?["rows"]?.arr ?? []
         let regimes = H["scoreboard"]?["regimes"]?.arr ?? []
         var body = ""
-        // legend and column headers
-        body += legend(18, marker: true)
-        body += "<text class=\"m s c\" x=\"453\" y=\"36\">vs rapid-mlx</text><text class=\"m s c\" x=\"549\" y=\"36\">vs mlx-vlm</text>"
-        let y0 = 48.0
+        let lg = legend(18, marker: true)
+        body += lg.svg
+        let extra = Double(lg.lines - 1) * 16
+        body += "<text class=\"m s c\" x=\"492\" y=\"\(fnum(36 + extra))\">vs the best rival</text>"
+        let y0 = 48.0 + extra
         var layout: [(y: Double, kind: Int, regime: PyJSON?, cell: PyJSON?)] = []
         var y = y0
         for r in rows {
@@ -127,13 +184,12 @@ extension SiteBuilder {
         }
         body += "<text class=\"m s\" x=\"\(fnum(X0))\" y=\"\(fnum(bottom + 29))\">\u{2190} Strim slower</text><text class=\"m s e\" x=\"\(fnum(X1))\" y=\"\(fnum(bottom + 29))\">Strim faster \u{2192}</text>"
         body += "<text class=\"m s\" x=\"8\" y=\"\(fnum(bottom + 46))\">Log scale. 1\u{00d7} = equal; the shaded strip is the 2% tie band. Seconds are inverted so that right is always better.</text>"
+        let n = RIVALS.count
         for item in layout {
             if item.kind == 0 {
                 let label = item.regime?["label"]?.pyStr ?? ""
-                let metric = item.regime?["metric"]?.pyStr ?? ""
                 body += "<line class=\"g\" x1=\"0\" x2=\"600\" y1=\"\(fnum(item.y + 2))\" y2=\"\(fnum(item.y + 2))\"/>"
                 body += "<text class=\"b\" x=\"0\" y=\"\(fnum(item.y + 17))\">\(esc(label))</text>"
-                _ = metric
                 continue
             }
             guard let c = item.cell else { continue }
@@ -143,21 +199,17 @@ extension SiteBuilder {
             var tip = "\(c["label"]?.pyStr ?? ""):"
             body += "<g>"
             body += "<text x=\"6\" y=\"\(fnum(cy + 4))\">\(esc(c["short"]?.pyStr ?? ""))</text>"
-            for (i, rv) in RIVALS.enumerated() {
-                guard let s = spd?[rv]?.number else { continue }
-                let dy = i == 0 ? -3.0 : 3.0
-                let x = sx(s), y = cy + dy
-                let lcls = i == 0 ? "lr" : "lv"
-                body += "<line class=\"\(lcls)\" x1=\"\(fnum(sx(1)))\" x2=\"\(fnum(x))\" y1=\"\(fnum(y))\" y2=\"\(fnum(y))\"/>"
-                if i == 0 {
-                    body += "<circle class=\"fr\" cx=\"\(fnum(x))\" cy=\"\(fnum(y))\" r=\"4.2\"/>"
-                } else {
-                    body += "<path class=\"fv\" d=\"M\(fnum(x)) \(fnum(y - 5.2)) l5.2 5.2 -5.2 5.2 -5.2 -5.2z\"/>"
-                }
-                let v = ver?[rv]?.str ?? "TIE"
-                body += pill(i == 0 ? 408 : 504, cy - 7.5, 90, v, "\(v) \(fx(s))")
+            for (j, rv) in RIVALS.enumerated() {
+                let v = ver?[rv]?.str ?? "n/a"
+                guard let s = spd?[rv]?.number else { tip += " vs \(rv) n/a;"; continue }
+                if v == "NC" { tip += " vs \(rv) not claimable;"; continue }
+                let dy = (Double(j) - Double(n - 1) / 2) * (n > 2 ? 3.8 : 6.0)
+                let x = sx(s), yy = cy + dy
+                body += "<line class=\"\(engLine(j + 1))\" x1=\"\(fnum(sx(1)))\" x2=\"\(fnum(x))\" y1=\"\(fnum(yy))\" y2=\"\(fnum(yy))\"/>"
+                body += marker(j, x, yy, r: n > 2 ? 3.2 : 4.2)
                 tip += " vs \(rv) \(fx(s)) \(v);"
             }
+            body += bestPill(c, x: 440, y: cy - 7.5, w: 84)
             body += "<title>\(esc(tip))</title></g>"
         }
         let h = bottom + 56
@@ -165,8 +217,12 @@ extension SiteBuilder {
         func line(_ rv: String) -> String {
             "vs \(rv): \(tot?[rv]?["WIN"]?.pyStr ?? "0") wins, \(tot?[rv]?["TIE"]?.pyStr ?? "0") ties, \(tot?[rv]?["LOSS"]?.pyStr ?? "0") losses"
         }
-        let title = "Strim vs rapid-mlx vs mlx-vlm: speed-up per measurement"
-        let desc = "Dot chart on a log scale. Each row is one measurement; the circle is Strim relative to rapid-mlx and the diamond is Strim relative to mlx-vlm, 1x meaning equal and right meaning Strim is faster. Verdict badges read WIN, TIE or LOSS. Summary over the scoreboard cells, " + line("rapid-mlx") + "; " + line("mlx-vlm") + "."
+        let names = RIVALS.map { WIDE_NAMES[$0] ?? $0 }
+        let title = "Strim vs \(names.joined(separator: " vs ")): speed-up per measurement"
+        let shapes = ["circle", "diamond", "square", "triangle"]
+        let desc = "Dot chart on a log scale. Each row is one measurement; "
+            + RIVALS.enumerated().map { "the \(shapes[$0.offset % 4]) is Strim relative to \(WIDE_NAMES[$0.element] ?? $0.element)" }.joined(separator: ", ")
+            + ", 1x meaning equal and right meaning Strim is faster. The badge reads WIN, TIE or LOSS against the best rival, or not claimable. Summary: " + RIVALS.map(line).joined(separator: "; ") + "."
         return wrapSVG("hv1", 600, h, title, desc, body, standalone: standalone)
     }
 
@@ -174,28 +230,34 @@ extension SiteBuilder {
 
     func memorySVG(standalone: Bool) -> String {
         let mem = H["memory"]
-        let X0 = 178.0, X1 = 520.0, maxV = 46.0
-        func sx(_ v: Double) -> Double { X0 + v / maxV * (X1 - X0) }
         var groups: [(label: String, vals: PyJSON, hl: Bool)] = []
         if let w = mem?["whole_run"] { groups.append(("Peak over the whole run", w, true)) }
         for c in mem?["cells"]?.arr ?? [] { groups.append((c["label"]?.pyStr ?? "", c["values"] ?? .null, false)) }
-        var body = legend(18, marker: false)
-        let y0 = 34.0
+        let dataMax = groups.flatMap { g in ENGINES.compactMap { g.vals[$0]?.number } }.max() ?? 0
+        let maxV = max(46.0, ((max(dataMax, mem?["abort_limit_gb"]?.number ?? 0) / 10).rounded(.up)) * 10 + 4)
+        let X0 = 178.0, X1 = 520.0
+        func sx(_ v: Double) -> Double { X0 + v / maxV * (X1 - X0) }
+        let lg = legend(18, marker: false)
+        var body = lg.svg
+        let y0 = 34.0 + Double(lg.lines - 1) * 16
         let bh = 9.0, gap = 1.5, pad = 8.0
-        let gh = 3 * bh + 2 * gap + pad
+        let ne = Double(ENGINES.count)
+        let gh = ne * bh + (ne - 1) * gap + pad
         var y = y0
         var inner = ""
         for (gi, g) in groups.enumerated() {
             if g.hl {
                 inner += "<rect class=\"hl\" x=\"0\" y=\"\(fnum(y - 3))\" width=\"600\" height=\"\(fnum(gh))\" rx=\"4\"/>"
             }
-            let tip = g.label + ": " + ENGINES.map { "\($0) \(fnum(g.vals[$0]?.number ?? 0)) GB" }.joined(separator: ", ")
-            inner += "<g><title>\(esc(tip))</title><text class=\"\(g.hl ? "b" : "")\" x=\"6\" y=\"\(fnum(y + 2 * bh))\">\(esc(g.label))</text>"
+            let tip = g.label + ": " + ENGINES.map { "\($0) \(g.vals[$0]?.number.map { fnum($0) + " GB" } ?? "n/a")" }.joined(separator: ", ")
+            inner += "<g><title>\(esc(tip))</title><text class=\"\(g.hl ? "b" : "")\" x=\"6\" y=\"\(fnum(y + ne * bh / 2 + 3))\">\(esc(g.label))</text>"
             for (i, e) in ENGINES.enumerated() {
-                let v = g.vals[e]?.number ?? 0
                 let by = y + Double(i) * (bh + gap)
-                let cls = e == "strim" ? "fs" : e == "rapid-mlx" ? "fr" : "fv"
-                inner += "<rect class=\"\(cls)\" x=\"\(fnum(X0))\" y=\"\(fnum(by))\" width=\"\(fnum(sx(v) - X0))\" height=\"\(fnum(bh))\"/>"
+                guard let v = g.vals[e]?.number else {
+                    inner += "<text class=\"s m\" x=\"\(fnum(X0 + 4))\" y=\"\(fnum(by + 8))\">n/a</text>"
+                    continue
+                }
+                inner += "<rect class=\"\(engCls(i))\" x=\"\(fnum(X0))\" y=\"\(fnum(by))\" width=\"\(fnum(sx(v) - X0))\" height=\"\(fnum(bh))\"/>"
                 inner += "<text class=\"s\(g.hl ? " b" : "")\" x=\"\(fnum(sx(v) + 4))\" y=\"\(fnum(by + 8))\">\(fmtFixed(v, 1))</text>"
             }
             inner += "</g>"
@@ -204,9 +266,11 @@ extension SiteBuilder {
         }
         let bottom = y
         // grid and abort limit
-        for t in [0.0, 10.0, 20.0, 30.0, 40.0] {
+        var t = 0.0
+        while t <= maxV {
             body += "<line class=\"g\" x1=\"\(fnum(sx(t)))\" x2=\"\(fnum(sx(t)))\" y1=\"\(fnum(y0 - 4))\" y2=\"\(fnum(bottom))\"/>"
             body += "<text class=\"m s c\" x=\"\(fnum(sx(t)))\" y=\"\(fnum(bottom + 13))\">\(fnum(t))</text>"
+            t += 10
         }
         body += inner
         if let lim = mem?["abort_limit_gb"]?.number {
@@ -215,8 +279,9 @@ extension SiteBuilder {
         }
         body += "<text class=\"m s\" x=\"8\" y=\"\(fnum(bottom + 29))\">Peak physical footprint of the engine process tree, GB (includes Metal buffers). Bars start at zero.</text>"
         let wr = mem?["whole_run"]
-        let title = "Peak memory footprint, Strim vs rapid-mlx vs mlx-vlm"
-        let desc = "Grouped bars, GB. Whole run peak: Strim \(fnum(wr?["strim"]?.number ?? 0)), rapid-mlx \(fnum(wr?["rapid-mlx"]?.number ?? 0)), mlx-vlm \(fnum(wr?["mlx-vlm"]?.number ?? 0)). Strim has the lowest peak in \(mem?["strim_lowest_cells"]?.pyStr ?? "0") of \(mem?["cells_total"]?.pyStr ?? "0") individual cells."
+        let title = "Peak memory footprint, " + ENGINES.map { WIDE_NAMES[$0] ?? $0 }.joined(separator: " vs ")
+        let desc = "Grouped bars, GB. Whole run peak: " + ENGINES.map { "\(WIDE_NAMES[$0] ?? $0) \(fnum(wr?[$0]?.number ?? 0))" }.joined(separator: ", ")
+            + ". Strim has the lowest peak in \(mem?["strim_lowest_cells"]?.pyStr ?? "0") of \(mem?["cells_total"]?.pyStr ?? "0") workload cells."
         return wrapSVG("hv2", 600, bottom + 38, title, desc, body, standalone: standalone)
     }
 
@@ -229,10 +294,12 @@ extension SiteBuilder {
             ("4K prompts", [("c=4  p50", "p50_4kc4"), ("c=4  p95", "p95_4kc4"), ("c=8  p50", "p50_4kc8"), ("c=8  p95", "p95_4kc8")]),
         ]
         let X0 = 78.0, X1 = 372.0
-        var body = legend(18, marker: false)
-        var y = 34.0
+        let lg = legend(18, marker: false)
+        var body = lg.svg
+        var y = 34.0 + Double(lg.lines - 1) * 16
         let bh = 8.0, gap = 1.5
-        let gh = 3 * bh + 2 * gap + 7
+        let ne = Double(ENGINES.count)
+        let gh = ne * bh + (ne - 1) * gap + 7
         for (title, items) in panels {
             var vmax = 0.0
             for (_, id) in items { for e in ENGINES { vmax = max(vmax, hCell(id)?["values"]?[e]?.number ?? 0) } }
@@ -240,41 +307,38 @@ extension SiteBuilder {
             func sx(_ v: Double) -> Double { X0 + v / mx * (X1 - X0) }
             body += "<text class=\"b\" x=\"0\" y=\"\(fnum(y + 12))\">\(esc(title))</text>"
             body += "<text class=\"m s\" x=\"262\" y=\"\(fnum(y + 12))\">0 to \(String(format: "%g", mx)) s, lower is better</text>"
-            body += "<text class=\"m s c\" x=\"478\" y=\"\(fnum(y + 12))\">vs rapid-mlx</text><text class=\"m s c\" x=\"558\" y=\"\(fnum(y + 12))\">vs mlx-vlm</text>"
+            body += "<text class=\"m s c\" x=\"492\" y=\"\(fnum(y + 12))\">vs the best rival</text>"
             y += 20
             let top = y
             for (label, id) in items {
                 guard let c = hCell(id) else { continue }
-                let tip = (c["label"]?.pyStr ?? "") + ": " + ENGINES.map { "\($0) \(fmtFixed(c["values"]?[$0]?.number ?? 0, 2)) s" }.joined(separator: ", ")
-                body += "<g><title>\(esc(tip))</title><text x=\"6\" y=\"\(fnum(y + 2 * bh))\">\(esc(label))</text>"
+                let tip = (c["label"]?.pyStr ?? "") + ": " + ENGINES.map { "\($0) \(c["values"]?[$0]?.number.map { fmtFixed($0, 2) + " s" } ?? "n/a")" }.joined(separator: ", ")
+                body += "<g><title>\(esc(tip))</title><text x=\"6\" y=\"\(fnum(y + ne * bh / 2 + 3))\">\(esc(label))</text>"
                 for (i, e) in ENGINES.enumerated() {
-                    let v = c["values"]?[e]?.number ?? 0
                     let by = y + Double(i) * (bh + gap)
-                    let cls = e == "strim" ? "fs" : e == "rapid-mlx" ? "fr" : "fv"
-                    body += "<rect class=\"\(cls)\" x=\"\(fnum(X0))\" y=\"\(fnum(by))\" width=\"\(fnum(sx(v) - X0))\" height=\"\(fnum(bh))\"/>"
+                    guard let v = c["values"]?[e]?.number else {
+                        body += "<text class=\"s m\" x=\"\(fnum(X0 + 4))\" y=\"\(fnum(by + 7.5))\">n/a</text>"
+                        continue
+                    }
+                    body += "<rect class=\"\(engCls(i))\" x=\"\(fnum(X0))\" y=\"\(fnum(by))\" width=\"\(fnum(sx(v) - X0))\" height=\"\(fnum(bh))\"/>"
                     body += "<text class=\"s\" x=\"\(fnum(sx(v) + 4))\" y=\"\(fnum(by + 7.5))\">\(fmtFixed(v, 2))</text>"
                 }
-                for (i, rv) in RIVALS.enumerated() {
-                    if let s = c["speedup"]?[rv]?.number {
-                        let v2 = c["verdict"]?[rv]?.str ?? "TIE"
-                        body += pill(i == 0 ? 440 : 520, y + 6, 76, v2, "\(v2) \(fx(s))")
-                    }
-                }
+                body += bestPill(c, x: 452, y: y + gh / 2 - 11, w: 84)
                 body += "</g>"
                 y += gh
             }
             body += "<line class=\"g\" x1=\"\(fnum(X0))\" x2=\"\(fnum(X0))\" y1=\"\(fnum(top - 2))\" y2=\"\(fnum(y - 3))\"/>"
             y += 8
         }
-        body += "<text class=\"m s\" x=\"8\" y=\"\(fnum(y + 6))\">Badges: Strim vs that rival (WIN = faster by more than 2%). p95 with 4 or 8 requests is the slowest request.</text>"
+        body += "<text class=\"m s\" x=\"8\" y=\"\(fnum(y + 6))\">Badge: Strim vs the best rival (WIN = faster by more than 2%). p95 with 4 or 8 requests is the slowest request.</text>"
         let title = "First-token latency (TTFT) at 4 and 8 concurrent requests"
-        let desc = "Grouped bars in seconds for Strim, rapid-mlx and mlx-vlm, median (p50) and 95th percentile (p95), for 512-token, agent-style and 4K prompts. Each rival bar carries a WIN, TIE or LOSS badge for Strim against it."
+        let desc = "Grouped bars in seconds for \(ENGINES.map { WIDE_NAMES[$0] ?? $0 }.joined(separator: ", ")), median (p50) and 95th percentile (p95), for 512-token, agent-style and 4K prompts. Each row carries a WIN, TIE, LOSS or not-claimable badge for Strim against the best rival."
         return wrapSVG("hv3", 600, y + 16, title, desc, body, standalone: standalone)
     }
 
     /// (file name under site/assets, standalone SVG)
     func chartAssets() -> [(String, String)] {
-        [("h2h-hero.svg", heroBarsSVG(standalone: true, ids: HERO_PROOF, svgId: "hv6")), ("h2h-speedup.svg", heroSVG(standalone: true)), ("h2h-memory.svg", memorySVG(standalone: true)), ("h2h-latency.svg", latencySVG(standalone: true))]
+        [("h2h-hero.svg", numberLineSVG(narrow: false, standalone: true)), ("h2h-ratio.svg", gaugesSVG()), ("banner.svg", bannerSVG()), ("logo.svg", markSVG("lg")), ("favicon.svg", markSVG("fv", title: "")), ("app-icon.svg", appIconSVG()), ("h2h-speedup.svg", heroSVG(standalone: true)), ("h2h-memory.svg", memorySVG(standalone: true)), ("h2h-latency.svg", latencySVG(standalone: true))]
     }
 
     // MARK: scoreboard, features (HTML and markdown)
@@ -285,46 +349,57 @@ extension SiteBuilder {
 
     func scoreboardHTML() -> String {
         let regimes = H["scoreboard"]?["regimes"]?.arr ?? []
+        func nc(_ k: Int) -> String { k > 0 ? " &middot; <b>\(k)</b> not claimable" : "" }
         func cell(_ r: PyJSON, _ rv: String) -> String {
             let (w, t, l) = scoreCounts(r, rv)
+            let k = scoreNC(r, rv)
             var bar = "<span class=\"vbar\" aria-hidden=\"true\">"
             if w > 0 { bar += "<i class=\"w\" style=\"flex-grow:\(w)\"></i>" }
             if t > 0 { bar += "<i class=\"t\" style=\"flex-grow:\(t)\"></i>" }
             if l > 0 { bar += "<i class=\"l\" style=\"flex-grow:\(l)\"></i>" }
             bar += "</span>"
-            return "<td>\(bar)<span class=\"cnt\"><b>\(w)</b> WIN &middot; <b>\(t)</b> TIE &middot; <b>\(l)</b> LOSS</span></td>"
+            return "<td>\(bar)<span class=\"cnt\"><b>\(w)</b> WIN &middot; <b>\(t)</b> TIE &middot; <b>\(l)</b> LOSS\(nc(k))</span></td>"
         }
         var rows = ""
         for r in regimes {
             let n = (r["cells"]?.arr ?? []).count
-            rows += "<tr><th scope=\"row\">\(esc(r["label"]?.pyStr ?? ""))<span class=\"sub\">\(esc(r["metric"]?.pyStr ?? "")) (\(n) \(n == 1 ? "cell" : "cells"))</span></th>\(cell(r, "rapid-mlx"))\(cell(r, "mlx-vlm"))</tr>"
+            rows += "<tr><th scope=\"row\">\(esc(r["label"]?.pyStr ?? ""))<span class=\"sub\">\(esc(r["metric"]?.pyStr ?? "")) (\(n) \(n == 1 ? "cell" : "cells"))</span></th>\(RIVALS.map { cell(r, $0) }.joined())</tr>"
         }
         let tot = H["scoreboard"]?["total"]
         func trow(_ rv: String) -> String {
             let w = tot?[rv]?["WIN"]?.pyStr ?? "0", t = tot?[rv]?["TIE"]?.pyStr ?? "0", l = tot?[rv]?["LOSS"]?.pyStr ?? "0"
-            return "<td><span class=\"cnt\"><b>\(w)</b> WIN &middot; <b>\(t)</b> TIE &middot; <b>\(l)</b> LOSS</span></td>"
+            return "<td><span class=\"cnt\"><b>\(w)</b> WIN &middot; <b>\(t)</b> TIE &middot; <b>\(l)</b> LOSS\(nc(Int(tot?[rv]?["NC"]?.number ?? 0)))</span></td>"
         }
-        rows += "<tr class=\"tot\"><th scope=\"row\">All counted cells</th>\(trow("rapid-mlx"))\(trow("mlx-vlm"))</tr>"
+        rows += "<tr class=\"tot\"><th scope=\"row\">All counted cells</th>\(RIVALS.map { trow($0) }.joined())</tr>"
+        let heads = RIVALS.map { "<th scope=\"col\">vs \(esc(engLabel($0)))</th>" }.joined()
         return "<div class=\"tablewrap\" tabindex=\"0\" role=\"region\" aria-label=\"Scoreboard\"><table class=\"score\"><caption>Scoreboard: Strim against each rival, verdict counts per regime</caption>"
-            + "<thead><tr><th scope=\"col\">Regime</th><th scope=\"col\">vs rapid-mlx (MTP)</th><th scope=\"col\">vs mlx-vlm (no MTP)</th></tr></thead><tbody>\(rows)</tbody></table></div>"
+            + "<thead><tr><th scope=\"col\">Regime</th>\(heads)</tr></thead><tbody>\(rows)</tbody></table></div>"
     }
 
+    func scoreNC(_ r: PyJSON, _ rv: String) -> Int { Int(r["vs"]?[rv]?["NC"]?.number ?? 0) }
+
     func scoreboardMarkdown() -> String {
-        var rows = ["| Regime | vs rapid-mlx (MTP): WIN / TIE / LOSS | vs mlx-vlm (no MTP): WIN / TIE / LOSS |", "|---|:---:|:---:|"]
+        var rows = ["| Regime | " + RIVALS.map { "vs \(engLabel($0)): WIN / TIE / LOSS" }.joined(separator: " | ") + " |", "|---|" + RIVALS.map { _ in ":---:" }.joined(separator: "|") + "|"]
+        func counts(_ w: Int, _ t: Int, _ l: Int, _ k: Int) -> String { "\(w) / \(t) / \(l)" + (k > 0 ? " (+\(k) not claimable)" : "") }
         for r in H["scoreboard"]?["regimes"]?.arr ?? [] {
-            let a = scoreCounts(r, "rapid-mlx"), b = scoreCounts(r, "mlx-vlm")
-            rows.append("| \(r["label"]?.pyStr ?? "") | \(a.0) / \(a.1) / \(a.2) | \(b.0) / \(b.1) / \(b.2) |")
+            let cols = RIVALS.map { rv -> String in let a = scoreCounts(r, rv); return counts(a.0, a.1, a.2, scoreNC(r, rv)) }
+            rows.append("| \(r["label"]?.pyStr ?? "") | " + cols.joined(separator: " | ") + " |")
         }
         let tot = H["scoreboard"]?["total"]
-        func t(_ rv: String) -> String { "\(tot?[rv]?["WIN"]?.pyStr ?? "0") / \(tot?[rv]?["TIE"]?.pyStr ?? "0") / \(tot?[rv]?["LOSS"]?.pyStr ?? "0")" }
-        rows.append("| **All counted cells** | **\(t("rapid-mlx"))** | **\(t("mlx-vlm"))** |")
+        func t(_ rv: String) -> String { counts(Int(tot?[rv]?["WIN"]?.number ?? 0), Int(tot?[rv]?["TIE"]?.number ?? 0), Int(tot?[rv]?["LOSS"]?.number ?? 0), Int(tot?[rv]?["NC"]?.number ?? 0)) }
+        rows.append("| **All counted cells** | " + RIVALS.map { "**\(t($0))**" }.joined(separator: " | ") + " |")
         return rows.joined(separator: "\n")
     }
 
     func heroAlt() -> String {
         let tot = H["scoreboard"]?["total"]
         func t(_ rv: String) -> String { "\(tot?[rv]?["WIN"]?.pyStr ?? "0") wins, \(tot?[rv]?["TIE"]?.pyStr ?? "0") ties, \(tot?[rv]?["LOSS"]?.pyStr ?? "0") losses" }
-        return "Dot chart of Strim relative to rapid-mlx and mlx-vlm per measurement, log scale. Against rapid-mlx: \(t("rapid-mlx")). Against mlx-vlm: \(t("mlx-vlm"))."
+        return "Dot chart of Strim relative to " + listWords(RIVALS.map { WIDE_NAMES[$0] ?? $0 }) + " per measurement, log scale. " + RIVALS.map { "Against \(WIDE_NAMES[$0] ?? $0): \(t($0))." }.joined(separator: " ")
+    }
+
+    /// "a, b and c"
+    func listWords(_ xs: [String]) -> String {
+        xs.count <= 1 ? (xs.first ?? "") : xs.dropLast().joined(separator: ", ") + " and " + xs[xs.count - 1]
     }
 
     static let STATUS_LABEL: [String: String] = ["yes": "Yes", "partial": "Partial", "no": "No", "notfound": "Not found", "unknown": "Unknown", "info": ""]
@@ -334,7 +409,7 @@ extension SiteBuilder {
         var body = ""
         for r in rows {
             body += "<tr><th scope=\"row\">\(esc(r["label"]?.pyStr ?? ""))<span class=\"sub\">\(esc(r["group"]?.pyStr ?? ""))</span></th>"
-            for e in ENGINES {
+            for e in FEATURE_ENGINES {
                 let s = r[e]?["s"]?.pyStr ?? "unknown"
                 let n = r[e]?["n"]?.pyStr ?? ""
                 let lab = SiteBuilder.STATUS_LABEL[s] ?? s
@@ -349,9 +424,9 @@ extension SiteBuilder {
     func featureCounts() -> String {
         let rows = (F["rows"]?.arr ?? []).filter { $0["strim"]?["s"]?.str != "info" }
         var parts: [String] = []
-        for e in ENGINES {
+        for e in FEATURE_ENGINES {
             let yes = rows.filter { $0[e]?["s"]?.str == "yes" }.count
-            parts.append("\(ENG_LABEL[e] ?? e) \(yes) of \(rows.count)")
+            parts.append("\(engLabel(e)) \(yes) of \(rows.count)")
         }
         return parts.joined(separator: ", ")
     }
@@ -360,7 +435,7 @@ extension SiteBuilder {
         var out = ["| Feature | Strim | rapid-mlx | mlx-vlm |", "|---|:---:|:---:|:---:|"]
         for r in F["rows"]?.arr ?? [] where r["readme"]?.truthy ?? false {
             var line = "| \(r["label"]?.pyStr ?? "") |"
-            for e in ENGINES {
+            for e in FEATURE_ENGINES {
                 let s = r[e]?["s"]?.pyStr ?? "unknown"
                 line += " " + (s == "info" ? (r[e]?["n"]?.pyStr ?? "") : (SiteBuilder.STATUS_LABEL[s] ?? s)) + " |"
             }
@@ -371,64 +446,136 @@ extension SiteBuilder {
 }
 
 
-// MARK: hero bars (README and landing page): six groups of three bars, each group on its own zero-based scale
+// MARK: ratios (README and landing): Strim over each rival, 1.0x in the middle
 
 let HERO_TITLE: [String: String] = [
     "d4k": "Decode at 4K context", "d32k": "Decode at 32K context", "aw5": "4 agents on a shared 16K prefix",
     "p50_agc8": "8 agents at once: median first token", "c32k_tt": "Cold 32K prompt: first token", "aagc8": "8 agents at once: total throughput",
 ]
 
+/// Lower-case phrase used in the "not faster" line.
+let SPEED_PHRASE: [String: String] = [
+    "c32k_tt": "cold 32K prompt", "aagc8": "8-agent total throughput", "d4k": "4K decode", "d32k": "32K decode", "aw5": "shared-prefix agents", "p50_agc8": "8-agent first token",
+]
+
+/// Ratio of two cell values so that above 1 always means Strim is faster: seconds cells (better = lower) are inverted.
+func ratioOf(strim s: Double, rival r: Double, lowerBetter: Bool) -> Double { lowerBetter ? r / s : s / r }
+
+func ratioLabel(_ r: Double) -> String { fmtFixed(r, 2) + "x" }
+
 extension SiteBuilder {
-    /// "WIN vs both", "LOSS vs mlx-vlm" ... from the two verdicts of a cell (the worst one leads).
+    /// "WIN vs both", "LOSS vs mlx-vlm" ... from the verdicts of a cell (the worst one leads). Rivals without a claim (n/a, not claimable) are left out.
     func verdictPill(_ c: PyJSON) -> (text: String, verdict: String) {
         let vs = RIVALS.map { (rv: $0, v: c["verdict"]?[$0]?.str ?? "n/a") }
-        let losses = vs.filter { $0.v == "LOSS" }, wins = vs.filter { $0.v == "WIN" }
-        if !losses.isEmpty { return ("LOSS vs " + (losses.count == RIVALS.count ? "both" : losses[0].rv), "LOSS") }
-        if !wins.isEmpty { return ("WIN vs " + (wins.count == RIVALS.count ? "both" : wins[0].rv), "WIN") }
+        let live = vs.filter { $0.v == "WIN" || $0.v == "TIE" || $0.v == "LOSS" }
+        let losses = live.filter { $0.v == "LOSS" }, wins = live.filter { $0.v == "WIN" }
+        func who(_ xs: [(rv: String, v: String)]) -> String { xs.count == RIVALS.count ? (RIVALS.count == 2 ? "both" : "all") : xs[0].rv + (xs.count > 1 ? " +\(xs.count - 1)" : "") }
+        if !losses.isEmpty { return ("LOSS vs " + who(losses), "LOSS") }
+        if !wins.isEmpty { return ("WIN vs " + who(wins), "WIN") }
+        if live.isEmpty && vs.contains(where: { $0.v == "NC" }) { return ("not claimable", "NC") }
         return ("TIE", "TIE")
     }
 
-    func heroBarsAlt(_ ids: [String] = GLANCE) -> String {
-        var parts: [String] = []
-        for id in ids { if let c = hCell(id) { parts.append("\(HERO_TITLE[id] ?? id): \(verdictPill(c).text)") } }
-        return "Grouped bars for Strim, rapid-mlx and mlx-vlm on \(ids.count == GLANCE.count ? "six" : String(ids.count)) measurements. " + parts.joined(separator: "; ") + "."
+    /// Strim against one rival in a cell, computed from the cell values (never typed).
+    func rivalRatio(_ id: String, _ rival: String) -> Double? {
+        guard let c = hCell(id), let s = c["values"]?["strim"]?.number, s > 0, let r = c["values"]?[rival]?.number, r > 0 else { return nil }
+        return ratioOf(strim: s, rival: r, lowerBetter: c["better"]?.str == "lower")
     }
 
-    func heroBarsSVG(standalone: Bool, ids: [String] = GLANCE, svgId: String = "hv4") -> String {
-        let W = 400.0, X0 = 92.0, BAR = 226.0
-        var body = legend(18, x: 8, marker: false)
-        var y = 34.0
-        for id in ids {
-            guard let c = hCell(id) else { continue }
-            let vals = ENGINES.map { c["values"]?[$0]?.number ?? 0 }
-            let mx = max(vals.max() ?? 1, 1e-9)
-            let lower = c["better"]?.str == "lower"
-            let unit = c["unit"]?.pyStr == "tok/s" ? "tokens per second" : "seconds"
-            body += "<text class=\"hh\" x=\"8\" y=\"\(fnum(y + 13))\">\(esc(HERO_TITLE[id] ?? id))</text>"
-            body += "<text class=\"m s\" x=\"8\" y=\"\(fnum(y + 27))\">\(unit), \(lower ? "lower" : "higher") is better</text>"
-            let pill = verdictPill(c)
-            let pw = Double(pill.text.count) * 6.6 + 14
-            body += self.pill(W - 8 - pw, y + 2, pw, pill.verdict, pill.text)
-            for (k, e) in ENGINES.enumerated() {
-                let ry = y + 34 + Double(k) * 19
-                let w = max(2.0, BAR * vals[k] / mx)
-                let cls = e == "strim" ? "fs" : e == "rapid-mlx" ? "fr" : "fv"
-                body += "<text class=\"s\" x=\"8\" y=\"\(fnum(ry + 10.5))\">\(esc(e == "strim" ? "Strim" : e))</text>"
-                body += "<rect class=\"\(cls)\" x=\"\(fnum(X0))\" y=\"\(fnum(ry))\" width=\"\(fnum(w))\" height=\"13\" rx=\"2\"/>"
-                body += "<text class=\"\(e == "strim" ? "hv1" : "")\" x=\"\(fnum(X0 + w + 6))\" y=\"\(fnum(ry + 11))\">\(esc(D.text(fid(id, e))))</text>"
-            }
-            body += "<line class=\"g\" x1=\"\(fnum(X0))\" x2=\"\(fnum(X0))\" y1=\"\(fnum(y + 32))\" y2=\"\(fnum(y + 91))\"/>"
-            y += 105
+    /// The rival Strim is weakest against in a cell (lowest speed ratio over all rivals with values), its ratio and whether that comparison may be claimed.
+    func bestRival(_ id: String) -> (rival: String, ratio: Double, claimable: Bool, why: String?)? {
+        var best: (rival: String, ratio: Double)?
+        for rv in RIVALS where hCell(id)?["verdict"]?[rv]?.str != "NC" {
+            if let r = rivalRatio(id, rv), best == nil || r < best!.ratio { best = (rv, r) }
         }
-        body += "<text class=\"m s\" x=\"8\" y=\"\(fnum(y + 6))\">Bars start at zero, one scale per group. WIN or LOSS only outside a 2% band.</text>"
-        let desc = heroBarsAlt(ids)
-        return wrapSVG(svgId, W, y + 18, "Strim against rapid-mlx and mlx-vlm on \(ids.count == GLANCE.count ? "six" : String(ids.count)) measurements", desc, body, standalone: standalone)
+        guard let b = best else { return nil }
+        let c = hCell(id)
+        let nc = c?["verdict"]?[b.rival]?.str == "NC"
+        return (b.rival, b.ratio, !nc, c?["not_claimable"]?[b.rival]?.str)
     }
-}
 
-/// The three proof measurements shown beside the landing-page headline: decode, shared-prefix agents, first token under load.
-let HERO_PROOF: [String] = ["d4k", "aw5", "p50_agc8"]
+    /// Strim's speed against the best claimable rival in a cell: above 1 is faster, latency cells are inverted so that is always true.
+    func speedRatio(_ id: String) -> Double? {
+        let c = hCell(id)
+        let rs = RIVALS.filter { c?["verdict"]?[$0]?.str != "NC" }.compactMap { rivalRatio(id, $0) }
+        return rs.min()
+    }
 
-extension SiteBuilder {
-    func heroProofSVG() -> String { heroBarsSVG(standalone: false, ids: HERO_PROOF, svgId: "hv5") }
+    /// Cells where Strim trails the best rival outside the tie band, as (id, percent behind).
+    func speedLosses() -> [(id: String, pct: Int)] {
+        GLANCE.compactMap { id in
+            guard let c = hCell(id), verdictPill(c).verdict == "LOSS", let r = speedRatio(id) else { return nil }
+            return (id, Int(((1 - r) * 100).rounded()))
+        }
+    }
+
+    /// Every headline measurement whose best eligible rival leads by more than the existing 2% tie band.
+    func allClaimLosses() -> [(id: String, label: String, pct: Int, rival: String)] {
+        (D.raw["final"]?["cells"]?.arr ?? []).compactMap { c in
+            guard let id = c["id"]?.str,
+                  c["claim_eligible"]?["strim"]?.truthy == true,
+                  let s = c["median"]?["strim"]?.number, s > 0 else { return nil }
+            let lower = c["better"]?.str == "lower"
+            let best = RIVALS.compactMap { rv -> (String, Double)? in
+                guard c["claim_eligible"]?[rv]?.truthy == true,
+                      let v = c["median"]?[rv]?.number, v > 0 else { return nil }
+                return (rv, ratioOf(strim: s, rival: v, lowerBetter: lower))
+            }.min { $0.1 < $1.1 }
+            guard let best, best.1 < 0.98 else { return nil }
+            return (id, c["label"]?.pyStr ?? id, Int(((1 - best.1) * 100).rounded()), best.0)
+        }
+    }
+
+    /// Compact, data-derived losses across every headline cell, with the full table linked on both pages.
+    func lossLine() -> String {
+        let losses = allClaimLosses()
+        guard !losses.isEmpty else { return "Not faster: none across claim-eligible measurements. All losses: benchmarks." }
+        let byID = Dictionary(uniqueKeysWithValues: losses.map { ($0.id, $0) })
+        let rivalName: (String) -> String = { WIDE_NAMES[$0] ?? $0 }
+        var used = Set<String>()
+        var parts: [String] = []
+
+        func addGroup(_ ids: [String], _ title: String, varyingLabels: [String]? = nil) {
+            let group = ids.compactMap { byID[$0] }
+            guard !group.isEmpty else { return }
+            used.formUnion(group.map(\.id))
+            let rivals = Set(group.map(\.rival)), pcts = Set(group.map(\.pct))
+            if group.count == ids.count, rivals.count == 1, pcts.count == 1 {
+                parts.append("\(title) (\(group[0].pct)% behind \(rivalName(group[0].rival)))")
+            } else if group.count > 1, rivals.count == 1 {
+                let labels = varyingLabels ?? group.map { $0.label }
+                let values = zip(group, labels).map { "\($1) \($0.pct)%" }.joined(separator: ", ")
+                parts.append("\(title): \(values) behind \(rivalName(group[0].rival))")
+            } else {
+                parts += group.map { "\(SHORT[$0.id] ?? $0.label) (\($0.pct)% behind \(rivalName($0.rival)))" }
+            }
+        }
+
+        let coldIDs = ["c4k_pf", "c4k_tt", "c16k_pf", "c16k_tt", "c32k_pf", "c32k_tt"]
+        let cold = coldIDs.compactMap { byID[$0] }
+        if cold.count == coldIDs.count, Set(cold.map(\.rival)).count == 1,
+           cold[0].pct == cold[1].pct, cold[2].pct == cold[3].pct, cold[4].pct == cold[5].pct {
+            used.formUnion(coldIDs)
+            parts.append("cold 4K/16K/32K prefill + TTFT (\(cold[0].pct)/\(cold[2].pct)/\(cold[4].pct)% behind \(rivalName(cold[0].rival)))")
+        } else {
+            addGroup(["c4k_pf", "c4k_tt"], "cold 4K prefill/TTFT")
+            addGroup(["c16k_pf", "c16k_tt"], "cold 16K prefill/TTFT")
+            addGroup(["c32k_pf", "c32k_tt"], "cold 32K prefill/TTFT")
+        }
+        addGroup(["a512c4"], "c=4 512-token aggregate")
+        addGroup(["p95_512c8"], "c=8 512-token p95 first token")
+        addGroup(["a4kc4", "a4kc8"], "4K prompt aggregate", varyingLabels: ["c=4", "c=8"])
+        parts += losses.filter { !used.contains($0.id) }.map {
+            "\(SHORT[$0.id] ?? $0.label) (\($0.pct)% behind \(rivalName($0.rival)))"
+        }
+        return "Not faster: \(parts.joined(separator: "; ")). All losses: benchmarks."
+    }
+
+    func speedAlt() -> String {
+        let parts = GLANCE.compactMap { id -> String? in
+            guard let b = bestRival(id) else { return nil }
+            return "\(HERO_TITLE[id] ?? id) " + (b.claimable ? ratioLabel(b.ratio) + " over \(WIDE_NAMES[b.rival] ?? b.rival)" : "not claimable")
+        }
+        return "Strim over its best rival in each measurement, 1.00x is the same speed, above is faster, first-token times inverted: " + parts.joined(separator: "; ") + "."
+    }
 }

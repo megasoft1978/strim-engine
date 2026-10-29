@@ -33,7 +33,8 @@ extension SiteBuilder {
         var rows: [[String]] = []
         let items: [(String, String)] = [
             ("ver.hw", "Hardware"), ("ver.macos", "macOS"), ("ver.mlx_swift", "MLX Swift"),
-            ("ver.strim_h2h", "Strim build in the head-to-head"), ("ver.rapid", "rapid-mlx"), ("ver.mlxvlm", "mlx-vlm"),
+            ("ver.strim_h2h", "Strim build in the head-to-head"),
+        ] + RIVALS.filter { D.figs["ver.h2h.\($0)"] != nil }.map { ("ver.h2h.\($0)", WIDE_NAMES[$0] ?? $0) } + [
             ("ver.claude", "Claude Code (soak client)"), ("ver.codex", "Codex (soak client)"),
         ]
         for (i, label) in items {
@@ -58,21 +59,60 @@ extension SiteBuilder {
 
     func cellUnit(_ id: String) -> String { finalCells().first(where: { $0.id == id })?.unit ?? "" }
 
+    /// Launch lines of the rivals for the Reproduce block: engine_meta flags when the run recorded them, the two legacy lines otherwise.
+    func rivalLaunchLines() -> String {
+        let exe = ["rapid-mlx": "rapid-mlx", "mlx-vlm": "mlx_vlm.server", "mlx-lm": "mlx_lm.server", "omlx": "omlx"]
+        let withFlags = RIVALS.filter { engineMeta[$0]?["flags"] != nil }
+        if withFlags.isEmpty {
+            return esc("rapid-mlx --no-telemetry serve models/qwen38-4bit --port 8651 --max-num-seqs 4 --speculative-config '{\"method\":\"mtp\",\"model\":\"models/qwen38-mtp-4bit\"}'\nmlx_vlm.server --model models/qwen38-4bit --port 8651          # defaults: no MTP, no prefix cache")
+        }
+        return withFlags.map { esc((exe[$0] ?? $0) + " " + (engineMeta[$0]?["flags"] ?? "")) }.joined(separator: "\n")
+    }
+
+    func hasCells(_ ids: [String]) -> Bool { ids.allSatisfy { id in finalCells().contains { $0.id == id } } }
+
+    /// Rivals that run with MTP, per engine_meta (rapid-mlx when the run predates engine_meta).
+    func mtpRivals() -> [String] {
+        RIVALS.filter { rv in engineMeta[rv]?["mtp"].map { $0.lowercased().hasPrefix("yes") } ?? (rv == "rapid-mlx") }
+    }
+
+    /// "rapid-mlx also uses MTP, so the gap to it is the engine, not the speculative head. mlx-vlm and mlx-lm have no MTP, so their gap includes it."
+    func mtpNote() -> String {
+        let with = mtpRivals().map { WIDE_NAMES[$0] ?? $0 }, without = RIVALS.filter { !mtpRivals().contains($0) }.map { WIDE_NAMES[$0] ?? $0 }
+        var parts: [String] = []
+        if !with.isEmpty { parts.append("\(esc(listWords(with))) also \(with.count == 1 ? "uses" : "use") MTP, so the gap to \(with.count == 1 ? "it is" : "them is") the engine, not the speculative head.") }
+        if !without.isEmpty { parts.append("\(esc(listWords(without))) \(without.count == 1 ? "has" : "have") no MTP, so \(without.count == 1 ? "its" : "their") gap includes it.") }
+        return parts.joined(separator: " ")
+    }
+
+    /// One sentence per rival about how it was launched: engine_meta flags, MTP and prefix cache when known, the legacy wording otherwise.
+    func rivalConfigText() -> String {
+        RIVALS.map { rv -> String in
+            let name = esc(WIDE_NAMES[rv] ?? rv)
+            if let m = engineMeta[rv], let flags = m["flags"] {
+                return "\(name) ran as <code>\(esc(flags))</code> (MTP: \(esc(m["mtp"] ?? "n/a")); prefix cache: \(esc(m["prefix_cache"] ?? "n/a")))."
+            }
+            if rv == "rapid-mlx" { return "rapid-mlx runs with its MTP speculative head on and <code>--max-num-seqs 4</code> (so c=8 queues)." }
+            if rv == "mlx-vlm" { return "mlx-vlm runs its server defaults, which means no MTP and no cross-request prefix cache." }
+            return "\(name) ran with its server defaults."
+        }.joined(separator: " ")
+    }
+
     func finalSection() -> String {
         guard D.raw["final"]?.truthy ?? false else {
             return "<h3 id=\"r-final\">Final head-to-head</h3><div class=\"pendbox\"><p><strong>Missing.</strong> <code>\(FINAL_REL)/</code> was not found, so no final figures exist.</p></div>"
         }
-        var o = "<h3 id=\"r-final\">Final head-to-head: Strim, rapid-mlx and mlx-vlm</h3>"
+        var o = "<h3 id=\"r-final\">Final head-to-head: Strim vs \(esc(listWords(RIVALS.map { WIDE_NAMES[$0] ?? $0 })))</h3>"
         o += "<p>Qwen3.8-27B 4-bit served alone over HTTP by each engine, one engine on the GPU at a time, thinking off, greedy decoding, on one Apple M5 Max with 64&nbsp;GB. "
-            + "\(n("final.claim.passes")) passes (pass 1 Strim, rapid-mlx, mlx-vlm; pass 2 reversed), one rep per pass, so each value is the median of two runs, which is their mean. "
+            + "\(n("final.claim.passes")) passes (pass 1 in the order \(esc(ENGINES.map { WIDE_NAMES[$0] ?? $0 }.joined(separator: ", "))); pass 2 reversed), one rep per pass, so each value is the median of two runs, which is their mean. "
             + "The largest swap growth in any session was \(n("final.claim.swap"))&nbsp;MB. "
-            + "Strim is build \(n("final.claim.build")); rapid-mlx runs with its MTP speculative head on and <code>--max-num-seqs 4</code>; mlx-vlm runs its server defaults, which means no MTP and no cross-request prefix cache. "
+            + "Strim is build \(n("final.claim.build")); \(rivalConfigText()) "
             + "Verdict: WIN / LOSS when the ratio is outside a 2% band, otherwise TIE. Raw files, launch lines and the full per-rival tables: <a href=\"../\(FINAL_REL)/summary.md\">summary.md</a>.</p>"
         o += chart("Decode speed, tok/s (higher is better)", "Greedy, after a cold prompt of each size: 256 tokens at 4K and 16K, 128 tokens at 32K.", [
             ("4K context", bars("d4k")), ("16K context", bars("d16k")), ("32K context", bars("d32k")),
         ], "tok/s")
-        o += "<p>Strim decodes \(n("final.claim.decode_vs_rapid")) faster than rapid-mlx and \(n("final.claim.decode_vs_vlm")) faster than mlx-vlm at 4K to 32K context. "
-            + "rapid-mlx also uses MTP, so the gap to it is the engine, not the speculative head. mlx-vlm has no MTP, so its gap includes it.</p>"
+        let dv = decodeVs { n($0) }
+        o += "<p>Strim decodes \(dv.head.replacingOccurrences(of: " decode", with: "")) \(dv.tail), at 4K to 32K context. \(mtpNote())</p>"
         o += chart("Cold prompt time to first token, s (lower is better)", "One distinct prompt at a time, no cache hit possible.", [
             ("4K prompt", bars("c4k_tt")), ("16K prompt", bars("c16k_tt")), ("32K prompt", bars("c32k_tt")),
         ], "s")
@@ -104,11 +144,14 @@ extension SiteBuilder {
             (nil, bars("aw5")),
         ], "tok/s")
         o += "<p>With a shared 16K prefix Strim is \(n("final.claim.w5_speedup"))&nbsp;faster than each rival in aggregate throughput.</p>"
-        o += chart("Agent replay: summed prefill over 8 turns, s (lower is better)", "Synthetic session, prompts 4.1K to 40.8K tokens, each turn resends the history. Prefill sum is the sum of per-turn first-token latency.", [
-            ("Turns 1 to 8", bars("rp8")), ("Turns 1 to 6", bars("rp6")),
-        ], "s")
-        o += "<p>8-turn replay, summed prefill: Strim \(n(fid("rp8", "strim")))&nbsp;s, rapid-mlx \(n(fid("rp8", "rapid-mlx")))&nbsp;s (verdict against rapid-mlx: \(n(fverdict("rp8", "rapid-mlx")))), mlx-vlm \(n(fid("rp8", "mlx-vlm")))&nbsp;s. Strim and rapid-mlx reuse about \(n(fid("rpc8", "strim")))% of the turn-8 prompt from cache; mlx-vlm has no cross-request prefix cache. "
-            + "Replay resends recorded assistant turns, so Strim's token ledger and hot-session reuse do not apply: a lower bound for Strim on a live agent.</p>"
+        if hasCells(["rp8", "rp6"]) {
+            o += chart("Agent replay: summed prefill over 8 turns, s (lower is better)", "Synthetic session, prompts 4.1K to 40.8K tokens, each turn resends the history. Prefill sum is the sum of per-turn first-token latency.", [
+                ("Turns 1 to 8", bars("rp8")), ("Turns 1 to 6", bars("rp6")),
+            ], "s")
+            o += "<p>8-turn replay, summed prefill: \(valuesAcross("rp8", { n($0) + "&nbsp;s" })). \(RIVALS.filter { engineHas("rp8", $0) }.map { "Verdict against \(esc(WIDE_NAMES[$0] ?? $0)): \(n(fverdict("rp8", $0)))" }.joined(separator: "; ")). "
+                + "Engines with a cross-request prefix cache reuse part of the turn-8 prompt; the others re-prefill it. "
+                + "Replay resends recorded assistant turns, so Strim's token ledger and hot-session reuse do not apply: a lower bound for Strim on a live agent.</p>"
+        }
         // full table
         var rows: [[String]] = []
         for c in finalCells() {
@@ -119,22 +162,64 @@ extension SiteBuilder {
             for rv in RIVALS { r.append(verdictCell(fverdict(c.id, rv))) }
             rows.append(r)
         }
-        o += table("All \(finalCells().count) cells: median of \(num("final.claim.passes").map { String(Int($0)) } ?? "?") passes; ratio = Strim / rival; bold = best of the three",
-                   ["Cell", "Unit", "Strim", "rapid-mlx (MTP)", "mlx-vlm (no MTP)", "Strim / rapid-mlx", "Strim / mlx-vlm", "vs rapid-mlx", "vs mlx-vlm"], rows, numcols: [2, 3, 4, 5, 6],
+        o += table("All \(finalCells().count) cells: median of \(num("final.claim.passes").map { String(Int($0)) } ?? "?") passes; ratio = Strim / rival; bold = best of the \(ENGINES.count)",
+                   ["Cell", "Unit"] + ENGINES.map { engLabel($0) } + RIVALS.map { "Strim / \(WIDE_NAMES[$0] ?? $0)" } + RIVALS.map { "vs \(WIDE_NAMES[$0] ?? $0)" }, rows, numcols: Set(2...(1 + ENGINES.count + RIVALS.count)),
                    foot: "Verdicts: WIN means Strim is better by more than 2%, LOSS worse by more than 2%, TIE within 2%. Lower-is-better cells (TTFT, time) win with a ratio below 1.")
+        // A second per-engine detail table keeps median, spread, and validity adjacent and explicit.
+        var detailRows: [[String]] = []
+        for c in finalCells() {
+            let raw = D.raw["final"]?["cells"]?.arr?.first(where: { $0["id"]?.str == c.id })
+            var row = [esc(c.label), esc(c.unit)]
+            for e in ENGINES {
+                row.append(td(fid(c.id, e)))
+                let passes = raw?["per_pass"]?[e]?.arr?.compactMap(\.number) ?? []
+                if let lo = passes.min(), let hi = passes.max() {
+                    row.append(tdText(fmtFixed(hi - lo, hi - lo >= 10 ? 1 : 2), "num"))
+                } else { row.append(tdText("n/a", "num muted")) }
+                let eligible: Bool
+                if case .bool(let value)? = raw?["claim_eligible"]?[e] { eligible = value } else { eligible = engineHas(c.id, e) }
+                row.append(tdText(engineHas(c.id, e) ? (eligible ? "yes" : "no") : "n/a", "muted"))
+            }
+            detailRows.append(row)
+        }
+        o += table("Per-engine detail: median, spread, valid", ["Cell", "Unit"] + ENGINES.flatMap { ["\(engLabel($0)) median", "range", "valid"] }, detailRows, numcols: Set(2...(1 + ENGINES.count * 3)),
+                   foot: "Valid = results.json claim_eligible for that engine and cell. A measured but ineligible comparison is shown with its value and marked no; aborted oMLX cells show n/a.")
+        let validity = D.raw["final"]?["validity"]?["sessions"]?.arr ?? []
+        if !validity.isEmpty {
+            var earliest: [String: Double] = [:]
+            func sessionKey(_ s: PyJSON) -> String { "\(s["engine"]?.pyStr ?? "")|\(s["pass"]?.pyStr ?? "")|\((s["cells"]?.arr ?? []).map { $0.pyStr }.joined(separator: ","))" }
+            for s in validity {
+                let k = sessionKey(s), end = s["end"]?.number ?? .greatestFiniteMagnitude
+                earliest[k] = min(earliest[k] ?? .greatestFiniteMagnitude, end)
+            }
+            let vrows = validity.sorted { ($0["end"]?.number ?? 0) < ($1["end"]?.number ?? 0) }.map { s -> [String] in
+                let k = sessionKey(s), primary = (s["end"]?.number ?? .greatestFiniteMagnitude) == earliest[k]
+                return [esc(WIDE_NAMES[s["engine"]?.pyStr ?? ""] ?? s["engine"]?.pyStr ?? ""), esc(s["pass"]?.pyStr ?? ""),
+                        esc((s["cells"]?.arr ?? []).map { $0.pyStr }.joined(separator: ", ")), primary ? "primary" : "rerun",
+                        esc(s["status"]?.pyStr ?? "UNKNOWN"), s["load_max"]?.number.map { fmtFixed($0, 2) } ?? "n/a"]
+            }
+            o += table("Session validity: \(validity.count) records including retained reruns", ["Engine", "Pass", "Cell groups", "Attempt", "Status", "Load max"], vrows, numcols: [1, 5])
+        }
+        let losses = finalCells().compactMap { c -> String? in
+            guard let b = bestRival(c.id), b.claimable,
+                  hCell(c.id)?["verdict"]?[b.rival]?.str == "LOSS" else { return nil }
+            let gap = Int(((1 - b.ratio) * 100).rounded())
+            return "<li><strong>\(esc(c.label))</strong>: \(gap)% behind \(esc(WIDE_NAMES[b.rival] ?? b.rival)) (ratio \(fmtFixed(b.ratio, 3))×).</li>"
+        }
+        o += "<h4 id=\"r-losses\">Honest losses</h4>" + (losses.isEmpty ? "<p>No claimable cell is more than 2% behind its best rival.</p>" : "<ul class=\"loss-list\">\(losses.joined())</ul>")
         // memory
-        let mrows: [[String]] = [["Peak physical footprint, whole run", td("final.mem.strim"), td("final.mem.rapid-mlx"), td("final.mem.mlx-vlm")]]
-        o += table("Peak memory over the whole run (engine process tree, includes Metal buffers), GB", ["Measure", "Strim", "rapid-mlx", "mlx-vlm"], mrows, numcols: [1, 2, 3],
-                   foot: "Whole-run maximum over passes and sessions, not steady state. Largest swap growth in any session: \(n("final.claim.swap"))&nbsp;MB.")
+        let mrows: [[String]] = [["Peak physical footprint, whole run"] + ENGINES.map { td("final.mem.\($0)") }]
+        o += table("Peak memory over the whole run (engine process tree, includes Metal buffers), GB", ["Measure"] + ENGINES.map { WIDE_NAMES[$0] ?? $0 }, mrows, numcols: Set(1...ENGINES.count),
+                   foot: "Whole-run maximum over passes and sessions, not steady state. oMLX measured 55.2 GB and exceeded the watchdog threshold; its abort note is retained in the session flags. Largest swap growth: \(n("final.claim.swap"))&nbsp;MB.")
         // agreement
-        o += "<h4 id=\"r-agree\">Greedy agreement (sanity check only)</h4><p>8 fixed prompts, 64 greedy tokens. Strim against itself across the two passes: \(n("final.agree.self")) identical. Strim against rapid-mlx: \(n("final.agree.rapid-mlx")); against mlx-vlm: \(n("final.agree.mlx-vlm")). "
+        o += "<h4 id=\"r-agree\">Greedy agreement (sanity check only)</h4><p>8 fixed prompts, 64 greedy tokens. Strim against itself across the two passes: \(n("final.agree.self")) identical. \(RIVALS.filter { D.figs["final.agree.\($0)"] != nil }.map { "Strim against \(esc(WIDE_NAMES[$0] ?? $0)): \(n("final.agree.\($0)"))" }.joined(separator: "; ")). "
             + "The divergences are bf16 near-ties, where a single flipped token changes every later one; it is a sanity check, not a quality measurement.</p>"
         // honest list
         o += "<h4 id=\"r-caveats\">Caveats that change how to read the table</h4><ul>"
         for c in [
             "<strong>Validity.</strong> " + validityHTML(),
             "<strong>Two passes, one rep each.</strong> Pass-to-pass spread is listed in the raw summary; prefill gaps of a few percent sit near the edge of the 2% tie band, so a single flipped pass can change a verdict.",
-            "<strong>Rival configuration.</strong> rapid-mlx used MTP and <code>--max-num-seqs 4</code> (so c=8 queues); mlx-vlm had no MTP and no prefix cache. Defaults were used otherwise; rival tuning was not explored.",
+            "<strong>Rival configuration.</strong> \(rivalConfigText()) Defaults were used otherwise; rival tuning was not explored.",
             "<strong>TTFT definitions differ in practice.</strong> Rivals report batch-synchronous first tokens, so aggregate throughput is the only fully comparable concurrency number.",
             "<strong>Later commits are not included.</strong> Only the build named above was measured.",
             "<strong>One model, one machine, thinking off,</strong> synthetic agent prompts and a synthetic 8-turn fixture.",

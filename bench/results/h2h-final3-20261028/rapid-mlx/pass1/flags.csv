@@ -1,0 +1,4 @@
+1793222301,1793221867-33624,shutdown,leftover_suspect,pid 711 /bin/zsh -c source /Users/user/.claude-work/shell-snapshots/snapshot-zsh-17930271050
+1793222301,1793221867-33624,shutdown,leftover_suspect,pid 3045 sleep 30
+1793229320,1793229068-5806,shutdown,leftover_suspect,pid 8905 sleep 30
+1793235937,1793235684-87737,shutdown,leftover_suspect,pid 90824 sleep 30

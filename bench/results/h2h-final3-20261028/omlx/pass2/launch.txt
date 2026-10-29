@@ -1,0 +1,5 @@
+[23:11:55] launch: env HOME=/private/tmp/h2h-scratch/omlx-2-49018-1793225515/home omlx serve --model-dir /private/tmp/h2h-scratch/omlx-2-49018-1793225515/models --port 8653
+[23:14:28] launch: env HOME=/private/tmp/h2h-scratch/omlx-2-52412-1793225668/home omlx serve --model-dir /private/tmp/h2h-scratch/omlx-2-52412-1793225668/models --port 8653
+[23:16:01] launch: env HOME=/private/tmp/h2h-scratch/omlx-2-52412-1793225761/home omlx serve --model-dir /private/tmp/h2h-scratch/omlx-2-52412-1793225761/models --port 8653
+[23:18:28] launch: env HOME=/private/tmp/h2h-scratch/omlx-2-55860-1793225908/home omlx serve --model-dir /private/tmp/h2h-scratch/omlx-2-55860-1793225908/models --port 8653
+[23:20:06] launch: env HOME=/private/tmp/h2h-scratch/omlx-2-55860-1793226006/home omlx serve --model-dir /private/tmp/h2h-scratch/omlx-2-55860-1793226006/models --port 8653

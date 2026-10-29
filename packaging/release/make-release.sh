@@ -31,30 +31,20 @@ while [ $# -gt 0 ]; do
 done
 
 build="$(cd "$build" && pwd)"
-[ -x "$build/strim" ] || { echo "no executable $build/strim" >&2; exit 1; }
-[ "$(uname -m)" = arm64 ] || { echo "run on arm64" >&2; exit 1; }
-file "$build/strim" | grep -q arm64 || { echo "binary is not arm64" >&2; exit 1; }
-for b in mlx-swift_Cmlx.bundle Strim_StrimHarness.bundle; do
-  [ -d "$build/$b" ] || { echo "missing $build/$b" >&2; exit 1; }
-done
-[ -f "$build/mlx-swift_Cmlx.bundle/Contents/Resources/default.metallib" ] || { echo "default.metallib missing" >&2; exit 1; }
+# shellcheck source=layout.sh
+. "$root/packaging/release/layout.sh"
+strim_check_build "$build" || exit 1
 
 # Version = second word of the first line of `strim --version` ("strim 0.1.0").
-version="$("$build/strim" --version | head -n 1 | awk '{print $2}')"
-case "$version" in
-  [0-9]*.[0-9]*.[0-9]*) ;;
-  *) echo "cannot parse version from 'strim --version' (got '$version')" >&2; exit 1 ;;
-esac
+version="$(strim_version "$build")" || exit 1
 name="strim-$version-arm64-macos"
 
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 stage="$work/strim-$version"
-mkdir -p "$stage/libexec" "$out"
-cp "$build/strim" "$stage/libexec/strim"
-cp -R "$build/mlx-swift_Cmlx.bundle" "$build/Strim_StrimHarness.bundle" "$stage/libexec/"
+mkdir -p "$out"
+strim_stage_cli "$build" "$stage/libexec"
 cp "$root/LICENSE" "$root/NOTICE" "$stage/"
-chmod 0755 "$stage/libexec/strim"
 
 # Signing. Default: keep the linker's ad-hoc signature (enough to run on Apple Silicon locally).
 # OWNER-GATED: Developer ID signing + notarization slot in HERE, before the tarball is made:

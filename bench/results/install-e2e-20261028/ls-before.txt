@@ -1,0 +1,6 @@
+jobs/
+worktrees/
+worktrees-host-objects/
+control-token  65B
+host.lock  6B
+token  65B

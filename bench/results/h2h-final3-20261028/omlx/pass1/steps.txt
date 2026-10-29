@@ -1,0 +1,54 @@
+session 22:58:35 id=1793224565-38387 engine=omlx cells=agree,w3,w3_32k load={ 1.26 1.17 1.36 } swap=total = 4096.00M  used = 2723.19M  free = 1372.81M  (encrypted)
+[22:58:37] engine pid 39831 ready after 2s port 8653 tree=39831 
+[22:58:37] CELL warmup load={ 1.32 1.19 1.36 } timeout=1200s
+[22:58:46] CACHELOG warmup server_log_cache_lines=14
+[22:58:46] CELL warmup rc=0 9s memory_aborted=no
+[22:58:46] CELL agree load={ 1.38 1.20 1.36 } timeout=1200s
+[22:59:03] CACHELOG agree server_log_cache_lines=8
+[22:59:03] CELL agree rc=0 17s memory_aborted=no
+[22:59:03] CELL w3 load={ 1.85 1.32 1.40 } timeout=1200s
+[22:59:42] CACHELOG w3 server_log_cache_lines=4
+[22:59:42] CELL w3 rc=0 39s memory_aborted=no
+[22:59:42] CELL w3_32k load={ 2.65 1.62 1.51 } timeout=1200s
+[23:00:27] CACHELOG w3_32k server_log_cache_lines=2
+[23:00:27] CELL w3_32k rc=0 45s memory_aborted=no
+[23:00:34] FLAG shutdown leftover_suspect pid 41346 sleep 30
+end 23:00:34 load={ 2.50 1.68 1.53 } swap=total = 4096.00M  used = 2723.19M  free = 1372.81M  (encrypted)
+session 23:01:10 id=1793224839-41811 engine=omlx cells=w4,w4s,w6 load={ 1.92 1.63 1.52 } swap=total = 4096.00M  used = 2723.19M  free = 1372.81M  (encrypted)
+[23:01:11] engine pid 42155 ready after 1s port 8653 tree=42155 
+[23:01:11] CELL warmup load={ 1.92 1.63 1.52 } timeout=1200s
+[23:01:19] CACHELOG warmup server_log_cache_lines=14
+[23:01:19] CELL warmup rc=0 8s memory_aborted=no
+[23:01:19] CELL w4 load={ 2.37 1.74 1.56 } timeout=1200s
+[23:02:35] FLAG w4 memory_abort_watchdog # ABORT cell=w4 footprint_mb=46083 swap_grow_mb=0 1793224941
+[23:02:35] FLAG w4 engine_guard_abort 2026-10-28 23:02:32;086 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)
+[23:02:35] CACHELOG w4 server_log_cache_lines=18
+[23:02:35] CELL w4 rc=0 76s memory_aborted=yes
+[23:02:43] engine restart (restart_after_flagged_cell)
+[23:02:43] FLAG restart engine_restart restart_after_flagged_cell
+[23:02:51] engine pid 43573 ready after 1s port 8653 tree=43573 
+[23:03:00] CELL w4s load={ 2.25 1.78 1.59 } timeout=1200s
+[23:03:27] CACHELOG w4s server_log_cache_lines=12
+[23:03:27] CELL w4s rc=0 27s memory_aborted=no
+[23:03:28] CELL w6 load={ 2.53 1.86 1.62 } timeout=1200s
+[23:04:26] CACHELOG w6 server_log_cache_lines=24
+[23:04:26] CELL w6 rc=0 59s memory_aborted=no
+[23:04:34] FLAG shutdown leftover_suspect pid 44813 sleep 30
+end 23:04:34 load={ 2.19 1.92 1.66 } swap=total = 11264.00M  used = 9674.69M  free = 1589.31M  (encrypted)
+session 23:05:09 id=1793225079-45217 engine=omlx cells=w5,replay load={ 1.61 1.81 1.63 } swap=total = 11264.00M  used = 9666.69M  free = 1597.31M  (encrypted)
+[23:05:10] engine pid 45570 ready after 1s port 8653 tree=45570 
+[23:05:10] CELL warmup load={ 1.61 1.81 1.63 } timeout=1200s
+[23:05:19] CACHELOG warmup server_log_cache_lines=14
+[23:05:19] CELL warmup rc=0 9s memory_aborted=no
+[23:05:19] CELL w5 load={ 1.44 1.77 1.62 } timeout=1200s
+[23:06:41] FLAG w5 engine_guard_abort 2026-10-28 23:06:41;606 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)
+[23:06:41] CACHELOG w5 server_log_cache_lines=4
+[23:06:41] CELL w5 rc=0 82s memory_aborted=no
+[23:06:41] engine restart (restart_after_flagged_cell)
+[23:06:41] FLAG restart engine_restart restart_after_flagged_cell
+[23:06:50] engine pid 47082 ready after 1s port 8653 tree=47082 
+[23:06:59] CELL replay load={ 1.68 1.73 1.61 } timeout=1200s
+[23:08:12] CACHELOG replay server_log_cache_lines=16
+[23:08:12] CELL replay rc=0 73s memory_aborted=no
+[23:08:19] FLAG shutdown leftover_suspect pid 48234 sleep 30
+end 23:08:19 load={ 1.48 1.66 1.60 } swap=total = 11264.00M  used = 9942.06M  free = 1321.94M  (encrypted)

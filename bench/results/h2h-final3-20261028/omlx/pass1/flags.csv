@@ -1,0 +1,8 @@
+1793224834,1793224565-38387,shutdown,leftover_suspect,pid 41346 sleep 30
+1793224955,1793224839-41811,w4,memory_abort_watchdog,# ABORT cell=w4 footprint_mb=46083 swap_grow_mb=0 1793224941
+1793224955,1793224839-41811,w4,engine_guard_abort,2026-10-28 23:02:32;086 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)
+1793224963,1793224839-41811,restart,engine_restart,restart_after_flagged_cell
+1793225074,1793224839-41811,shutdown,leftover_suspect,pid 44813 sleep 30
+1793225201,1793225079-45217,w5,engine_guard_abort,2026-10-28 23:06:41;606 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)
+1793225201,1793225079-45217,restart,engine_restart,restart_after_flagged_cell
+1793225299,1793225079-45217,shutdown,leftover_suspect,pid 48234 sleep 30

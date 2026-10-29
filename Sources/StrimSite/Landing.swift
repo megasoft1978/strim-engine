@@ -2,8 +2,6 @@ import Foundation
 
 /// Cells shown in the README table, the landing table and the hero chart, in order. Wins and losses are both in here on purpose.
 let GLANCE: [String] = ["d4k", "d32k", "aw5", "p50_agc8", "c32k_tt", "aagc8"]
-/// Rows of the landing comparison matrix (ids of site/data/features.json), at most 6.
-let COMPARE_ROWS: [String] = ["runtime", "breadth", "mtp", "prefix", "messages", "harness"]
 /// Rows of the README results table (a win, a win under load, and the losses).
 let README_GLANCE: [String] = ["d4k", "aw5", "c32k_tt", "aagc8"]
 
@@ -39,14 +37,40 @@ extension SiteBuilder {
 
     func notFasterSentence() -> String { notFaster { n($0) } + "." }
 
+    /// Figure ids of the engines that have a value in a cell (n/a cells carry no value).
+    func engineHas(_ cell: String, _ e: String) -> Bool { D.figs[fid(cell, e)].map { !$0.value.isNull } ?? false }
+
+    /// Values for a cell in run order, with n/a engines omitted.
+    func valuesAcross(_ cell: String, _ f: (String) -> String, sep: String = " ") -> String {
+        ENGINES.filter { engineHas(cell, $0) }.map { "\(WIDE_NAMES[$0] ?? $0)\(sep)\(f(fid(cell, $0)))" }.joined(separator: " vs ")
+    }
+
+    /// Decode gain sentence from the claim figures: "17-24% faster than rapid-mlx, 2.0-2.1x the speed of mlx-lm", closest rival first.
+    func decodeVs(_ f: (String) -> String) -> (head: String, tail: String) {
+        let closest = bestRival("d4k")?.rival
+        let order = RIVALS.filter { $0 == closest } + RIVALS.filter { $0 != closest }
+        func phrase(_ rv: String) -> String? {
+            let id = "final.claim.decode_vs.\(rv)"
+            guard D.figs[id] != nil, D.text(id) != "n/a" else { return nil }
+            return D.text(id).hasSuffix("%") ? "\(f(id)) faster than \(WIDE_NAMES[rv] ?? rv)" : "\(f(id)) the speed of \(WIDE_NAMES[rv] ?? rv)"
+        }
+        let ps = order.compactMap(phrase)
+        guard let first = order.first(where: { phrase($0) != nil }) else { return ("n/a", "") }
+        let id = "final.claim.decode_vs.\(first)"
+        let head = D.text(id).hasSuffix("%") ? "\(f(id)) faster decode" : "\(f(id)) the decode speed"
+        let rest = Array(ps.dropFirst())
+        let lead = D.text(id).hasSuffix("%") ? "than \(WIDE_NAMES[first] ?? first), the closest rival" : "of \(WIDE_NAMES[first] ?? first), the closest rival"
+        return (head, lead + (rest.isEmpty ? "" : "; " + listWords(rest)))
+    }
+
     /// Three proof points as (headline, detail).
     func proofPoints(_ f: (String) -> String) -> [(head: String, body: String)] {
-        func v(_ cell: String, _ e: String) -> String { f(fid(cell, e)) }
+        let d = decodeVs(f)
+        let p50 = valuesAcross("p50_w5", { f($0) + " s" })
         return [
-            ("\(f("final.claim.decode_vs_rapid")) faster decode",
-             "than rapid-mlx, and \(f("final.claim.decode_vs_vlm")) the speed of mlx-vlm. At 4K: \(v("d4k", "strim")) vs \(v("d4k", "rapid-mlx")) vs \(v("d4k", "mlx-vlm")) tok/s."),
+            (d.head, d.tail + ". At 4K: " + valuesAcross("d4k", f) + " tok/s."),
             ("\(f("final.claim.w5_speedup")) faster for agents sharing a prefix",
-             "with four clients on one 16K prefix. Median first token \(v("p50_w5", "strim")) s vs \(v("p50_w5", "rapid-mlx")) s and \(v("p50_w5", "mlx-vlm")) s."),
+             "with four clients on one 16K prefix. Median first token: \(p50)."),
             ("\(f("final.claim.ttft_p50_lower")) lower median first token",
              "at 4 to 8 concurrent requests, against each rival."),
         ]
@@ -54,33 +78,66 @@ extension SiteBuilder {
 
     // MARK: run facts
 
+    /// "rapid-mlx 0.15.7 (MTP on, ...), mlx-vlm 0.7.10 (server defaults, no MTP)" for the rivals of the run.
+    func rivalsFactText() -> String {
+        RIVALS.map { rv -> String in
+            let name = WIDE_NAMES[rv] ?? rv
+            let ver = engVersion(rv).map { " " + $0 } ?? ""
+            if let m = engineMeta[rv]?["mtp"] {
+                return "\(esc(name))\(esc(ver)) (\(m.lowercased().hasPrefix("yes") ? "MTP on" : "no MTP")" + (rv == "rapid-mlx" ? ", <code>--max-num-seqs 4</code>" : "") + ")"
+            }
+            if rv == "rapid-mlx" { return "\(esc(run_ver(rv))) (MTP on, <code>--max-num-seqs 4</code>)" }
+            if rv == "mlx-vlm" { return "\(esc(run_ver(rv))) (server defaults, no MTP)" }
+            return esc(name + ver)
+        }.joined(separator: ", ")
+    }
+
+    private func run_ver(_ rv: String) -> String { D.figs["ver.h2h.\(rv)"] != nil ? D.text("ver.h2h.\(rv)") : (WIDE_NAMES[rv] ?? rv) + (engVersion(rv).map { " " + $0 } ?? "") }
+
     func runBannerHTML() -> String {
         let run = H["run"]
         let raw = "../" + esc(FINAL_REL)
         var o = "<dl class=\"facts runfacts\">"
         o += "<div><dt>Run</dt><dd><a href=\"\(raw)/summary.md\">\(esc(rawDirName))</a> (<a href=\"\(raw)/results.json\">results.json</a>), \(esc(run?["date"]?.pyStr ?? ""))</dd></div>"
         o += "<div><dt>Strim build</dt><dd>\(n("final.claim.build")), \(n("final.claim.passes")) passes of one rep, medians, \(esc(run?["tie_band_pct"]?.pyStr ?? "2"))% tie band</dd></div>"
-        o += "<div><dt>Rivals</dt><dd>\(esc(run?["rapid_mlx"]?.pyStr ?? "")) (MTP on, <code>--max-num-seqs 4</code>), \(esc(run?["mlx_vlm"]?.pyStr ?? "")) (server defaults, no MTP)</dd></div>"
+        o += "<div><dt>Rivals</dt><dd>\(rivalsFactText())</dd></div>"
         o += "<div><dt>Machine</dt><dd>\(esc(D.meta["machine"]?.pyStr ?? "")); model \(esc(run?["model"]?.pyStr ?? ""))</dd></div>"
         o += "</dl>"
         o += "<div class=\"callout\" role=\"note\"><p><strong>Validity.</strong> \(validityHTML())</p></div>"
+        o += claimPolicyHTML()
         return o
+    }
+
+    /// Claim policy and what it withheld in this run: cells that cannot carry a WIN or LOSS, with the reason, and the flags that excluded passes.
+    func claimPolicyHTML() -> String {
+        guard let nc = D.raw["final"]?["not_claimable"]?.obj, !nc.keys.isEmpty else { return "" }
+        var items = ""
+        for (id, v) in nc.items {
+            let label = cellLabel(id)
+            for (rv, why) in v.obj?.items ?? [] { items += "<li><strong>\(esc(label))</strong> vs \(esc(WIDE_NAMES[rv] ?? rv)): \(esc(why.pyStr))</li>" }
+        }
+        return "<div class=\"callout\" role=\"note\" id=\"claim-policy\"><p><strong>Not claimable.</strong> Verdicts are only printed for a cell when every pass of both engines is present, none was excluded (abort, memory guard, OOM, timeout) and every session was clean. The numbers below stay visible; no WIN or LOSS is attached to these comparisons:</p><ul>\(items)</ul></div>"
     }
 
     /// Claims block of the benchmarks page (data-driven cards, then the not-faster list).
     func claimsSection() -> String {
         func F(_ cell: String, _ e: String) -> String { n(fid(cell, e)) }
+        let d = decodeVs { n($0) }
+        let names = listWords(RIVALS.map { WIDE_NAMES[$0] ?? $0 })
         var o = "<section id=\"claims\" aria-labelledby=\"h-claims\"><h2 id=\"h-claims\">What the data supports, and what it does not</h2>"
-        o += "<p>Strim against rapid-mlx (MTP on) and mlx-vlm on Qwen3.8-27B 4-bit, one machine. Every claim below is computed from the cells in <a href=\"#r-final\">Results</a>; losses are listed next to the wins.</p>"
+        o += "<p>Strim against \(esc(names)) on Qwen3.8-27B 4-bit, one machine. Every claim below is computed from the cells in <a href=\"#r-final\">Results</a>; losses are listed next to the wins.</p>"
         o += "<ul class=\"claims\">"
-        o += "<li class=\"claim\"><h3>Decode</h3><p class=\"big\">\(n("final.claim.decode_vs_rapid")) <span class=\"vs\">faster than rapid-mlx</span></p><p>and \(n("final.claim.decode_vs_vlm")) the speed of mlx-vlm, at 4K to 32K context. At 4K: \(F("d4k", "strim")) vs \(F("d4k", "rapid-mlx")) vs \(F("d4k", "mlx-vlm"))&nbsp;tok/s.</p><p class=\"cav\">rapid-mlx also uses MTP; mlx-vlm does not. <a href=\"#r-final\">Details</a></p></li>"
-        o += "<li class=\"claim\"><h3>Four agents, one 16K prefix</h3><p class=\"big\">\(n("final.claim.w5_speedup")) <span class=\"vs\">faster aggregate</span></p><p>Four clients on one 16K prefix, aggregate tok/s. Median first token \(F("p50_w5", "strim"))&nbsp;s vs \(F("p50_w5", "rapid-mlx"))&nbsp;s (rapid-mlx) and \(F("p50_w5", "mlx-vlm"))&nbsp;s (mlx-vlm).</p><p class=\"cav\">Neither rival shared the prefix in this setup. <a href=\"#r-final\">Details</a></p></li>"
-        o += "<li class=\"claim\"><h3>Median first token under concurrency</h3><p class=\"big\">\(n("final.claim.ttft_p50_lower")) <span class=\"vs\">lower, 4 to 8 concurrent</span></p><p>Against each rival, over 512-token, agent-style and 4K prompts.</p><p class=\"cav\">Rivals report first tokens batch-synchronously, so their median is a weaker number. <a href=\"#r-final\">Details</a></p></li>"
-        o += "<li class=\"claim\"><h3>Agent replay</h3><p class=\"big\">\(F("rp8", "strim"))&nbsp;s <span class=\"vs\">vs \(F("rp8", "rapid-mlx"))&nbsp;s (rapid-mlx)</span></p><p>8-turn replay, summed prefill; verdict against rapid-mlx: \(n(fverdict("rp8", "rapid-mlx"))), against mlx-vlm (\(F("rp8", "mlx-vlm"))&nbsp;s): \(n(fverdict("rp8", "mlx-vlm"))).</p><p class=\"cav\">mlx-vlm has no cross-request prefix cache. <a href=\"#r-final\">Details</a></p></li>"
+        o += "<li class=\"claim\"><h3>Decode</h3><p class=\"big\">\(d.head) </p><p>\(d.tail), at 4K to 32K context. At 4K: \(valuesAcross("d4k", { n($0) }))&nbsp;tok/s.</p><p class=\"cav\">Engines differ in speculative decoding (MTP) and prefix caching; see the table of rivals above. <a href=\"#r-final\">Details</a></p></li>"
+        o += "<li class=\"claim\"><h3>Four agents, one 16K prefix</h3><p class=\"big\">\(n("final.claim.w5_speedup")) <span class=\"vs\">faster aggregate</span></p><p>Four clients on one 16K prefix, aggregate tok/s. Median first token: \(valuesAcross("p50_w5", { n($0) + "&nbsp;s" })).</p><p class=\"cav\">Engines without a cross-request prefix cache cannot share the prefix in this setup. <a href=\"#r-final\">Details</a></p></li>"
+        o += "<li class=\"claim\"><h3>Median first token under concurrency</h3><p class=\"big\">\(n("final.claim.ttft_p50_lower")) <span class=\"vs\">lower, 4 to 8 concurrent</span></p><p>Against each rival, over 512-token, agent-style and 4K prompts.</p><p class=\"cav\">Some rivals report first tokens batch-synchronously, so their median is a weaker number. <a href=\"#r-final\">Details</a></p></li>"
+        if engineHas("rp8", "strim") {
+            let ver = RIVALS.filter { engineHas("rp8", $0) }.map { "\(esc(WIDE_NAMES[$0] ?? $0)) (\(F("rp8", $0))&nbsp;s): \(n(fverdict("rp8", $0)))" }.joined(separator: "; ")
+            o += "<li class=\"claim\"><h3>Agent replay</h3><p class=\"big\">\(F("rp8", "strim"))&nbsp;s <span class=\"vs\">8-turn replay</span></p><p>Summed prefill. Verdict against \(ver).</p><p class=\"cav\">Engines without a cross-request prefix cache re-prefill every turn. <a href=\"#r-final\">Details</a></p></li>"
+        }
         o += "</ul>"
         o += "<div class=\"notahead\" role=\"note\" aria-labelledby=\"h-notahead\"><h3 id=\"h-notahead\">Where Strim is not faster</h3><ul>"
         o += "<li>\(notFasterSentence())</li>"
-        o += "<li><strong>No \"fastest overall\".</strong> Two rivals, one model, one machine, thinking off. No head-to-head against llama.cpp, Ollama or LM Studio exists, so none is claimed.</li>"
+        o += "<li><strong>No \"fastest overall\".</strong> \(RIVALS.count) rivals, one model, one machine, thinking off. No head-to-head against llama.cpp, Ollama or LM Studio exists, so none is claimed.</li>"
         o += "</ul></div></section>\n\n"
         return o
     }
@@ -93,7 +150,7 @@ extension SiteBuilder {
     }
 
     func glanceMarkdown() -> String {
-        var rows = ["| Measurement | Strim | rapid-mlx | mlx-vlm | vs rapid-mlx | vs mlx-vlm |", "|---|---:|---:|---:|:---:|:---:|"]
+        var rows = ["| Measurement | " + ENGINES.map { WIDE_NAMES[$0] ?? $0 }.joined(separator: " | ") + " | " + RIVALS.map { "vs \(WIDE_NAMES[$0] ?? $0)" }.joined(separator: " | ") + " |", "|---|" + ENGINES.map { _ in "---:" }.joined(separator: "|") + "|" + RIVALS.map { _ in ":---:" }.joined(separator: "|") + "|"]
         for r in glanceRows(README_GLANCE) {
             let best = bestEngine(r.id, r.better)
             var line = "| \(HERO_TITLE[r.id] ?? r.label) (\(r.unit)\(r.better == "lower" ? ", lower is better" : "")) |"
@@ -115,7 +172,7 @@ extension SiteBuilder {
             return r
         }
         for g in glanceRows() { rows.append(cellRow(g.id, g.label, g.unit, g.better)) }
-        if let c = finalCells().first(where: { $0.id == "rp8" }) { rows.append(cellRow("rp8", "8-turn agent replay, summed prefill", c.unit, c.better)) }
+        if let c = finalCells().first(where: { $0.id == "rp8" }), engineHas("rp8", "strim") { rows.append(cellRow("rp8", "8-turn agent replay, summed prefill", c.unit, c.better)) }
         let mem = H["memory"]?["whole_run_verdict"]
         let memBest = ENGINES.min(by: { (num("final.mem.\($0)") ?? 1e9) < (num("final.mem.\($1)") ?? 1e9) })
         var mr = ["Peak memory, whole run<span class=\"sub\">GB, lower is better</span>"]
@@ -126,63 +183,35 @@ extension SiteBuilder {
             mr.append(cls.isEmpty ? tdText(esc(v), "muted") : tdText("<span class=\"tag \(cls)\">\(esc(v))</span>"))
         }
         rows.append(mr)
-        return table("Strim against each rival, median of \(num("final.claim.passes").map { String(Int($0)) } ?? "?") passes (bold = best of the three)",
-                     ["Measurement", "Strim", "rapid-mlx", "mlx-vlm", "vs rapid-mlx", "vs mlx-vlm"], rows, numcols: [1, 2, 3])
-    }
-
-    /// At most 8 rows, from features.json, rival wins included.
-    func compareMatrixHTML() -> String {
-        let rows = COMPARE_ROWS.compactMap { id in (F["rows"]?.arr ?? []).first(where: { $0["id"]?.str == id }) }
-        var body = ""
-        for r in rows {
-            body += "<tr><th scope=\"row\">\(esc(r["label"]?.pyStr ?? ""))</th>"
-            for e in ENGINES {
-                let s = r[e]?["s"]?.pyStr ?? "unknown"
-                let note = r[e]?["n"]?.pyStr ?? ""
-                body += "<td><span class=\"st st-\(s)\">\(esc(SiteBuilder.STATUS_LABEL[s] ?? s))</span>" + (note.isEmpty ? "" : "<span class=\"fn\">\(esc(note))</span>") + "</td>"
-            }
-            body += "</tr>"
-        }
-        let v = F["versions"]
-        return "<div class=\"tablewrap\" tabindex=\"0\" role=\"region\" aria-label=\"Comparison\"><table class=\"feat\"><caption>Strim, rapid-mlx and mlx-vlm, checked \(esc(F["date"]?.pyStr ?? ""))</caption>"
-            + "<thead><tr><th scope=\"col\">Feature</th><th scope=\"col\">Strim</th><th scope=\"col\">rapid-mlx \(esc(v?["rapid-mlx"]?.pyStr ?? ""))</th><th scope=\"col\">mlx-vlm \(esc(v?["mlx-vlm"]?.pyStr ?? ""))</th></tr></thead><tbody>\(body)</tbody></table></div>"
-    }
-
-    // MARK: terminal demo (captured, not generated)
-
-    func loadDemo() -> PyJSON? {
-        guard let t = readText(root + "/site/data/demo.json"), let j = try? PyJSONParser.parse(t) else { fail("cannot read site/data/demo.json"); return nil }
-        return j
-    }
-
-    func terminalHTML() -> String {
-        guard let d = loadDemo() else { return "" }
-        var code = ""
-        var first = true
-        for s in d["steps"]?.arr ?? [] {
-            if !first { code += "\n" }
-            first = false
-            code += "<span class=\"tp\">$ </span>\(esc(s["cmd"]?.pyStr ?? ""))\n"
-            let out = s["out"]?.pyStr ?? ""
-            if !out.isEmpty { code += "<span class=\"to\">\(esc(out))</span>\n" }
-        }
-        return "<figure class=\"term\"><div class=\"termbar\" aria-hidden=\"true\"><i></i><i></i><i></i></div><pre tabindex=\"0\" aria-label=\"Terminal transcript\"><code>\(code)</code></pre>"
-            + "<figcaption>\(esc(d["caption"]?.pyStr ?? ""))</figcaption></figure>"
+        return table("Strim against each rival, median of \(num("final.claim.passes").map { String(Int($0)) } ?? "?") passes (bold = best of the \(ENGINES.count))",
+                     ["Measurement"] + ENGINES.map { WIDE_NAMES[$0] ?? $0 } + RIVALS.map { "vs \(WIDE_NAMES[$0] ?? $0)" }, rows, numcols: Set(1...ENGINES.count))
     }
 
     // MARK: landing page
 
+    static let BREW_CMD = "brew install megasoft1978/strim/strim"
+    static let CASK_CMD = "brew install --cask megasoft1978/strim/strim-app"
+    static let PULL_CMD = "strim pull"
+    static let CURL_CMD = "curl -fsSL https://raw.githubusercontent.com/megasoft1978/strim-engine/main/packaging/install.sh | bash"
+    static let XATTR_CMD = "xattr -dr com.apple.quarantine /Applications/Strim.app"
+
+    /// Three install paths as tabs (text from packaging/INSTALL-SNIPPETS.md), each command with its own copy button.
     func installTabsHTML() -> String {
-        func panel(_ cls: String, _ lines: String, _ note: String) -> String { "<div class=\"panel \(cls)\"><pre><code>\(lines)</code></pre><p class=\"small muted\">\(note)</p></div>" }
-        let model = "strim pull                  # Qwen3.8-27B 4-bit + MTP head, about 15 GB, resumable\nstrim serve ~/.strim/models/qwen38-4bit ~/.strim/models/qwen38-mtp-4bit --port 8203"
+        func cmd(_ c: String, comment: String = "") -> String {
+            "<div class=\"cmd\"><code><span class=\"pr\">$</span> \(esc(c))\(comment.isEmpty ? "" : " <span class=\"cm\"># \(esc(comment))</span>")</code><button type=\"button\" class=\"copy\" data-copy=\"\(esc(c))\" hidden>Copy</button></div>"
+        }
         var o = "<div class=\"tabs\">"
         o += "<input type=\"radio\" name=\"inst\" id=\"inst-brew\" checked><label for=\"inst-brew\">Homebrew</label>"
         o += "<input type=\"radio\" name=\"inst\" id=\"inst-curl\"><label for=\"inst-curl\">curl</label>"
-        o += "<input type=\"radio\" name=\"inst\" id=\"inst-src\"><label for=\"inst-src\">From source</label>"
+        o += "<input type=\"radio\" name=\"inst\" id=\"inst-dmg\"><label for=\"inst-dmg\">DMG</label>"
         o += "<div class=\"panels\">"
-        o += panel("p-brew", "brew install megasoft1978/strim/strim\n" + model, "Recommended. Apple Silicon, macOS 14 or newer.")
-        o += panel("p-curl", "curl -fsSL https://raw.githubusercontent.com/megasoft1978/strim-engine/main/packaging/install.sh | bash\n" + model, "No sudo: installs to <code>~/.local/strim</code>. The tarball is checked against its SHA-256 first.")
-        o += panel("p-src", "git clone https://github.com/megasoft1978/strim-engine &amp;&amp; cd strim-engine\nswift build -c release --disable-sandbox\n.build/release/strim pull", "For developers. Needs Xcode with the Swift 6 toolchain.")
+        o += "<div class=\"panel p-brew\">" + cmd(Self.BREW_CMD) + cmd(Self.CASK_CMD) + cmd(Self.PULL_CMD)
+            + "<p class=\"cap\">Installs the <code>strim</code> command. The menu-bar app (second line) is optional; it already contains the CLI.</p></div>"
+        o += "<div class=\"panel p-curl\">" + cmd(Self.CURL_CMD) + cmd(Self.PULL_CMD)
+            + "<p class=\"cap\">No sudo. Installs to <code>~/.local/strim</code> and links <code>~/.local/bin/strim</code>. Checks the SHA-256 before installing.</p></div>"
+        o += "<div class=\"panel p-dmg\"><div class=\"dmgrow\"><a class=\"btn\" href=\"\(REPO_URL)/releases/latest\">Download the DMG (arm64)</a>"
+            + "<span class=\"cap\">Open the DMG. Drag Strim to Applications. Launch Strim from the menu bar.</span></div>"
+            + "<p class=\"warn\"><strong>Not notarized yet: right-click Open.</strong> macOS warns on first launch. Right-click Strim in Applications and choose Open, or click Open Anyway in System Settings, Privacy and Security, or run <code>\(esc(Self.XATTR_CMD))</code>. Homebrew avoids the warning.</p></div>"
         o += "</div></div>"
         return o
     }
@@ -191,88 +220,79 @@ extension SiteBuilder {
         func item(_ q: String, _ a: String) -> String { "<details class=\"faq\"><summary>\(esc(q))</summary><div class=\"ans\">\(a)</div></details>" }
         var o = ""
         o += item("Why only one model?", "<p>Everything is tuned for one dense model: its attention state, its speculative-decoding head and its prefix cache. That is why these numbers are possible, and why Strim will not run your other models. Others are on the <a href=\"benchmarks.html#roadmap\">roadmap</a>.</p>")
-        o += item("Does speculative decoding change the output?", "<p>Draft tokens are verified by the full model, but batching can flip near-tie tokens. Greedy output over 8 fixed prompts and 64 tokens: Strim against itself \(n("final.agree.self")) identical, against rapid-mlx \(n("final.agree.rapid-mlx")), against mlx-vlm \(n("final.agree.mlx-vlm")). <a href=\"benchmarks.html#exact\">Quality and exactness</a>.</p>")
         o += item("Does it run on a 32 GB Mac or an M1?", "<p>Only a 64&nbsp;GB M5 Max has been tested. For 32&nbsp;GB the computed estimate is \(n("qt.t32")) of context (not measured); 16&nbsp;GB and below are unsupported. See <a href=\"benchmarks.html#scope\">supported scope</a>.</p>")
-        o += item("Why is cold prefill not faster?", "<p>On a prompt the engine has never seen, prefill is compute-bound and Strim has no faster kernel than the rivals: \(notFasterSentence()) Strim wins by not repeating prefill (exact prefix cache) and by decoding faster.</p>")
+        o += item("Does speculative decoding change the output?", "<p>Draft tokens are verified by the full model, but batching can flip near-tie tokens. Greedy output over 8 fixed prompts and 64 tokens: Strim against itself \(n("final.agree.self")) identical, \(RIVALS.filter { D.figs["final.agree.\($0)"] != nil }.map { "against \(WIDE_NAMES[$0] ?? $0) \(n("final.agree.\($0)"))" }.joined(separator: ", ")). <a href=\"benchmarks.html#exact\">Quality and exactness</a>.</p>")
         return o
     }
 
+    /// Real-window captures of the running app (copied from docs/img/app-live/ into site/assets/app/, downscaled). The section renders only when the hero capture exists.
+    static let APP_DIR = "site/assets/app/"
+    func appLive(_ name: String) -> Bool { fileExists(root + "/" + Self.APP_DIR + name) }
+
+    static let APP_CAPTION = "Captured from the running app against a live server on a 64 GB M5 Max; real numbers."
+
+    /// Dark and light variants of one shot; the theme switch and prefers-color-scheme pick one in CSS. width/height keep the layout stable.
+    /// One expandable screenshot: a button holding the small embed (dark and light variants, CSS shows one) that opens the full-resolution original in the lightbox.
+    private func zoomTile(base: String, light: String?, alt: String, cap: String, w: Int, h: Int, cls: String) -> String {
+        func img(_ src: String, _ t: String?) -> String { "<img class=\"\(cls)\(t.map { " if-" + $0 } ?? "")\" src=\"assets/app/\(src).png\" alt=\"\(esc(alt))\" width=\"\(w)\" height=\"\(h)\" loading=\"lazy\" decoding=\"async\">" }
+        let full = light == nil ? "assets/app/full/\(base).png" : "assets/app/full/\(base)-dark.png"
+        let fl = light.map { " data-full-light=\"assets/app/full/\($0).png\"" } ?? ""
+        let imgs = light == nil ? img(base, nil) : img(base + "-dark", "dark") + img(base + "-light", "light")
+        return "<button type=\"button\" class=\"zoom\" data-full=\"\(full)\"\(fl) data-alt=\"\(esc(alt))\" data-cap=\"\(esc(cap))\" aria-label=\"Expand screenshot: \(esc(cap))\">\(imgs)<span class=\"xp\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" width=\"14\" height=\"14\"><path d=\"M9 2h5v5M7 14H2V9M14 2L9.5 6.5M2 14l4.5-4.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"/></svg></span></button>"
+    }
+
+    /// Modal viewer shared by every .zoom tile; the script in assets/site.js drives it (arrows, swipe, counter, caption).
+    func lightboxHTML() -> String {
+        "<dialog id=\"lb\" aria-label=\"Screenshot viewer\"><div class=\"lbstage\"><img id=\"lbi\" alt=\"\"></div>"
+        + "<p class=\"lbbar\"><span id=\"lbc\"></span><span id=\"lbcap\"></span></p>"
+        + "<button type=\"button\" id=\"lbx\" class=\"lbb\" aria-label=\"Close\">&times;</button>"
+        + "<button type=\"button\" id=\"lbp\" class=\"lbb\" aria-label=\"Previous screenshot\">&lsaquo;</button>"
+        + "<button type=\"button\" id=\"lbn\" class=\"lbb\" aria-label=\"Next screenshot\">&rsaquo;</button></dialog>\n"
+    }
+
+    func appSectionHTML() -> String {
+        guard appLive("app-hero-live.png") else { return "" }
+        var o = "<section id=\"app\" aria-labelledby=\"h-app\"><div class=\"sh\"><p class=\"kick\">Menu-bar app</p><h2 id=\"h-app\">The <span>app.</span></h2></div>"
+        let heroAlt = "The Strim menu-bar app with a running server: decode speed, MTP acceptance and memory, from a live session"
+        o += "<figure class=\"appfig\"><div class=\"macwin rev\"><div class=\"mbar\" aria-hidden=\"true\"><i></i><i></i><i></i></div>" + zoomTile(base: "app-hero-live", light: nil, alt: heroAlt, cap: "Menu-bar app, live session", w: 1072, h: 628, cls: "apphero") + "</div><figcaption class=\"cap\">\(Self.APP_CAPTION)</figcaption></figure>"
+        let strip: [(String, String, Int, Int)] = [("status", "Status", 800, 707), ("chat", "Chat", 754, 800), ("jobs", "Jobs", 800, 683)]
+        if strip.allSatisfy({ appLive("\($0.0)-dark.png") && appLive("\($0.0)-light.png") }) {
+            o += "<div class=\"appstrip\">" + strip.map { "<figure>\(zoomTile(base: $0.0, light: $0.0 + "-light", alt: "Strim app, \($0.1.lowercased()) view, real session", cap: "\($0.1) view", w: $0.2, h: $0.3, cls: "tile"))<figcaption class=\"cap\">\($0.1)</figcaption></figure>" }.joined() + "</div>"
+        }
+        return o + "</section>\n\n"
+    }
+
     func buildLandingHTML() -> String {
-        let run = H["run"]
-        let pts = proofPoints { n($0) }
-        var o = """
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Strim</title>
-<meta name="description" content="Strim is a single-binary Swift engine that runs Qwen3.8-27B on Apple Silicon as a local backend for Claude Code and Codex. Measured against rapid-mlx and mlx-vlm, losses included.">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css">
-</head>
-<body class="landing">
-<a class="skip" href="#main">Skip to content</a>
-<header class="site"><div class="wrap">
-<a class="brand" href="#top">Strim</a>
-<nav aria-label="Sections"><ul>
-<li><a href="#results">Results</a></li><li><a href="#install">Install</a></li><li><a href="#compare">Compare</a></li><li><a href="#faq">FAQ</a></li><li><a href="benchmarks.html">Benchmarks</a></li>
-</ul></nav></div></header>
-<main id="main"><div class="wrap">
-
-<section class="hero lhero" id="top" aria-labelledby="h-hero">
-<div class="herotext">
-<h1 id="h-hero">Run Qwen3.8-27B on your Mac like a server.</h1>
-<p class="lede">One Swift binary, built for one model: a local backend for Claude Code and Codex.</p>
-<div class="cta">
-<div class="cmd"><code id="hero-cmd">brew install megasoft1978/strim/strim</code><button type="button" class="copy" data-copy="brew install megasoft1978/strim/strim" hidden>Copy</button></div>
-<a class="btn" href="benchmarks.html">See the benchmarks</a>
-</div>
-<p class="small muted">Apple Silicon, macOS 14 or newer. Tested only on a 64&nbsp;GB M5 Max. MIT license.</p>
-</div>
-<figure class="heroproof"><figcaption>Strim vs rapid-mlx vs mlx-vlm<span>Median of \(n("final.claim.passes")) passes. Qwen3.8-27B 4-bit.</span></figcaption><div class="hvwrap">\(heroProofSVG())</div></figure>
-</section>
-
-
-"""
-        o += "<section id=\"proof\" aria-labelledby=\"h-proof\"><h2 id=\"h-proof\" class=\"sr\">What it does well</h2><ul class=\"proofs\">"
-        for p in pts { o += "<li><p class=\"pbig\">\(p.head)</p><p>\(p.body)</p></li>" }
-        o += "</ul></section>\n\n"
-
-        o += "<section id=\"results\" aria-labelledby=\"h-results\"><h2 id=\"h-results\">All six measurements, losses included</h2>"
-        o += "<figure class=\"hvfig herochart\"><figcaption>Each group has its own scale and starts at zero<span>The badge says WIN or LOSS against the rivals, outside a \(esc(run?["tie_band_pct"]?.pyStr ?? "2"))% tie band. Labels are medians.</span></figcaption>"
-        o += "<div class=\"hvpair\"><div class=\"hvwrap\">" + heroBarsSVG(standalone: false, ids: Array(GLANCE.prefix(3)), svgId: "hv4") + "</div><div class=\"hvwrap\">" + heroBarsSVG(standalone: false, ids: Array(GLANCE.dropFirst(3)), svgId: "hv7") + "</div></div></figure>"
-        o += "<p class=\"honest\"><strong>Where it is not faster.</strong> \(notFaster { n($0) }.prefix(1).uppercased() + notFaster { n($0) }.dropFirst()).</p>"
-        o += "<div class=\"callout\" role=\"note\"><p><strong>Validity.</strong> \(validityHTML())</p></div>"
-        o += "<p class=\"note\">\(esc(run?["rapid_mlx"]?.pyStr ?? "")) and \(esc(run?["mlx_vlm"]?.pyStr ?? "")), Strim build \(n("final.claim.build")), \(esc(D.meta["machine"]?.pyStr ?? "")), \(n("final.claim.passes")) passes. "
-            + "Run <a href=\"../\(esc(FINAL_REL))/summary.md\">\(esc(rawDirName))</a> (<a href=\"../\(esc(FINAL_REL))/results.json\">raw results</a>), \(esc(run?["date"]?.pyStr ?? "")). Full table and method: <a href=\"benchmarks.html#results\">benchmarks</a>.</p>"
+        let engines = ENGINES.count
+        var o = pageHead(title: "Strim: Qwen3.8-27B on your Mac, like a server",
+                         desc: "Strim is a single-binary Swift engine that runs Qwen3.8-27B on Apple Silicon as a local backend for Claude Code and Codex. Measured against \(RIVALS.map { WIDE_NAMES[$0] ?? $0 }.joined(separator: ", ")), losses included.",
+                         path: "", bodyClass: "landing")
+        o += headerHTML([("Install", "#install"), ("Speed", "#field"), ("Ratios", "#ratios"), ("App", "#app"), ("FAQ", "#faq"), ("Benchmarks", "benchmarks.html")], brandHref: "#top")
+        o += "<main id=\"main\"><div class=\"wrap\">\n\n"
+        o += "<section class=\"hero\" id=\"top\" aria-labelledby=\"h-hero\">"
+        o += "<p class=\"pill\"><i></i>Qwen3.8-27B &middot; one Swift binary &middot; Apple silicon</p>"
+        o += "<h1 id=\"h-hero\">Your Mac, now a <span>local AI server.</span></h1>"
+        o += "<p class=\"lede\"><b>Strim</b> runs Qwen3.8-27B as a local backend for Claude Code and Codex. Nothing leaves the machine.</p>"
+        o += "<div class=\"inst\" id=\"install\">" + installTabsHTML() + "</div>"
+        o += "<p class=\"sub\">Model weights (about 16&nbsp;GB) come separately with <code>strim pull</code>. Apple Silicon, macOS 14 or newer, tested on a 64&nbsp;GB M5 Max. MIT.</p>"
         o += "</section>\n\n"
 
-        o += "<section id=\"install\" aria-labelledby=\"h-install\"><h2 id=\"h-install\">Install</h2>" + installTabsHTML()
-        o += "<p>Then point Claude Code at <code>ANTHROPIC_BASE_URL=http://127.0.0.1:8203</code>; the token is in <code>~/.strim/token</code>. See <a href=\"../docs/INSTALL.md\">INSTALL.md</a> and <a href=\"../docs/CLIENTS.md\">CLIENTS.md</a> (Codex included).</p>"
-        o += terminalHTML() + "</section>\n\n"
+        o += "<section id=\"field\" aria-labelledby=\"h-field\"><div class=\"sh\"><p class=\"kick\">Decode speed &middot; \(engines) current engines</p><h2 id=\"h-field\">The wide field, on <span>one line.</span></h2></div>"
+        o += "<div class=\"glass rev\"><div class=\"hvwrap\">\(numberLineSVG(narrow: false, standalone: false))\(numberLineSVG(narrow: true, standalone: false))</div>"
+        o += "<p class=\"cap gen\"><span class=\"earlier-legend\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 18 18\" aria-hidden=\"true\"><circle cx=\"9\" cy=\"9\" r=\"5\" fill=\"none\" stroke=\"currentColor\" stroke-dasharray=\"2 2\"/></svg>Hollow dashed beads: llama.cpp and Ollama, earlier run.</span> \(esc(wideCaption())) <a href=\"benchmarks.html#wide\">Full results</a>.</p></div></section>\n\n"
 
-        o += "<section id=\"compare\" aria-labelledby=\"h-compare\"><h2 id=\"h-compare\">Compared</h2>" + compareMatrixHTML()
-        o += "<p class=\"note\"><strong>Not found</strong> means no evidence was found, not proof of absence. Strim is new and tested on one machine; the others have larger communities and wider platform support. <a href=\"../\(esc(F["source"]?.pyStr ?? ""))\">Evidence per cell</a>.</p></section>\n\n"
+        o += "<section id=\"ratios\" aria-labelledby=\"h-ratios\"><div class=\"sh\"><p class=\"kick\">Strim today &middot; right of the line is faster</p><h2 id=\"h-ratios\">The honest <span>ratios.</span></h2></div>"
+        o += ratioCardsHTML()
+        let loss = esc(lossLine()).replacingOccurrences(of: "All losses: benchmarks.", with: "All losses: <a href=\"benchmarks.html\">benchmarks</a>.")
+        o += "<p class=\"honest\">\(loss)</p>"
+        o += "<p class=\"note\">\(validityText { n($0) }) <a href=\"benchmarks.html#method\">Method</a> and <a href=\"benchmarks.html#r-final\">every cell</a>.</p>"
+        o += "</section>\n\n"
 
-        o += "<section id=\"faq\" aria-labelledby=\"h-faq\"><h2 id=\"h-faq\">FAQ</h2>" + faqHTML() + "</section>\n\n"
-
-        o += """
-</div></main>
-<footer><div class="wrap"><p><a href="benchmarks.html">Benchmarks</a>, <a href="../docs/ARCHITECTURE.md">architecture</a>, <a href="../docs/INSTALL.md">install</a>, <a href="../LICENSE">MIT license</a>. Source: <code>github.com/megasoft1978/strim-engine</code>. Numbers are generated by <code>strim site build</code> from <a href="data/headline.json">site/data/headline.json</a>.</p></div></footer>
-<script>
-document.querySelectorAll('[data-copy]').forEach(function (b) {
-  b.hidden = false;
-  b.addEventListener('click', function () {
-    if (!navigator.clipboard) return;
-    navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1500); });
-  });
-});
-</script>
-</body>
-</html>
-
-"""
+        o += appSectionHTML()
+        o += "<section id=\"faq\" aria-labelledby=\"h-faq\"><div class=\"sh\"><p class=\"kick\">FAQ</p><h2 id=\"h-faq\">Questions.</h2></div><div class=\"faqs\">" + faqHTML() + "</div></section>\n\n"
+        o += "</div></main>\n"
+        if appLive("app-hero-live.png") { o += lightboxHTML() }
+        o += footerHTML()
         return o
     }
 }

@@ -1,7 +1,7 @@
 import Foundation
 
 /// The README must stay a short front page; `strim site check` fails above this.
-let README_MAX_LINES = 60
+let README_MAX_LINES = 30
 
 extension SiteBuilder {
     /// (id, label, unit, better) of every generated head-to-head cell, in summary order.
@@ -38,6 +38,9 @@ extension SiteBuilder {
                 + "Claude Code \(D.text("soak.pass_claude"))%, Codex \(D.text("soak.pass_codex"))%, server crashes \(D.text("soak.crashes")), HTTP 5xx \(D.text("soak.http5xx")). "
                 + "A reliability check, not a quality benchmark; the Claude Code failures were a harness allow-list flaw, since fixed. Not repeated on the current build or the current sandboxed harness."
         }
+        if name == "lossline" {
+            return lossLine().replacingOccurrences(of: "All losses: benchmarks.", with: "All losses: [benchmarks](site/benchmarks.html).")
+        }
         if name == "glance" { return glanceMarkdown() }
         if name == "proofs" {
             return proofPoints { D.text($0) }.map { "- **\($0.head)** \($0.body)" }.joined(separator: "\n")
@@ -50,10 +53,14 @@ extension SiteBuilder {
         if name == "runlink" { return "[raw results](\(FINAL_REL)/results.json)" }
         if name == "runline" {
             let run = H["run"]
-            return "Run [\(rawDirName)](\(FINAL_REL)/summary.md) ([results.json](\(FINAL_REL)/results.json)), \(run?["date"]?.pyStr ?? ""): Strim build \(D.text("final.claim.build")), \(run?["rapid_mlx"]?.pyStr ?? "") (MTP on), \(run?["mlx_vlm"]?.pyStr ?? "") (no MTP), \(D.text("final.claim.passes")) passes of one rep, medians, 2% tie band."
+            return "Run [\(rawDirName)](\(FINAL_REL)/summary.md) ([results.json](\(FINAL_REL)/results.json)), \(run?["date"]?.pyStr ?? ""): Strim build \(D.text("final.claim.build")), \(RIVALS.map { rv in let v = D.figs["ver.h2h.\(rv)"] != nil ? D.text("ver.h2h.\(rv)") : (WIDE_NAMES[rv] ?? rv); return v + (mtpRivals().contains(rv) ? " (MTP on)" : " (no MTP)") }.joined(separator: ", ")), \(D.text("final.claim.passes")) passes of one rep, medians, 2% tie band."
+        }
+        if name == "app_figure" {
+            return appLive("app-hero-live.png") ? "![The Strim menu-bar app with a running server, captured from a live session on a 64 GB M5 Max](\(Self.APP_DIR)app-hero-live.png)" : ""
         }
         if name == "scoreboard" { return scoreboardMarkdown() }
-        if name == "hero_alt" { return heroBarsAlt(HERO_PROOF) }
+        if name == "banner_alt" { return bannerAlt() }
+        if name == "ratio_alt" { return speedAlt() }
         if name == "features" { return featuresMarkdown() }
         throw SiteError("README template: unknown block @\(name)")
     }
@@ -77,7 +84,7 @@ extension SiteBuilder {
             }
             out.append(s[i]); i += 1
         }
-        return String(out)
+        return String(out).replacingOccurrences(of: "\n\n\n", with: "\n\n")   // an empty optional block leaves no extra blank line
     }
 
     private func readmeSub(_ spec: String) throws -> String {

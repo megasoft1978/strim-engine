@@ -4,11 +4,10 @@ let NB = "\u{00A0}"
 
 /// THE head-to-head run the site and README present. Everything (figures, charts, run date, build, versions, validity text, raw-results link) is derived from this directory;
 /// to swap in a clean rerun change this one line and run `strim site build`.
-let FINAL_REL = "bench/results/h2h-final2-20261028"
+let FINAL_REL = "bench/results/h2h-final3-20261028"
 let FINAL_SRC = FINAL_REL + "/summary.md"
-let ENG_LABEL: [String: String] = ["strim": "Strim", "rapid-mlx": "rapid-mlx (MTP)", "mlx-vlm": "mlx-vlm (no MTP)"]
-let ENGINES = ["strim", "rapid-mlx", "mlx-vlm"]
-let RIVALS = ["rapid-mlx", "mlx-vlm"]
+/// Engines of the features matrix (hand-filled site/data/features.json); the head-to-head engines come from the run (SiteBuilder.ENGINES).
+let FEATURE_ENGINES = ["strim", "rapid-mlx", "mlx-vlm"]
 
 func ek(_ e: String) -> String { e }
 
@@ -35,6 +34,32 @@ public final class SiteBuilder {
     var readmeTpl: String { root + "/site/README.template.md" }
     var outReadme: String { root + "/README.md" }
     var finalDir: String { root + "/" + FINAL_REL }
+
+    /// Engines of the head-to-head run (results.json `engines`; engines[0] is the reference, Strim) and their engine_meta strings. Set by syncFinal, restored from the final block.
+    var engineList: [String] = ["strim", "rapid-mlx", "mlx-vlm"]
+    var engineMeta: [String: [String: String]] = [:]
+    var ENGINES: [String] { engineList }
+    var RIVALS: [String] { Array(engineList.dropFirst()) }
+    var ENG_LABEL: [String: String] { Dictionary(uniqueKeysWithValues: engineList.map { ($0, engLabel($0)) }) }
+
+    /// Display name: "Strim", "rapid-mlx (MTP)", "mlx-vlm (no MTP)", "oMLX (no MTP)"; the MTP suffix comes from engine_meta.mtp (yes... / no...).
+    func engLabel(_ e: String) -> String {
+        if e == engineList.first { return WIDE_NAMES[e] ?? e }
+        let name = WIDE_NAMES[e] ?? e
+        guard let m = engineMeta[e]?["mtp"]?.lowercased() else { return e == "rapid-mlx" ? "rapid-mlx (MTP)" : e == "mlx-vlm" ? "mlx-vlm (no MTP)" : name }
+        return name + (m.hasPrefix("yes") ? " (MTP)" : m.hasPrefix("no") ? " (no MTP)" : "")
+    }
+    /// Measured version of an engine in the head-to-head run (engine_meta, else the run summary title); nil when unknown.
+    func engVersion(_ e: String) -> String? {
+        if var v = engineMeta[e]?["version"], !v.isEmpty, v != "n/a" {
+            if v.lowercased().hasPrefix(e.lowercased() + " ") { v = String(v.dropFirst(e.count + 1)) }
+            return v
+        }
+        return runVersions[e]
+    }
+    var runVersions: [String: String] = [:]
+    /// The benchmarks page shows the archived eight-engine run next to the current one: it flips this while it renders the archive section.
+    var wideForceArchive = false
 
     var D: SiteData!
     /// Parsed site/data/headline.json (generated) and site/data/features.json (hand-filled): the data behind the comparison charts and matrix.
@@ -65,6 +90,7 @@ public final class SiteBuilder {
 
     func figSpan(_ i: String, withUnit: Bool = true) -> String {
         let f = fig(i)
+        if D.isNA(i) { return "<span class=\"na\" title=\"\(esc(i))\">n/a</span>" }
         if D.pending(i) { return "<span class=\"pending\" title=\"\(esc(i))\">pending</span>" }
         var t = esc(D.text(i))
         let u = f.unit
@@ -80,6 +106,7 @@ public final class SiteBuilder {
     func td(_ i: String, _ best: Bool = false, unit: Bool = false) -> String {
         let f = fig(i)
         let cls = "num" + (best ? " best" : "")
+        if D.isNA(i) { return "<td class=\"num muted\" title=\"\(esc(i))\">n/a</td>" }
         if D.pending(i) { return "<td class=\"num\"><span class=\"pending\" title=\"\(esc(i))\">pending</span></td>" }
         let uu = unit ? f.unit : ""
         let suffix: String
@@ -131,7 +158,8 @@ public final class SiteBuilder {
                 let pend = D.pending(r.id)
                 let w: Double, val: String, aria: String
                 if pend {
-                    w = 0; val = "<span class=\"val\">pending</span>"; aria = "\(r.label): pending"
+                    w = 0; let word = D.isNA(r.id) ? "n/a" : "pending"
+                    val = "<span class=\"val\">\(word)</span>"; aria = "\(r.label): \(word)"
                 } else {
                     let v = num(r.id) ?? 0
                     w = max(0.0, min(100.0, 100.0 * v / mx))

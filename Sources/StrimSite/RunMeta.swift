@@ -6,8 +6,9 @@ struct RunMeta {
     var id: String
     var date: String
     var build: String
-    var rapid: String?
-    var vlm: String?
+    var versions: [String: String] = [:]   // engine -> version read from the summary title ("rapid-mlx 0.15.7")
+    var rapid: String? { versions["rapid-mlx"] }
+    var vlm: String? { versions["mlx-vlm"] }
     var sessions: Int?          // rows of the per-session load table
     var polluted: Int?          // rows marked POLLUTED
     var maxLoad: Double?        // highest 1-min load recorded at a cell start
@@ -26,11 +27,13 @@ func firstMatch(_ pattern: String, in text: String) -> [String]? {
 }
 
 extension SiteBuilder {
-    func parseRunMeta(summary text: String, passes: Int) -> RunMeta {
+    func parseRunMeta(summary text: String, passes: Int, engines: [String] = ["strim", "rapid-mlx", "mlx-vlm"]) -> RunMeta {
         let title = pySplitlines(text).first.map { pyStrip(String($0.drop(while: { $0 == "#" || $0 == " " }))) } ?? ""
         let id = FINAL_REL.split(separator: "/").last.map(String.init) ?? FINAL_REL
         let date = firstMatch(#"\((\d{4}-\d{2}-\d{2})\)"#, in: title)?[1] ?? firstMatch(#"(\d{4})(\d{2})(\d{2})$"#, in: id).map { "\($0[1])-\($0[2])-\($0[3])" } ?? ""
-        let build = firstMatch(#"Strim ([0-9a-f]{7,40}) vs"#, in: title)?[1] ?? firstMatch(#"exactly commit ([0-9a-f]{7,40})"#, in: text)?[1] ?? "unknown"
+        let build = firstMatch(#"Strim ([0-9a-f]{7,40}) vs"#, in: title)?[1]
+            ?? firstMatch(#"(?:exactly commit|built from commit) ([0-9a-f]{7,40})"#, in: text)?[1]
+            ?? "unknown"
         var rows: [[String]] = []
         let secs = mdSections(text)
         if let k = secs.keys.first(where: { $0.hasPrefix("Completeness") }) {
@@ -43,12 +46,16 @@ extension SiteBuilder {
             if r[3].hasPrefix("POLLUTED") { polluted += 1 }
             for tok in r[2].split(whereSeparator: { $0 == "/" || $0 == " " }) { if let v = Double(tok) { maxLoad = max(maxLoad ?? 0, v) } }
         }
+        var versions: [String: String] = [:]
+        for e in engines.dropFirst() {
+            if let v = firstMatch("(?i)" + NSRegularExpression.escapedPattern(for: e) + #" (\d+\.\d+\.\d+(?:\.[A-Za-z0-9]+)?)"#, in: title)?[1] { versions[e] = v }
+        }
         var swap: Int?
         for line in pySplitlines(text) {
             if let m = firstMatch(#"swap growth max (\d+) MB"#, in: line), let v = Int(m[1]) { swap = max(swap ?? 0, v) }
         }
         return RunMeta(id: id, date: date, build: build,
-                       rapid: firstMatch(#"rapid-mlx (\d+\.\d+\.\d+)"#, in: title)?[1], vlm: firstMatch(#"mlx-vlm (\d+\.\d+\.\d+)"#, in: title)?[1],
+                       versions: versions,
                        sessions: rows.isEmpty ? nil : rows.count, polluted: rows.isEmpty ? nil : polluted, maxLoad: maxLoad, maxSwapMB: swap, passes: passes, title: title)
     }
 
@@ -59,24 +66,21 @@ extension SiteBuilder {
         }
         let total = f("final.val.sessions"), bad = f("final.val.polluted")
         if (num("final.val.polluted") ?? 0) > 0 {
-            return "Preliminary results: \(bad) of \(total) engine sessions were measured while other jobs loaded the machine (highest 1-minute load \(f("final.val.load_max"))); a clean rerun is in progress. Direction matches the earlier interleaved run."
+            return "\(f("final.val.clean")) of \(total) primary sessions were clean; \(bad) were marked polluted. Reruns are retained in the data. Claims use only cells marked claim eligible (highest primary-session 1-minute load \(f("final.val.load_max")))."
         }
-        return "All \(total) engine sessions ran on a quiet machine (highest 1-minute load \(f("final.val.load_max")))."
+        return "All \(total) primary engine sessions ran clean (highest 1-minute load \(f("final.val.load_max")))."
     }
 }
-
-/// Earlier interleaved run whose summary the validity note points at.
-let EARLIER_REL = "bench/results/h2h-final-20261028"
 
 extension SiteBuilder {
     var validityPolluted: Bool { (num("final.val.polluted") ?? 0) > 0 }
 
-    /// Validity sentence plus the link to the earlier run (HTML pages); the link only appears when the run was loaded.
+    /// Validity sentence plus links to the methodology and full cell table.
     func validityHTML() -> String {
-        validityText { n($0) } + (validityPolluted ? " <a href=\"../\(EARLIER_REL)/summary.md\">Earlier run summary</a>." : "")
+        validityText { n($0) } + " <a href=\"#method\">Method</a> and <a href=\"#r-final\">every cell</a>."
     }
 
     func validityMarkdown() -> String {
-        validityText { D.text($0) } + (validityPolluted ? " [Earlier run summary](\(EARLIER_REL)/summary.md)." : "")
+        validityText { D.text($0) } + " [Method](site/benchmarks.html#method) and [every cell](site/benchmarks.html#r-final)."
     }
 }

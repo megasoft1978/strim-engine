@@ -1,0 +1,9 @@
+strim pull 4bit -> /Users/user/.strim/models
+ok  qwen38-4bit/chat_template.jinja  0.00 GB  0.4s
+ok  qwen38-4bit/config.json  0.00 GB  0.4s
+ok  qwen38-4bit/generation_config.json  0.00 GB  0.3s
+strim pull 4bit -> /Users/user/.strim/models
+checking qwen38-4bit/chat_template.jinja
+checking qwen38-4bit/config.json
+checking qwen38-4bit/generation_config.json
+ok  qwen38-4bit/model-00001-of-00003.safetensors  5.34 GB  527.0s

@@ -1,0 +1,100 @@
+[20:13:20] lock acquired load={ 5.81 6.28 7.66 }
+[20:13:23] auth: server pid 45795 ready after ~3s
+-rw-------  1 megasoft78  staff  65 Oct 26 21:30 /Users/user/.strim/token
+600
+== health
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 32
+Connection: keep-alive
+
+{"status": "ok", "engine": "up"}== models noauth
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 116
+WWW-Authenticate: Bearer
+Connection: keep-alive
+
+{"error": {"message": "Missing or invalid API key (Authorization: Bearer <token>)", "type": "authentication_error"}}== chat noauth
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 116
+WWW-Authenticate: Bearer
+Connection: keep-alive
+
+{"error": {"message": "Missing or invalid API key (Authorization: Bearer <token>)", "type": "authentication_error"}}== chat auth
+{"id": "chatcmpl-4c17abb7b3944a999189c5d9", "object": "chat.completion", "created": 1793214803, "model": "qwen38-4bit", "choices": [{"index": 0, "message": {"role": "assistant", "content": "", "reasoning_content": "We need answer user: \"Say hi in 5 words.\" Need final exactly 5 words? Need say hi in 5 words. Could be \"Hi"}, "finish_reason": "length"}], "usage": {"prompt_tokens": 59, "completion_tokens": 32, "total_tokens": 91, "prompt_tokens_details": {"cached_tokens": 0}}}
+time 0.548196s
+== chat auth stream
+data: {"id": "chatcmpl-700397bf2dec45ce84bb8024", "object": "chat.completion.chunk", "created": 1793214803, "model": "qwen38-4bit", "choices": [{"index": 0, "delta": {}, "finish_reason": "length"}]}
+
+data: {"id": "chatcmpl-700397bf2dec45ce84bb8024", "object": "chat.completion.chunk", "created": 1793214803, "model": "qwen38-4bit", "choices": [], "usage": {"prompt_tokens": 59, "completion_tokens": 32, "total_tokens": 91, "prompt_tokens_details": {"cached_tokens": 0}}}
+
+data: [DONE]
+
+
+time 1.645292s
+== anthropic noauth
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 133
+WWW-Authenticate: Bearer
+Connection: keep-alive
+
+{"type": "error", "error": {"type": "authentication_error", "message": "Missing or invalid API key (Authorization: Bearer <token>)"}}== anthropic x-api-key
+{"id": "msg_f046a7ffadbc4deea54fe3bd", "type": "message", "role": "assistant", "model": "claude-sonnet-4-5", "content": [{"type": "text", "text": "Hello there, my friend."}], "stop_reason": "end_turn", "stop_sequence": null, "usage": {"input_tokens": 28, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "output_tokens": 7}}
+time 0.617070s
+== anthropic bearer stream
+event: message_start
+data: {"type": "message_start", "message": {"id": "msg_f72c07326ee84ddb9c2164b9", "type": "message", "role": "assistant", "model": "claude-sonnet-4-5", "content": [], "stop_reason": null, "stop_sequence": null, "usage": {"input_tokens": 19, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "output_tokens": 1}}}
+
+event: ping
+data: {"type": "ping"}
+
+event: content_block_start
+data: {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "Hello"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": " there"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": ", how are you"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "."}}
+
+event: content_block_stop
+data: {"type": "content_block_stop", "index": 0}
+
+event: message_delta
+data: {"type": "message_delta", "delta": {"stop_reason": "end_turn", "stop_sequence": null}, "usage": {"input_tokens": 19, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0, "output_tokens": 8}}
+
+event: message_stop
+data: {"type": "message_stop"}
+
+
+time 0.284778s
+== count_tokens
+{"input_tokens": 19}== wrong token
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 116
+WWW-Authenticate: Bearer
+Connection: keep-alive
+
+{"error": {"message": "Missing or invalid API key (Authorization: Bearer <token>)", "type": "authentication_error"}}== mem (footprint MB)
+    phys_footprint: 16 GB
+    phys_footprint_peak: 17 GB
+[20:13:27] stopped after 2s
+/Users/user/Desktop/Freelance/strim-engine/bench/results/install-e2e-20261028/serve-test.sh: line 11: 45796 Terminated: 15          $PWD/bench/h2h/watchdog.sh $SP $O/cell-$n $O/watch-$n.csv
+[20:13:30] noauth: server pid 46708 ready after ~3s
+[20:13:30] w3 run 1 load={ 9.61 7.05 7.92 }
+[20:13:39] w3 run 2 load={ 9.24 7.01 7.90 }
+[20:13:47] w3 run 3 load={ 8.43 6.91 7.85 }
+[20:13:56] stopped after 2s
+/Users/user/Desktop/Freelance/strim-engine/bench/results/install-e2e-20261028/serve-test.sh: line 38: 46709 Terminated: 15          $PWD/bench/h2h/watchdog.sh $SP $O/cell-$n $O/watch-$n.csv
+[20:13:56] no strim serve left
+[20:13:56] done

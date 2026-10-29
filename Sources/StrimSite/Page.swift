@@ -8,37 +8,20 @@ extension SiteBuilder {
         func A(_ s: String) { page += s }
         func F(_ cell: String, _ e: String) -> String { n(fid(cell, e)) }
 
-        A("""
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Strim benchmarks</title>
-<meta name="description" content="Strim benchmarks: every head-to-head cell against rapid-mlx and mlx-vlm on Qwen3.8-27B 4-bit, with method, caveats and engineering notes.">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css">
-</head>
-<body>
-<a class="skip" href="#main">Skip to content</a>
-<header class="site"><div class="wrap">
-<a class="brand" href="index.html">Strim</a>
-<nav aria-label="Sections"><ul>
-<li><a href="index.html">Home</a></li><li><a href="#claims">Claims</a></li><li><a href="#compare">Compare</a></li><li><a href="#features">Features</a></li><li><a href="#results">Results</a></li><li><a href="#how">How it works</a></li>
-<li><a href="#exact">Quality</a></li><li><a href="#agents">Agents</a></li><li><a href="#security">Security</a></li><li><a href="#scope">Scope</a></li>
-<li><a href="#limits">Limits</a></li><li><a href="#roadmap">Roadmap</a></li><li><a href="#reproduce">Reproduce</a></li><li><a href="#method">Method</a></li><li><a href="#license">License</a></li><li><a href="#figures">Figures</a></li>
-</ul></nav></div></header>
-<main id="main"><div class="wrap">
-
-""")
+        A(pageHead(title: "Strim benchmarks: five-engine head-to-head",
+                   desc: "Strim benchmarks: every head-to-head cell against \(listWords(RIVALS.map { WIDE_NAMES[$0] ?? $0 })) on Qwen3.8-27B 4-bit, method, caveats and engineering notes.",
+                   path: "benchmarks.html", bodyClass: "bench"))
+        A(headerHTML([("Home", "index.html"), ("Install", "index.html#install"), ("Results", "#results"), ("Wide field", "#wide"), ("GitHub", REPO_URL)], brandHref: "index.html", sub: [("Claims", "#claims"), ("Compare", "#compare"), ("Wide field", "#wide"), ("Features", "#features"), ("Results", "#results"), ("How it works", "#how"), ("Quality", "#exact"), ("Agents", "#agents"), ("Security", "#security"), ("Scope", "#scope"), ("Limits", "#limits"), ("Roadmap", "#roadmap"), ("Reproduce", "#reproduce"), ("Method", "#method"), ("License", "#license"), ("Figures", "#figures")]))
+        A("<main id=\"main\"><div class=\"wrap\">\n\n")
 
         A("<section class=\"hero\" id=\"top\" aria-labelledby=\"h-hero\"><h1 id=\"h-hero\">Strim benchmarks</h1>"
-            + "<p class=\"lede\">Every head-to-head cell of Strim against rapid-mlx and mlx-vlm on Qwen3.8-27B 4-bit, plus the method, the caveats and the engineering notes behind the <a href=\"index.html\">landing page</a>. Wins and losses are drawn the same way.</p>"
+            + "<p class=\"lede\">Every head-to-head cell of Strim against \(esc(listWords(RIVALS.map { WIDE_NAMES[$0] ?? $0 }))) on Qwen3.8-27B 4-bit, plus the method, the caveats and the engineering notes behind the <a href=\"index.html\">landing page</a>. Wins and losses are drawn the same way.</p>"
             + runBannerHTML() + "</section>\n\n")
         A(claimsSection())
         A(compareSection())
+        A(wideSectionHTML())
         A("<section id=\"results\" aria-labelledby=\"h-results\"><h2 id=\"h-results\">Results</h2>")
-        A("<p>The eight headline rows first, then every cell. Bars always start at zero. Every number carries its figure id as a hover title and appears in the <a href=\"#figures\">figure index</a>.</p>")
+        A("<p>The headline rows first, then every cell. Bars always start at zero. Every number carries its figure id as a hover title and appears in the <a href=\"#figures\">figure index</a>.</p>")
         A(glanceTableHTML())
         A(finalSection())
         A("<h3 id=\"r-cache\">Prefix cache and memory</h3>")
@@ -201,16 +184,15 @@ extension SiteBuilder {
 </section>
 
 <section id="reproduce" aria-labelledby="h-repro"><h2 id="h-repro">Reproduce</h2>
-<p>Hardware: \(esc(fig("ver.hw").raw["value"]?.pyStr ?? "None")), macOS \(esc(fig("ver.macos").raw["value"]?.pyStr ?? "None")). Versions: \(esc(fig("ver.strim_h2h").raw["value"]?.pyStr ?? "None")), \(esc(fig("ver.rapid").raw["value"]?.pyStr ?? "None")), \(esc(fig("ver.mlxvlm").raw["value"]?.pyStr ?? "None")).
+<p>Hardware: \(esc(fig("ver.hw").raw["value"]?.pyStr ?? "None")), macOS \(esc(fig("ver.macos").raw["value"]?.pyStr ?? "None")). Versions: \(esc(fig("ver.strim_h2h").raw["value"]?.pyStr ?? "None")), \(RIVALS.filter { D.figs["ver.h2h.\($0)"] != nil }.map { esc(fig("ver.h2h.\($0)").raw["value"]?.pyStr ?? "None") }.joined(separator: ", ")).
 Run GPU benchmarks one at a time in a foreground shell (the runner takes <code>lockf /tmp/strim-bench.lock</code>). Models live under <code>models/</code>; rival engines must be installed separately.</p>
 <pre><code># head-to-head: OUTDIR [passes] [engines] [cell groups]; pass 2 runs the engines in reverse order
-bench/h2h/run.sh bench/results/&lt;dir&gt; 1,2 strim,rapid-mlx,mlx-vlm g1,g2,g3
+bench/h2h/run.sh bench/results/&lt;dir&gt; 1,2 \(ENGINES.joined(separator: ",")) g1,g2,g3
 bench/h2h/summarize.sh bench/results/&lt;dir&gt;          # writes summary.md and results.json
 
 # flags used
 strim serve models/qwen38-4bit models/qwen38-mtp-4bit --port 8203 --no-auth
-rapid-mlx --no-telemetry serve models/qwen38-4bit --port 8651 --max-num-seqs 4 --speculative-config '{"method":"mtp","model":"models/qwen38-mtp-4bit"}'
-mlx_vlm.server --model models/qwen38-4bit --port 8651          # defaults: no MTP, no prefix cache
+\(rivalLaunchLines())
 
 # engine-level gates
 swift test --disable-sandbox
@@ -231,7 +213,7 @@ lockf -k /tmp/strim-bench.lock .build/release/strim soak --duration 30 --arms bo
 <li><strong>Final head-to-head.</strong> Runner <code>bench/h2h/{run,pass,summarize,watchdog,agree,agent-prompts}.sh</code> (shell, jq, awk). Per pass and engine, sessions are short and contiguous; each engine is the only GPU job; a watchdog aborts on memory limits. The figure rows are generated from <code>summary.md</code> by <code>strim site build</code> and re-checked cell by cell against it.</li>
 <li><strong>Thinking off</strong> for all engines so the chat template is identical. <strong>Decode</strong> = (completion tokens &minus; 1) / (last chunk time &minus; first chunk time) from <code>usage.completion_tokens</code>. <strong>TTFT</strong> = first non-empty output chunk minus send time.</li>
 <li><strong>Cold prompts</strong> carry a unique head so no engine can hit a cache across reps. <strong>Statistics:</strong> medians over two passes; no confidence intervals (the sample is too small).</li>
-<li><strong>Earlier 8-engine run (2026-10-26) not repeated for the final build</strong>; its tables were removed rather than shown beside the final numbers. Older in-process and cache measurements above are labelled as such.</li>
+<li><strong>Earlier 8-engine run (2026-10-26) not repeated for the final build.</strong> Only the llama.cpp and Ollama decode points are shown as hollow dashed earlier-run beads; their full historical scoreboard is not mixed with this run.</li>
 </ul>
 
 """)
@@ -249,11 +231,8 @@ lockf -k /tmp/strim-bench.lock .build/release/strim soak --duration 30 --arms bo
 <details><summary>Show all figures</summary>\(figureIndex())</details>
 </section>
 </div></main>
-<footer><div class="wrap"><p><a href="index.html">Home</a>. Strim benchmarks, generated by <code>strim site build</code> from <code>site/data/results.json</code>. Links to repository files are relative and work from a checkout. License: MIT.</p></div></footer>
-</body>
-</html>
-
 """)
+        A(footerHTML())
         _ = soakDone
         return page
     }

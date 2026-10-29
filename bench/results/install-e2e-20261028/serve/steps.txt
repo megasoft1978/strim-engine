@@ -1,0 +1,12 @@
+[20:13:20] lock acquired load={ 5.81 6.28 7.66 }
+[20:13:23] auth: server pid 45795 ready after ~3s
+-rw-------  1 megasoft78  staff  65 Oct 26 21:30 /Users/user/.strim/token
+600
+[20:13:27] stopped after 2s
+[20:13:30] noauth: server pid 46708 ready after ~3s
+[20:13:30] w3 run 1 load={ 9.61 7.05 7.92 }
+[20:13:39] w3 run 2 load={ 9.24 7.01 7.90 }
+[20:13:47] w3 run 3 load={ 8.43 6.91 7.85 }
+[20:13:56] stopped after 2s
+[20:13:56] no strim serve left
+[20:13:56] done

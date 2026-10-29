@@ -1,0 +1,3 @@
+[23:38:34] launch: /Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/mlx_vlm.server --model /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit --port 8651
+[23:41:02] launch: /Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/mlx_vlm.server --model /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit --port 8651
+[23:44:04] launch: /Users/user/Desktop/Freelance/strim-engine/.venv-sprint/bin/mlx_vlm.server --model /Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit --port 8651

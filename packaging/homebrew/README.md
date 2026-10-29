@@ -33,3 +33,8 @@ Notes
 - The formula installs the real binary and its resource bundles into `libexec` and exposes `bin/strim` as an exec wrapper. A plain symlink does not work: the MLX metallib is looked up next to the unresolved binary path.
 - Without Developer ID signing the binary is ad-hoc signed. Homebrew and curl downloads are not quarantined, so it runs; a browser-downloaded tarball may be blocked by Gatekeeper.
 - `brew audit --strict` passed in a throwaway local tap (placeholder sha256). Re-run with `--online` after publishing.
+
+Cask (menu-bar app)
+- `Casks/strim-app.rb` installs `Strim.app` from the release DMG: `brew install --cask megasoft1978/strim/strim-app`. Copy it to the tap's `Casks/` directory next to `Formula/strim.rb`. The token is `strim-app` so it does not clash with the formula `strim`.
+- `packaging/release/update-tap.sh` fills version and sha256 for both files; CI runs it when the `TAP_GITHUB_TOKEN` secret exists (see `packaging/RELEASING.md`).
+- `brew style` and `brew audit --cask --strict` pass in a throwaway local tap (placeholder sha256).

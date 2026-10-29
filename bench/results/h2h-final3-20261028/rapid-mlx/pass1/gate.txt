@@ -1,0 +1,39 @@
+# gate for cells=agree,w3,w3_32k start 22:11:07 threshold=4.5
+t=0s load=2.08 consec_ok=1 foreign=[]
+t=30s load=2.23 consec_ok=0 foreign=[  515 432.9 /usr/libexec/syspolicyd]
+t=61s load=3.46 consec_ok=0 foreign=[36072  88.3 /private/tmp/claude-501/-Users-user-Desktop-Freelance-store-games/e9412eda-2441-4925-8f1b-d0874423183d]
+t=91s load=3.16 consec_ok=0 foreign=[40671  99.8 /private/tmp/claude-501/-Users-user-Desktop-Freelance-store-games/e9412eda-2441-4925-8f1b-d0874423183d]
+t=121s load=3.36 consec_ok=0 foreign=[40671  99.7 /private/tmp/claude-501/-Users-user-Desktop-Freelance-store-games/e9412eda-2441-4925-8f1b-d0874423183d]
+t=151s load=3.65 consec_ok=0 foreign=[18641  62.9 /private/tmp/claude-501/-Users-user-Desktop-Freelance-store-games/e9412eda-2441-4925-8f1b-d0874423183d]
+t=181s load=3.66 consec_ok=1 foreign=[]
+t=211s load=3.92 consec_ok=2 foreign=[]
+t=241s load=3.63 consec_ok=3 foreign=[]
+t=271s load=3.30 consec_ok=4 foreign=[]
+t=301s load=3.14 consec_ok=5 foreign=[]
+t=331s load=2.94 consec_ok=6 foreign=[]
+GATE PASSED after 331s
+# gate for cells=w4,w4s,w6 start 22:18:26 threshold=4.5
+t=0s load=1.81 consec_ok=0 foreign=[ 2498  99.8 /private/tmp/claude-501/-Users-user-Desktop-Freelance-store-games/e9412eda-2441-4925-8f1b-d0874423183d]
+t=30s load=1.87 consec_ok=1 foreign=[]
+t=60s load=1.69 consec_ok=2 foreign=[]
+GATE PASSED after 60s
+# gate for cells=w5,replay start 22:22:06 threshold=4.5
+t=0s load=1.78 consec_ok=1 foreign=[]
+t=30s load=1.67 consec_ok=2 foreign=[]
+GATE PASSED after 30s
+# gate for cells=agree,w3,w3_32k start 00:11:08 threshold=4.5
+t=0s load=1.14 consec_ok=1 foreign=[]
+t=30s load=1.41 consec_ok=2 foreign=[]
+t=60s load=1.51 consec_ok=3 foreign=[]
+t=90s load=1.31 consec_ok=4 foreign=[]
+t=120s load=1.18 consec_ok=5 foreign=[]
+t=150s load=1.39 consec_ok=6 foreign=[]
+GATE PASSED after 150s
+# gate for cells=agree,w3,w3_32k start 02:01:24 threshold=4.5
+t=0s load=2.06 consec_ok=1 foreign=[]
+t=31s load=1.97 consec_ok=2 foreign=[]
+t=61s load=1.77 consec_ok=3 foreign=[]
+t=91s load=1.53 consec_ok=4 foreign=[]
+t=121s load=1.52 consec_ok=5 foreign=[]
+t=151s load=1.73 consec_ok=6 foreign=[]
+GATE PASSED after 151s

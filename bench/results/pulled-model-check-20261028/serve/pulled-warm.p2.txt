@@ -1,0 +1,8 @@
+```swift
+func fibonacci(_ n: Int) -> Int {
+    guard n >= 0 else { return 0 }
+    if n == 0 { return 0 }
+    if n == 1 { return 1 }
+    
+    var a = 0
+    var b = 

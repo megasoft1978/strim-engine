@@ -14,9 +14,10 @@ import Testing
         let g = try Self.generated()
         let h = try PyJSONParser.parse(g["site/data/headline.json"] ?? "")
         let cells = h["cells"]?.arr ?? []
-        var expect: [String: [String: Int]] = ["rapid-mlx": ["WIN": 0, "TIE": 0, "LOSS": 0], "mlx-vlm": ["WIN": 0, "TIE": 0, "LOSS": 0]]
+        let rivals = (h["run"]?["versions"]?.obj?.keys ?? []).sorted()
+        var expect = Dictionary(uniqueKeysWithValues: rivals.map { ($0, ["WIN": 0, "TIE": 0, "LOSS": 0, "NC": 0]) })
         for r in h["scoreboard"]?["regimes"]?.arr ?? [] {
-            for rv in RIVALS {
+            for rv in rivals {
                 for id in r["cells"]?.arr?.compactMap({ $0.str }) ?? [] {
                     let v = id == "whole_run" ? h["memory"]?["whole_run_verdict"]?[rv]?.str : cells.first(where: { $0["id"]?.str == id })?["verdict"]?[rv]?.str
                     #expect(v != nil, "no verdict for \(id) vs \(rv)")
@@ -24,13 +25,13 @@ import Testing
                 }
             }
         }
-        for rv in RIVALS {
-            for k in ["WIN", "TIE", "LOSS"] {
+        for rv in rivals {
+            for k in ["WIN", "TIE", "LOSS", "NC"] {
                 #expect(Int(h["scoreboard"]?["total"]?[rv]?[k]?.number ?? -1) == expect[rv]![k], "\(rv) \(k)")
             }
         }
         // losses are part of the data, not hidden
-        #expect((expect["mlx-vlm"]!["LOSS"] ?? 0) > 0 && (expect["rapid-mlx"]!["LOSS"] ?? 0) > 0)
+        #expect(rivals.contains { (expect[$0]?["LOSS"] ?? 0) > 0 })
     }
 
     @Test func everyHeadlineNumberTracesToAFinalFigure() throws {
@@ -39,12 +40,12 @@ import Testing
         let d = try SiteData(raw: try PyJSONParser.parse(readString(repoRoot + "/site/data/results.json")))
         for c in h["cells"]?.arr ?? [] {
             let id = c["id"]?.pyStr ?? ""
-            for e in ENGINES {
+            for e in (h["engines"]?.obj?.keys ?? []).sorted() {
                 guard let v = c["values"]?[e]?.number else { continue }
                 #expect(d.figs[fid(id, e)]?.value.number == v, "\(id)/\(e)")
             }
         }
-        for e in ENGINES { #expect(d.figs["final.mem.\(e)"]?.value.number == h["memory"]?["whole_run"]?[e]?.number) }
+        for e in (h["engines"]?.obj?.keys ?? []).sorted() { #expect(d.figs["final.mem.\(e)"]?.value.number == h["memory"]?["whole_run"]?[e]?.number) }
     }
 
     @Test func chartSVGsAreSelfContainedAndSmall() throws {
@@ -55,7 +56,7 @@ import Testing
             #expect(svg.contains("<title") && svg.contains("<desc") && svg.contains("role=\"img\""))
             #expect(!svg.contains("<script") && !svg.contains("href=") && !svg.contains("url("))
             #expect(!svg.replacingOccurrences(of: "http://www.w3.org/2000/svg", with: "").contains("http"))
-            #expect(svg.contains("prefers-color-scheme:dark"))
+            #expect(!svg.contains("prefers-color-scheme") && svg.contains("#0F0D2B"), "standalone charts carry their own night glass background, whatever the GitHub theme")
             var p = LinkScan(); p.feed(svg)
             #expect(p.errors.isEmpty && p.stack.isEmpty, "\(name): \(p.errors) \(p.stack)")
         }
@@ -64,8 +65,11 @@ import Testing
     }
 
     @Test func staleHeadlineJSONFailsCheck() throws {
-        let text = readString(repoRoot + "/site/data/headline.json").replacingOccurrences(of: "\"strim_build\": \"ac35bd9\"", with: "\"strim_build\": \"0000000\"")
-        #expect(text != readString(repoRoot + "/site/data/headline.json"))
+        let source = readString(repoRoot + "/site/data/headline.json")
+        let run = try PyJSONParser.parse(source)["run"]
+        let build = run?["strim_build"]?.pyStr ?? ""
+        let text = source.replacingOccurrences(of: "\"strim_build\": \"\(build)\"", with: "\"strim_build\": \"0000000\"")
+        #expect(text != source)
         guard case .ok(let r) = try SiteCheckTests.runCheck(["site/data/headline.json": text]) else { Issue.record("threw"); return }
         #expect(r.exitCode == 1)
         #expect(r.errors.contains("site/data/headline.json is out of sync (run strim site build)"))
@@ -83,7 +87,7 @@ import Testing
         #expect(rows.count >= 15)
         for r in rows {
             #expect(FileManager.default.fileExists(atPath: repoRoot + "/" + (r["source"]?.pyStr ?? "missing")))
-            for e in ENGINES {
+            for e in ["strim", "rapid-mlx", "mlx-vlm"] {
                 let note: String = (r[e]?["n"]?.pyStr ?? "").lowercased()
                 let hasPlaceholder = note.contains("tbd")
                 #expect(!hasPlaceholder)

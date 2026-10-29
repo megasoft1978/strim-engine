@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Strim"><defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2A2470"/><stop offset="1" stop-color="#120F33"/></linearGradient>
+<linearGradient id="cs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C7BFF"/><stop offset=".5" stop-color="#B25CFF"/><stop offset="1" stop-color="#FF4FD0"/></linearGradient>
+<filter id="cb" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.200"/></filter></defs>
+<rect width="64" height="64" rx="16" fill="url(#cg)"/><rect x=".5" y=".5" width="63" height="63" rx="15.500" fill="none" stroke="#fff" stroke-opacity=".16"/>
+<path id="cp" d="M46 19H28A8.500 8.500 0 0 0 28 36H36A8.500 8.500 0 0 1 36 53H17" fill="none" stroke="url(#cs)" stroke-width="9" stroke-linecap="round" stroke-dasharray="14.500 11" stroke-dashoffset="-1" filter="url(#cb)" opacity=".7"/>
+<path d="M46 19H28A8.500 8.500 0 0 0 28 36H36A8.500 8.500 0 0 1 36 53H17" fill="none" stroke="url(#cs)" stroke-width="8.500" stroke-linecap="round" stroke-dasharray="14.500 11" stroke-dashoffset="-1"/></svg>

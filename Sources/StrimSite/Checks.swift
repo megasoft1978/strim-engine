@@ -123,7 +123,7 @@ extension SiteBuilder {
             if h.hasPrefix("#") {
                 if !p.ids.contains(String(h.dropFirst())) { errs.append("missing anchor \(h)") }
             } else if isExternal(h) {
-                errs.append("external link (offline rule): \(h)")
+                if !(h == SITE_URL || h.hasPrefix(SITE_URL + "benchmarks.html") || h.hasPrefix(REPO_URL)) { errs.append("external link (offline rule): \(h)") }
             } else {
                 let tgt = site + "/" + (h.split(separator: "#", maxSplits: 1, omittingEmptySubsequences: false).first.map(String.init) ?? "")
                 if !fileExists(tgt) { errs.append("broken link \(h)") }
@@ -148,14 +148,16 @@ extension SiteBuilder {
         let lines = readme.split(separator: "\n", omittingEmptySubsequences: false).count
         if lines > README_MAX_LINES { errs.append("README has \(lines) lines, limit is \(README_MAX_LINES)") }
         let imgs = readme.components(separatedBy: "](site/assets/").count - 1 + readme.components(separatedBy: "](docs/img/").count - 1
-        if imgs != 1 { errs.append("README must embed exactly one chart image, found \(imgs)") }
-        guard let brew = readme.range(of: "brew install megasoft1978/strim/strim"), let pull = readme.range(of: "strim pull"), let serve = readme.range(of: "strim serve ~/.strim/models") else {
-            return errs + ["README install block lacks brew, strim pull or strim serve"]
+        let want = appLive("app-hero-live.png") ? 3 : 2   // banner, ratio chart, and the app capture when it exists
+        if imgs != want { errs.append("README must embed exactly \(want) images (banner, ratio chart\(want == 3 ? ", app capture" : "")), found \(imgs)") }
+        guard let brew = readme.range(of: "brew install megasoft1978/strim/strim"), let curl = readme.range(of: "packaging/install.sh | bash"),
+              let pull = readme.range(of: "strim pull"), let serve = readme.range(of: "strim serve ~/.strim/models") else {
+            return errs + ["README install block lacks brew, curl, strim pull or strim serve"]
         }
-        if !(brew.lowerBound < pull.lowerBound && pull.lowerBound < serve.lowerBound) { errs.append("README install order must be brew install, strim pull, strim serve") }
-        if !readme.contains("LOSS") && (H["cells"]?.arr ?? []).contains(where: { c in README_GLANCE.contains(c["id"]?.str ?? "") && RIVALS.contains { c["verdict"]?[$0]?.str == "LOSS" } }) {
-            errs.append("README results table hides a LOSS row")
+        if !(brew.lowerBound < curl.lowerBound && curl.lowerBound < pull.lowerBound && pull.lowerBound < serve.lowerBound) {
+            errs.append("README install order must be brew, curl, strim pull, strim serve")
         }
+        if !readme.contains("Not faster:") { errs.append("README lacks the \"Not faster:\" line") }
         return errs
     }
 

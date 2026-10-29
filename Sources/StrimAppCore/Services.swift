@@ -169,7 +169,11 @@ public enum HostCommand {
         return ([binary] + a).map(shellQuote).joined(separator: " ")
     }
     public static func defaultBinaries() -> [String] {
-        [AppPaths.home + "/.strim/bin/strim", "/opt/homebrew/bin/strim", "/usr/local/bin/strim"]
+        // Strim.app ships the CLI at Contents/Resources/strim (packaging/app/make-app.sh); try it first so the
+        // app works without Homebrew. Absent when running from `swift run`.
+        var c: [String] = []
+        if let r = Bundle.main.resourcePath, Bundle.main.bundleIdentifier == "dev.strim.Strim" { c.append(r + "/strim") }
+        return c + [AppPaths.home + "/.strim/bin/strim", "/opt/homebrew/bin/strim", "/usr/local/bin/strim"]
     }
     public enum Resolution: Equatable, Sendable { case found(String), missing, invalid(String) }
     /// A configured `strim_binary` is used only if valid (never silently replaced); otherwise the first valid default.

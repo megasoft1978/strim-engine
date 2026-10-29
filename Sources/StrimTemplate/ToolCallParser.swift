@@ -70,6 +70,10 @@ public struct ToolCallParser {
     private var pendingWS = ""
     private var toolLead = ""
     private var scanFrom = 0
+    // Markdown code-span tracking over emitted content, so reasoning delimiters inside code stay literal.
+    private var fenceOpen = false
+    private var inlineOpen = false
+    private var tickRun = 0
     private var currentFunction = ""
     public private(set) var toolCallCount = 0
 
@@ -204,20 +208,33 @@ public struct ToolCallParser {
                 return
 
             case .content:
-                if !detectTools {
-                    emitContent(rest(pos, buf.count), &out)
-                    pos = buf.count
-                    return
+                // Earliest of: `<tool_call>` (when tools are declared), a stray `</think>`, a fresh `<think>`.
+                var hit: (idx: Int, tag: [Unicode.Scalar])?
+                var tags = [Self.thinkClose, Self.thinkOpen]
+                if detectTools { tags.append(Self.toolOpen) }
+                for t in tags {
+                    if let i = find(t, from: pos), hit == nil || i < hit!.idx { hit = (i, t) }
                 }
-                if let i = find(Self.toolOpen, from: pos) {
-                    emitContent(rest(pos, i), &out)
-                    toolLead = pendingWS
-                    pendingWS = ""
-                    pos = i + Self.toolOpen.count
-                    state = .toolHead(inEnvelope: false)
+                if let h = hit {
+                    emitContent(rest(pos, h.idx), &out)
+                    endFenceRun()
+                    pos = h.idx + h.tag.count
+                    if h.tag == Self.toolOpen {
+                        toolLead = pendingWS
+                        pendingWS = ""
+                        state = .toolHead(inEnvelope: false)
+                    } else if inCode {
+                        emitContent(rest(h.idx, pos), &out)  // literal inside a code fence / inline code
+                    } else if h.tag == Self.thinkOpen {
+                        state = .reasoning
+                        lead = true
+                    }
+                    // else: `</think>` with no open block (e.g. model re-emits the closer after its answer): dropped
                     continue
                 }
-                let cut = buf.count - (final ? 0 : partialSuffix(Self.toolOpen))
+                var held = 0
+                if !final { for t in tags { held = max(held, partialSuffix(t)) } }
+                let cut = buf.count - held
                 emitContent(rest(pos, cut), &out)
                 pos = cut
                 return
@@ -364,7 +381,23 @@ public struct ToolCallParser {
         if !text.isEmpty { out.append(.reasoning(text)) }
     }
 
+    private var inCode: Bool { fenceOpen || inlineOpen }
+
+    private mutating func endFenceRun() {
+        if tickRun >= 3 { fenceOpen.toggle() } else if tickRun > 0, !fenceOpen { inlineOpen.toggle() }
+        tickRun = 0
+    }
+
+    private mutating func trackCode(_ s: String) {
+        for c in s.unicodeScalars {
+            if c == "`" { tickRun += 1; continue }
+            endFenceRun()
+            if c == "\n", !fenceOpen { inlineOpen = false }
+        }
+    }
+
     private mutating func emitContent(_ s: String, _ out: inout [ParserEvent]) {
+        trackCode(s)
         var text = s
         if lead {
             text = lstripPy(text)

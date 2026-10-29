@@ -1,0 +1,26 @@
+Wed Oct 28 21:51:39 CET 2026
+Now drawing from 'AC Power'
+Note: No thermal warning level has been recorded
+Note: No performance warning level has been recorded
+Note: No CPU power status has been recorded
+ lowpowermode         0
+vm.swapusage: total = 4096.00M  used = 2883.38M  free = 1212.62M  (encrypted)
+vm.loadavg: { 4.65 4.89 4.78 }
+/:
+	Indexing enabled. 
+ %CPU   PID COMMAND
+ 56.5 38503 /System/Library/ExtensionKit/Extensions/TGOnDeviceInferenceProviderService.appex/Contents/MacOS/TGOnDevic...
+ 28.0   425 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer -daemon
+ 24.0   807 /usr/libexec/aned
+ 21.4 40453 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059...
+ 11.2  1230 /Applications/Stats.app/Contents/MacOS/Stats
+ 10.7 26994 /usr/libexec/textunderstandingd
+  5.6 99377 /System/Library/PrivateFrameworks/ModelCatalogRuntime.framework/Versions/A/modelcatalogd
+  4.5 12415 /System/Library/PrivateFrameworks/MediaAnalysis.framework/Versions/A/mediaanalysisd
+  4.2 71311 /Users/user/.local/bin/claude --dangerously-skip-permissions
+  3.1 83709 /usr/libexec/sysmond
+  3.1 82491 /bin/zsh -c source /Users/user/.claude-work/shell-snapshots/snapshot-zsh-1793016849813-0t2n0u.sh 2>...
+a8f182448dd09cd85fa91374d37810185f947ea0
+
+engine-source diff vs ee9f9d8: empty if nothing above
+strim 0.1.1

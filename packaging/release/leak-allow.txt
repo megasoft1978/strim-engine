@@ -1,0 +1,17 @@
+# Redactor tests intentionally use synthetic marker strings to verify redaction behavior.
+Tests/**/Redactor*:*
+# These exact tests contain synthetic fake token/key values used as redactor fixtures.
+Tests/StrimMCPTests/ToolsTests.swift:ANTHROPIC_TOKEN
+Tests/StrimMCPTests/ResultRenderTests.swift:GITHUB_TOKEN
+Tests/StrimHarnessTests/ChatSessionTests.swift:PRIVATE_KEY
+# The implementation contains token/key patterns as regex source, not credentials.
+Sources/StrimHarness/Redactor.swift:AWS_KEY
+Sources/StrimHarness/Redactor.swift:GITHUB_TOKEN
+Sources/StrimHarness/RunProfile.swift:PRIVATE_KEY
+# This review line documents the prior scanner's synthetic fixture findings.
+docs/SECURITY-REVIEW-2026-10-28-release.md:GITHUB_PAT
+docs/SECURITY-REVIEW-2026-10-28-release.md:GITHUB_TOKEN
+docs/SECURITY-REVIEW-2026-10-28-release.md:AWS_KEY
+docs/SECURITY-REVIEW-2026-10-28-release.md:HUGGINGFACE_TOKEN
+# Redactor.swift contains the detection regex as implementation source.
+Sources/StrimHarness/Redactor.swift:GITHUB_PAT

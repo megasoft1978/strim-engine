@@ -1,0 +1,5 @@
+1793227226,1793226964-69868,shutdown,leftover_suspect,pid 72801 sleep 30
+1793227408,1793227232-73197,shutdown,leftover_suspect,pid 74630 /bin/bash ./run39.sh
+1793227408,1793227232-73197,shutdown,leftover_suspect,pid 75283 /Users/user/.codex/computer-use/Codex Computer Use.app/Contents/MacOS/SkyComputerUse
+1793227408,1793227232-73197,shutdown,leftover_suspect,pid 82630 sleep 30
+1793227738,1793227413-83093,shutdown,leftover_suspect,pid 87429 sleep 30

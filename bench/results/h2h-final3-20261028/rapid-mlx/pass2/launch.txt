@@ -1,0 +1,3 @@
+[23:52:34] launch: rapid-mlx --no-telemetry serve models/qwen38-4bit --port 8651 --max-num-seqs 4 --speculative-config \{\"method\":\"mtp\"\,\"model\":\"models/qwen38-mtp-4bit\"\}
+[23:54:51] launch: rapid-mlx --no-telemetry serve models/qwen38-4bit --port 8651 --max-num-seqs 4 --speculative-config \{\"method\":\"mtp\"\,\"model\":\"models/qwen38-mtp-4bit\"\}
+[23:57:59] launch: rapid-mlx --no-telemetry serve models/qwen38-4bit --port 8651 --max-num-seqs 4 --speculative-config \{\"method\":\"mtp\"\,\"model\":\"models/qwen38-mtp-4bit\"\}

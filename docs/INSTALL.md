@@ -20,7 +20,20 @@ curl -fsSL https://raw.githubusercontent.com/megasoft1978/strim-engine/main/pack
 
 The tarball is checked against its published SHA-256 before anything is installed.
 
-## 3. From source (developers)
+## 3. Download the DMG (menu-bar app)
+
+Download `Strim-<version>-arm64.dmg` from the [latest release](https://github.com/megasoft1978/strim-engine/releases/latest), open it and drag **Strim** to **Applications**. Or: `brew install --cask megasoft1978/strim/strim-app`.
+
+The app contains the `strim` CLI; model weights are not included (`strim pull`, or the Settings tab).
+
+**Not notarized yet.** The DMG is ad-hoc signed only, so a copy downloaded in a browser carries the quarantine flag and macOS Gatekeeper blocks the first launch ("Apple could not verify..."). Pick one:
+
+- System Settings > Privacy & Security > scroll to the Strim message > **Open Anyway** (macOS 15 and newer; on macOS 14 right-click the app > Open also works).
+- Or in Terminal: `xattr -dr com.apple.quarantine /Applications/Strim.app`
+
+This goes away once the release is signed with a Developer ID certificate and notarized (owner-gated, see `packaging/RELEASING.md`). Homebrew and curl installs are not quarantined and show no warning.
+
+## 4. From source (developers)
 
 Needs Xcode with the Swift 6 toolchain.
 
@@ -52,7 +65,7 @@ Re-running `strim pull` skips files that are already complete. The first run ove
 
 Memory: only 4-bit has a measured peak (about 31 GB on a 64 GB M5 Max). 6-bit, 8-bit and oq4e are larger on disk and their peaks are not measured.
 
-`strim --version` prints the version and the built-in model defaults without touching the GPU.
+`strim --version` prints one line (`strim 0.1.0`). `strim doctor` adds the runtime config (model, quant, context, wired limit), then the GPU smoke test.
 
 ### Fallback for flaky links
 
@@ -83,6 +96,10 @@ curl -s http://127.0.0.1:8203/v1/chat/completions -H "Authorization: Bearer $TOK
 ```
 
 The server binds to 127.0.0.1 only. State lives in `~/.strim` (token, control-token, packs, jobs, worktrees, logs, cache); uninstalling does not remove it.
+
+Thinking is on by default, so a small `max_tokens` (such as 32) can return empty `content` with the text under `reasoning_content` and `finish_reason` `length`. To turn it off, send `"chat_template_kwargs": {"enable_thinking": false}` in the request body (or top-level `enable_thinking`), as read in `Sources/StrimServer/ChatRequest.swift`.
+
+`strim bench http` (`run`, `scoreboard`) sends no bearer token and starts its own `serve --no-auth` engines, so against a token-protected server restart that server with `--no-auth` (loopback only) for the run; `needle` is the only bench subcommand with `--token-file`.
 
 ## Requirements
 

@@ -1,29 +1,25 @@
+![{{@banner_alt}}](site/assets/banner.svg)
+
 # Strim
+One Swift binary that runs Qwen3.8-27B on your Mac like a server: a local backend for Claude Code and Codex.
 
-**Run Qwen3.8-27B on your Mac like a server. One Swift binary, a local backend for Claude Code and Codex.**
+![{{@ratio_alt}}](site/assets/h2h-ratio.svg)
+{{@lossline}}
 
-![MIT](https://img.shields.io/badge/license-MIT-blue) ![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-macOS%2014%2B-lightgrey) ![Swift 6](https://img.shields.io/badge/Swift-6-orange)
+{{@app_figure}}
 
-![{{@hero_alt}}](site/assets/h2h-hero.svg)
-
-*Own benchmark against rapid-mlx and mlx-vlm: Qwen3.8-27B 4-bit, 64 GB M5 Max (the only machine tested), medians of {{final.claim.passes|n}} passes ({{@runlink}}).*
-
+**Homebrew**
 ```sh
 brew install megasoft1978/strim/strim
-strim pull        # Qwen3.8-27B 4-bit + MTP head, about 15 GB, resumable
+brew install --cask megasoft1978/strim/strim-app   # optional menu-bar app
+```
+**curl**
+```sh
+curl -fsSL https://raw.githubusercontent.com/megasoft1978/strim-engine/main/packaging/install.sh | bash
+```
+Then, either way:
+```sh
+strim pull
 strim serve ~/.strim/models/qwen38-4bit ~/.strim/models/qwen38-mtp-4bit --port 8203
 ```
-
-Then point Claude Code at `ANTHROPIC_BASE_URL=http://127.0.0.1:8203`; the bearer token is in `~/.strim/token`. Other install paths and Codex: [INSTALL](docs/INSTALL.md), [CLIENTS](docs/CLIENTS.md).
-
-{{@proofs}}
-
-{{@notfaster}}
-
-> {{@validity}}
-
-{{@glance}}
-
-[Every cell and the method](site/benchmarks.html) · [Install](docs/INSTALL.md) · [Clients](docs/CLIENTS.md) · [Architecture](docs/ARCHITECTURE.md) · [Benchmarking](docs/BENCH.md) · [Security](SECURITY.md)
-
-MIT, see [LICENSE](LICENSE). Third-party notices: [NOTICE](NOTICE).
+[Site](https://megasoft1978.github.io/strim-engine/) · [Benchmarks](site/benchmarks.html) · [Install](docs/INSTALL.md) · [DMG](https://github.com/megasoft1978/strim-engine/releases/latest) (not notarized yet) · MIT, see [LICENSE](LICENSE).

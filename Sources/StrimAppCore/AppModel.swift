@@ -37,6 +37,8 @@ public struct SourceCount: Equatable, Sendable, Identifiable {
 public final class AppModel: ObservableObject {
     @Published public private(set) var connection: ConnectionState = .connecting
     @Published public private(set) var jobs: [JobSummary] = []
+    /// Jobs list default: active jobs plus the last 24 h. The model (`jobs`) always keeps everything.
+    @Published public var showAllJobs = false
     @Published public private(set) var selectedJob: JobDetail?
     /// Analysis of `selectedJob.patch` (cached; recomputed on selection).
     @Published public private(set) var selectedAnalysis: PatchAnalysis?
@@ -83,6 +85,9 @@ public final class AppModel: ObservableObject {
     private var loop: Task<Void, Never>?
     private var pendingText = ""
     private var pendingRole: ChatMessage.Role?
+    /// First message of the current assistant text run and its raw (tag-bearing) text; see `ThinkSplitter`.
+    private var rawBase: Int?
+    private var rawText = ""
     private var flushTask: Task<Void, Never>?
     private var turnLedger = TokenLedger()
     private var turnStart: Date?
@@ -172,6 +177,7 @@ public final class AppModel: ObservableObject {
     }
     /// Background jobs are paused on the host (chat is never paused).
     public var jobsPaused: Bool { status?.jobsPaused == true }
+    public var jobListView: JobListFilter.Result { JobListFilter.apply(jobs, now: clock.now(), showAll: showAllJobs, keep: selectedJob?.id) }
     /// Pause when running, resume when paused.
     public var pauseAvailability: Availability {
         guard status != nil else { return .no("Host offline") }
@@ -445,7 +451,7 @@ public final class AppModel: ObservableObject {
             new.projectPath = dir
             new.recentProjects = ([dir] + new.recentProjects.filter { $0 != dir }).prefix(AppSettings.maxRecents).map { $0 }
             update(settings: new)
-            chat = .unknown; chatMessages = []; chatGenerating = false
+            chat = .unknown; chatMessages = []; chatGenerating = false; rawBase = nil
             return true
         }
     }
@@ -570,6 +576,7 @@ public final class AppModel: ObservableObject {
     public func sendChat(_ text: String) async {
         guard case .ready(let s) = chat, !text.trimmingCharacters(in: .whitespaces).isEmpty, !chatGenerating else { return }
         flushPending()
+        rawBase = nil
         chatMessages.append(ChatMessage(role: .user, text: text))
         chatGenerating = true; turnLedger = TokenLedger(); turnStart = clock.now()
         await run("Chat") {
@@ -608,10 +615,12 @@ public final class AppModel: ObservableObject {
         case .reasoning: appendStreamed(.reasoning, d.text)
         case .toolCall:
             flushPending()
+            rawBase = nil
             let card = ToolCard.call(d.text)
             chatMessages.append(ChatMessage(role: .tool, text: d.text, tool: card))
         case .toolResult:
             flushPending()
+            rawBase = nil
             let r = ToolCard.parseResult(d.text)
             if let i = chatMessages.lastIndex(where: { $0.role == .tool && $0.tool?.finished == false && ($0.tool?.name == r.name || r.name.isEmpty) }) {
                 chatMessages[i].tool?.result = r.summary; chatMessages[i].tool?.isError = r.isError
@@ -620,7 +629,8 @@ public final class AppModel: ObservableObject {
                 chatMessages.append(ChatMessage(role: .tool, text: d.text, tool: ToolCard(name: r.name, result: r.summary, isError: r.isError)))
             }
         case .done:
-            flushPending()
+            flushPending(final: true)
+            rawBase = nil
             finishTurn()
         }
     }
@@ -635,16 +645,32 @@ public final class AppModel: ObservableObject {
         }
     }
 
-    private func flushPending() {
+    private func flushPending(final: Bool = false) {
         flushTask?.cancel(); flushTask = nil
-        guard let role = pendingRole, !pendingText.isEmpty else { pendingRole = nil; pendingText = ""; return }
+        guard let role = pendingRole, !pendingText.isEmpty else { pendingRole = nil; pendingText = ""; if final { resplitAssistant(final: true) }; return }
         let text = pendingText
         pendingRole = nil; pendingText = ""
+        if role == .assistant { rawText = (rawBase == nil ? "" : rawText) + text; if rawBase == nil { rawBase = chatMessages.count }; resplitAssistant(final: final); return }
+        rawBase = nil
         if let last = chatMessages.last, last.role == role {
             chatMessages[chatMessages.count - 1].text += text
         } else {
             chatMessages.append(ChatMessage(role: role, text: text))
         }
+    }
+
+    /// Rebuilds the messages of the current assistant run from its raw text: `<think>` blocks become reasoning messages.
+    private func resplitAssistant(final: Bool) {
+        guard let base = rawBase, base <= chatMessages.count else { return }
+        let segs = ThinkSplitter.split(rawText, final: final)
+        let old = Array(chatMessages[base...])
+        var rebuilt: [ChatMessage] = []
+        for (k, seg) in segs.enumerated() {
+            var m = ChatMessage(role: seg.isReasoning ? .reasoning : .assistant, text: seg.text)
+            if k < old.count, old[k].role == m.role { m.id = old[k].id }
+            rebuilt.append(m)
+        }
+        chatMessages.replaceSubrange(base..., with: rebuilt)
     }
 }
 

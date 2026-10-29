@@ -17,9 +17,12 @@ extension SiteBuilder {
         let run = H["run"]
         let mem = H["memory"]
         let wr = mem?["whole_run"]
-        let mv = mem?["whole_run_verdict"]
-        var o = "<section id=\"compare\" aria-labelledby=\"h-compare\"><h2 id=\"h-compare\">Strim vs rapid-mlx vs mlx-vlm at a glance</h2>"
-        o += "<p>Head-to-head of \(esc(run?["date"]?.pyStr ?? "")) (\(esc(run?["id"]?.pyStr ?? ""))): Strim build \(esc(run?["strim_build"]?.pyStr ?? "")), \(esc(run?["rapid_mlx"]?.pyStr ?? "")) with MTP on, \(esc(run?["mlx_vlm"]?.pyStr ?? "")) with server defaults, "
+        var o = "<section id=\"compare\" aria-labelledby=\"h-compare\"><h2 id=\"h-compare\">Strim vs \(esc(listWords(RIVALS.map { WIDE_NAMES[$0] ?? $0 }))) at a glance</h2>"
+        let rivalFacts = RIVALS.map { e in
+            let version = engVersion(e).map { " \($0)" } ?? ""
+            return "\(esc(engLabel(e)))\(esc(version))"
+        }.joined(separator: ", ")
+        o += "<p>Head-to-head of \(esc(run?["date"]?.pyStr ?? "")) (\(esc(run?["id"]?.pyStr ?? ""))): Strim build \(esc(run?["strim_build"]?.pyStr ?? "")) (\(esc(engineMeta["strim"]?["version"] ?? ""))); rivals: \(rivalFacts). "
             + "\(esc(run?["model"]?.pyStr ?? "")) on \(esc(run?["machine"]?.pyStr ?? "")), \(run?["passes"]?.pyStr ?? "") passes of one rep. "
             + "Wins and losses are drawn the same way. A verdict is WIN or LOSS only outside a \(run?["tie_band_pct"]?.pyStr ?? "2")% band. "
             + "Only numbers measured on that build are shown; work done since is not re-benchmarked and not included.</p>"
@@ -29,14 +32,14 @@ extension SiteBuilder {
         o += hvFigure("Speed-up of Strim over each rival, per measurement", "Right of 1\u{00d7} Strim is faster, left it is slower. Higher is always better: for seconds the ratio is inverted.", "Speed-up chart, scrolls sideways on narrow screens", heroSVG(standalone: false))
         o += "<h3 id=\"c-memory\">Memory</h3>"
         let lowest = mem?["strim_lowest_cells"]?.pyStr ?? "0", total = mem?["cells_total"]?.pyStr ?? "0"
-        o += "<p>Peak physical footprint over the whole run: Strim \(fnum(wr?["strim"]?.number ?? 0))&nbsp;GB, rapid-mlx \(fnum(wr?["rapid-mlx"]?.number ?? 0))&nbsp;GB, mlx-vlm \(fnum(wr?["mlx-vlm"]?.number ?? 0))&nbsp;GB "
-            + "(\(esc(mv?["rapid-mlx"]?.pyStr ?? "")) against rapid-mlx, \(esc(mv?["mlx-vlm"]?.pyStr ?? "")) against mlx-vlm). "
-            + (lowest == total ? "Strim has the lowest peak in every workload cell.</p>" : "Per workload cell the picture is mixed: Strim has the lowest peak in \(lowest) of \(total) cells; the whole-run figure is each engine's largest cell.</p>")
+        o += "<p>Peak physical footprint over the whole run: " + ENGINES.map { "\(esc(WIDE_NAMES[$0] ?? $0)) \(fnum(wr?[$0]?.number ?? 0))&nbsp;GB" }.joined(separator: ", ") + ". "
+            + "Claims compare each engine with Strim; the whole-run values are measured maxima, not steady-state memory.</p>"
+        if lowest != total { o += "<p>Strim has the lowest peak in \(lowest) of \(total) workload cells.</p>" }
         o += hvFigure("Peak memory footprint by workload (GB)", "Engine process tree, includes Metal buffers; maximum over passes and sessions. Nobody swapped.", "Memory chart, scrolls sideways on narrow screens", memorySVG(standalone: false))
         o += "<h3 id=\"c-latency\">Latency</h3>"
         func cnt(_ prefix: String, _ rv: String, _ v: String) -> String { let (n, t) = countVerdict(prefix, rv, v); return "\(n) of \(t)" }
-        o += "<p>Median first token (p50): Strim WINs \(cnt("p50", "rapid-mlx", "WIN")) cells against rapid-mlx and \(cnt("p50", "mlx-vlm", "WIN")) against mlx-vlm. "
-            + "Tail (p95): WIN \(cnt("p95", "rapid-mlx", "WIN")) and LOSS \(cnt("p95", "rapid-mlx", "LOSS")) against rapid-mlx; WIN \(cnt("p95", "mlx-vlm", "WIN")) and LOSS \(cnt("p95", "mlx-vlm", "LOSS")) against mlx-vlm. "
+        o += "<p>Median first-token WIN counts (p50): " + RIVALS.map { "\(esc(WIDE_NAMES[$0] ?? $0)) \(cnt("p50", $0, "WIN"))" }.joined(separator: "; ") + ". "
+            + "Tail p95 WIN/LOSS counts: " + RIVALS.map { "\(esc(WIDE_NAMES[$0] ?? $0)) \(cnt("p95", $0, "WIN"))/\(cnt("p95", $0, "LOSS"))" }.joined(separator: "; ") + ". "
             + "With four or eight requests per cell p95 is the slowest request, and the rivals deliver first tokens batch-synchronously, so their p50 is a weaker number than Strim's.</p>"
         o += hvFigure("First-token latency (TTFT) at c=4 and c=8, seconds", "Median (p50) and 95th percentile (p95). Lower is better; bars start at zero, each prompt class has its own scale.", "Latency chart, scrolls sideways on narrow screens", latencySVG(standalone: false))
         o += "</section>\n\n"

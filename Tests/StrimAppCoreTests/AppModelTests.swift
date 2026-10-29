@@ -247,6 +247,26 @@ private func awaitSubscribed(_ m: AppModel, _ fake: FakeControlClient) async -> 
         m.stop()
     }
 
+    @Test func thinkTagsSplitAcrossChunksBecomeReasoning() async {
+        let fake = FakeControlClient()
+        let m = makeModel(fake)
+        m.start()
+        #expect(await waitFor { m.connection.isConnected })
+        await m.probeChat()
+        guard case .ready(let s) = m.chat else { Issue.record("chat not ready"); return }
+        await m.sendChat("go")
+        for c in ["Plan the step.<", "/thi", "nk>\n\nThe ", "answer.\n```diff\n-a\n+b\n```\n</think>"] {
+            await fake.emit(.chatDelta(ChatDelta(sessionID: s.sessionID, kind: .text, text: c)))
+        }
+        await fake.emit(.chatDelta(ChatDelta(sessionID: s.sessionID, kind: .done, text: "ok")))
+        #expect(await waitFor { !m.chatGenerating })
+        #expect(m.chatMessages.map(\.role) == [.user, .reasoning, .assistant])
+        #expect(m.chatMessages[1].text == "Plan the step.")
+        #expect(m.chatMessages[2].text == "The answer.\n```diff\n-a\n+b\n```\n")
+        #expect(!m.chatMessages.contains { $0.text.contains("think>") })
+        m.stop()
+    }
+
     @Test func startHostLaunchesAndReconnects() async {
         let launcher = MockLauncher(.started(pid: 4242))
         let m = makeModel(FailingClient(error: ControlClientError.hostUnreachable("refused")), clock: RecordingClock(auto: 0), launcher: launcher)

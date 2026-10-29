@@ -1,0 +1,61 @@
+session 22:28:42 id=1793222772-10446 engine=mlx-vlm cells=agree,w3,w3_32k load={ 1.56 1.69 2.36 } swap=total = 4096.00M  used = 2731.19M  free = 1364.81M  (encrypted)
+[22:28:49] engine pid 12009 ready after 7s port 8651 tree=12009 
+[22:28:49] CELL warmup load={ 1.63 1.70 2.35 } timeout=900s
+[22:28:54] CACHELOG warmup server_log_cache_lines=1
+[22:28:54] CELL warmup rc=0 5s memory_aborted=no
+[22:28:54] CELL agree load={ 1.74 1.72 2.36 } timeout=900s
+[22:29:11] CACHELOG agree server_log_cache_lines=8
+[22:29:11] CELL agree rc=0 17s memory_aborted=no
+[22:29:12] CELL w3 load={ 1.80 1.73 2.35 } timeout=900s
+[22:29:49] CACHELOG w3 server_log_cache_lines=2
+[22:29:49] CELL w3 rc=0 38s memory_aborted=no
+[22:29:49] CELL w3_32k load={ 2.89 2.04 2.44 } timeout=900s
+[22:30:29] CACHELOG w3_32k server_log_cache_lines=1
+[22:30:29] CELL w3_32k rc=0 40s memory_aborted=no
+[22:30:36] FLAG shutdown leftover_suspect pid 13523 sleep 30
+end 22:30:36 load={ 1.83 1.86 2.35 } swap=total = 4096.00M  used = 2731.19M  free = 1364.81M  (encrypted)
+session 22:31:12 id=1793223041-13932 engine=mlx-vlm cells=w4,w4s,w6 load={ 1.74 1.82 2.31 } swap=total = 4096.00M  used = 2731.19M  free = 1364.81M  (encrypted)
+[22:31:17] engine pid 14269 ready after 5s port 8651 tree=14269 
+[22:31:17] CELL warmup load={ 1.84 1.84 2.31 } timeout=900s
+[22:31:22] CACHELOG warmup server_log_cache_lines=1
+[22:31:22] CELL warmup rc=0 5s memory_aborted=no
+[22:31:22] CELL w4 load={ 1.69 1.81 2.30 } timeout=900s
+[22:32:18] CACHELOG w4 server_log_cache_lines=12
+[22:32:18] CELL w4 rc=0 56s memory_aborted=no
+[22:32:18] CELL w4s load={ 1.63 1.75 2.25 } timeout=900s
+[22:32:40] CACHELOG w4s server_log_cache_lines=12
+[22:32:40] CELL w4s rc=0 22s memory_aborted=no
+[22:32:40] CELL w6 load={ 1.52 1.71 2.21 } timeout=900s
+[22:33:31] CACHELOG w6 server_log_cache_lines=12
+[22:33:31] CELL w6 rc=0 51s memory_aborted=no
+[22:33:39] FLAG shutdown leftover_suspect pid 16143 sleep 30
+end 22:33:39 load={ 1.57 1.68 2.17 } swap=total = 4096.00M  used = 2731.19M  free = 1364.81M  (encrypted)
+session 22:34:14 id=1793223224-16609 engine=mlx-vlm cells=w5,replay load={ 1.47 1.63 2.13 } swap=total = 4096.00M  used = 2731.19M  free = 1364.81M  (encrypted)
+[22:34:19] engine pid 16935 ready after 5s port 8651 tree=16935 
+[22:34:19] CELL warmup load={ 1.59 1.66 2.14 } timeout=900s
+[22:34:24] CACHELOG warmup server_log_cache_lines=1
+[22:34:24] CELL warmup rc=0 5s memory_aborted=no
+[22:34:24] CELL w5 load={ 1.62 1.66 2.14 } timeout=900s
+[22:35:38] CACHELOG w5 server_log_cache_lines=4
+[22:35:38] CELL w5 rc=0 74s memory_aborted=no
+[22:35:38] CELL replay load={ 1.50 1.58 2.06 } timeout=900s
+[22:38:59] CACHELOG replay server_log_cache_lines=8
+[22:38:59] CELL replay rc=0 201s memory_aborted=no
+[22:39:07] FLAG shutdown leftover_suspect pid 20758 sleep 30
+end 22:39:07 load={ 1.84 1.53 1.92 } swap=total = 4096.00M  used = 2731.19M  free = 1364.81M  (encrypted)
+session 00:19:20 id=1793229380-9676 engine=mlx-vlm cells=w4,w4s,w6 load={ 1.36 1.36 1.37 } swap=total = 9216.00M  used = 7804.38M  free = 1411.62M  (encrypted)
+[00:19:28] engine pid 11362 ready after 8s port 8651 tree=11362 
+[00:19:28] CELL warmup load={ 1.81 1.45 1.40 } timeout=900s
+[00:19:33] CACHELOG warmup server_log_cache_lines=1
+[00:19:33] CELL warmup rc=0 5s memory_aborted=no
+[00:19:33] CELL w4 load={ 1.67 1.43 1.39 } timeout=900s
+[00:20:29] CACHELOG w4 server_log_cache_lines=12
+[00:20:29] CELL w4 rc=0 56s memory_aborted=no
+[00:20:29] CELL w4s load={ 1.53 1.40 1.38 } timeout=900s
+[00:20:51] CACHELOG w4s server_log_cache_lines=12
+[00:20:51] CELL w4s rc=0 22s memory_aborted=no
+[00:20:51] CELL w6 load={ 1.71 1.46 1.40 } timeout=900s
+[00:21:42] CACHELOG w6 server_log_cache_lines=12
+[00:21:42] CELL w6 rc=0 51s memory_aborted=no
+[00:21:49] FLAG shutdown leftover_suspect pid 13271 sleep 30
+end 00:21:49 load={ 1.85 1.53 1.43 } swap=total = 9216.00M  used = 7796.38M  free = 1419.62M  (encrypted)

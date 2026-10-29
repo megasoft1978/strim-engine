@@ -1,0 +1,3 @@
+[00:04:05] launch: /tmp/strim-build-final4/release/strim serve models/qwen38-4bit models/qwen38-mtp-4bit --port 8203 --no-auth
+[00:06:11] launch: /tmp/strim-build-final4/release/strim serve models/qwen38-4bit models/qwen38-mtp-4bit --port 8203 --no-auth
+[00:09:11] launch: /tmp/strim-build-final4/release/strim serve models/qwen38-4bit models/qwen38-mtp-4bit --port 8203 --no-auth

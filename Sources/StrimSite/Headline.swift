@@ -73,7 +73,7 @@ extension SiteBuilder {
         var verdicts: [String: [String: String]] = [:]
         for c in cells {
             let regime = REGIMES.first(where: { $0.cells.contains(c.id) })?.id ?? (c.id.hasSuffix("_tt") ? "prefill_ttft" : "other")
-            var values = JObject(), speed = JObject(), verdict = JObject()
+            var values = JObject(), speed = JObject(), verdict = JObject(), claim = JObject()
             for e in ENGINES { if let v = D.figs[fid(c.id, e)]?.value.number { values[e] = .double(v) } }
             let s = values["strim"]?.number
             for rv in RIVALS {
@@ -81,26 +81,28 @@ extension SiteBuilder {
                     speed[rv] = jround(c.better == "lower" ? r / s : s / r, 3)
                 }
                 if let v = D.figs[fverdict(c.id, rv)]?.value.str { verdict[rv] = .string(v); verdicts[c.id, default: [:]][rv] = v }
+                if let why = D.raw["final"]?["not_claimable"]?[c.id]?[rv]?.str { claim[rv] = .string(why) }
             }
             cellJSON.append(jobj([
                 ("id", .string(c.id)), ("regime", .string(regime)), ("label", .string(c.label)), ("short", .string(SHORT[c.id] ?? c.label)),
                 ("unit", .string(c.unit)), ("better", .string(c.better)),
-                ("values", .object(values)), ("speedup", .object(speed)), ("verdict", .object(verdict)),
+                ("values", .object(values)), ("speedup", .object(speed)), ("verdict", .object(verdict)), ("not_claimable", .object(claim)),
                 ("source", .string("\(FINAL_SRC) section Results, row \(c.label)")),
             ]))
         }
         // scoreboard: verdict counts per regime and rival
         func tally(_ ids: [String], _ rv: String) -> PyJSON {
-            var w = 0, t = 0, l = 0
+            var w = 0, t = 0, l = 0, nc = 0
             for id in ids {
                 switch verdicts[id]?[rv] ?? "" {
                 case "WIN": w += 1
                 case "TIE": t += 1
                 case "LOSS": l += 1
+                case "NC": nc += 1
                 default: break
                 }
             }
-            return jobj([("WIN", .int(w)), ("TIE", .int(t)), ("LOSS", .int(l))])
+            return jobj([("WIN", .int(w)), ("TIE", .int(t)), ("LOSS", .int(l)), ("NC", .int(nc))])
         }
         // memory: whole run from the figures, per-cell from summary.md
         guard let text = readText(finalDir + "/summary.md") else { throw SiteError("headline: cannot read \(FINAL_SRC)") }
@@ -118,14 +120,13 @@ extension SiteBuilder {
             guard let name = row.first, name != "**whole run**" else { continue }
             var vals = JObject()
             for e in ENGINES {
-                guard let ci = mh.firstIndex(of: "\(e) footprint / RSS"), ci < row.count, let mbText = row[ci].split(separator: " ").first, let mbv = Double(mbText) else {
-                    throw SiteError("headline: cannot parse memory cell for \(name)/\(e)")
-                }
+                guard let ci = mh.firstIndex(of: "\(e) footprint / RSS"), ci < row.count else { throw SiteError("headline: no memory column for \(e)") }
+                if row[ci].hasPrefix("n/a") { continue }   // the engine never ran this cell (or its footprint was unreadable)
+                guard let mbText = row[ci].split(separator: " ").first, let mbv = Double(mbText) else { throw SiteError("headline: cannot parse memory cell for \(name)/\(e)") }
                 vals[e] = jround(mbv / 1000, 1)
             }
             counted += 1
-            let sv = vals["strim"]?.number ?? 0
-            if RIVALS.allSatisfy({ sv < (vals[$0]?.number ?? 0) }) { lowest += 1 }
+            if let sv = vals["strim"]?.number, RIVALS.allSatisfy({ vals[$0]?.number.map { sv < $0 } ?? true }) { lowest += 1 }
             memCells.append(jobj([("id", .string(name)), ("label", .string(MEM_LABEL[name] ?? name)), ("values", .object(vals))]))
         }
         let abort: PyJSON = firstMatch(#"(\d+) GB (?:abort )?limit"#, in: text).flatMap { Int($0[1]) }.map { PyJSON.int($0) } ?? .null
@@ -135,9 +136,9 @@ extension SiteBuilder {
             ("strim_lowest_cells", .int(lowest)), ("cells_total", .int(counted)), ("cells", .array(memCells)),
         ])
         var regimeJSON: [PyJSON] = []
-        var tot: [String: [String: Int]] = ["rapid-mlx": ["WIN": 0, "TIE": 0, "LOSS": 0], "mlx-vlm": ["WIN": 0, "TIE": 0, "LOSS": 0]]
+        var tot: [String: [String: Int]] = Dictionary(uniqueKeysWithValues: RIVALS.map { ($0, ["WIN": 0, "TIE": 0, "LOSS": 0, "NC": 0]) })
         func addTotals(_ rv: String, _ t: PyJSON) {
-            for k in ["WIN", "TIE", "LOSS"] { tot[rv]![k]! += Int(t[k]?.number ?? 0) }
+            for k in ["WIN", "TIE", "LOSS", "NC"] { tot[rv]![k]! += Int(t[k]?.number ?? 0) }
         }
         for r in REGIMES {
             var vs = JObject()
@@ -151,7 +152,7 @@ extension SiteBuilder {
         }
         regimeJSON.append(jobj([("id", .string("memory")), ("label", .string("Memory")), ("metric", .string("peak footprint over the whole run")), ("cells", .array([.string("whole_run")])), ("vs", .object(memVs))]))
         var totalJSON = JObject()
-        for rv in RIVALS { totalJSON[rv] = jobj([("WIN", .int(tot[rv]!["WIN"]!)), ("TIE", .int(tot[rv]!["TIE"]!)), ("LOSS", .int(tot[rv]!["LOSS"]!))]) }
+        for rv in RIVALS { totalJSON[rv] = jobj([("WIN", .int(tot[rv]!["WIN"]!)), ("TIE", .int(tot[rv]!["TIE"]!)), ("LOSS", .int(tot[rv]!["LOSS"]!)), ("NC", .int(tot[rv]!["NC"]!))]) }
         let vmeta = D.raw["final"]?["validity"]
         func optNum(_ id: String) -> PyJSON { D.figs[id]?.value ?? .null }
         let validity = jobj([
@@ -162,11 +163,11 @@ extension SiteBuilder {
         let run = jobj([
             ("id", vmeta?["run"] ?? .string(FINAL_REL)), ("date", vmeta?["date"] ?? .string("")), ("source", .string(FINAL_SRC)), ("raw_dir", .string(FINAL_REL)),
             ("machine", .string(D.meta["machine"]?.pyStr ?? "")), ("model", .string("Qwen3.8-27B 4-bit + MTP head")),
-            ("strim_build", .string(D.text("final.claim.build"))), ("rapid_mlx", .string(D.text("ver.rapid"))), ("mlx_vlm", .string(D.text("ver.mlxvlm"))),
+            ("strim_build", .string(D.text("final.claim.build"))), ("versions", jobj(RIVALS.map { ($0, PyJSON.string(D.figs["ver.h2h.\($0)"] != nil ? D.text("ver.h2h.\($0)") : "")) })),
             ("passes", .int(Int(try figNum("final.claim.passes")))), ("reps_per_pass", .int(1)), ("tie_band_pct", .int(2)),
             ("validity", validity),
         ])
-        let engines = jobj(ENGINES.map { e in (e, jobj([("label", .string(ENG_LABEL[e] ?? e))])) })
+        let engines = jobj(ENGINES.map { e in (e, jobj([("label", .string(engLabel(e))), ("name", .string(WIDE_NAMES[e] ?? e)), ("mtp", .string(engineMeta[e]?["mtp"] ?? "")), ("prefix_cache", .string(engineMeta[e]?["prefix_cache"] ?? "")), ("flags", .string(engineMeta[e]?["flags"] ?? ""))])) })
         let hero = jobj([("rows", .array(HERO_ROWS.map { jobj([("regime", .string($0.regime)), ("cells", .array($0.cells.map { .string($0) }))]) }))])
         return jobj([
             ("schema", .string("strim-headline/1")),
@@ -188,7 +189,7 @@ extension SiteBuilder {
         guard let rows = f["rows"]?.arr, !rows.isEmpty else { throw SiteError("features.json: no rows") }
         for r in rows {
             let id = r["id"]?.pyStr ?? "?"
-            for e in ENGINES {
+            for e in FEATURE_ENGINES {
                 guard let s = r[e]?["s"]?.str, ok.contains(s) else { throw SiteError("features.json: row \(id) engine \(e): bad status") }
             }
             guard let src = r["source"]?.str, fileExists(root + "/" + src) else { throw SiteError("features.json: row \(id): source file missing") }

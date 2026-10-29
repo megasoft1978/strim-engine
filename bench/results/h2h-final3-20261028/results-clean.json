@@ -1,0 +1,4206 @@
+{
+  "tie_pct": 2,
+  "engines": [
+    "strim",
+    "rapid-mlx",
+    "mlx-vlm",
+    "mlx-lm",
+    "omlx"
+  ],
+  "cells": [
+    {
+      "id": "c4k_pf",
+      "cell": "cold 4K prefill",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 994.516,
+        "rapid-mlx": 996.793,
+        "mlx-vlm": 1016.76,
+        "mlx-lm": 949.083,
+        "omlx": 896.71
+      },
+      "per_pass": {
+        "strim": [
+          990.2591763647282,
+          998.7737541188864
+        ],
+        "rapid-mlx": [
+          993.5955083481768,
+          999.9908488769455
+        ],
+        "mlx-vlm": [
+          1015.6156469704706,
+          1017.8993544220102
+        ],
+        "mlx-lm": [
+          948.9737704784246,
+          949.1914573317958
+        ],
+        "omlx": [
+          896.2131638654869,
+          897.2074989399104
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9977,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9781,
+          "verdict": "LOSS"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 1.0479,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 1.1091,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w3",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "c4k_tt",
+      "cell": "cold 4K TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 4.12972,
+        "rapid-mlx": 4.12026,
+        "mlx-vlm": 4.03932,
+        "mlx-lm": 4.32734,
+        "omlx": 4.58008
+      },
+      "per_pass": {
+        "strim": [
+          4.147399083012715,
+          4.112042375025339
+        ],
+        "rapid-mlx": [
+          4.133472791989334,
+          4.107037584006321
+        ],
+        "mlx-vlm": [
+          4.0438526250072755,
+          4.034780042013153
+        ],
+        "mlx-lm": [
+          4.327832999988459,
+          4.326840458030347
+        ],
+        "omlx": [
+          4.582615125051234,
+          4.577536416996736
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0023,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0224,
+          "verdict": "LOSS"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.9543,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.9017,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w3",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "d4k",
+      "cell": "decode 256 tok @ 4K ctx",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 75.3386,
+        "rapid-mlx": 50.1205,
+        "mlx-vlm": 32.6902,
+        "mlx-lm": 30.1058,
+        "omlx": 33.5263
+      },
+      "per_pass": {
+        "strim": [
+          74.64110888676724,
+          76.03612735705855
+        ],
+        "rapid-mlx": [
+          48.90937840234158,
+          51.33163401688596
+        ],
+        "mlx-vlm": [
+          32.719537096804686,
+          32.66081025175724
+        ],
+        "mlx-lm": [
+          30.079984597115736,
+          30.1316226093821
+        ],
+        "omlx": [
+          33.533956805267124,
+          33.518641581396196
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.5031,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 2.3046,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 2.5025,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 2.2471,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w3",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "c16k_pf",
+      "cell": "cold 16K prefill",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 963.081,
+        "rapid-mlx": 972.366,
+        "mlx-vlm": 988.039,
+        "mlx-lm": 919.824,
+        "omlx": 891.921
+      },
+      "per_pass": {
+        "strim": [
+          956.0441104955673,
+          970.1182379757528
+        ],
+        "rapid-mlx": [
+          967.9860365197084,
+          976.7453096939153
+        ],
+        "mlx-vlm": [
+          987.575208063232,
+          988.5027667653405
+        ],
+        "mlx-lm": [
+          919.8360799524447,
+          919.8113156098983
+        ],
+        "omlx": [
+          892.1081525642752,
+          891.733113908098
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9905,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9747,
+          "verdict": "LOSS"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 1.0470,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 1.0798,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w3",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "c16k_tt",
+      "cell": "cold 16K TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 17.0244,
+        "rapid-mlx": 16.8613,
+        "mlx-vlm": 16.5935,
+        "mlx-lm": 17.8241,
+        "omlx": 18.3817
+      },
+      "per_pass": {
+        "strim": [
+          17.148790333012585,
+          16.900001832982525
+        ],
+        "rapid-mlx": [
+          16.937227791990153,
+          16.78533783298917
+        ],
+        "mlx-vlm": [
+          16.601267291989643,
+          16.58568954101065
+        ],
+        "mlx-lm": [
+          17.823827915999573,
+          17.82430779200513
+        ],
+        "omlx": [
+          18.377816582971718,
+          18.385545791999903
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0097,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0260,
+          "verdict": "LOSS"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.9551,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.9262,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w3",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "d16k",
+      "cell": "decode 256 tok @ 16K ctx",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 65.1795,
+        "rapid-mlx": 45.749,
+        "mlx-vlm": 30.934,
+        "mlx-lm": 28.6754,
+        "omlx": 31.4219
+      },
+      "per_pass": {
+        "strim": [
+          62.46886891454122,
+          67.89015071310035
+        ],
+        "rapid-mlx": [
+          45.448993280541536,
+          46.04895247400194
+        ],
+        "mlx-vlm": [
+          30.965347284484512,
+          30.902559074388684
+        ],
+        "mlx-lm": [
+          28.737987478095178,
+          28.612712763106046
+        ],
+        "omlx": [
+          31.407909585455236,
+          31.4358064190046
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.4247,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 2.1071,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 2.2730,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 2.0743,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w3",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "c32k_pf",
+      "cell": "cold 32K prefill",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 884.629,
+        "rapid-mlx": 910.005,
+        "mlx-vlm": 923.193,
+        "mlx-lm": 850.827,
+        "omlx": 823.739
+      },
+      "per_pass": {
+        "strim": [
+          872.6838022697696,
+          896.574278148532
+        ],
+        "rapid-mlx": [
+          906.9449453053962,
+          913.0643932415978
+        ],
+        "mlx-vlm": [
+          922.9500087062694,
+          923.4365616009732
+        ],
+        "mlx-lm": [
+          850.2966577741058,
+          851.3581738196085
+        ],
+        "omlx": [
+          822.5779456564721,
+          824.8995013191036
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9721,
+          "verdict": "LOSS"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9582,
+          "verdict": "LOSS"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 1.0397,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 1.0739,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w3_32k",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "c32k_tt",
+      "cell": "cold 32K TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 37.0607,
+        "rapid-mlx": 36.0211,
+        "mlx-vlm": 35.5061,
+        "mlx-lm": 38.526,
+        "omlx": 39.793
+      },
+      "per_pass": {
+        "strim": [
+          37.56114175001858,
+          36.56027258298127
+        ],
+        "rapid-mlx": [
+          36.14221587503562,
+          35.89998716698028
+        ],
+        "mlx-vlm": [
+          35.51546637498541,
+          35.496753499959596
+        ],
+        "mlx-lm": [
+          38.55007508298149,
+          38.502008917042986
+        ],
+        "omlx": [
+          39.84911116701551,
+          39.736961833026726
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0289,
+          "verdict": "LOSS"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0438,
+          "verdict": "LOSS"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.9620,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.9313,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w3_32k",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "d32k",
+      "cell": "decode 128 tok @ 32K ctx",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 52.1703,
+        "rapid-mlx": 42.169,
+        "mlx-vlm": 29.349,
+        "mlx-lm": 27.6153,
+        "omlx": 29.9042
+      },
+      "per_pass": {
+        "strim": [
+          49.109589812569176,
+          55.23104196732022
+        ],
+        "rapid-mlx": [
+          42.36726480988293,
+          41.970641127312646
+        ],
+        "mlx-vlm": [
+          29.44298765099528,
+          29.25505879753046
+        ],
+        "mlx-lm": [
+          27.611249194518408,
+          27.61934886731594
+        ],
+        "omlx": [
+          29.932424308882194,
+          29.87603357654898
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.2372,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.7776,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 1.8892,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 1.7446,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w3_32k",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "a512c4",
+      "cell": "c=4 512-tok prompts aggregate",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 69.217,
+        "rapid-mlx": 71.6904,
+        "mlx-vlm": 67.294,
+        "mlx-lm": 66.3094,
+        "omlx": 54.6131
+      },
+      "per_pass": {
+        "strim": [
+          68.89521764334172,
+          69.53888088183697
+        ],
+        "rapid-mlx": [
+          71.62508451056928,
+          71.75576984087522
+        ],
+        "mlx-vlm": [
+          67.52973790330746,
+          67.05832885217677
+        ],
+        "mlx-lm": [
+          66.41515530108697,
+          66.2036084923877
+        ],
+        "omlx": [
+          53.922727471503364,
+          55.303456567038076
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9655,
+          "verdict": "LOSS"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0286,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 1.0438,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 1.2674,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w4s",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "p50_512c4",
+      "cell": "c=4 512-tok prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 1.4931,
+        "rapid-mlx": 2.33915,
+        "mlx-vlm": 2.30482,
+        "mlx-lm": 2.4667,
+        "omlx": 3.04904
+      },
+      "per_pass": {
+        "strim": [
+          1.4997049160301685,
+          1.4864987709734123
+        ],
+        "rapid-mlx": [
+          2.3466427079983987,
+          2.3316598965320736
+        ],
+        "mlx-vlm": [
+          2.299901812482858,
+          2.3097471255168784
+        ],
+        "mlx-lm": [
+          2.4666102085029706,
+          2.46678129202337
+        ],
+        "omlx": [
+          3.173189374996582,
+          2.9248848960269243
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.6383,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.6478,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.6053,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.4897,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w4s",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "p95_512c4",
+      "cell": "c=4 512-tok prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 2.29205,
+        "rapid-mlx": 2.33916,
+        "mlx-vlm": 2.30494,
+        "mlx-lm": 2.46895,
+        "omlx": 3.19772
+      },
+      "per_pass": {
+        "strim": [
+          2.2991381722327784,
+          2.2849593661318064
+        ],
+        "rapid-mlx": [
+          2.3466546223295155,
+          2.331661468811217
+        ],
+        "mlx-vlm": [
+          2.300043581263162,
+          2.3098422063689212
+        ],
+        "mlx-lm": [
+          2.4690242563869105,
+          2.4688733517949
+        ],
+        "omlx": [
+          3.324441466142889,
+          3.070992528620991
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9799,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9944,
+          "verdict": "TIE"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.9284,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.7168,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w4s",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "a512c8",
+      "cell": "c=8 512-tok prompts aggregate",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 76.3713,
+        "rapid-mlx": 71.7601,
+        "mlx-vlm": 74.6549,
+        "mlx-lm": 67.8957,
+        "omlx": 58.7399
+      },
+      "per_pass": {
+        "strim": [
+          76.06283677969233,
+          76.67966851303228
+        ],
+        "rapid-mlx": [
+          71.66717184498926,
+          71.85296406924105
+        ],
+        "mlx-vlm": [
+          74.88146730994514,
+          74.42840650970386
+        ],
+        "mlx-lm": [
+          67.88206292729927,
+          67.90929719558979
+        ],
+        "omlx": [
+          58.639098334836454,
+          58.8406402821852
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0643,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0230,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 1.1248,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 1.3002,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w4s",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "p50_512c8",
+      "cell": "c=8 512-tok prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 2.6835,
+        "rapid-mlx": 5.88939,
+        "mlx-vlm": 4.34047,
+        "mlx-lm": 6.0643,
+        "omlx": 5.72625
+      },
+      "per_pass": {
+        "strim": [
+          2.720974333002232,
+          2.646025207999628
+        ],
+        "rapid-mlx": [
+          5.901846958498936,
+          5.876939062029123
+        ],
+        "mlx-vlm": [
+          4.322359583486104,
+          4.358571604505414
+        ],
+        "mlx-lm": [
+          6.073393354541622,
+          6.055213812505826
+        ],
+        "omlx": [
+          5.753753083001357,
+          5.69875633349875
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.4556,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.6183,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.4425,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.4686,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w4s",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "p95_512c8",
+      "cell": "c=8 512-tok prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 4.60995,
+        "rapid-mlx": 9.4659,
+        "mlx-vlm": 4.3407,
+        "mlx-lm": 9.83719,
+        "omlx": 6.30375
+      },
+      "per_pass": {
+        "strim": [
+          4.657134281177423,
+          4.562765900004887
+        ],
+        "rapid-mlx": [
+          9.479474070490687,
+          9.452318600111175
+        ],
+        "mlx-vlm": [
+          4.322517264279304,
+          4.358890007913578
+        ],
+        "mlx-lm": [
+          9.853219283002545,
+          9.821168749462231
+        ],
+        "omlx": [
+          6.345935666884179,
+          6.261567833437584
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.4870,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0620,
+          "verdict": "LOSS"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.4686,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.7313,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w4s",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "aagc4",
+      "cell": "c=4 agent prompts (~2.8K tok) aggregate",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 28.7283,
+        "rapid-mlx": 27.729,
+        "mlx-vlm": 28.5687,
+        "mlx-lm": 27.2156,
+        "omlx": 25.277022684698338
+      },
+      "per_pass": {
+        "strim": [
+          28.7369845524891,
+          28.71951967036254
+        ],
+        "rapid-mlx": [
+          27.70149047006139,
+          27.756607754912185
+        ],
+        "mlx-vlm": [
+          28.647259215847495,
+          28.49009302515629
+        ],
+        "mlx-lm": [
+          27.147750311128263,
+          27.283398050485438
+        ],
+        "omlx": [
+          25.277022684698338
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0360,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0056,
+          "verdict": "TIE"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 1.0556,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 1.1365,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w6",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "p50_agc4",
+      "cell": "c=4 agent prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 7.67754,
+        "rapid-mlx": 13.439,
+        "mlx-vlm": 12.4301,
+        "mlx-lm": 13.4678,
+        "omlx": 13.31877581300796
+      },
+      "per_pass": {
+        "strim": [
+          7.695195166481426,
+          7.6598812914744485
+        ],
+        "rapid-mlx": [
+          13.456243604508927,
+          13.42169252052554
+        ],
+        "mlx-vlm": [
+          12.395282979006879,
+          12.465013937995536
+        ],
+        "mlx-lm": [
+          13.498417625029106,
+          13.437261562503409
+        ],
+        "omlx": [
+          13.31877581300796
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.5713,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.6177,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.5701,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.5764,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w6",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "p95_agc4",
+      "cell": "c=4 agent prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 12.0733,
+        "rapid-mlx": 13.439,
+        "mlx-vlm": 12.4302,
+        "mlx-lm": 13.4696,
+        "omlx": 13.472804481285857
+      },
+      "per_pass": {
+        "strim": [
+          12.118655014241812,
+          12.027920441940658
+        ],
+        "rapid-mlx": [
+          13.456259006261826,
+          13.421711412494187
+        ],
+        "mlx-vlm": [
+          12.395381018627086,
+          12.465060604567407
+        ],
+        "mlx-lm": [
+          13.500029979436658,
+          13.43920824554516
+        ],
+        "omlx": [
+          13.472804481285857
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.8984,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9713,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.8963,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.8961,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w6",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "aagc8",
+      "cell": "c=8 agent prompts aggregate",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 31.1928,
+        "rapid-mlx": 28.4732,
+        "mlx-vlm": 31.1774,
+        "mlx-lm": 27.6328,
+        "omlx": 26.893094469953493
+      },
+      "per_pass": {
+        "strim": [
+          31.058883791666254,
+          31.32669517706924
+        ],
+        "rapid-mlx": [
+          28.102641095604362,
+          28.84378155887728
+        ],
+        "mlx-vlm": [
+          31.25065339980182,
+          31.104077976614192
+        ],
+        "mlx-lm": [
+          27.598599190289164,
+          27.66700882963603
+        ],
+        "omlx": [
+          26.893094469953493
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0955,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 1.0005,
+          "verdict": "TIE"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 1.1288,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 1.1599,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w6",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "p50_agc8",
+      "cell": "c=8 agent prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 13.3427,
+        "rapid-mlx": 22.0974,
+        "mlx-vlm": 23.0982,
+        "mlx-lm": 22.6107,
+        "omlx": 25.079944395984057
+      },
+      "per_pass": {
+        "strim": [
+          13.322275937505765,
+          13.363075375498738
+        ],
+        "rapid-mlx": [
+          22.204041874501854,
+          21.990672020998318
+        ],
+        "mlx-vlm": [
+          23.06750191701576,
+          23.128884103993187
+        ],
+        "mlx-lm": [
+          22.63748277098057,
+          22.584005479497137
+        ],
+        "omlx": [
+          25.079944395984057
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.6038,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.5777,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.5901,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.5320,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w6",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "p95_agc8",
+      "cell": "c=8 agent prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 22.6717,
+        "rapid-mlx": 30.9825,
+        "mlx-vlm": 23.0995,
+        "mlx-lm": 31.6794,
+        "omlx": 25.685719004581916
+      },
+      "per_pass": {
+        "strim": [
+          22.820181774467343,
+          22.523155427191522
+        ],
+        "rapid-mlx": [
+          31.455370599971502,
+          30.509650635209983
+        ],
+        "mlx-vlm": [
+          23.06985785975703,
+          23.129135960663554
+        ],
+        "mlx-lm": [
+          31.71786625845125,
+          31.640849556209286
+        ],
+        "omlx": [
+          25.685719004581916
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.7318,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9815,
+          "verdict": "TIE"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.7157,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.8827,
+          "verdict": "WIN"
+        }
+      },
+      "group": "w6",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "a4kc4",
+      "cell": "c=4 4K prompts aggregate (prefill-bound)",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 13.2369,
+        "rapid-mlx": 13.1613,
+        "mlx-vlm": 13.5173,
+        "mlx-lm": 13.0998,
+        "omlx": null
+      },
+      "per_pass": {
+        "strim": [
+          13.28056585263768,
+          13.193249397770483
+        ],
+        "rapid-mlx": [
+          13.096246090228522,
+          13.2262970561705
+        ],
+        "mlx-vlm": [
+          13.553951633802114,
+          13.480556781413014
+        ],
+        "mlx-lm": [
+          13.083382242953997,
+          13.116264563248466
+        ],
+        "omlx": []
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0057,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9793,
+          "verdict": "LOSS"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 1.0105,
+          "verdict": "TIE"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        }
+      },
+      "group": "w4",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          1,
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "p50_4kc4",
+      "cell": "c=4 4K prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 10.3625,
+        "rapid-mlx": 16.8558,
+        "mlx-vlm": 16.1717,
+        "mlx-lm": 16.8446,
+        "omlx": null
+      },
+      "per_pass": {
+        "strim": [
+          10.389784458006034,
+          10.335266291513108
+        ],
+        "rapid-mlx": [
+          16.89036414551083,
+          16.821316666493658
+        ],
+        "mlx-vlm": [
+          16.129387896013213,
+          16.21398506249534
+        ],
+        "mlx-lm": [
+          16.865549792011734,
+          16.82363620851538
+        ],
+        "omlx": []
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.6148,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.6408,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.6152,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        }
+      },
+      "group": "w4",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          1,
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "p95_4kc4",
+      "cell": "c=4 4K prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 15.9992,
+        "rapid-mlx": 16.8559,
+        "mlx-vlm": 16.1717,
+        "mlx-lm": 16.8462,
+        "omlx": null
+      },
+      "per_pass": {
+        "strim": [
+          16.04394589991134,
+          15.954539590200874
+        ],
+        "rapid-mlx": [
+          16.890381424996303,
+          16.821354568810783
+        ],
+        "mlx-vlm": [
+          16.12939299554273,
+          16.21403056695417
+        ],
+        "mlx-lm": [
+          16.867203677634826,
+          16.825282172395966
+        ],
+        "omlx": []
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9492,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9893,
+          "verdict": "TIE"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.9497,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        }
+      },
+      "group": "w4",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          1,
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "a4kc8",
+      "cell": "c=8 4K prompts aggregate (prefill-bound)",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 13.2936,
+        "rapid-mlx": 13.2033,
+        "mlx-vlm": 13.8365,
+        "mlx-lm": 13.0407,
+        "omlx": null
+      },
+      "per_pass": {
+        "strim": [
+          13.209520210758383,
+          13.377597446174038
+        ],
+        "rapid-mlx": [
+          13.192249864973292,
+          13.214348378334625
+        ],
+        "mlx-vlm": [
+          13.892911435474106,
+          13.780100087362115
+        ],
+        "mlx-lm": [
+          13.045700355982651,
+          13.035669948704655
+        ],
+        "omlx": []
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0068,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9608,
+          "verdict": "LOSS"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 1.0194,
+          "verdict": "TIE"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        }
+      },
+      "group": "w4",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          1,
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "p50_4kc8",
+      "cell": "c=8 4K prompts p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 18.7503,
+        "rapid-mlx": 26.5585,
+        "mlx-vlm": 32.0735,
+        "mlx-lm": 26.8316,
+        "omlx": null
+      },
+      "per_pass": {
+        "strim": [
+          18.8558203119901,
+          18.64470752052148
+        ],
+        "rapid-mlx": [
+          26.58756104198983,
+          26.52938443797757
+        ],
+        "mlx-vlm": [
+          31.94380550002097,
+          32.203213520988356
+        ],
+        "mlx-lm": [
+          26.816113750013756,
+          26.84702549999929
+        ],
+        "omlx": []
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.7060,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.5846,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.6988,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        }
+      },
+      "group": "w4",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          1,
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "p95_4kc8",
+      "cell": "c=8 4K prompts p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 31.9956,
+        "rapid-mlx": 36.2376,
+        "mlx-vlm": 32.0748,
+        "mlx-lm": 36.5658,
+        "omlx": null
+      },
+      "per_pass": {
+        "strim": [
+          32.192702170572005,
+          31.7984509710659
+        ],
+        "rapid-mlx": [
+          36.26950996856031,
+          36.20563456700474
+        ],
+        "mlx-vlm": [
+          31.944214449467836,
+          32.20543624583515
+        ],
+        "mlx-lm": [
+          36.54713623693387,
+          36.584527047676964
+        ],
+        "omlx": []
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.8829,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.9975,
+          "verdict": "TIE"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.8750,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        }
+      },
+      "group": "w4",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          1,
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "aw5",
+      "cell": "W5 4 clients, 16K shared prefix aggregate",
+      "unit": "tok/s",
+      "better": "higher",
+      "median": {
+        "strim": 9.77319,
+        "rapid-mlx": 3.34356,
+        "mlx-vlm": 3.47338,
+        "mlx-lm": 3.34618,
+        "omlx": null
+      },
+      "per_pass": {
+        "strim": [
+          9.734546028038928,
+          9.811841537422566
+        ],
+        "rapid-mlx": [
+          3.3424440502530754,
+          3.3446849403395285
+        ],
+        "mlx-vlm": [
+          3.5021039621845165,
+          3.444648421597538
+        ],
+        "mlx-lm": [
+          3.3415622312427806,
+          3.3507904754004794
+        ],
+        "omlx": []
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 2.9230,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 2.8137,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 2.9207,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        }
+      },
+      "group": "w5",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          1,
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "p50_w5",
+      "cell": "W5 p50 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 20.2925,
+        "rapid-mlx": 73.5338,
+        "mlx-vlm": 70.4808,
+        "mlx-lm": 73.3956,
+        "omlx": null
+      },
+      "per_pass": {
+        "strim": [
+          20.365314187511103,
+          20.219642292009667
+        ],
+        "rapid-mlx": [
+          73.53973824999412,
+          73.5279119584884
+        ],
+        "mlx-vlm": [
+          69.88661229147692,
+          71.07506408300833
+        ],
+        "mlx-lm": [
+          73.49170729148318,
+          73.29942797950935
+        ],
+        "omlx": []
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.2760,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.2879,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.2765,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        }
+      },
+      "group": "w5",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          1,
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "p95_w5",
+      "cell": "W5 p95 TTFT",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 22.8346,
+        "rapid-mlx": 73.5339,
+        "mlx-vlm": 70.4809,
+        "mlx-lm": 73.3972,
+        "omlx": null
+      },
+      "per_pass": {
+        "strim": [
+          22.90824494556,
+          22.760883662544074
+        ],
+        "rapid-mlx": [
+          73.53982229820394,
+          73.52796024824492
+        ],
+        "mlx-vlm": [
+          69.88667804813304,
+          71.07512262678647
+        ],
+        "mlx-lm": [
+          73.49342685361334,
+          73.30098296257783
+        ],
+        "omlx": []
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.3105,
+          "verdict": "WIN"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.3240,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.3111,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        }
+      },
+      "group": "w5",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": [
+          1,
+          2
+        ]
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": false
+      }
+    },
+    {
+      "id": "rp8",
+      "cell": "agent replay prefill sum T1-T8",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 48.9337,
+        "rapid-mlx": 49.1317,
+        "mlx-vlm": 192.494,
+        "mlx-lm": 55.0172,
+        "omlx": 64.8438
+      },
+      "per_pass": {
+        "strim": [
+          49.04054024798097,
+          48.82678403996397
+        ],
+        "rapid-mlx": [
+          49.21724704094231,
+          49.04606283304747
+        ],
+        "mlx-vlm": [
+          192.11589604103938,
+          192.87292145896936
+        ],
+        "mlx-lm": [
+          56.15164162393194,
+          53.88273254100932
+        ],
+        "omlx": [
+          64.92123408301268,
+          64.76629537489498
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9960,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.2542,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.8894,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.7546,
+          "verdict": "WIN"
+        }
+      },
+      "group": "replay",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "rp6",
+      "cell": "agent replay prefill sum T1-T6",
+      "unit": "s",
+      "better": "lower",
+      "median": {
+        "strim": 34.5958,
+        "rapid-mlx": 34.7669,
+        "mlx-vlm": 107.681,
+        "mlx-lm": 39.3085,
+        "omlx": 44.8998
+      },
+      "per_pass": {
+        "strim": [
+          34.67593983199913,
+          34.51573699899018
+        ],
+        "rapid-mlx": [
+          34.808584456914105,
+          34.72528483305359
+        ],
+        "mlx-vlm": [
+          107.26883254101267,
+          108.09303366695531
+        ],
+        "mlx-lm": [
+          39.36328779091127,
+          39.25380787398899
+        ],
+        "omlx": [
+          44.90104391699424,
+          44.89864512486383
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 0.9951,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": 0.3213,
+          "verdict": "WIN"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.8801,
+          "verdict": "WIN"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 0.7705,
+          "verdict": "WIN"
+        }
+      },
+      "group": "replay",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    },
+    {
+      "id": "rpc8",
+      "cell": "agent replay T8 cached fraction",
+      "unit": "frac",
+      "better": "higher",
+      "median": {
+        "strim": 0.872475,
+        "rapid-mlx": 0.872285,
+        "mlx-vlm": 0,
+        "mlx-lm": 0.87263,
+        "omlx": 0.852487
+      },
+      "per_pass": {
+        "strim": [
+          0.8724748402262543,
+          0.8724748402262543
+        ],
+        "rapid-mlx": [
+          0.8722820763956906,
+          0.8722883306400274
+        ],
+        "mlx-vlm": [
+          0.0,
+          0.0
+        ],
+        "mlx-lm": [
+          0.8726279963761906,
+          0.872631115028647
+        ],
+        "omlx": [
+          0.8524975514201762,
+          0.8524766778482408
+        ]
+      },
+      "vs_rivals": {
+        "rapid-mlx": {
+          "ratio_strim_over_rival": 1.0002,
+          "verdict": "TIE"
+        },
+        "mlx-vlm": {
+          "ratio_strim_over_rival": null,
+          "verdict": "n/a"
+        },
+        "mlx-lm": {
+          "ratio_strim_over_rival": 0.9998,
+          "verdict": "TIE"
+        },
+        "omlx": {
+          "ratio_strim_over_rival": 1.0234,
+          "verdict": "WIN"
+        }
+      },
+      "group": "replay",
+      "excluded_passes": {
+        "strim": [],
+        "rapid-mlx": [],
+        "mlx-vlm": [],
+        "mlx-lm": [],
+        "omlx": []
+      },
+      "session_status": {
+        "strim": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "rapid-mlx": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-vlm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "mlx-lm": [
+          "CLEAN",
+          "CLEAN"
+        ],
+        "omlx": [
+          "CLEAN",
+          "CLEAN"
+        ]
+      },
+      "claim_eligible": {
+        "strim": true,
+        "rapid-mlx": true,
+        "mlx-vlm": true,
+        "mlx-lm": true,
+        "omlx": true
+      }
+    }
+  ],
+  "schema_version": 2,
+  "run_dir": "h2h-final3-20261028",
+  "only_clean": true,
+  "claim_policy": {
+    "claims_only_from_clean_sessions": true,
+    "tie_pct": 2,
+    "rerun_polluted_once": true,
+    "pollution_rule": "1-min load > pollute_load or a foreign process > 60% CPU in 2 consecutive samples = POLLUTED",
+    "excluded_flags": [
+      "memory_abort_watchdog",
+      "engine_guard_abort",
+      "engine_oom",
+      "cell_timeout"
+    ]
+  },
+  "engine_meta": {
+    "strim": {
+      "port": 8203,
+      "mtp": "yes (qwen38-mtp-4bit head)",
+      "prefix_cache": "yes, default (STRIM_PREFIX_CACHE_MB 12288)",
+      "cache_hits_visible_via": "usage.prompt_tokens_details.cached_tokens",
+      "own_memory_guard": "none (admission control, max_inflight 8)",
+      "flags": "serve models/qwen38-4bit models/qwen38-mtp-4bit --port 8203 --no-auth",
+      "version": "strim 0.1.1",
+      "model": "qwen38-4bit"
+    },
+    "rapid-mlx": {
+      "port": 8651,
+      "mtp": "yes (--speculative-config mtp, qwen38-mtp-4bit)",
+      "prefix_cache": "yes, default on",
+      "cache_hits_visible_via": "not reported in usage (unknown)",
+      "own_memory_guard": "none",
+      "flags": "--no-telemetry serve models/qwen38-4bit --port 8651 --max-num-seqs 4 --speculative-config {mtp,qwen38-mtp-4bit}",
+      "version": "rapid-mlx 0.15.7",
+      "model": "models/qwen38-4bit"
+    },
+    "mlx-vlm": {
+      "port": 8651,
+      "mtp": "no",
+      "prefix_cache": "no cross-request reuse (0% cached in replay)",
+      "cache_hits_visible_via": "none",
+      "own_memory_guard": "none",
+      "flags": "--model models/qwen38-4bit --port 8651 (server defaults)",
+      "version": "mlx-vlm 0.7.10",
+      "model": "./models/qwen38-4bit"
+    },
+    "mlx-lm": {
+      "port": 8654,
+      "mtp": "no (no speculative decoding)",
+      "prefix_cache": "yes, default in-memory LRU prompt cache",
+      "cache_hits_visible_via": "usage.prompt_tokens_details.cached_tokens; server log 'Prompt Cache: N sequences, X GB'",
+      "own_memory_guard": "none",
+      "flags": "--model models/qwen38-4bit --port 8654 --decode-concurrency 4 --prompt-concurrency 4",
+      "version": "mlx-lm 0.32.2",
+      "model": "models/qwen38-4bit"
+    },
+    "omlx": {
+      "port": 8653,
+      "mtp": "no (MTP needs oMLX's own checkpoint; stock weights have no MTP head)",
+      "prefix_cache": "yes, default paged SSD prefix cache under the scratch HOME (fresh per session, so no cross-session hits)",
+      "cache_hits_visible_via": "usage.prompt_tokens_details.cached_tokens (reported after warm-up; first rows can be unknown)",
+      "own_memory_guard": "process memory enforcer (tier balanced, ceiling ~54-56 GB): aborts requests and unloads the model",
+      "flags": "serve --model-dir <scratch>/models (symlink to models/qwen38-4bit) --port 8653, HOME=<scratch>/home, defaults otherwise (memory-guard balanced, max-concurrent-requests 8)",
+      "version": "oMLX 0.4.5.dev1",
+      "model": "qwen38-4bit"
+    }
+  },
+  "sessions": [
+    {
+      "engine": "mlx-lm",
+      "pass": 1,
+      "session": "1793223612-21733",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793223612,
+      "end": 1793223880,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 2.05,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 29524 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "mlx-lm",
+      "pass": 1,
+      "session": "1793223885-29996",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793223885,
+      "end": 1793224311,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.1,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    },
+    {
+      "engine": "mlx-lm",
+      "pass": 1,
+      "session": "1793224316-35107",
+      "cells": [
+        "w5",
+        "replay"
+      ],
+      "start": 1793224316,
+      "end": 1793224500,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.51,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    },
+    {
+      "engine": "mlx-lm",
+      "pass": 2,
+      "session": "1793226162-59620",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793226162,
+      "end": 1793226431,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.48,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 62627 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "mlx-lm",
+      "pass": 2,
+      "session": "1793226436-63127",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793226436,
+      "end": 1793226711,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.5,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    },
+    {
+      "engine": "mlx-lm",
+      "pass": 2,
+      "session": "1793226716-66699",
+      "cells": [
+        "w5",
+        "replay"
+      ],
+      "start": 1793226716,
+      "end": 1793226899,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.41,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 1,
+      "session": "1793222772-10446",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793222772,
+      "end": 1793223036,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 2.89,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 13523 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 1,
+      "session": "1793223041-13932",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793223041,
+      "end": 1793223219,
+      "gate": "PASSED",
+      "status": "POLLUTED",
+      "polluted_cells": [
+        "w4s"
+      ],
+      "load_max": 1.84,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 16143 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 1,
+      "session": "1793223224-16609",
+      "cells": [
+        "w5",
+        "replay"
+      ],
+      "start": 1793223224,
+      "end": 1793223547,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.68,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 20758 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 1,
+      "session": "1793229380-9676",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793229380,
+      "end": 1793229709,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.92,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 13271 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 2,
+      "session": "1793226964-69868",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793226964,
+      "end": 1793227226,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.85,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 72801 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 2,
+      "session": "1793227232-73197",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793227232,
+      "end": 1793227408,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 3.69,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 74630 /bin/bash ./run39.sh"
+        },
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 75283 /Users/user/.codex/computer-use/Codex Computer Use.app/Contents/MacOS/SkyComputerUse"
+        },
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 82630 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 2,
+      "session": "1793227413-83093",
+      "cells": [
+        "w5",
+        "replay"
+      ],
+      "start": 1793227413,
+      "end": 1793227738,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 2.72,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 87429 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793224565-38387",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793224565,
+      "end": 1793224834,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 2.76,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 41346 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793224839-41811",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793224839,
+      "end": 1793225074,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 2.78,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "w4",
+          "flag": "memory_abort_watchdog",
+          "detail": "# ABORT cell=w4 footprint_mb=46083 swap_grow_mb=0 1793224941"
+        },
+        {
+          "cell": "w4",
+          "flag": "engine_guard_abort",
+          "detail": "2026-10-28 23:02:32;086 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)"
+        },
+        {
+          "cell": "restart",
+          "flag": "engine_restart",
+          "detail": "restart_after_flagged_cell"
+        },
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 44813 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793225079-45217",
+      "cells": [
+        "w5",
+        "replay"
+      ],
+      "start": 1793225079,
+      "end": 1793225299,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.92,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "w5",
+          "flag": "engine_guard_abort",
+          "detail": "2026-10-28 23:06:41;606 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)"
+        },
+        {
+          "cell": "restart",
+          "flag": "engine_restart",
+          "detail": "restart_after_flagged_cell"
+        },
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 48234 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225364-49018",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793225364,
+      "end": 1793225633,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.74,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 51937 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225638-52412",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793225638,
+      "end": 1793225873,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 2.39,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "w4",
+          "flag": "memory_abort_watchdog",
+          "detail": "# ABORT cell=w4 footprint_mb=49531 swap_grow_mb=-439 1793225740"
+        },
+        {
+          "cell": "w4",
+          "flag": "engine_guard_abort",
+          "detail": "2026-10-28 23:15:43;199 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)"
+        },
+        {
+          "cell": "restart",
+          "flag": "engine_restart",
+          "detail": "restart_after_flagged_cell"
+        },
+        {
+          "cell": "w6",
+          "flag": "memory_abort_watchdog",
+          "detail": "# ABORT cell=w6 footprint_mb=43655 swap_grow_mb=-871 1793225848"
+        },
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 55487 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225878-55860",
+      "cells": [
+        "w5",
+        "replay"
+      ],
+      "start": 1793225878,
+      "end": 1793226097,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.74,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "w5",
+          "flag": "engine_guard_abort",
+          "detail": "2026-10-28 23:19:59;152 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)"
+        },
+        {
+          "cell": "restart",
+          "flag": "engine_restart",
+          "detail": "restart_after_flagged_cell"
+        },
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 58888 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 1,
+      "session": "1793221867-33624",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793221867,
+      "end": 1793222301,
+      "gate": "PASSED",
+      "status": "POLLUTED",
+      "polluted_cells": [
+        "w3",
+        "w3_32k"
+      ],
+      "load_max": 2.94,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 711 /bin/zsh -c source /Users/user/.claude-work/shell-snapshots/snapshot-zsh-17930271050"
+        },
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 3045 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 1,
+      "session": "1793222306-3394",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793222306,
+      "end": 1793222520,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 4.68,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 1,
+      "session": "1793222525-6998",
+      "cells": [
+        "w5",
+        "replay"
+      ],
+      "start": 1793222525,
+      "end": 1793222707,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.9,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 1,
+      "session": "1793229068-5806",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793229068,
+      "end": 1793229320,
+      "gate": "PASSED",
+      "status": "POLLUTED",
+      "polluted_cells": [
+        "w3_32k"
+      ],
+      "load_max": 1.5,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 8905 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 1,
+      "session": "1793235684-87737",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793235684,
+      "end": 1793235937,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.76,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 90824 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 2,
+      "session": "1793227803-88418",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793227803,
+      "end": 1793228055,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.69,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 91430 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 2,
+      "session": "1793228061-91695",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793228061,
+      "end": 1793228243,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.86,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 2,
+      "session": "1793228249-94514",
+      "cells": [
+        "w5",
+        "replay"
+      ],
+      "start": 1793228249,
+      "end": 1793228429,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.83,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    },
+    {
+      "engine": "strim",
+      "pass": 1,
+      "session": "1793220706-82660",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793220706,
+      "end": 1793221310,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 2.53,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 92796 bash /Users/user/.claude-work/skills/_shared/codex-exec.sh new /Users/user/Des"
+        }
+      ]
+    },
+    {
+      "engine": "strim",
+      "pass": 1,
+      "session": "1793221315-94954",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793221315,
+      "end": 1793221671,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 3.63,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 29621 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "strim",
+      "pass": 1,
+      "session": "1793221676-30159",
+      "cells": [
+        "w5",
+        "replay"
+      ],
+      "start": 1793221676,
+      "end": 1793221802,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 2.44,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    },
+    {
+      "engine": "strim",
+      "pass": 2,
+      "session": "1793228494-97828",
+      "cells": [
+        "agree",
+        "w3",
+        "w3_32k"
+      ],
+      "start": 1793228494,
+      "end": 1793228736,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.88,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    },
+    {
+      "engine": "strim",
+      "pass": 2,
+      "session": "1793228741-1061",
+      "cells": [
+        "w4",
+        "w4s",
+        "w6"
+      ],
+      "start": 1793228741,
+      "end": 1793228916,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.52,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": [
+        {
+          "cell": "shutdown",
+          "flag": "leftover_suspect",
+          "detail": "pid 3380 sleep 30"
+        }
+      ]
+    },
+    {
+      "engine": "strim",
+      "pass": 2,
+      "session": "1793228921-3793",
+      "cells": [
+        "w5",
+        "replay"
+      ],
+      "start": 1793228921,
+      "end": 1793229046,
+      "gate": "PASSED",
+      "status": "CLEAN",
+      "polluted_cells": [],
+      "load_max": 1.34,
+      "pollute_load": 4.5,
+      "dryrun": false,
+      "completed": true,
+      "flags": []
+    }
+  ],
+  "flags": [
+    {
+      "engine": "mlx-lm",
+      "pass": 1,
+      "session": "1793223612-21733",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 29524 sleep 30"
+    },
+    {
+      "engine": "mlx-lm",
+      "pass": 2,
+      "session": "1793226162-59620",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 62627 sleep 30"
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 1,
+      "session": "1793222772-10446",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 13523 sleep 30"
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 1,
+      "session": "1793223041-13932",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 16143 sleep 30"
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 1,
+      "session": "1793223224-16609",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 20758 sleep 30"
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 1,
+      "session": "1793229380-9676",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 13271 sleep 30"
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 2,
+      "session": "1793226964-69868",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 72801 sleep 30"
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 2,
+      "session": "1793227232-73197",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 74630 /bin/bash ./run39.sh"
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 2,
+      "session": "1793227232-73197",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 75283 /Users/user/.codex/computer-use/Codex Computer Use.app/Contents/MacOS/SkyComputerUse"
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 2,
+      "session": "1793227232-73197",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 82630 sleep 30"
+    },
+    {
+      "engine": "mlx-vlm",
+      "pass": 2,
+      "session": "1793227413-83093",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 87429 sleep 30"
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793224565-38387",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 41346 sleep 30"
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793224839-41811",
+      "cell": "w4",
+      "flag": "memory_abort_watchdog",
+      "detail": "# ABORT cell=w4 footprint_mb=46083 swap_grow_mb=0 1793224941"
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793224839-41811",
+      "cell": "w4",
+      "flag": "engine_guard_abort",
+      "detail": "2026-10-28 23:02:32;086 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)"
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793224839-41811",
+      "cell": "restart",
+      "flag": "engine_restart",
+      "detail": "restart_after_flagged_cell"
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793224839-41811",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 44813 sleep 30"
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793225079-45217",
+      "cell": "w5",
+      "flag": "engine_guard_abort",
+      "detail": "2026-10-28 23:06:41;606 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)"
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793225079-45217",
+      "cell": "restart",
+      "flag": "engine_restart",
+      "detail": "restart_after_flagged_cell"
+    },
+    {
+      "engine": "omlx",
+      "pass": 1,
+      "session": "1793225079-45217",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 48234 sleep 30"
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225364-49018",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 51937 sleep 30"
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225638-52412",
+      "cell": "w4",
+      "flag": "memory_abort_watchdog",
+      "detail": "# ABORT cell=w4 footprint_mb=49531 swap_grow_mb=-439 1793225740"
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225638-52412",
+      "cell": "w4",
+      "flag": "engine_guard_abort",
+      "detail": "2026-10-28 23:15:43;199 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)"
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225638-52412",
+      "cell": "restart",
+      "flag": "engine_restart",
+      "detail": "restart_after_flagged_cell"
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225638-52412",
+      "cell": "w6",
+      "flag": "memory_abort_watchdog",
+      "detail": "# ABORT cell=w6 footprint_mb=43655 swap_grow_mb=-871 1793225848"
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225638-52412",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 55487 sleep 30"
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225878-55860",
+      "cell": "w5",
+      "flag": "engine_guard_abort",
+      "detail": "2026-10-28 23:19:59;152 - omlx.process_memory_enforcer - WARNING - Hard memory pressure: requested abort/unload for 'qwen38-4bit' (aborted=3)"
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225878-55860",
+      "cell": "restart",
+      "flag": "engine_restart",
+      "detail": "restart_after_flagged_cell"
+    },
+    {
+      "engine": "omlx",
+      "pass": 2,
+      "session": "1793225878-55860",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 58888 sleep 30"
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 1,
+      "session": "1793221867-33624",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 711 /bin/zsh -c source /Users/user/.claude-work/shell-snapshots/snapshot-zsh-17930271050"
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 1,
+      "session": "1793221867-33624",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 3045 sleep 30"
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 1,
+      "session": "1793229068-5806",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 8905 sleep 30"
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 1,
+      "session": "1793235684-87737",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 90824 sleep 30"
+    },
+    {
+      "engine": "rapid-mlx",
+      "pass": 2,
+      "session": "1793227803-88418",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 91430 sleep 30"
+    },
+    {
+      "engine": "strim",
+      "pass": 1,
+      "session": "1793220706-82660",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 92796 bash /Users/user/.claude-work/skills/_shared/codex-exec.sh new /Users/user/Des"
+    },
+    {
+      "engine": "strim",
+      "pass": 1,
+      "session": "1793221315-94954",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 29621 sleep 30"
+    },
+    {
+      "engine": "strim",
+      "pass": 2,
+      "session": "1793228741-1061",
+      "cell": "shutdown",
+      "flag": "leftover_suspect",
+      "detail": "pid 3380 sleep 30"
+    }
+  ]
+}

@@ -2,19 +2,22 @@ import Foundation
 import StrimCore
 import StrimPull
 
-// strim --version | version: static, never touches MLX/Metal.
-// strim doctor [--dir ~/.strim/models]: the GPU smoke test (device + tiny matmul) and the model dir status.
+// strim --version | version: one line, static, never touches MLX/Metal.
+// strim doctor [--dir ~/.strim/models]: version, runtime config, the GPU smoke test (device + tiny matmul) and the model dir status.
 
 func runVersion(_ args: [String]) {
+    print("strim 0.1.1")
+}
+
+/// Runtime config, printed once by `strim doctor` (not by `--version`).
+private func printRuntimeConfig() {
     let cfg = RuntimeConfig.measuredSpeed
-    print("strim 0.1.0")
     print("model:   \(cfg.model.repo)")
     print("quant:   \(cfg.quant.rawValue)-bit")
     print("context: \(cfg.contextTokens) tokens")
     print("prefill: \(cfg.prefillStep) tokens/step")
     print("mtp:     depth \(cfg.mtpDepth)")
     print("wired:   \(cfg.wiredLimitGB) GB")
-    print("check the GPU and model files with: strim doctor")
 }
 
 func runDoctor(_ args: [String]) {
@@ -28,6 +31,7 @@ func runDoctor(_ args: [String]) {
     }
     let root = URL(fileURLWithPath: (dir as NSString).expandingTildeInPath)
     runVersion(args)
+    printRuntimeConfig()
     print("device:  \(Compute.deviceName)")
     let mm = Compute.matMulSmoke()
     let ok = mm.values == [10, 13, 28, 40]

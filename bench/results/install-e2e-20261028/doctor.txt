@@ -1,0 +1,16 @@
+strim 0.1.0
+model:   mlx-community/Qwen3.8-27B-4bit
+quant:   4-bit
+context: 65536 tokens
+prefill: 2048 tokens/step
+mtp:     depth 3
+wired:   44 GB
+check the GPU and model files with: strim doctor
+device:  Device(gpu, 0)
+matmul:  [2, 2] -> [10.0, 13.0, 28.0, 40.0] ok
+models:  /Users/user/.strim/models
+  4bit: qwen38-4bit absent, qwen38-mtp-4bit absent
+  6bit: qwen38-6bit absent, qwen38-mtp-4bit absent
+  8bit: qwen38-8bit absent, qwen38-mtp-8bit absent
+  oq4e: qwen38-oq4e-mtp absent
+missing the default 4bit model: run `strim pull`

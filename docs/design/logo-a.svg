@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Strim"><defs><linearGradient id="ag" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC45E"/><stop offset="1" stop-color="#F26A1E"/></linearGradient>
+<mask id="am" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="#fff"/><path d="M38.5 12 33 28M26.5 44 21 60" stroke="#000" stroke-width="3.4" fill="none"/></mask></defs>
+<rect width="64" height="64" rx="15" fill="url(#ag)"/>
+<path mask="url(#am)" d="M46 20H27A8 8 0 0 0 27 36H37A8 8 0 0 1 37 52H16" fill="none" stroke="#1B1109" stroke-width="8"/></svg>

@@ -18,90 +18,120 @@ import Testing
     @Test func readmeIsShortWithOneHeroChart() throws {
         let (_, r) = try Self.build()
         let lines = r.readme.split(separator: "\n", omittingEmptySubsequences: false).count
-        #expect(lines <= 60, "README has \(lines) lines")
-        #expect(lines >= 25)
-        #expect(Self.matches(#"\]\(site/assets/[^)]+\)"#, in: r.readme).count == 1)
-        #expect(r.readme.contains("](site/assets/h2h-hero.svg)"))
-        #expect(!r.readme.contains("33-cell") && !r.readme.contains("Scoreboard"))
+        #expect(lines <= 30, "README has \(lines) lines")
+        #expect(lines >= 15)
+        #expect(Self.matches(#"\]\(site/assets/[^)]+\)"#, in: r.readme).count == 3, "banner, ratio chart, app capture")
+        #expect(r.readme.contains("](site/assets/banner.svg)") && r.readme.contains("](site/assets/h2h-ratio.svg)"))
+        #expect(!r.readme.contains("| Measurement") && !r.readme.contains("img.shields.io"))
     }
 
-    @Test func installAndQuickstartOrder() throws {
+    @Test func bothInstallPathsAndTheQuickstart() throws {
         let (_, r) = try Self.build()
         func at(_ s: String) -> String.Index { r.readme.range(of: s)!.lowerBound }
-        // one code block: install, pull, serve (in that order), then the token path, all before the results table
-        #expect(at("brew install megasoft1978/strim/strim") < at("strim pull "))
-        #expect(at("strim pull ") < at("strim serve ~/.strim/models"))
-        #expect(r.readme.contains("--port 8203") && r.readme.contains("~/.strim/token"))
-        #expect(at("strim serve ~/.strim/models") < at("| Measurement"))
-        #expect(r.readme.components(separatedBy: "```").count == 3, "one code block")
+        #expect(at("brew install megasoft1978/strim/strim") < at("packaging/install.sh | bash"))
+        #expect(at("packaging/install.sh | bash") < at("strim pull"))
+        #expect(at("strim pull") < at("strim serve ~/.strim/models"))
+        #expect(r.readme.contains("--port 8203"))
+        #expect(r.html.contains("inst-brew") && r.html.contains("inst-curl") && r.html.contains("inst-dmg"))
+        #expect(r.html.contains("brew install --cask megasoft1978/strim/strim-app") && r.readme.contains("strim-app"))
+        #expect(r.html.contains("Not notarized yet: right-click Open"), "the DMG tab says so honestly")
+        #expect(r.html.contains("brew install megasoft1978/strim/strim") && r.html.contains("packaging/install.sh | bash"))
     }
 
     @Test func lossesStayVisible() throws {
         let (b, r) = try Self.build()
-        let losses = (b.H["cells"]?.arr ?? []).filter { c in README_GLANCE.contains(c["id"]?.str ?? "") && RIVALS.contains { c["verdict"]?[$0]?.str == "LOSS" } }
+        let losses = (b.H["cells"]?.arr ?? []).filter { c in GLANCE.contains(c["id"]?.str ?? "") && b.RIVALS.contains { c["verdict"]?[$0]?.str == "LOSS" } }
         #expect(!losses.isEmpty, "the stand-in run has loss cells in the glance set")
-        #expect(r.readme.contains("| LOSS"))
-        #expect(r.html.contains("<g class=\"pl\">"))   // a LOSS badge in the chart
-        #expect(r.readme.contains("Not faster:"))
-        #expect(r.html.contains("Where it is not faster."))
-        #expect(r.readme.split(separator: "\n").filter { $0.hasPrefix("| ") && $0.contains("LOSS") }.count == losses.count)
-        #expect(!r.readme.lowercased().contains("fastest overall") || r.readme.contains("No \"fastest overall\""))
+        #expect(b.speedLosses().count == losses.count)
+        #expect(b.allClaimLosses().count == 10, "all ten current claim-eligible losses are reported from results.json")
+        #expect(r.readme.contains(b.lossLine().replacingOccurrences(of: "All losses: benchmarks.", with: "All losses: [benchmarks](site/benchmarks.html).")))
+        #expect(r.html.contains("All losses: <a href=\"benchmarks.html\">benchmarks</a>."))
+        #expect(r.readme.contains("All losses: [benchmarks](site/benchmarks.html)."))
+        #expect(b.lossLine().contains("c=4 512-token aggregate") && b.lossLine().contains("c=8 512-token p95 first token"))
+        #expect(Self.matches("<article class=\"card rev loss\"", in: r.html).count == b.speedLosses().count, "a loss card is drawn")
+        #expect(r.html.contains("honest loss"))
+        #expect(!r.readme.lowercased().contains("fastest overall"))
     }
 
-    @Test func runFactsAndValidityAreOnThePage() throws {
+    @Test func runFactsAndValidityAreOnTheBenchmarksPage() throws {
         let (b, r) = try Self.build()
         let run = b.H["run"]
-        let build = run?["strim_build"]?.pyStr ?? "?"
-        for page in [r.html, r.generated["site/benchmarks.html"] ?? ""] {
-            #expect(page.contains(build))
-            #expect(page.contains(FINAL_REL + "/summary.md"))
-            #expect(page.contains(run?["date"]?.pyStr ?? "?"))
-            #expect(page.contains("Validity."))
+        let page = r.generated["site/benchmarks.html"] ?? ""
+        #expect(page.contains(run?["strim_build"]?.pyStr ?? "?"))
+        #expect(page.contains(FINAL_REL + "/summary.md"))
+        #expect(page.contains(run?["date"]?.pyStr ?? "?"))
+        #expect(page.contains("Validity."))
+        for e in b.RIVALS {
+            #expect(page.contains(b.engLabel(e)))
+            if let version = b.engVersion(e) { #expect(page.contains(version)) }
         }
-        #expect(r.readme.contains(FINAL_REL + "/results.json"))
         let v = run?["validity"]
         #expect(v?["text"]?.pyStr.isEmpty == false)
-        if v?["clean"]?.truthy == false { #expect(r.html.contains("Preliminary results")) }
+        if v?["clean"]?.truthy == false {
+            #expect(page.contains("primary sessions were clean") && r.html.contains("primary sessions were clean"))
+            #expect(page.contains("#method") && page.contains("#r-final"))
+        }
+        #expect(!r.html.contains("Validity."), "the landing page only carries a one-line note")
     }
 
-    @Test func landingTableAndMatrixAreCompact() throws {
+    /// The hero chart is parsed from the wide-field run summary, not typed.
+    @Test func wideFieldChartComesFromTheRunSummary() throws {
+        let (b, r) = try Self.build()
+        let bars = b.wideBars()
+        #expect(bars.count == 7)
+        #expect(bars.first?.strim == true, "Strim leads the wide-field decode row")
+        #expect(bars.filter(\.earlier).map(\.name).sorted() == ["llama.cpp", "Ollama"].sorted())
+        #expect(bars.map(\.value) == bars.map(\.value).sorted(by: >))
+        let page = r.generated["site/benchmarks.html"] ?? ""
+        #expect(page.contains("id=\"wide\"") && page.contains("oMLX") && page.contains("n/a"))
+        #expect(page.contains("llama.cpp and Ollama from the 2026-10-26 run"))
+        #expect(r.html.contains(b.wideDate) && r.html.contains("earlier run"))
+        #expect(Self.matches("<svg class=\"hv nl vw\"", in: r.html).count == 1 && Self.matches("<svg class=\"hv nl vn\"", in: r.html).count == 1)
+        #expect(page.contains("class=\"hv nl vw\""), "the benchmarks page draws the wide field too")
+    }
+
+    @Test func parsesTheScoreboardTable() {
+        let md = "intro\n\n| metric | strim | llama.cpp | tensorfold-ctx64k |\n|---|---|---|---|\n| W3 4K cold decode tok/s | **61.9 (4)** | n/a | 29.5 (3) |\n"
+        let t = parseWideScoreboard(md)
+        #expect(t?.engines == ["strim", "llama.cpp"])
+        #expect(t?.rows.first?.cells == [WideCell(raw: "**61.9 (4)**", value: 61.9, best: true), WideCell(raw: "n/a", value: nil, best: false)])
+    }
+
+    @Test func landingIsShortAndHasTheTwoVisuals() throws {
         let (_, r) = try Self.build()
-        func rows(_ id: String, _ next: String) -> Int {
-            let a = r.html.range(of: "id=\"\(id)\"")!.lowerBound
-            let seg = String(r.html[a..<(r.html.range(of: "id=\"\(next)\"", range: a..<r.html.endIndex)?.lowerBound ?? r.html.endIndex)])
-            return seg.components(separatedBy: "<tbody>").dropFirst().first.map { $0.components(separatedBy: "<tr>").count - 1 } ?? 0
+        #expect(Self.matches("<svg class=\"hv nl", in: r.html).count == 2)   // wide field: desktop and narrow variant
+        #expect(Self.matches("<article class=\"card", in: r.html).count == GLANCE.count)
+        #expect(Self.matches("<details class=\"faq\"", in: r.html).count == 3)
+        #expect(!r.html.contains("<table") && !r.html.contains("class=\"term\""))
+        let top = String(r.html[r.html.range(of: "id=\"top\"")!.lowerBound..<r.html.range(of: "id=\"field\"")!.lowerBound])
+        #expect(top.contains("brew install") && top.contains("Qwen3.8-27B"))
+        #expect(r.html.count < 60_000)
+        for tag in ["<title>", "name=\"description\"", "property=\"og:image\"", "name=\"twitter:card\"", "name=\"theme-color\"", "rel=\"canonical\" href=\"https://megasoft1978.github.io/strim-engine/\""] {
+            #expect(r.html.contains(tag), "missing \(tag)")
         }
-        #expect(rows("compare", "faq") <= 8 && rows("compare", "faq") > 0)
-        #expect(rows("results", "install") <= 8)
-        #expect(Self.matches("<svg class=\"hv\"", in: r.html).count == 3)   // hero proof (3 groups) and the six-group chart (two panels); the table lives on benchmarks.html
-        #expect(Self.matches("<details class=\"faq\"", in: r.html).count == 4)
-        #expect(r.html.contains("class=\"term\""))
-        // hero proof sits in the first section; the 8-row table is on benchmarks.html only
-        let top = String(r.html[r.html.range(of: "id=\"top\"")!.lowerBound..<r.html.range(of: "id=\"proof\"")!.lowerBound])
-        #expect(top.contains("<svg class=\"hv\"") && top.contains("brew install"))
-        #expect(Self.matches("<tr>", in: r.html).count <= 7)   // only the 6-row comparison has a table
         #expect((r.generated["site/benchmarks.html"] ?? "").contains("Strim against each rival, median of"))
-        #expect(r.html.contains("inst-brew") && r.html.contains("inst-curl") && r.html.contains("inst-src"))
     }
 
     @Test func everyNumberOnTheLandingPageTracesToTheData() throws {
         let (b, r) = try Self.build()
-        // 1. every figure span and cell cites an id that exists
+        // 1. every figure span cites an id that exists
         for id in Self.matches(#"title="([a-z0-9_.\-]+\.[a-z0-9_.\-]+)""#, in: r.html).map({ $0.dropFirst(7).dropLast(1) }) {
             #expect(b.D.figs[String(id)] != nil, "unknown figure id \(id)")
         }
-        // 2. in the proof, results and install sections, no decimal or percentage appears outside a cited element
+        // 2. no decimal or percentage appears in the page text outside a cited element; the loss line is computed from the cells (checked in lossesStayVisible)
         var text = r.html
-        for strip in [#"(?s)<svg.*?</svg>"#, #"(?s)<span class="fig"[^>]*>.*?</span>"#, #"(?s)<td[^>]*title=[^>]*>.*?</td>"#, #"(?s)<code>.*?</code>"#, #"(?s)<pre.*?</pre>"#, #"(?s)<script>.*?</script>"#, #"<[^>]+>"#] {
+        for strip in [#"(?s)<(b|p|i|span)[^>]*class="[^"]*\bgen\b[^"]*"[^>]*>.*?</\1>"#, #"(?s)<svg.*?</svg>"#, #"(?s)<span class="fig"[^>]*>.*?</span>"#, #"(?s)<p class="honest">.*?</p>"#, #"(?s)<code>.*?</code>"#, #"(?s)<script>.*?</script>"#, #"<[^>]+>"#] {
             text = text.replacingOccurrences(of: strip, with: " ", options: .regularExpression)
         }
-        text = text.replacingOccurrences(of: #"Qwen3\.8|\d+\.\d+\.\d+|2%|\d{4}-\d\d-\d\d"#, with: " ", options: .regularExpression)
+        text = text.replacingOccurrences(of: #"Qwen3\.8|\d+\.\d+\.\d+|\d{4}-\d\d-\d\d"#, with: " ", options: .regularExpression)
         #expect(Self.matches(#"\d+\.\d+|\d+%|\d+(\.\d+)?×"#, in: text).isEmpty, "untraced numbers: \(Self.matches(#".{20}(\d+\.\d+|\d+%)"#, in: text))")
-        // 3. the hero chart labels are exactly the figure values
-        let known = Set(GLANCE.flatMap { id in ENGINES.map { b.D.text(fid(id, $0)) } })
-        for t in Self.matches(#"(?<=>)\d+(\.\d+)?(?=</text>)"#, in: r.html) { #expect(known.contains(t), "chart label \(t) is not a figure value") }
+        // 3. every gauge shows exactly the computed ratio of Strim over the best rival
+        let expected = GLANCE.compactMap { id in b.bestRival(id).map { ratioLabel($0.ratio) } }
+        #expect(Self.matches(#"(?<=<b class="gen" data-count="[0-9.]{1,6}" data-suffix="x">)\d+\.\d+x(?=</b>)"#, in: r.html) == expected)
+        #expect(expected.count == 6)
     }
 
+    
     @Test func swappingTheRunIsOneConstant() throws {
         // every presented fact derives from FINAL_REL: the generated headline carries it, nothing else hard-codes a run directory
         let (b, _) = try Self.build()
@@ -109,6 +139,91 @@ import Testing
         for f in ["Landing.swift", "Page.swift", "Pieces.swift", "Readme.swift", "Headline.swift", "Compare.swift"] {
             let src = readString(repoRoot + "/Sources/StrimSite/" + f)
             #expect(!src.contains("h2h-final-2026") && !src.contains("h2h-final2-2026"), "\(f) hard-codes a run directory")
+        }
+    }
+}
+
+/// Ratio maths, gauge geometry and the colour rules of the Aurora redesign.
+@Suite struct SiteAuroraTests {
+    static func builder(_ cellsJSON: String) throws -> SiteBuilder {
+        let b = SiteBuilder(root: repoRoot)
+        b.H = try PyJSONParser.parse("{\"cells\": \(cellsJSON)}")
+        return b
+    }
+
+    /// Latency cells (better = lower) are inverted so that above 1.0x always means Strim is faster; throughput cells are not.
+    @Test func ratiosAreInvertedForLatencyCells() throws {
+        let b = try Self.builder("""
+        [{"id":"lat","better":"lower","values":{"strim":2.0,"rapid-mlx":3.0,"mlx-vlm":4.0}},
+         {"id":"slow","better":"lower","values":{"strim":5.0,"rapid-mlx":3.0,"mlx-vlm":4.0}},
+         {"id":"thr","better":"higher","values":{"strim":50,"rapid-mlx":40,"mlx-vlm":60}}]
+        """)
+        #expect(b.rivalRatio("lat", "rapid-mlx") == 1.5 && b.rivalRatio("lat", "mlx-vlm") == 2.0, "faster first token = ratio above 1")
+        #expect(b.rivalRatio("slow", "rapid-mlx") == 0.6, "a slower first token is a ratio below 1")
+        #expect(b.speedRatio("lat") == 1.5, "the best rival decides")
+        #expect(b.rivalRatio("thr", "rapid-mlx") == 1.25)
+        #expect(abs((b.rivalRatio("thr", "mlx-vlm") ?? 0) - 50.0 / 60.0) < 1e-12)
+        #expect(b.speedRatio("thr") == b.rivalRatio("thr", "mlx-vlm"))
+        #expect(ratioLabel(0.96) == "0.96x" && ratioLabel(1.482) == "1.48x")
+        #expect(ratioOf(strim: 2, rival: 3, lowerBetter: true) == 1.5 && ratioOf(strim: 3, rival: 2, lowerBetter: false) == 1.5)
+    }
+
+    @Test func realDataRatiosMatchTheVerdicts() throws {
+        let b = SiteBuilder(root: repoRoot)
+        b.log = { _ in }
+        _ = try b.run(SiteOptions(check: true))
+        for id in GLANCE {
+            guard let c = b.hCell(id) else { Issue.record("missing cell \(id)"); continue }
+            for rv in b.RIVALS {
+                if ["NC", "n/a"].contains(c["verdict"]?[rv]?.str ?? "") {
+                    #expect(c["not_claimable"]?[rv]?.str != nil, "\(id) vs \(rv) must retain its eligibility reason")
+                    continue
+                }
+                guard let r = b.rivalRatio(id, rv), let sp = c["speedup"]?[rv]?.number else { Issue.record("no ratio \(id) \(rv)"); continue }
+                #expect(abs(r - sp) < 0.006, "\(id) vs \(rv): computed \(r), summary \(sp)")
+                #expect((c["verdict"]?[rv]?.str == "LOSS") == (r < 0.98), "\(id) vs \(rv) verdict and ratio disagree")
+            }
+        }
+    }
+
+    /// Arc gauge: the 1.0x tick sits left of centre on a 0.5x to 3.2x log scale; wins sweep right, losses sweep left.
+    @Test func gaugeSweepsWithTheRatio() throws {
+        let b = try Self.builder("[]")
+        let win = b.gaugeSVGInner(1.5, gradId: "g"), loss = b.gaugeSVGInner(0.9, gradId: "g")
+        #expect(win.contains("A32 32 0 0 1 ") && !win.contains("lose"))
+        #expect(loss.contains("A32 32 0 0 0 ") && loss.contains("gv lose"))
+        #expect(win.contains("M27.6 10.5A32 32"), "the arc starts at the 1.0x tick")
+    }
+
+    @Test func wideFieldHasFiveCurrentEnginesAndTwoEarlierBeads() throws {
+        let b = SiteBuilder(root: repoRoot)
+        b.log = { _ in }
+        _ = try b.run(SiteOptions(check: true))
+        let svg = b.numberLineSVG(narrow: false, standalone: true)
+        #expect(Self.count("class=\"nldot\"", in: svg) == 4 && Self.count("class=\"nldot earlier-run\"", in: svg) == 2 && svg.contains("fill=\"url(#nlso)\""))
+        #expect(svg.contains(b.wideNumeral()) && b.wideBars().count == 7)
+        let narrow = b.numberLineSVG(narrow: true, standalone: false)
+        #expect(Self.count("class=\"nldot\"", in: narrow) == 4 && Self.count("class=\"nldot earlier-run\"", in: narrow) == 2)
+    }
+
+    static func count(_ s: String, in t: String) -> Int { t.components(separatedBy: s).count - 1 }
+
+    @Test func noGreenAnywhere() throws {
+        #expect(!greenColours(in: "a{color:#00aa55}").isEmpty && !greenColours(in: "#3c9").isEmpty && !greenColours(in: "fill=\"#4cc9b0\"").isEmpty)
+        #expect(greenColours(in: "#7C7BFF #B25CFF #FF4FD0 #0A0920 #F1EFFF #A29FC8 #4F4BFF #E0309E").isEmpty, "the gradient and text colours are blue, violet and pink")
+        for rel in ["site/assets/style.css", "site/assets/banner.svg", "site/assets/logo.svg", "site/assets/favicon.svg", "site/assets/h2h-hero.svg", "site/assets/h2h-ratio.svg",
+                    "site/assets/h2h-speedup.svg", "site/assets/h2h-memory.svg", "site/assets/h2h-latency.svg", "site/assets/app-icon.svg", "site/index.html", "site/benchmarks.html"] {
+            #expect(greenColours(in: readString(repoRoot + "/" + rel)).isEmpty, "\(rel) contains a green colour")
+        }
+        #expect(!readString(repoRoot + "/site/assets/style.css").lowercased().contains("green"))
+    }
+
+    /// README SVGs are shown by GitHub as images: system fonts only, no filters, no external references.
+    @Test func readmeSVGsAreSelfContained() throws {
+        for rel in ["banner.svg", "h2h-ratio.svg", "h2h-hero.svg", "logo.svg"] {
+            let s = readString(repoRoot + "/site/assets/" + rel)
+            #expect(!s.contains("<filter") && !s.contains("feGaussianBlur") && !s.contains("@import") && !s.contains("url(http") && !s.contains("href=\"http"), "\(rel)")
+            #expect(!s.contains("Space Grotesk") || s.contains("-apple-system"), "\(rel): no web font dependency")
         }
     }
 }

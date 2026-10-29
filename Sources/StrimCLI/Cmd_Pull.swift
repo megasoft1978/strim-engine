@@ -40,9 +40,6 @@ func runPull(_ args: [String]) {
         case "--list": printPullList(); exit(0)
         case "--revision-lock": lock = true
         case "--verify": verify = true
-        case "-h", "--help":
-            print("usage: strim pull [--tier 4bit|6bit|8bit|oq4e] [--dir DIR=~/.strim/models] [--revision-lock] [--verify] [--list] [--only REPO_DIR_NAME]")
-            exit(0)
         default:
             if a == "--only" || a.hasPrefix("--only=") { only = value() }
             else if a == "--tier" || a.hasPrefix("--tier=") { tierName = value() }
@@ -69,6 +66,19 @@ func runPull(_ args: [String]) {
     let opts = o
     let repos = selected
     pullErr("strim pull \(tier.name) -> \(root.path)")
+    // Explicit handlers: a shell that started this job in the background may have set SIGINT to ignored. The .part.state
+    // sidecar is written at most 1 s behind the transfer, so a rerun resumes from there.
+    for (sig, code) in [(SIGINT, Int32(130)), (SIGTERM, Int32(143))] {
+        signal(sig, SIG_IGN)
+        let src = DispatchSource.makeSignalSource(signal: sig, queue: .main)
+        src.setEventHandler {
+            if opts.interactive { FileHandle.standardError.write(Data("\r\u{1b}[K".utf8)) }
+            pullErr("interrupted, progress saved; rerun strim pull to resume")
+            exit(code)
+        }
+        src.resume()
+        pullSignalSources.append(src)
+    }
     exitAsync {
         do {
             let s = try await Puller(opts).pull(repos)
@@ -87,3 +97,5 @@ func runPull(_ args: [String]) {
         }
     }
 }
+
+nonisolated(unsafe) private var pullSignalSources: [DispatchSourceSignal] = []

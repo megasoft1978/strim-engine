@@ -1,0 +1,5 @@
+SIGINT at 20:05:04
+still alive after SIGINT
+SIGTERM
+exited
+restart 20:05:24

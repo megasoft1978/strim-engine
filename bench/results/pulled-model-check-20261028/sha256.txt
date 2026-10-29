@@ -1,0 +1,8 @@
+6cc1508e96fb5d0865dfd5753a79f4ec60651bf3e2a82844a7e8ae9c60528c0d */Users/user/.strim/models/qwen38-4bit/model-00001-of-00003.safetensors
+6cc1508e96fb5d0865dfd5753a79f4ec60651bf3e2a82844a7e8ae9c60528c0d */Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit/model-00001-of-00003.safetensors
+83f2a20ca8058f486a3634a27faf99587f4cd3c156a83dee34fb99e6ac178670 */Users/user/.strim/models/qwen38-4bit/model-00002-of-00003.safetensors
+83f2a20ca8058f486a3634a27faf99587f4cd3c156a83dee34fb99e6ac178670 */Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit/model-00002-of-00003.safetensors
+31b8c91ef899f79efaaa69e3d2c096f6e2ebeb2ff20e29222abbd9ebc79e560a */Users/user/.strim/models/qwen38-4bit/model-00003-of-00003.safetensors
+31b8c91ef899f79efaaa69e3d2c096f6e2ebeb2ff20e29222abbd9ebc79e560a */Users/user/Desktop/Freelance/strim-engine/models/qwen38-4bit/model-00003-of-00003.safetensors
+76663c101e7e8ea9c0ae17bcb95183cd7f733ce424c912b8b264a7b1c48e4cc6 */Users/user/.strim/models/qwen38-mtp-4bit/model.safetensors
+76663c101e7e8ea9c0ae17bcb95183cd7f733ce424c912b8b264a7b1c48e4cc6 */Users/user/Desktop/Freelance/strim-engine/models/qwen38-mtp-4bit/model.safetensors

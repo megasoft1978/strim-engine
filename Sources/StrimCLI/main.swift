@@ -1841,15 +1841,9 @@ if args.count >= 4, args[1] == "benchlayer" {
         exit(1)
     }
 } else {
-    print("strim 0.1.0")
-    print("model:   \(cfg.model.repo)")
-    print("quant:   \(cfg.quant.rawValue)-bit")
-    print("context: \(cfg.contextTokens) tokens")
-    print("prefill: \(cfg.prefillStep) tokens/step")
-    print("mtp:     depth \(cfg.mtpDepth)")
-    print("wired:   \(cfg.wiredLimitGB) GB")
-    print("device:  \(Compute.deviceName)")
-    let mm = Compute.matMulSmoke()
-    print("matmul:  \(mm.shape) -> \(mm.values)")
-    print("usage:   strim inspect <model-dir> | strim probe <model-dir> [token]")
+    if args.count > 1 {
+        FileHandle.standardError.write(Data("strim: unknown or incomplete command \(args[1...].joined(separator: " "))\n\(cliHelpText())\n".utf8))
+        exit(2)
+    }
+    print(cliHelpText())
 }

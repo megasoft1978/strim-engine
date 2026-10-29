@@ -1,0 +1,24 @@
+# gate for cells=agree,w3,w3_32k start 22:40:12 threshold=4.5
+t=0s load=1.21 consec_ok=1 foreign=[]
+t=30s load=1.37 consec_ok=2 foreign=[]
+t=60s load=2.73 consec_ok=3 foreign=[]
+t=90s load=2.38 consec_ok=4 foreign=[]
+t=120s load=2.08 consec_ok=5 foreign=[]
+t=150s load=2.05 consec_ok=6 foreign=[]
+GATE PASSED after 150s
+# gate for cells=w4,w4s,w6 start 22:44:46 threshold=4.5
+t=0s load=1.32 consec_ok=1 foreign=[]
+t=30s load=1.38 consec_ok=0 foreign=[15125  93.6 /System/Library/CoreServices/Software Update.app/Contents/Resources/softwareupdated | 30325 105.6 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.85]
+t=60s load=1.23 consec_ok=1 foreign=[]
+t=90s load=1.29 consec_ok=0 foreign=[30926 114.0 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.85]
+t=120s load=1.20 consec_ok=1 foreign=[]
+t=150s load=1.00 consec_ok=0 foreign=[31482  63.9 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.85]
+t=180s load=0.90 consec_ok=1 foreign=[]
+t=210s load=1.10 consec_ok=0 foreign=[32081  60.7 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/155.0.8059.85]
+t=240s load=1.06 consec_ok=1 foreign=[]
+t=270s load=0.97 consec_ok=2 foreign=[]
+GATE PASSED after 270s
+# gate for cells=w5,replay start 22:51:57 threshold=4.5
+t=0s load=1.12 consec_ok=1 foreign=[]
+t=30s load=1.47 consec_ok=2 foreign=[]
+GATE PASSED after 30s

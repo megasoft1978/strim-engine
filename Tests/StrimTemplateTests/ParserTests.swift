@@ -89,6 +89,59 @@ private let readCall = "<tool_call>\n<function=read_file>\n<parameter=path>\nsrc
     #expect(ev == call("read_file", [("path", .string("a"))]) + [.text("done")])  // leading whitespace of content is dropped while `lead` is set
 }
 
+// MARK: stray reasoning delimiters never reach content
+
+private func render(_ ev: [ParserEvent]) -> (reasoning: String, text: String) {
+    var r = "", t = ""
+    for e in ev {
+        if case let .reasoning(x) = e { r += x }
+        if case let .text(x) = e { t += x }
+    }
+    return (r, t)
+}
+
+@Test func openerInjectedByPromptThenCloserOnly() {  // (a)
+    let ev = parse("Plan.</think>\n\nThe answer.", reasoning: true, tools: [])
+    #expect(ev == [.reasoning("Plan."), .text("The answer.")])
+}
+
+@Test func closerSplitAcrossChunks() {  // (b)
+    var p = ToolCallParser(startsInReasoning: true)
+    var ev = [ParserEvent]()
+    for c in ["Plan.</thi", "nk", ">\n\nAns", "wer.</", "think", ">"] { ev += p.feed(c) }
+    ev += p.finish()
+    #expect(ev.coalesced() == [.reasoning("Plan."), .text("Answer.")])
+}
+
+@Test func thinkingOffPrefillEmitsNothingOfTheKind() {  // (c)
+    #expect(parse("Just the answer.", reasoning: false, tools: []) == [.text("Just the answer.")])
+    #expect(!ToolCallParser.promptOpensReasoning("<|im_start|>assistant\n<think>\n\n</think>\n\n"))
+}
+
+@Test func trailingStrayCloserIsDropped() {  // (d) real transcript shape
+    let t = "```diff\n-a\n+b\n```\n\nNo files were edited.\n</think>"
+    for tl in [tools, []] {
+        let r = render(parse(t, tools: tl))
+        #expect(!r.text.contains("</think>"))
+        #expect(r.text.hasPrefix("```diff\n-a\n+b\n```\n\nNo files were edited."))
+    }
+}
+
+@Test func tagsInCodeStayLiteral() {  // (e)
+    let r = render(parse("Use ```\n</think>\n``` and `<think>` then </think>done", tools: []))
+    #expect(r.text == "Use ```\n</think>\n``` and `<think>` then done")
+    #expect(r.reasoning.isEmpty)
+    // tool-call argument JSON is never inspected
+    let ev = parse("<tool_call>\n<function=create>\n<parameter=title>\nx </think> <think> y\n</parameter>\n</function>\n</tool_call>")
+    #expect(ev == call("create", [("title", .string("x </think> <think> y"))]))
+}
+
+@Test func multipleThinkingBlocks() {  // (f)
+    let r = render(parse("<think>one</think>\n\nA <think>two</think>\n\nB", tools: []))
+    #expect(r.reasoning == "onetwo")
+    #expect(r.text == "A B")
+}
+
 private let samples: [(String, Bool)] = [
     ("Plan the read.</think>\n\nLet me read it.\n\n" + readCall, true),
     ("<think>\nhm</think>\n\nsome  text \n\n" + readCall + "\n\n" + readCall + "\n", false),
@@ -99,6 +152,9 @@ private let samples: [(String, Bool)] = [
     ("<tool_call>\n<function=read_file>\n<parameter=path>\ntrunc", false),
     ("no think close at all, reasoning only", true),
     ("a<tool_call>\n  \n<function=read_file>\ngarbage <parameter=path>\nq\n</parameter>  junk </function>\n  <function=create>\n</function></tool_call>", false),
+    ("answer.\n</think>", false),
+    ("a <think>b</think> c ```\n</think> <think>\n```\n</think>d `</think>` e", false),
+    ("r1</think>\nA <think>r2</think>\nB\n</think>", true),
     ("</think></think> <think> <tool_call><tool_call>\n<function=read_file>\n</function>", true),
 ]
 

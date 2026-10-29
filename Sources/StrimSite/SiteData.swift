@@ -60,13 +60,16 @@ public struct SiteData {
         throw SiteError("\(f.id): unknown op \(f.raw["op"]?.pyStr ?? "None")")
     }
 
+    /// A cell where the engine produced no valid value (n/a in the summary): shown as "n/a", not as a pending measurement.
+    public func isNA(_ i: String) -> Bool { figs[i].map { $0.value.isNull && ($0.raw["na"]?.truthy ?? false) } ?? false }
+
     public func pending(_ i: String) -> Bool { figs[i]?.value.isNull ?? true }
 
     /// Value as displayed (no unit).
     public func text(_ i: String) -> String {
         guard let f = figs[i] else { return "pending" }
         switch f.value {
-        case .null: return "pending"
+        case .null: return f.raw["na"]?.truthy ?? false ? "n/a" : "pending"
         case .string(let s): return s
         case .int(let n): return fmtCommas(n)
         case .bool(let b): return b ? "1" : "0"

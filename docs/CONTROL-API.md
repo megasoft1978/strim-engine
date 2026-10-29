@@ -105,3 +105,5 @@ Disk prefix cache privacy: files hold KV/GDN/MTP tensors and a SHA-256 hash chai
 Fixed caps: `stop` at most 16 sequences of 1024 bytes; MCP JSON-RPC batches at most 16 requests; unfinished delegated jobs at most 64 (`JobManager.maxPending`, submit fails with `queueFull`).
 
 Priority: the server grants every API-token holder the class `ServerConfig.apiPriority` (default `interactive`). `x-strim-priority`/`priority` can only lower a request (to `background`), never raise it above that class. `/health` returns only `{status, engine}`; the unhealthy reason is on the guarded `/metrics`.
+
+- Reasoning delimiters never reach `content`: the shared output parser (`ToolCallParser`) drops a stray `</think>` with no open block (the model sometimes re-emits it after its answer), opens a new reasoning block on a later `<think>`, and keeps both literal inside code fences, inline code and tool arguments.

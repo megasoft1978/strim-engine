@@ -1,0 +1,10 @@
+{"engine":"mlx-vlm","session":"1793226964-69868","cell":"warmup","rows":1,"hit_rows":0,"cached_tokens":0,"unreported_rows":0}
+{"engine":"mlx-vlm","session":"1793226964-69868","cell":"w3","rows":2,"hit_rows":0,"cached_tokens":0,"unreported_rows":0}
+{"engine":"mlx-vlm","session":"1793226964-69868","cell":"w3_32k","rows":1,"hit_rows":0,"cached_tokens":0,"unreported_rows":0}
+{"engine":"mlx-vlm","session":"1793227232-73197","cell":"warmup","rows":1,"hit_rows":0,"cached_tokens":0,"unreported_rows":0}
+{"engine":"mlx-vlm","session":"1793227232-73197","cell":"w4","rows":12,"hit_rows":0,"cached_tokens":0,"unreported_rows":0}
+{"engine":"mlx-vlm","session":"1793227232-73197","cell":"w4s","rows":12,"hit_rows":0,"cached_tokens":0,"unreported_rows":0}
+{"engine":"mlx-vlm","session":"1793227232-73197","cell":"w6","rows":12,"hit_rows":0,"cached_tokens":0,"unreported_rows":0}
+{"engine":"mlx-vlm","session":"1793227413-83093","cell":"warmup","rows":1,"hit_rows":0,"cached_tokens":0,"unreported_rows":0}
+{"engine":"mlx-vlm","session":"1793227413-83093","cell":"w5","rows":4,"hit_rows":0,"cached_tokens":0,"unreported_rows":0}
+{"engine":"mlx-vlm","session":"1793227413-83093","cell":"replay","rows":8,"hit_rows":0,"cached_tokens":0,"unreported_rows":0}

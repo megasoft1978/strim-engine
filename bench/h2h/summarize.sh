@@ -1,8 +1,19 @@
 #!/bin/bash
-# usage: summarize.sh RESULTS_DIR [ENGINES=strim,rapid-mlx,mlx-vlm]  -> markdown tables on stdout (jq + awk only)
+# usage: summarize.sh RESULTS_DIR [ENGINES=strim,rapid-mlx,mlx-vlm,mlx-lm,omlx]  -> markdown tables on stdout (jq + awk only)
+# H2H_JSON=file also writes results.json (schema in SCHEMA.md).
 # cell value = median over passes of the per-pass value (per-pass: median over the cell's requests); ratio = strim / rival;
 # verdict WIN/TIE/LOSS with TIE = within H2H_TIE_PCT percent (default 2); lower-is-better cells are inverted.
-R=${1:?results dir}; ENGS=${2:-strim,rapid-mlx,mlx-vlm}; TIE=${H2H_TIE_PCT:-2}
+# A cell flagged memory_abort_watchdog / engine_guard_abort / engine_oom / cell_timeout in the LATEST session of that engine+pass is n/a
+# (raw kept, never retried silently). H2H_ONLY_CLEAN=1 also drops every cell whose latest session is not CLEAN.
+R=${1:?results dir}; ENGS=${2:-strim,rapid-mlx,mlx-vlm,mlx-lm,omlx}; TIE=${H2H_TIE_PCT:-2}
+HERE=$(cd "$(dirname "$0")" && pwd); MEMO=$(mktemp); EXCL=$(mktemp)
+cstate() { # engine pass cell -> "excluding-flag|session-status" of the latest session of that engine+pass that ran the cell ("|UNKNOWN" for runs without sessions.jsonl)
+  local k="$1|$2|$3|" m; m=$(grep -F -m1 "$k" "$MEMO"); if [ -n "$m" ]; then echo "${m#$k}"; return; fi
+  local f="$R/$1/pass$2/sessions.jsonl" r="|UNKNOWN"
+  [ -s "$f" ] && r=$(jq -rs --arg c "$3" 'map(select(.cells|index($c))) | last | if . == null then "|UNKNOWN" else ((.flags|map(select(.cell==$c and (.flag|test("^(memory_abort_watchdog|engine_guard_abort|engine_oom|cell_timeout)$"))))|map(.flag)|first) // "") + "|" + .status end' "$f" 2>/dev/null || echo "|UNKNOWN")
+  echo "$k$r" >> "$MEMO"; echo "$r"
+}
+skipcell() { local s; s=$(cstate "$1" "$2" "$3"); [ -n "${s%%|*}" ] && return 0; [ "${H2H_ONLY_CLEAN:-0}" = 1 ] && [ "${s##*|}" != CLEAN ] && return 0; return 1; }
 JQDEF='def med: sort | if length==0 then null elif length%2==1 then .[(length/2)|floor] else (.[length/2-1]+.[length/2])/2 end;
  def pct($p): sort | if length==0 then null else ((length-1)*$p) as $i | (.[$i|floor]) as $a | (.[$i|ceil]) as $b | $a+($b-$a)*($i-($i|floor)) end;
  def req($w;$v): [.[] | select(.kind=="request" and .workload==$w and .variant==$v and .error==null)];
@@ -44,23 +55,27 @@ p95_w5|W5 p95 TTFT|s|l|w5|tt("W5";"shared16384-c4")|pct(0.95)
 M
 )
 val() { # engine pass cell program -> number|""
-  local f="$R/$1/pass$2/$3/raw.jsonl"; [ -s "$f" ] || return
+  local f="$R/$1/pass$2/$3/raw.jsonl"; [ -s "$f" ] || return; skipcell "$1" "$2" "$3" && return
   jq -s -r "$JQDEF ${4} | numbers" "$f" 2>/dev/null
 }
 rval() { # replay metrics: engine pass kind
-  local f="$R/$1/pass$2/replay/raw.jsonl"; [ -s "$f" ] || return
+  local f="$R/$1/pass$2/replay/raw.jsonl"; [ -s "$f" ] || return; skipcell "$1" "$2" replay && return
   jq -s -r "$JQDEF rp | $3" "$f" 2>/dev/null
 }
 medpass() { awk 'NF{a[n++]=$1} END{if(!n){print "NA";exit} for(i=0;i<n;i++)for(j=i+1;j<n;j++)if(a[j]<a[i]){t=a[i];a[i]=a[j];a[j]=t}; print (n%2)?a[int(n/2)]:(a[n/2-1]+a[n/2])/2}'; }
 IFS=, read -ra E <<<"$ENGS"
 ROWS=$(mktemp); PASSV=$(mktemp)
 passes() { ls -d "$R/${E[0]}"/pass* 2>/dev/null | sed 's/.*pass//' | sort; }
+xrec() { # id engine cell -> EXCL line: excluded passes and the session status per pass (for results.json)
+  local P s ex="" st=""; for P in $(passes); do s=$(cstate "$2" "$P" "$3"); [ -n "${s%%|*}" ] && ex="$ex$P,"; st="$st${s##*|},"; done
+  echo "$1|$2|$3|${ex%,}|${st%,}" >> "$EXCL"
+}
 while IFS='|' read -r id label unit dir cellname prog rest; do
   [ -z "$id" ] && continue
   p="$prog"; [ -n "$rest" ] && p="$prog | $rest"
   line="$id|$label|$unit|$dir"
   for e in "${E[@]}"; do
-    pv=$(for P in $(passes); do val "$e" "$P" "$cellname" "$p"; done | tr "\n" ","); echo "$id|$e|${pv%,}" >> "$PASSV"; v=$(echo "$pv" | tr "," "\n" | medpass); line="$line|$v"
+    pv=$(for P in $(passes); do val "$e" "$P" "$cellname" "$p"; done | tr "\n" ","); echo "$id|$e|${pv%,}" >> "$PASSV"; xrec "$id" "$e" "$cellname"; v=$(echo "$pv" | tr "," "\n" | medpass); line="$line|$v"
   done
   echo "$line" >> "$ROWS"
 done <<<"$(echo "$METRICS" | awk -F'|' '{printf "%s|%s|%s|%s|%s|", $1,$2,$3,$4,$5; for(i=6;i<=NF;i++) printf "%s%s", $i, (i<NF?"|":""); print ""}')"
@@ -68,7 +83,7 @@ done <<<"$(echo "$METRICS" | awk -F'|' '{printf "%s|%s|%s|%s|%s|", $1,$2,$3,$4,$
 for spec in "rp8|agent replay prefill sum T1-T8|s|l|map(select(.turn<=8).ttft_s)|add" "rp6|agent replay prefill sum T1-T6|s|l|map(select(.turn<=6).ttft_s)|add" \
             "rpc8|agent replay T8 cached fraction|frac|h|map(select(.turn==8).cache_frac)|first"; do
   IFS='|' read -r id label unit dir a b <<<"$spec"; line="$id|$label|$unit|$dir"
-  for e in "${E[@]}"; do pv=$(for P in $(passes); do rval "$e" "$P" "$a | $b | numbers"; done | tr "\n" ","); echo "$id|$e|${pv%,}" >> "$PASSV"; v=$(echo "$pv" | tr "," "\n" | medpass); line="$line|$v"; done
+  for e in "${E[@]}"; do pv=$(for P in $(passes); do rval "$e" "$P" "$a | $b | numbers"; done | tr "\n" ","); echo "$id|$e|${pv%,}" >> "$PASSV"; xrec "$id" "$e" replay; v=$(echo "$pv" | tr "," "\n" | medpass); line="$line|$v"; done
   echo "$line" >> "$ROWS"
 done
 echo "## Results (ratio = ${E[0]} / rival; lower-is-better cells (TTFT, time) win with ratio < 1; tie = within ${TIE}%)"; echo
@@ -98,6 +113,22 @@ for c in warmup agree w3 w3_32k w4 w4s w6 w5 replay; do
 done
 printf '| **whole run** |'
 for e in "${E[@]}"; do cat "$R/$e"/pass*/watch.csv 2>/dev/null | awk -F, '!/^#/ {if($5>f)f=$5; if($4>r)r=$4} END{printf " **%d / %d** |", f, r}'; done; echo
+echo; echo "## Engines: capabilities and exact launch (engines.sh is the single source; versions are those measured in this run)"; echo
+H2H_ROOT=$HERE/../.. "$HERE/engines.sh" table "$ENGS" "$R"
+echo; echo "## Session validity (latest session per engine, pass and cell group; CLEAN = no 2-sample pollution, gate passed; claims only from CLEAN)"; echo
+printf '| engine | pass | cells | status | gate | polluted cells | flags |\n|---|---|---|---|---|---|---|\n'
+for e in "${E[@]}"; do for P in $(passes); do
+  [ -s "$R/$e/pass$P/sessions.jsonl" ] || { echo "| $e | $P | n/a | UNKNOWN (no sessions.jsonl) | n/a | n/a | n/a |"; continue; }
+  jq -rs --arg e "$e" --argjson p "$P" 'group_by(.cells|join(","))|map(last)|.[]|"| \($e) | \($p) | \(.cells|join(",")) | \(.status) | \(.gate) | \(.polluted_cells|join(" ")) | \(.flags|map("\(.cell):\(.flag)")|join(" ")) |"' "$R/$e/pass$P/sessions.jsonl"
+done; done
+echo; echo "## Flagged cells (never retried silently; n/a in the tables above when an abort, guard, OOM or timeout flag)"; echo
+FL=$(for e in "${E[@]}"; do for P in $(passes); do [ -s "$R/$e/pass$P/sessions.jsonl" ] && jq -rs --arg e "$e" --argjson p "$P" '.[]|.flags[]|"- \($e) pass\($p) \(.cell): \(.flag) \(.detail)"' "$R/$e/pass$P/sessions.jsonl"; done; done)
+[ -n "$FL" ] && echo "$FL" || echo "- none"
+echo; echo "## Cache-hit reporting (usage-reported cached tokens, per engine; rows without a value = engine did not report)"; echo
+printf '| engine | cell | rows | rows with a hit | cached tokens | unreported rows |\n|---|---|---|---|---|---|\n'
+for e in "${E[@]}"; do for c in w5 replay; do
+  cat "$R/$e"/pass*/cache.jsonl 2>/dev/null | jq -rs --arg e "$e" --arg c "$c" '[.[]|select(.cell==$c)]|if length==0 then "| \($e) | \($c) | n/a | n/a | n/a | n/a |" else "| \($e) | \($c) | \(map(.rows)|add) | \(map(.hit_rows)|add) | \(map(.cached_tokens)|add) | \(map(.unreported_rows)|add) |" end'
+done; done
 echo; echo "## Run conditions"; echo
 for e in "${E[@]}"; do for d in "$R/$e"/pass*; do
   s=$(awk '/^session/ {n++} END{print n}' "$d/steps.txt")
@@ -110,7 +141,7 @@ cmp() { jq -s -r "$JQCMP" "$1" "$2" 2>/dev/null || echo "n/a"; }
 F=$R/${E[0]}
 [ -s "$F/pass1/agree.json" ] && [ -s "$F/pass2/agree.json" ] && echo "- ${E[0]} pass1 vs pass2 (self): $(cmp "$F/pass1/agree.json" "$F/pass2/agree.json")"
 for e in "${E[@]:1}"; do echo "- ${E[0]} vs $e (pass1): $(cmp "$F/pass1/agree.json" "$R/$e/pass1/agree.json"); (pass2): $(cmp "$F/pass2/agree.json" "$R/$e/pass2/agree.json")"; done
-if [ ${#E[@]} -ge 3 ]; then echo "- ${E[1]} vs ${E[2]} (pass1): $(cmp "$R/${E[1]}/pass1/agree.json" "$R/${E[2]}/pass1/agree.json")"; fi
+for ((i=1;i<${#E[@]};i++)); do for ((j=i+1;j<${#E[@]};j++)); do echo "- ${E[i]} vs ${E[j]} (pass1): $(cmp "$R/${E[i]}/pass1/agree.json" "$R/${E[j]}/pass1/agree.json")"; done; done
 echo; echo "## Agent replay detail (8 turns; median over passes)"; echo
 printf '| turn | prompt tok |'; for e in "${E[@]}"; do printf ' %s TTFT s | %s cached tok |' "$e" "$e"; done; echo; printf '|---|---|'; for e in "${E[@]}"; do printf -- '---|---|'; done; echo
 for t in 1 2 3 4 5 6 7 8; do
@@ -144,6 +175,25 @@ if [ -n "${H2H_JSON:-}" ]; then
        median:([range(0;$n)] | map({key:$E[.], value:$med[.]}) | from_entries),
        per_pass:([range(0;$n)] | map(. as $i | {key:$E[$i], value:([$pv[0][]|select(.id==$f[0] and .engine==$E[$i])|.passes][0] // [])}) | from_entries),
        vs_rivals:([range(1;$n)] | map(. as $i | {key:$E[$i], value:{ratio_strim_over_rival:($rv[($i-1)*2]|tonumber? // null), verdict:$rv[($i-1)*2+1]}}) | from_entries)} ]
-    | {tie_pct:$tie, engines:$E, cells:.}' > "$H2H_JSON"
+    | {tie_pct:$tie, engines:$E, cells:.}' > "$H2H_JSON.tmp"
+  # schema v2 additions (all additive; SCHEMA.md): per-cell group / excluded_passes / session_status / claim_eligible, engine_meta, sessions, flags, claim_policy
+  jq --arg dir "$(basename "$R")" \
+     --slurpfile ex <(jq -R -s 'split("\n")|map(select(length>0)|split("|")|{id:.[0],engine:.[1],group:.[2],excluded:(.[3]|split(",")|map(select(length>0)|tonumber)),status:(.[4]|split(",")|map(select(length>0)))})' "$EXCL") \
+     --slurpfile meta <("$HERE/engines.sh" tsv "$ENGS" "$R" | jq -R -s 'split("\n")|map(select(length>0)|split("\t")|{key:.[0],value:{port:(.[1]|tonumber),mtp:.[2],prefix_cache:.[3],cache_hits_visible_via:.[4],own_memory_guard:.[5],flags:.[6],version:.[7],model:.[8]}})|from_entries') \
+     --slurpfile sess <(cat "$R"/*/pass*/sessions.jsonl 2>/dev/null | jq -s '.') \
+     --argjson only "$([ "${H2H_ONLY_CLEAN:-0}" = 1 ] && echo true || echo false)" '
+    ($ex[0]) as $X | .engines as $E |
+    .cells |= map(. as $c | ([$X[]|select(.id==$c.id)]) as $r |
+      . + {group: ($r[0].group // null),
+           excluded_passes: ([$E[] | . as $e | {key:$e, value:([$r[]|select(.engine==$e)|.excluded]|first // [])}] | from_entries),
+           session_status: ([$E[] | . as $e | {key:$e, value:([$r[]|select(.engine==$e)|.status]|first // [])}] | from_entries),
+           claim_eligible: ([$E[] | . as $e | {key:$e, value:(([$r[]|select(.engine==$e)][0]) as $q | if $q == null or ($q.status|length)==0 then null else (($q.excluded|length)==0 and ($q.status|all(. == "CLEAN")) and (($c.per_pass[$e]|length) == ($q.status|length))) end)}] | from_entries)})
+    | . + {schema_version: 2, run_dir: $dir, only_clean: $only,
+           claim_policy: {claims_only_from_clean_sessions: true, tie_pct: .tie_pct, rerun_polluted_once: true,
+                          pollution_rule: "1-min load > pollute_load or a foreign process > 60% CPU in 2 consecutive samples = POLLUTED",
+                          excluded_flags: ["memory_abort_watchdog","engine_guard_abort","engine_oom","cell_timeout"]},
+           engine_meta: $meta[0],
+           sessions: $sess[0],
+           flags: [($sess[0] // [])[] | . as $s | .flags[] | {engine:$s.engine, pass:$s.pass, session:$s.session, cell:.cell, flag:.flag, detail:.detail}]}' "$H2H_JSON.tmp" > "$H2H_JSON" && rm -f "$H2H_JSON.tmp"
 fi
-rm -f "$ROWS" "$PASSV"
+rm -f "$ROWS" "$PASSV" "$MEMO" "$EXCL"
