@@ -24,9 +24,9 @@ concurrency:
 jobs:
   build:
     name: Build, test, package
-    # Newest hosted Apple Silicon image. Needs Xcode with a Swift 6 toolchain (Package.swift: swift-tools-version 6.0)
-    # and the Metal toolchain (mlx-swift compiles default.metallib with `xcrun metal`).
-    runs-on: macos-26
+    # Xcode 27's Swift toolchain is required for the current StrimHarness sources. The Metal toolchain
+    # is checked below (mlx-swift compiles default.metallib with `xcrun metal`).
+    runs-on: xcode-27
     timeout-minutes: 120
     outputs:
       version: ${{ steps.ver.outputs.version }}
@@ -42,9 +42,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select newest Xcode
+      - name: Select Xcode 27.1
         run: |
-          xc="$(printf "%s\n" /Applications/Xcode_*.app | sort -V | tail -n 1)"; [ -d "$xc" ] || xc=""
+          xc="/Applications/Xcode_27.1.app"; [ -d "$xc" ] || xc=""
           [ -n "$xc" ] || xc="$(xcode-select -p | sed 's#/Contents/Developer##')"
           echo "Using $xc"
           sudo xcode-select -s "$xc"

@@ -25,7 +25,17 @@ public struct PullOptions: Sendable {
     public var log: @Sendable (String) -> Void = { _ in }
     /// Transient single-line status, only called when `interactive`.
     public var status: @Sendable (String) -> Void = { _ in }
+    /// Structured events for clients that need a machine-readable transfer stream.
+    public var event: @Sendable (PullEvent) -> Void = { _ in }
     public init(dir: URL) { self.dir = dir }
+}
+
+public enum PullEvent: Sendable, Equatable {
+    case plan(totalBytes: Int64, files: [String])
+    case progress(file: String, doneBytes: Int64, totalBytes: Int64, bytesPerSec: Double, etaSec: Double?)
+    case verify(file: String)
+    case done
+    case error(code: String, message: String)
 }
 
 public enum PullDisk {
@@ -57,17 +67,18 @@ final class PullMeter: @unchecked Sendable {
     private let options: PullOptions
     // The file currently downloading (label empty between files).
     private var fileLabel = ""
+    private var eventFile = ""
     private var fileSize: Int64 = 0
     private var fileDone: Int64 = 0
     private var fileFetched: Int64 = 0
     private var fileBegan = Date()
     init(total: Int64, alreadyHave: Int64, options: PullOptions) { self.total = total; self.done = alreadyHave; self.options = options }
     var fetchedBytes: Int64 { lock.lock(); defer { lock.unlock() }; return fetched }
-    func beginFile(_ label: String, size: Int64, resumedFrom: Int64) {
+    func beginFile(_ label: String, size: Int64, resumedFrom: Int64, eventFile: String) {
         lock.lock(); defer { lock.unlock() }
-        fileLabel = label; fileSize = size; fileDone = resumedFrom; fileFetched = 0; fileBegan = Date()
+        fileLabel = label; self.eventFile = eventFile; fileSize = size; fileDone = resumedFrom; fileFetched = 0; fileBegan = Date()
     }
-    func endFile() { lock.lock(); defer { lock.unlock() }; fileLabel = "" }
+    func endFile() { lock.lock(); defer { lock.unlock() }; fileLabel = ""; eventFile = "" }
     /// Non-TTY progress line for the active file (nil when none is active).
     func progressLine() -> String? {
         lock.lock(); defer { lock.unlock() }
@@ -84,7 +95,11 @@ final class PullMeter: @unchecked Sendable {
         let due = options.interactive && now.timeIntervalSince(lastPrint) >= 0.5
         if due { lastPrint = now }
         let (d, f, l) = (done, fetched, fileLabel)
+        let jsonFile = eventFile
         lock.unlock()
+        let overallRate = Double(f) / max(now.timeIntervalSince(began), 0.001)
+        options.event(.progress(file: jsonFile, doneBytes: d, totalBytes: total, bytesPerSec: overallRate,
+                                etaSec: overallRate > 0 ? Double(max(0, total - d)) / overallRate : nil))
         guard due else { return }
         let el = max(now.timeIntervalSince(began), 0.001)
         let rate = Double(f) / el
@@ -171,6 +186,7 @@ public final class Puller: Sendable {
                 throw PullError.insufficientDisk(need: needed, free: free, reserve: options.reserveBytes)
             }
         }
+        options.event(.plan(totalBytes: total, files: plans.flatMap { repo, items in items.map { "\(repo.name)/\($0.0.path)" } }))
         var summary = PullSummary()
         let meter = PullMeter(total: total, alreadyHave: have, options: options)
         // Non-TTY (logs, redirected output): a progress line for the active file at least every 30 s, even when stalled.
@@ -185,7 +201,8 @@ public final class Puller: Sendable {
             try fm.createDirectory(at: options.dir.appendingPathComponent(repo.name), withIntermediateDirectories: true)
             for (i, (f, action)) in items.enumerated() {
                 if action == .skip { summary.skippedFiles += 1; continue }
-                meter.beginFile("\(repo.name)/\(f.path) (\(i + 1)/\(items.count))", size: f.size, resumedFrom: resumableBytes(repo, f))
+                meter.beginFile("\(repo.name)/\(f.path) (\(i + 1)/\(items.count))", size: f.size,
+                                resumedFrom: resumableBytes(repo, f), eventFile: "\(repo.name)/\(f.path)")
                 let t0 = Date()
                 try await downloadFile(repo, f, meter: meter, singleConnection: false)
                 meter.endFile()
@@ -198,6 +215,7 @@ public final class Puller: Sendable {
         }
         summary.downloadedBytes = meter.fetchedBytes
         summary.seconds = Date().timeIntervalSince(began)
+        options.event(.done)
         return summary
     }
 
@@ -256,6 +274,7 @@ public final class Puller: Sendable {
 
         let got = fileSize(part) ?? -1
         guard got == file.size else { throw PullError.sizeMismatch(file.path, expected: file.size, got: got) }
+        options.event(.verify(file: "\(repo.name)/\(file.path)"))
         guard try PullHash.matches(file, at: part) else {
             try? fm.removeItem(at: part); try? fm.removeItem(at: stateFile)
             throw PullError.hashMismatch(file.path)

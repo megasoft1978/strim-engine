@@ -26,7 +26,7 @@ struct PullPartState: Codable, Equatable {
     }
 }
 
-enum PullError: Error, CustomStringConvertible, Equatable {
+public enum PullError: Error, CustomStringConvertible, Equatable {
     case insufficientDisk(need: Int64, free: Int64, reserve: Int64)
     case hashMismatch(String)
     case sizeMismatch(String, expected: Int64, got: Int64)
@@ -35,7 +35,7 @@ enum PullError: Error, CustomStringConvertible, Equatable {
     case lockConflict(repo: String, locked: String, pinned: String)
     case network(String)
 
-    var description: String {
+    public var description: String {
         switch self {
         case let .insufficientDisk(need, free, reserve):
             return "not enough free disk: need \(PullFormat.gb(need)) + \(PullFormat.gb(reserve)) headroom, have \(PullFormat.gb(free))"

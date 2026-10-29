@@ -46,6 +46,13 @@ final class MockHF: URLProtocol, @unchecked Sendable {
     }
 }
 
+private final class PullEventRecorder: @unchecked Sendable {
+    private let lock = NSLock()
+    private var storage: [PullEvent] = []
+    func append(_ event: PullEvent) { lock.lock(); storage.append(event); lock.unlock() }
+    func snapshot() -> [PullEvent] { lock.lock(); defer { lock.unlock() }; return storage }
+}
+
 final class PullTests: XCTestCase {
     var tmp: URL!
     override func setUp() {
@@ -95,6 +102,19 @@ final class PullTests: XCTestCase {
             XCTAssertEqual(repo.revision.count, 40, repo.name)
             XCTAssertTrue(repo.url(for: repo.files[0], endpoint: PullManifest.defaultEndpoint).absoluteString.contains("/resolve/\(repo.revision)/"))
         }
+    }
+
+    func testStructuredEventsWithStubTransfer() async throws {
+        let repo = makeRepo()
+        let events = PullEventRecorder()
+        var o = options()
+        o.event = { event in events.append(event) }
+        _ = try await Puller(o).pull([repo])
+        let captured = events.snapshot()
+        XCTAssertTrue(captured.contains { if case .plan(let bytes, let files) = $0 { return bytes == repo.totalBytes && files.count == 2 }; return false })
+        XCTAssertTrue(captured.contains { if case .progress(let file, _, let bytes, _, _) = $0 { return file == "m-test/model.safetensors" && bytes == repo.totalBytes }; return false })
+        XCTAssertTrue(captured.contains { if case .verify = $0 { return true }; return false })
+        XCTAssertEqual(captured.last, .done)
     }
 
     func testManifestIsConsistent() {
