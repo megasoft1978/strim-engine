@@ -19,7 +19,7 @@ brew install megasoft1978/strim/strim              # CLI
 brew install --cask megasoft1978/strim/strim-app   # optional menu-bar app (includes the CLI)
 strim pull                                         # downloads the model
 ```
-Or the [DMG](https://github.com/megasoft1978/strim-engine/releases/latest) (not notarized yet: right-click, then Open). macOS 14+, Apple silicon.
+Or the [DMG](https://github.com/megasoft1978/strim-engine/releases/latest) (signed and notarized). macOS 14+, Apple silicon.
 
 ## Use it with Claude Code or Codex
 ```sh

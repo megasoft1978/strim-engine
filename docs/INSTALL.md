@@ -26,12 +26,7 @@ Download `Strim-<version>-arm64.dmg` from the [latest release](https://github.co
 
 The app contains the `strim` CLI; model weights are not included (`strim pull`, or the Settings tab).
 
-**Not notarized yet.** The DMG is ad-hoc signed only, so a copy downloaded in a browser carries the quarantine flag and macOS Gatekeeper blocks the first launch ("Apple could not verify..."). Pick one:
-
-- System Settings > Privacy & Security > scroll to the Strim message > **Open Anyway** (macOS 15 and newer; on macOS 14 right-click the app > Open also works).
-- Or in Terminal: `xattr -dr com.apple.quarantine /Applications/Strim.app`
-
-This goes away once the release is signed with a Developer ID certificate and notarized (owner-gated, see `packaging/RELEASING.md`). Homebrew and curl installs are not quarantined and show no warning.
+The app and the DMG are signed with a Developer ID and notarized by Apple, so a copy downloaded in a browser opens without a Gatekeeper warning. Homebrew and curl installs are not quarantined either.
 
 ## 4. From source (developers)
 

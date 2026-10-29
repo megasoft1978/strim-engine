@@ -212,7 +212,7 @@ extension SiteBuilder {
             + "<p class=\"cap\">No sudo. Installs to <code>~/.local/strim</code> and links <code>~/.local/bin/strim</code>. Checks the SHA-256 before installing.</p></div>"
         o += "<div class=\"panel p-dmg\"><div class=\"dmgrow\"><a class=\"btn\" href=\"\(REPO_URL)/releases/latest\">Download the DMG (arm64)</a>"
             + "<span class=\"cap\">Open the DMG. Drag Strim to Applications. Launch Strim from the menu bar.</span></div>"
-            + "<p class=\"warn\"><strong>Not notarized yet: right-click &rarr; Open the first time.</strong> macOS warns on first launch. Right-click Strim in Applications and choose Open, or click Open Anyway in System Settings, Privacy and Security, or run <code>\(esc(Self.XATTR_CMD))</code>. Homebrew avoids the warning.</p></div>"
+            + "<p class=\"cap\">Signed with a Developer ID and notarized by Apple: it opens without a Gatekeeper warning.</p></div>"
         o += "</div></div>"
         return o
     }
@@ -229,7 +229,7 @@ extension SiteBuilder {
             o += item("How much memory does it need?", "<p>Measured peak over the whole benchmark run: \(mine)&nbsp;GB on \(esc(runHW)) (\(esc(m.others == "the others" ? "the rivals" : m.others)) peaked at \(loS)\(m.lo.rv == m.hi.rv ? "" : " to \(hiS)")&nbsp;GB). For 32&nbsp;GB the computed estimate is \(n("qt.t32")) of context, not measured; 16&nbsp;GB and below are unsupported.</p>")
         }
         o += item("Why use Ollama or LM Studio instead?", "<p>Use them if you want many models or a model browser: Strim runs one model, tuned for agent work. The current benchmark does not include them, so no comparison is claimed. See <a href=\"benchmarks.html#scope\">supported scope</a>.</p>")
-        o += item("Is the DMG notarized?", "<p>Not yet. The first time, right-click Strim in Applications and choose Open. Installing with Homebrew avoids the warning.</p>")
+        o += item("Is the DMG notarized?", "<p>Yes. The app and the DMG are signed with a Developer ID and notarized by Apple, so they open without a Gatekeeper warning. Homebrew and curl installs are not quarantined either.</p>")
         return o
     }
 

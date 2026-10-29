@@ -15,10 +15,6 @@ cask "strim-app" do
   # Deliberately no zap stanza: ~/.strim holds the user's API tokens, models, jobs and logs and is never removed.
 
   caveats <<~EOS
-    Strim.app is not notarized yet. If macOS blocks the first launch, either
-    open System Settings > Privacy & Security and choose "Open Anyway", or run:
-      xattr -dr com.apple.quarantine /Applications/Strim.app
-
     The app bundles the strim CLI; model weights are not included (about 16 GB).
     Strim keeps its state under ~/.strim (tokens, models, packs, jobs, logs, cache).
     `brew uninstall --cask strim-app` does not remove it.

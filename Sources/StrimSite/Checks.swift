@@ -153,7 +153,7 @@ extension SiteBuilder {
             return errs + ["README install block lacks brew, strim pull or strim serve"]
         }
         if !(brew.lowerBound < pull.lowerBound && pull.lowerBound < serve.lowerBound) { errs.append("README install order must be brew, strim pull, strim serve") }
-        if !readme.contains("not notarized yet") { errs.append("README must say the DMG is not notarized yet") }
+        if !readme.contains("notarized") || readme.contains("not notarized") { errs.append("README must say the DMG is notarized") }
         if !readme.contains("ANTHROPIC_BASE_URL=http://127.0.0.1:8203") || !readme.contains("OPENAI_BASE_URL=http://127.0.0.1:8203/v1") { errs.append("README lacks the Claude Code / Codex quickstart on port 8203") }
         if !readme.contains("Not a fit if you want many models") { errs.append("README lacks the \"why not Strim\" line") }
         for t in ["wordmark", "decode"] { for th in ["dark", "light"] where !readme.contains("\(README_ASSET_DIR)\(t)-\(th).svg") { errs.append("README must reference \(README_ASSET_DIR)\(t)-\(th).svg") } }

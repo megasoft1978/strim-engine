@@ -29,12 +29,12 @@ import Testing
         let (_, r) = try Self.build()
         func at(_ s: String) -> String.Index { r.readme.range(of: s)!.lowerBound }
         #expect(at("brew install megasoft1978/strim/strim") < at("strim pull"))
-        #expect(r.readme.contains("not notarized yet"))
+        #expect(r.readme.contains("signed and notarized"))
         #expect(at("strim pull") < at("strim serve ~/.strim/models"))
         #expect(r.readme.contains("--port 8203"))
         #expect(r.html.contains("inst-brew") && r.html.contains("inst-curl") && r.html.contains("inst-dmg"))
         #expect(r.html.contains("brew install --cask megasoft1978/strim/strim-app") && r.readme.contains("strim-app"))
-        #expect(r.html.contains("Not notarized yet: right-click &rarr; Open the first time."), "the DMG tab says so honestly")
+        #expect(r.html.contains("notarized by Apple"), "the DMG tab says it is notarized")
         #expect(r.html.contains("brew install megasoft1978/strim/strim") && r.html.contains("packaging/install.sh | bash"))
     }
 
