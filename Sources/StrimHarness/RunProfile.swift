@@ -138,7 +138,7 @@ public enum ChatLimits {
     public static let maxUserTextChars = 32_000
     public static let defaultMaxSessions = 2
     public static let defaultIdleTimeout: TimeInterval = 1800
-    public static let summaryChars = 300
+    public static let summaryChars = 800
 }
 
 // MARK: - Redaction of streamed text
@@ -222,7 +222,7 @@ final class ChatEventMapper: @unchecked Sendable {
                     out.append(.toolCallStarted(name: Self.name(name), summary: Self.summary("\(name) \(args)")))
                 case let .toolResult(name, output, isError):
                     if name == "_compaction" { out.append(.compaction(Self.summary(output))) } else {
-                        out.append(.toolCallFinished(name: Self.name(name), summary: Self.summary(output), isError: isError))
+                        out.append(.toolCallFinished(name: Self.name(name), summary: Self.summary(output, keepNewlines: true), isError: isError))
                     }
                 case let .usage(u): out.append(.usage(promptTokens: u.promptTokens, cachedTokens: u.cachedTokens,
                                                       completionTokens: u.completionTokens))
@@ -247,10 +247,10 @@ final class ChatEventMapper: @unchecked Sendable {
 
     static func name(_ s: String) -> String { Compaction.sanitize(s, max: 80) }
 
-    /// Redact first, then flatten and clip (a secret cut by the clip cannot leak a prefix).
-    static func summary(_ s: String) -> String {
+    /// Redact first, then flatten (tool output keeps its line breaks) and clip (a secret cut by the clip cannot leak a prefix).
+    static func summary(_ s: String, keepNewlines: Bool = false) -> String {
         let red = Redactor.redact(s)
-        let flat = red.replacingOccurrences(of: "\n", with: " ")
+        let flat = keepNewlines ? red : red.replacingOccurrences(of: "\n", with: " ")
         return flat.count > summaryChars ? String(flat.prefix(summaryChars)) + "…" : flat
     }
 }

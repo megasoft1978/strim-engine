@@ -191,6 +191,16 @@ private func writeSpec(_ f: Fixture, limits: HarnessLimits = HarnessLimits()) ->
         #expect(err && s2.count <= ChatLimits.summaryChars + 1 && !s2.contains(secret))
     }
 
+    @Test func toolResultSummaryKeepsLineBreaksButArgsStayFlat() {
+        let m = ChatEventMapper(streamsDeltas: true)
+        let started = m.map(.toolCall(name: "bash", args: "line1\nline2"))
+        guard case let .toolCallStarted(_, a)? = started.first else { Issue.record("no event"); return }
+        #expect(!a.contains("\n"))
+        let finished = m.map(.toolResult(name: "read_file", output: "1  a\n2  b\n3  c", isError: false))
+        guard case let .toolCallFinished(_, s, _)? = finished.first else { Issue.record("no event"); return }
+        #expect(s == "1  a\n2  b\n3  c")
+    }
+
     @Test func nonStreamingProfileDropsDeltas() {
         let m = ChatEventMapper(streamsDeltas: false)
         #expect(m.map(.textDelta("hello\n")).isEmpty && m.flush().isEmpty)
