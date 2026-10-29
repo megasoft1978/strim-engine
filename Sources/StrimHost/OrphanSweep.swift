@@ -1,13 +1,14 @@
 import Foundation
 import Darwin
+import StrimHarness
 
-/// Best-effort cleanup after a host died without cleanup (SIGKILL): kills same-uid processes whose
-/// environment carries a `STRIM_JOB=` marker (set by the harness process runner on every job command).
+/// Best-effort cleanup after a host died without cleanup: kills marked same-user job processes owned by
+/// this host's state directory. Legacy unowned markers are swept only by the default host.
 /// Call only while holding the host lock, when no job of this host is live.
 public enum OrphanSweep {
     /// Returns the number of processes killed.
     @discardableResult
-    public static func killMarkedProcesses(marker: String = "STRIM_JOB=") -> Int {
+    public static func killMarkedProcesses(marker: String = "STRIM_JOB=", hostID: String = HostIdentity.id(for: HostIdentity.defaultRoot), includeLegacy: Bool = true) -> Int {
         let uid = getuid(), me = getpid()
         let count = proc_listallpids(nil, 0)
         guard count > 0 else { return 0 }
@@ -15,11 +16,15 @@ public enum OrphanSweep {
         let got = proc_listallpids(&pids, Int32(pids.count * MemoryLayout<pid_t>.size))
         guard got > 0 else { return 0 }
         var killed = 0
+        let allowLegacy = includeLegacy && hostID == HostIdentity.id(for: HostIdentity.defaultRoot)
         for pid in pids.prefix(Int(got)) where pid > 1 && pid != me {
             var info = proc_bsdinfo()
             let n = proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, Int32(MemoryLayout<proc_bsdinfo>.size))
             guard n == Int32(MemoryLayout<proc_bsdinfo>.size), info.pbi_uid == uid else { continue }
-            guard environment(of: pid).contains(where: { $0.hasPrefix(marker) }) else { continue }
+            let env = environment(of: pid)
+            guard env.contains(where: { $0.hasPrefix(marker) }) else { continue }
+            let owners = env.filter { $0.hasPrefix("STRIM_HOST=") }
+            guard owners == ["STRIM_HOST=" + hostID] || (owners.isEmpty && allowLegacy) else { continue }
             if kill(pid, SIGKILL) == 0 { killed += 1 }
         }
         if killed > 0 { FileHandle.standardError.write(Data("strim: killed \(killed) orphaned job process(es)\n".utf8)) }

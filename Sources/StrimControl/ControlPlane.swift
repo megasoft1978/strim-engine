@@ -68,7 +68,7 @@ public final class StrimControlPlane: Sendable {
         var patch: (@Sendable (String) async throws -> String)?
         if let runner = host.chatRunner { patch = { @Sendable (id: String) async throws -> String in try await runner.currentPatch(sessionID: id) } }
         self.init(slot: slot, jobs: host.jobs, store: host.jobStore, jobsRoot: host.paths.jobs,
-                  policy: HostPolicy(host.hostConfig),
+                  policy: host.hostPolicy,
                   currentPatch: patch,
                   auth: auth, options: options)
     }
@@ -94,6 +94,7 @@ public final class StrimControlPlane: Sendable {
             return try await c.chatClose(b.sessionID)
         }
         registerProduct(on: server)
+        registerFolders(on: server)
         server.addOpenRoute("POST", StrimRoutes.chatAppend) { [self] req, r in try await chatAppend(req, r) }
         server.addOpenRoute("GET", StrimRoutes.jobs + "/", prefix: true) { [self] req, r in
             await respond(r) {

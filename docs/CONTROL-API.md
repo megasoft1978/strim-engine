@@ -33,6 +33,11 @@ Two secrets, both 0600 files under `~/.strim` (hex, 32 random bytes):
 | POST | `/v1/strim/jobs/cancel` | yes | `JobCancelRequest {job_id}` | 200, `JobCancelResult {job_id, status, cancelled}` |
 | GET | `/v1/strim/models` | no | - | `ModelList {models: [LocalModel {name, path, size_gb?, kind}]}` |
 | GET | `/v1/strim/pack` | no | - | `PackInfo {active_fingerprint?, pack_count, last_evolve?}` |
+| GET | `/v1/strim/folders` | control token only | - | `FolderList {folders, home, max}` (effective allowed roots: home plus granted folders) |
+| POST | `/v1/strim/folders` | control token only | `FolderRequest {path}` | 200 `FolderList`; the resolved path is added to the allowed roots at once and persisted to `mcp.allowedRoots` in `config.json` |
+| DELETE | `/v1/strim/folders` | control token only | `FolderRequest {path}` | 200 `FolderList`; 404 if not granted, 403 for the home folder |
+
+Folder grants: the API/MCP token gets 403 on `folders` (an agent or MCP client cannot widen its own access). A grant needs an absolute, existing directory; symlinks are resolved and the resolved path is stored. `/`, `/System`, `/usr`, `/bin`, `/sbin`, `/etc`, `/private/etc`, `/var/root`, `/Library/Keychains`, anything inside `~/.ssh ~/.aws ~/.gnupg ~/.strim` (and the other credential directories), a path with `..`, and any folder that contains a credential directory (other than `$HOME` itself) are refused. At most 64 roots. Credential-directory refusals still apply inside a granted root. Revoke does not end open chats; applying their patch is refused once their folder is outside the roots.
 
 Write-capable routes (all POST) change host state or the parent tree (`approve` with `apply` runs plain `git apply`, never `--3way`; it is the only way the parent tree is written by the app). GET routes are read-only.
 

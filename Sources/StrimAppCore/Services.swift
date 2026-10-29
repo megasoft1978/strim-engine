@@ -165,7 +165,7 @@ public protocol HostLauncher: Sendable {
 
 public enum HostCommand {
     /// Arguments after the binary: `serve <model> [mtp] --port N`. Option-like paths are refused.
-    public static func arguments(settings: AppSettings) -> [String]? {
+    public static func arguments(settings: AppSettings, stateDir: String? = nil) -> [String]? {
         guard let m = settings.modelPath, !m.isEmpty, !m.hasPrefix("-") else { return nil }
         var a = ["serve", m]
         if let t = settings.mtpPath, !t.isEmpty {
@@ -173,13 +173,16 @@ public enum HostCommand {
             a.append(t)
         }
         a += ["--port", String(settings.port)]
+        if let stateDir {
+            a += ["--state-dir", stateDir, "--token-file", (stateDir as NSString).appendingPathComponent("token")]
+        }
         return a
     }
     public static func shellQuote(_ s: String) -> String {
         s.range(of: #"^[A-Za-z0-9_@%+=:,./~-]+$"#, options: .regularExpression) != nil ? s : "'" + s.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
-    public static func commandLine(binary: String, settings: AppSettings) -> String? {
-        guard let a = arguments(settings: settings) else { return nil }
+    public static func commandLine(binary: String, settings: AppSettings, stateDir: String? = nil) -> String? {
+        guard let a = arguments(settings: settings, stateDir: stateDir) else { return nil }
         return ([binary] + a).map(shellQuote).joined(separator: " ")
     }
     public static func defaultBinaries() -> [String] {
@@ -203,10 +206,12 @@ public enum HostCommand {
 
 /// Runs `strim serve` as a detached child writing to ~/.strim/host.log (0600). Never needs a login.
 public struct ProcessHostLauncher: HostLauncher {
-    public init() {}
+    public let stateDir: String?
+    public init(stateDir: String? = nil) { self.stateDir = stateDir }
+    public var logPath: String { stateDir.map { ($0 as NSString).appendingPathComponent("host.log") } ?? AppPaths.hostLogPath }
     public func start(settings: AppSettings) -> HostLaunchResult {
-        guard let args = HostCommand.arguments(settings: settings) else { return .needsModel }
-        let manual = HostCommand.commandLine(binary: "strim", settings: settings) ?? "strim serve"
+        guard let args = HostCommand.arguments(settings: settings, stateDir: stateDir) else { return .needsModel }
+        let manual = HostCommand.commandLine(binary: "strim", settings: settings, stateDir: stateDir) ?? "strim serve"
         let bin: String
         switch HostCommand.resolveBinary(settings: settings) {
         case .missing: return .binaryMissing(command: manual)
@@ -217,7 +222,7 @@ public struct ProcessHostLauncher: HostLauncher {
         p.executableURL = URL(fileURLWithPath: bin)
         p.arguments = args
         do {
-            let log = try SecureFS.openAppend(AppPaths.hostLogPath)
+            let log = try SecureFS.openAppend(logPath)
             log.seekToEndOfFile()
             p.standardOutput = log; p.standardError = log; p.standardInput = FileHandle.nullDevice
             try p.run()

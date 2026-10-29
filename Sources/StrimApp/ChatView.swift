@@ -33,6 +33,9 @@ struct ChatTab: View {
         .confirmationDialog(removeProject.map { "Remove “\($0.name)”?" } ?? "Remove project?", isPresented: Binding(get: { removeProject != nil }, set: { if !$0 { removeProject = nil } }),
                             titleVisibility: .visible, presenting: removeProject) { p in
             Button("Remove Project", role: .destructive) { Task { await model.removeProject(p.id) } }
+            if model.folderAccessRoot(p) != nil {
+                Button("Remove and Revoke Access", role: .destructive) { Task { await model.removeProject(p.id, revokeAccess: true) } }
+            }
             Button("Cancel", role: .cancel) {}
         } message: { p in Text("Deletes its \(model.threads(in: p.id).count) chats from this Mac. The folder itself is not touched.") }
     }
@@ -73,6 +76,10 @@ struct ChatTab: View {
                 if let why = model.chatUnavailable[t.id] {
                     Label(why, systemImage: "exclamationmark.circle").font(.system(size: 12)).foregroundStyle(Strim.C.danger)
                         .textSelection(.enabled)
+                    if model.folderRefused.contains(t.id) {
+                        Button("Grant access…") { model.requestGrant(forThread: t.id) }.buttonStyle(StrimButtonStyle(.secondary))
+                            .help("Ask to let Strim work in this folder")
+                    }
                 } else if let why = avail.reason {
                     Label(why, systemImage: "lock").font(.system(size: 12)).foregroundStyle(Strim.C.muted)
                 }

@@ -40,7 +40,7 @@ import Testing
         try FileManager.default.createSymbolicLink(atPath: real + "/proj/escape", withDestinationPath: outside)
         let why = p.violation(access: "write", cwd: real + "/proj/escape", home: "/nonexistent")
         #expect(why?.contains("outside the allowed roots") == true)
-        #expect(why?.contains("canonical path: \(outside)") == true)
+        #expect(why?.contains("canonical path") == false && why?.contains(outside) == false, "the refusal does not reveal resolved paths")
         // sibling sharing a name prefix
         try FileManager.default.createDirectory(atPath: real + "-evil", withIntermediateDirectories: true)
         #expect(p.violation(access: "write", cwd: real + "-evil", home: "/nonexistent") != nil)

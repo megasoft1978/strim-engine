@@ -8,6 +8,8 @@ import StrimAppCore
 final class ProjectsFlow: ObservableObject {
     @Published var error: String?
     private var clearTask: Task<Void, Never>?
+    /// Runs after the user allows a folder that needed consent (e.g. switch to the chat section).
+    private var afterConsent: (() -> Void)?
 
     func fail(_ message: String) {
         error = message
@@ -18,7 +20,7 @@ final class ProjectsFlow: ObservableObject {
         }
     }
 
-    func openFolderPanel(_ model: AppModel, then: () -> Void = {}) {
+    func openFolderPanel(_ model: AppModel, then: @escaping () -> Void = {}) {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true; panel.canChooseFiles = false; panel.allowsMultipleSelection = true
         panel.prompt = "Open"; panel.message = "Choose project folders to chat with."
@@ -28,7 +30,7 @@ final class ProjectsFlow: ObservableObject {
 
     /// Adds each folder; selects a chat in the first one that works, shows the first failure.
     @discardableResult
-    func add(_ paths: [String], _ model: AppModel, then: () -> Void = {}) -> Bool {
+    func add(_ paths: [String], _ model: AppModel, then: @escaping () -> Void = {}) -> Bool {
         var opened = false, failure: String?
         for path in paths {
             var isDir: ObjCBool = false
@@ -36,15 +38,27 @@ final class ProjectsFlow: ObservableObject {
                 failure = failure ?? "“\((path as NSString).lastPathComponent)” is not a folder."
                 continue
             }
-            switch model.addProject(path) {
-            case .success(let p):
+            switch model.requestProject(path) {
+            case .added(let p):
                 if !opened { _ = model.newThread(projectID: p.id); opened = true }
-            case .failure(let e): failure = failure ?? e.message
+            case .needsConsent: afterConsent = then   // the consent sheet is up; Allow adds the project, Cancel adds nothing
+            case .failed(let e): failure = failure ?? e.message
             }
         }
         if let failure { fail(failure) } else { error = nil }
         if opened { then() }
         return opened
+    }
+}
+
+extension ProjectsFlow {
+    /// Allow in the consent sheet.
+    func allow(_ model: AppModel) {
+        let then = afterConsent
+        Task {
+            let wasAdd = model.pendingConsent.map { c -> Bool in if case .add = c.kind { return true } else { return false } } ?? false
+            if await model.confirmConsent() != nil, wasAdd { then?() }
+        }
     }
 }
 
@@ -66,5 +80,5 @@ enum Finder {
     panel.canChooseDirectories = true; panel.canChooseFiles = false; panel.allowsMultipleSelection = false
     panel.prompt = "Locate"; panel.message = "Choose the folder this project moved to."
     guard panel.runModal() == .OK, let url = panel.url else { return }
-    Task { if case .failure(let e) = await model.relocateProject(projectID, path: url.path) { flow.fail(e.message) } }
+    Task { if case .failed(let e) = await model.requestRelocate(projectID, path: url.path) { flow.fail(e.message) } }
 }

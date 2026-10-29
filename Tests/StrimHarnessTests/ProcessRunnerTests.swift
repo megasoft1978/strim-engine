@@ -3,6 +3,16 @@ import Foundation
 @testable import StrimHarness
 
 @Suite struct ProcessRunnerTests {
+    @Test func hostMarkerCannotBeOverriddenByJobEnvironment() async throws {
+        let base = NSTemporaryDirectory() + "strim-marker-" + UUID().uuidString
+        try FileManager.default.createDirectory(atPath: base, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(atPath: base) }
+        let runner = ProcessRunner(profile: SandboxProfile(access: .write, writableRoots: [base], jobTmp: base + "/tmp"),
+                                   sandboxed: false, hostID: "owner-a")
+        let result = try await runner.run("printf '%s %s' \"$STRIM_HOST\" \"$STRIM_JOB\"", cwd: base,
+                                          env: ["STRIM_HOST": "other", "STRIM_JOB": "forged"], timeout: 5, outputCap: 1024)
+        #expect(result.exitCode == 0 && result.output.hasPrefix("owner-a ") && !result.output.contains("forged"))
+    }
     private func makeRunner(sandboxed: Bool = true) throws -> (ProcessRunner, String) {
         let base = URL(fileURLWithPath: NSTemporaryDirectory())
             .appendingPathComponent("strim-pr-\(UUID().uuidString)").path

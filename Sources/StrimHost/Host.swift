@@ -44,6 +44,9 @@ public actor StrimHost {
     public nonisolated let jobs: JobManager
     public nonisolated let jobStore: FileJobStore
     public nonisolated let hostConfig: HostConfig
+    /// Runtime folder grants (shared with `hostPolicy`); changed only through the control plane.
+    public nonisolated let folderGrants: FolderGrants
+    public nonisolated let hostPolicy: HostPolicy
     public nonisolated let paths: HostPaths
     private let prefetchIDs: [Int32]?
     private let sweepWorktrees: Bool
@@ -83,7 +86,10 @@ public actor StrimHost {
         self.paths = paths
         self.lock = lock
         self.prefetchIDs = prefetchIDs
-        let policy = HostPolicy(hostConfig)
+        let grants = FolderGrants(roots: hostConfig.allowedRoots, configURL: paths.config)
+        let policy = HostPolicy(hostConfig, grants: grants)
+        self.folderGrants = grants
+        self.hostPolicy = policy
         let exec: JobExecutor
         let inflight = self.inflight
         var chat: (any ChatBackend)? = chatBackend
@@ -97,8 +103,8 @@ public actor StrimHost {
             }
         } else {
             let runner = isolationBaseDir.map {
-                HarnessRunner(engine: engine, isolation: GitWorktreeIsolation(baseDir: $0), sandboxed: sandboxed, jobsDir: paths.jobs)
-            } ?? HarnessRunner(engine: engine, sandboxed: sandboxed, jobsDir: paths.jobs)
+                HarnessRunner(engine: engine, isolation: GitWorktreeIsolation(baseDir: $0), sandboxed: sandboxed, jobsDir: paths.jobs, hostID: HostIdentity.id(for: paths.root))
+            } ?? HarnessRunner(engine: engine, sandboxed: sandboxed, jobsDir: paths.jobs, hostID: HostIdentity.id(for: paths.root))
             chat = chat ?? runner
             exec = { spec, id, onEvent in
                 if let v = policy.violation(access: spec.access.rawValue, cwd: spec.cwd) {
@@ -135,7 +141,8 @@ public actor StrimHost {
             Redactor.registerStrimToken(from: paths.token.deletingLastPathComponent().appendingPathComponent("control-token"))
             await jobs.recover()
             // Lock held: no live job of ours exists, so marked processes are leftovers of a killed host.
-            OrphanSweep.killMarkedProcesses()
+            OrphanSweep.killMarkedProcesses(hostID: HostIdentity.id(for: paths.root),
+                                           includeLegacy: HostIdentity.id(for: paths.root) == HostIdentity.id(for: HostIdentity.defaultRoot))
             if sweepWorktrees {
                 // Chat sessions open when a previous host died left worktrees behind; their jobs were just
                 // failed(host_restart) by `recover`.

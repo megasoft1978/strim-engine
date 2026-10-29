@@ -77,6 +77,9 @@ struct Sidebar: View {
         .confirmationDialog(removeProject.map { "Remove “\($0.name)”?" } ?? "Remove project?", isPresented: Binding(get: { removeProject != nil }, set: { if !$0 { removeProject = nil } }),
                             titleVisibility: .visible, presenting: removeProject) { p in
             Button("Remove Project", role: .destructive) { Task { await model.removeProject(p.id) } }
+            if model.folderAccessRoot(p) != nil {
+                Button("Remove and Revoke Access", role: .destructive) { Task { await model.removeProject(p.id, revokeAccess: true) } }
+            }
             Button("Cancel", role: .cancel) {}
         } message: { p in Text("Deletes its \(model.threads(in: p.id).count) chats from this Mac. The folder itself is not touched.") }
     }
@@ -90,7 +93,7 @@ struct Sidebar: View {
         let all = model.threads(in: p.id)
         let (visible, hidden) = Self.visible(all, selected: model.selectedThreadID, showAll: showAll.contains(p.id))
         let open = !collapsed.contains(p.id)
-        ProjectRow(project: p, missing: missing, open: open)
+        ProjectRow(project: p, missing: missing, open: open, granted: model.folderAccessRoot(p) != nil)
             .contentShape(Rectangle())
             .onTapGesture { if open { collapsed.insert(p.id) } else { collapsed.remove(p.id) } }
             .contextMenu { projectMenu(p, missing: missing) }
@@ -142,6 +145,9 @@ struct Sidebar: View {
         Button("Reveal in Finder") { Finder.reveal(p.path) }.disabled(missing)
         Button("Copy Path") { Finder.copy(p.path) }
         if missing { Button("Locate…") { locateProject(model, p.id, flow: flow) } }
+        if model.folderAccessRoot(p) != nil {
+            Button("Revoke Folder Access") { Task { await model.revokeFolderAccess(projectID: p.id) } }
+        }
         Divider()
         Button(p.isScratch ? "Delete Scratch Chats…" : "Remove Project…", role: .destructive) { removeProject = p }
     }
@@ -241,6 +247,8 @@ struct ProjectRow: View {
     let project: ChatProject
     let missing: Bool
     var open = true
+    /// The folder is outside home and the user allowed Strim to work in it.
+    var granted = false
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: open ? "chevron.down" : "chevron.right").font(.system(size: 9, weight: .semibold))
@@ -250,12 +258,17 @@ struct ProjectRow: View {
             Text(project.name).font(.system(size: 13, weight: .medium)).foregroundStyle(Strim.C.text)
                 .lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 0)
+            if granted {
+                Image(systemName: "lock.open").font(.system(size: 9)).foregroundStyle(Strim.C.tertiary)
+                    .help("Access granted: Strim can read, change files and run commands in this folder (in an isolated copy)")
+                    .accessibilityHidden(true)
+            }
         }
         .frame(height: 28)
         .opacity(missing ? 0.5 : 1)
-        .help(missing ? "Folder not found" : PathDisplay.tilde(project.path))
+        .help(missing ? "Folder not found" : PathDisplay.tilde(project.path) + (granted ? " (access granted)" : ""))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(missing ? "\(project.name), folder not found" : project.name)
+        .accessibilityLabel(missing ? "\(project.name), folder not found" : project.name + (granted ? ", folder access granted" : ""))
     }
 }
 

@@ -72,6 +72,13 @@ public final class AppModel: ObservableObject {
     /// Thread id -> open host session (LRU, at most `maxLiveSessions`).
     @Published public internal(set) var liveSessions: [String: ChatSession] = [:]
     @Published public internal(set) var chatUnavailable: [String: String] = [:]
+    /// Threads whose chat open was refused by the host's folder policy (shows "Grant access").
+    @Published public internal(set) var folderRefused: Set<String> = []
+    /// The host's allowed folders (home plus grants); nil until fetched or when the host cannot grant.
+    @Published public internal(set) var hostFolders: FolderList?
+    /// The consent step on screen (set only by explicit user actions; see `AppModel+Folders.swift`).
+    @Published public internal(set) var pendingConsent: FolderConsent?
+    var consentQueue: [FolderConsent] = []
     /// Why chat cannot start when no thread is selected (e.g. no project folder).
     @Published public internal(set) var chatProbeError: String?
     /// Repair / read-only message from loading `~/.strim/chats`.
@@ -357,6 +364,7 @@ public final class AppModel: ObservableObject {
                 log("connected: state=\(s.state.rawValue)")
                 await refreshJobs()
                 await refreshPack()
+                await reconcileFolders()
                 try await runSession()
                 if Task.isCancelled { return }
                 disconnect(OfflineBanner.streamEnded + " Reconnecting.")

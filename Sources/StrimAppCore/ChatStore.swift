@@ -9,8 +9,16 @@ public struct ChatProject: Codable, Equatable, Identifiable, Sendable {
     public var addedAt: Double
     public var lastActivity: Double
     public var isScratch: Bool
-    public init(id: String = UUID().uuidString, path: String, name: String? = nil, addedAt: Double = 0, lastActivity: Double = 0, isScratch: Bool = false) {
+    /// When the user allowed Strim to work in this folder (outside the home folder) through the consent step. Only the
+    /// consent sheet sets it; it lets a restarted host be re-granted without asking again. nil: never consented.
+    public var folderConsent: Double?
+    /// The resolved folder the user allowed (realpath at Allow time). A restarted host is re-granted this exact path, and
+    /// only while the project's path still resolves to it. nil (older index): not consented, the user is asked again.
+    public var consentRoot: String?
+    public init(id: String = UUID().uuidString, path: String, name: String? = nil, addedAt: Double = 0, lastActivity: Double = 0, isScratch: Bool = false,
+                folderConsent: Double? = nil, consentRoot: String? = nil) {
         self.id = id; self.path = path; self.addedAt = addedAt; self.lastActivity = lastActivity; self.isScratch = isScratch
+        self.folderConsent = folderConsent; self.consentRoot = consentRoot
         self.name = name ?? (path as NSString).lastPathComponent
     }
 }

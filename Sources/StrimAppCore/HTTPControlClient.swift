@@ -319,6 +319,13 @@ public struct HTTPControlClient: StrimControlClient {
     }
     public func models() async throws -> ModelList { try decode(ModelList.self, try await send(StrimRoutes.models)) }
     public func pack() async throws -> PackInfo { try decode(PackInfo.self, try await send(StrimRoutes.pack)) }
+    public func folders() async throws -> FolderList { try decode(FolderList.self, try await send(StrimRoutes.folders)) }
+    public func grantFolder(path: String) async throws -> FolderList {
+        try decode(FolderList.self, try await post(StrimRoutes.folders, FolderRequest(path: path)))
+    }
+    public func revokeFolder(path: String) async throws -> FolderList {
+        try decode(FolderList.self, try await send(StrimRoutes.folders, method: "DELETE", body: try JSONEncoder().encode(FolderRequest(path: path))))
+    }
 
     public func events() -> AsyncThrowingStream<StrimEvent, Error> {
         let req = makeRequest(StrimRoutes.events, timeout: streamIdleTimeout)
@@ -382,4 +389,7 @@ struct InvalidConfigClient: StrimControlClient {
     func cancelJob(_ request: JobCancelRequest) async throws -> JobCancelResult { throw err }
     func models() async throws -> ModelList { throw err }
     func pack() async throws -> PackInfo { throw err }
+    func folders() async throws -> FolderList { throw err }
+    func grantFolder(path: String) async throws -> FolderList { throw err }
+    func revokeFolder(path: String) async throws -> FolderList { throw err }
 }

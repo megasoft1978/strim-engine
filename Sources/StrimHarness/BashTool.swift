@@ -36,10 +36,11 @@ public struct BashTool: HarnessTool {
     /// Sandboxed runner for one job: `.write` makes the workspace root writable, `.read` only the job tmp.
     public static func makeRunner(workspaceRoot: String, access: AccessLevel, jobTmp: String,
                                   gitWritable: [String] = [], gitControlDirs: [String] = [],
-                                  sandboxed: Bool = true, home: String = NSHomeDirectory()) -> ProcessRunner {
+                                  sandboxed: Bool = true, home: String = NSHomeDirectory(),
+                                  hostID: String = HostIdentity.id(for: HostIdentity.defaultRoot)) -> ProcessRunner {
         let profile = jobProfile(workspaceRoot: workspaceRoot, access: access, jobTmp: jobTmp, gitWritable: gitWritable,
                                  gitControlDirs: gitControlDirs, home: home)
-        return ProcessRunner(profile: profile, sandboxed: sandboxed, toolchains: true)
+        return ProcessRunner(profile: profile, sandboxed: sandboxed, toolchains: true, hostID: hostID)
     }
 
     /// The job sandbox profile: default-deny reads of the home, plus read-only access to the three version roots the language

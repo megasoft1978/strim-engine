@@ -125,6 +125,9 @@ struct MainWindow: View {
             if now { setVisibility(.detailOnly) } else { userPinnedVisibility = false; setVisibility(.all); applyAutoVisibility(width: windowWidth) }
         }
         .onAppear { model.checkModelAvailability() }
+        .sheet(item: Binding(get: { model.pendingConsent }, set: { if $0 == nil, model.pendingConsent != nil { model.cancelConsent() } })) { c in
+            ConsentSheet(consent: c, allow: { flow.allow(model) }, cancel: { model.cancelConsent() })
+        }
     }
 
     /// ⌘1 Status, ⌘2 Jobs, ⌘3 last chat, ⌘N new chat, ⇧⌘O open folder, ⌘[ / ⌘] previous / next chat, ⌘R toggles the server.

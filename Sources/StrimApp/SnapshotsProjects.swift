@@ -44,13 +44,18 @@ extension SnapshotMode {
     }
 
     @MainActor
-    static func projectsModel(empty: Bool = false) async -> AppModel {
+    static func projectsModel(empty: Bool = false, grants: Bool = false) async -> AppModel {
         PathDisplay.displayMap = (fxRoot, "~/Projects")
         let fm = FileManager.default
         for d in ["strim-engine", "notes-app"] { try? fm.createDirectory(atPath: "\(fxRoot)/\(d)", withIntermediateDirectories: true) }
         try? fm.removeItem(atPath: "\(fxRoot)/old-service")
         let fake = FakeControlClient(status: runningStatus(state: .ready, decode: 0))
         await fake.setUniqueSessions(true)
+        if grants {
+            // Host home is /Users/me; only strim-engine is granted (resolved path, as the host reports it). notes-app is refused.
+            let real = URL(fileURLWithPath: fxRoot).resolvingSymlinksInPath().path
+            await fake.setFolders(home: "/Users/me", roots: ["/Users/me", real + "/strim-engine"], enforce: true)
+        }
         await fake.setModels([LocalModel(name: "qwen38-4bit", path: "/Users/me/.strim/models/qwen38-4bit", sizeGB: 15.2)])
         let t = now
         func at(_ ago: Double) -> Double { t - ago }
@@ -58,7 +63,8 @@ extension SnapshotMode {
         var transcripts: [String: [ChatMessage]] = [:]
         if !empty {
             idx.projects = [
-                ChatProject(id: "p-a", path: "\(fxRoot)/strim-engine", name: "strim-engine", addedAt: at(900_000), lastActivity: at(60)),
+                ChatProject(id: "p-a", path: "\(fxRoot)/strim-engine", name: "strim-engine", addedAt: at(900_000), lastActivity: at(60),
+                            folderConsent: grants ? at(800_000) : nil),
                 ChatProject(id: "p-b", path: "\(fxRoot)/notes-app", name: "notes-app", addedAt: at(800_000), lastActivity: at(14_400)),
                 ChatProject(id: "p-c", path: "\(fxRoot)/old-service", name: "old-service", addedAt: at(700_000), lastActivity: at(259_200)),
                 ChatProject(id: "p-s", path: "\(fxRoot)-scratch/Strim Scratch", name: "Scratch", addedAt: at(600_000), lastActivity: at(1_200), isScratch: true),
@@ -107,7 +113,7 @@ extension SnapshotMode {
 
         // Error: the host refuses to open a session for notes-app.
         model.selectThread("t-b1")
-        await fake.setFailNext(APIError(code: "load_failed", message: "The model is still loading"))
+        if !grants { await fake.setFailNext(APIError(code: "load_failed", message: "The model is still loading")) }
         await model.send("Try the toggle again", in: "t-b1")
         // Generating: a1 streams; a2 then waits in the queue.
         model.selectThread("t-a1")

@@ -19,11 +19,14 @@ public struct ProcessRunner: CommandRunner {
     /// Adds the language toolchains (`Toolchains`): their bin dirs on PATH, offline settings, caches under the job tmp, code-injection
     /// variables absent. The matching read grants live in the profile (`BashTool.makeRunner`).
     public var toolchains: Bool
+    public var hostID: String
 
     public static let defaultPath = "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin"
 
     public init(profile: SandboxProfile, passthroughEnv: [String] = [], killGrace: TimeInterval = 1,
-                sandboxed: Bool = true, maxFileSizeKB: Int = 512 * 1024, processMargin: Int = 256, toolchains: Bool = false) {
+                sandboxed: Bool = true, maxFileSizeKB: Int = 512 * 1024, processMargin: Int = 256, toolchains: Bool = false,
+                hostID: String = HostIdentity.id(for: HostIdentity.defaultRoot)) {
+        self.hostID = hostID
         self.toolchains = toolchains
         self.profile = profile; self.passthroughEnv = passthroughEnv
         self.killGrace = killGrace; self.sandboxed = sandboxed
@@ -73,7 +76,10 @@ public struct ProcessRunner: CommandRunner {
         }
         argv += ["/bin/bash", "--noprofile", "--norc", "-c", script]
         let marker = "STRIM_JOB=" + UUID().uuidString
-        let envp = buildEnv(env).map { "\($0.key)=\($0.value)" } + [marker]
+        var processEnv = buildEnv(env)
+        processEnv["STRIM_HOST"] = hostID
+        processEnv.removeValue(forKey: "STRIM_JOB")
+        let envp = processEnv.map { "\($0.key)=\($0.value)" } + [marker]
 
         let job = try Job.spawn(argv: argv, env: envp, cwd: cwd, cap: max(outputCap, 0), marker: marker, tags: tags)
         return await withTaskCancellationHandler {

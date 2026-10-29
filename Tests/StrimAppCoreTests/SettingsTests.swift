@@ -25,6 +25,9 @@ import Testing
         #expect(HostCommand.arguments(settings: s) == ["serve", "/models/Qwen 27B", "/models/mtp", "--port", "8203"])
         #expect(HostCommand.commandLine(binary: "strim", settings: s) == "strim serve '/models/Qwen 27B' /models/mtp --port 8203")
         #expect(HostCommand.arguments(settings: AppSettings()) == nil)
+        #expect(HostCommand.arguments(settings: s, stateDir: "/tmp/smoke state") == ["serve", "/models/Qwen 27B", "/models/mtp", "--port", "8203", "--state-dir", "/tmp/smoke state", "--token-file", "/tmp/smoke state/token"])
+        #expect(ProcessHostLauncher().logPath == AppPaths.hostLogPath)
+        #expect(ProcessHostLauncher(stateDir: "/tmp/smoke state").logPath == "/tmp/smoke state/host.log")
     }
     @Test func tokenReaderTrimsAndNeverThrows() throws {
         let p = NSTemporaryDirectory() + "tok-\(UUID().uuidString)"

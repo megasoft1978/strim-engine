@@ -1,6 +1,12 @@
-# Strim 0.1.4
+# Strim 0.1.5
 
-## What's in 0.1.4
+## What's in 0.1.5
+
+- Folder access: a project can live anywhere on disk. Opening a folder outside your home folder asks once ("Allow Strim to read, change files and run commands in this folder?"). Strim still works in an isolated copy and every change comes back as a patch you review in Jobs. Granted folders show a lock, can be revoked from the project menu or Settings, and survive restarts. Only the app can grant access; agents and MCP clients cannot. Credential folders (`~/.ssh`, `~/.aws`, `~/.gnupg`, `~/.strim`) and system folders are always refused.
+- Starting a second `strim serve` no longer kills the first one's running job processes.
+- Headless app smoke test (`scripts/app-smoke.sh`, about a minute, no windows).
+
+## Also in 0.1.4
 
 - Quitting the app stops the server it started, so the model no longer stays in memory after Quit.
 - A refused chat (for example a project folder outside your home folder, which the host does not allow unless `mcp.allowedRoots` is set) now shows the host's reason instead of "loopback only".

@@ -51,6 +51,23 @@ private func makeClient(token: String? = "sekret") throws -> (HTTPControlClient,
 private let statusJSON = #"{"state":"ready","model":"m","memory":{"weights_gb":1,"prefix_trie_gb":0,"mlx_cache_gb":0,"headroom_gb":1},"decode_tps":40,"prefill_tps":0,"mtp_acceptance":0,"mtp_depth":0,"prefix_hit_rate":0,"saved_prefill_seconds":0,"active_jobs":0,"queued_jobs":0,"tokens_today":0,"local_tokens_generated":0,"uptime_seconds":1}"#
 
 @Suite(.serialized) struct HTTPControlClientTests {
+    @Test func folderGrantRoutesUseControlTokenMethodsAndBodies() async throws {
+        let (c, p) = try makeClient(); defer { try? FileManager.default.removeItem(atPath: p) }
+        let list = #"{"folders":["/Users/me","/Volumes/x/proj"],"home":"/Users/me","max":64}"#
+        StubProtocol.handler = { _ in .response(status: 200, body: list, headers: [:]) }
+        #expect(try await c.folders().granted == ["/Volumes/x/proj"])
+        _ = try await c.grantFolder(path: "/Volumes/x/proj")
+        _ = try await c.revokeFolder(path: "/Volumes/x/proj")
+        let seen = StubProtocol.seen
+        #expect(seen.map { $0.httpMethod ?? "" } == ["GET", "POST", "DELETE"])
+        #expect(seen.allSatisfy { $0.url?.path == "/v1/strim/folders" && $0.value(forHTTPHeaderField: "Authorization") == "Bearer sekret" })
+        #expect(String(decoding: StubProtocol.seenBodies[1], as: UTF8.self) == #"{"path":"\/Volumes\/x\/proj"}"# || String(decoding: StubProtocol.seenBodies[1], as: UTF8.self) == #"{"path":"/Volumes/x/proj"}"#)
+        #expect(String(decoding: StubProtocol.seenBodies[2], as: UTF8.self).contains("Volumes"))
+        StubProtocol.handler = { _ in .response(status: 403, body: #"{"error":{"code":"forbidden","message":"/ cannot be granted"}}"#, headers: [:]) }
+        await #expect(throws: ControlClientError.http(status: 403, api: APIError(code: "forbidden", message: "/ cannot be granted"))) {
+            _ = try await c.grantFolder(path: "/")
+        }
+    }
     @Test func statusSendsBearerAndDecodes() async throws {
         let (c, p) = try makeClient(); defer { try? FileManager.default.removeItem(atPath: p) }
         StubProtocol.handler = { _ in .response(status: 200, body: statusJSON, headers: [:]) }

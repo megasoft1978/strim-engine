@@ -24,6 +24,7 @@ enum SnapshotMode {
         if CommandLine.arguments.contains("--offline-menu") { await runOfflineMenu(into: dir); exit(0) }
         if let live = LiveOptions.parse() { await runLive(live, into: dir); exit(0) }
         if CommandLine.arguments.contains("--projects") { await runProjects(into: dir); exit(0) }
+        if CommandLine.arguments.contains("--grants") { await runGrants(into: dir); exit(0) }
 
         let icon = SnapshotMode.value("--icon") ?? "packaging/app/icon/icon-1024.png"
         if let img = NSImage(contentsOfFile: icon) { NSApp.applicationIconImage = img }

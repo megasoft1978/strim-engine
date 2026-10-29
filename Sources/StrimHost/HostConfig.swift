@@ -59,7 +59,13 @@ public struct HostConfig: Sendable, Equatable {
         }
         if let v = m["allowedRoots"] {
             guard let arr = v as? [String] else { throw HostConfigError(description: "\(url.path): mcp.allowedRoots must be an array of strings") }
-            cfg.allowedRoots = arr.map { ($0 as NSString).expandingTildeInPath }
+            // A hand-edited root that is relative or "/" is dropped with a warning: it must never widen access. An empty
+            // result then means the production default (home), not "any cwd".
+            cfg.allowedRoots = arr.map { ($0 as NSString).expandingTildeInPath }.filter { r in
+                let ok = r.hasPrefix("/") && (r as NSString).standardizingPath != "/" && !r.contains("\0")
+                if !ok { FileHandle.standardError.write(Data("strim: ignoring mcp.allowedRoots entry \"\(r)\" (must be an absolute folder other than /)\n".utf8)) }
+                return ok
+            }
         }
         return cfg
     }
@@ -93,8 +99,15 @@ extension HostConfig {
 public struct HostPolicy: Sendable {
     public var maxAccess: AccessLevel
     public var allowedRoots: [String]
-    public init(maxAccess: AccessLevel, allowedRoots: [String]) { self.maxAccess = maxAccess; self.allowedRoots = allowedRoots }
-    public init(_ c: HostConfig) { self.init(maxAccess: c.maxAccess, allowedRoots: c.allowedRoots) }
+    /// Runtime folder grants. When set, its list replaces `allowedRoots` (it starts from them) so a grant or revoke
+    /// reaches every copy of this policy (chat backend, MCP wrapper, control plane) without a restart.
+    public var grants: FolderGrants?
+    public init(maxAccess: AccessLevel, allowedRoots: [String], grants: FolderGrants? = nil) {
+        self.maxAccess = maxAccess; self.allowedRoots = allowedRoots; self.grants = grants
+    }
+    public init(_ c: HostConfig, grants: FolderGrants? = nil) { self.init(maxAccess: c.maxAccess, allowedRoots: c.allowedRoots, grants: grants) }
+
+    var effectiveRoots: [String] { grants?.roots ?? allowedRoots }
 
     /// A human-readable rejection, or nil when the request is allowed. `access` is the raw requested value.
     public func violation(access: String?, cwd: String?, home: String = NSHomeDirectory()) -> String? {
@@ -104,14 +117,18 @@ public struct HostPolicy: Sendable {
         if let cwd, !cwd.isEmpty, let why = SensitiveDirs.refuse(path: cwd, home: home) {
             return "cwd \(cwd) rejected: \(why)."
         }
-        if !allowedRoots.isEmpty {
+        let allowedRoots = effectiveRoots
+        if !allowedRoots.isEmpty || (grants?.restricted ?? false) {   // a restricted host with an empty list denies everything
             guard let cwd, !cwd.isEmpty else { return "cwd is required and must be inside an allowed root (mcp.allowedRoots)." }
             let real = Self.canonical(cwd)
+            let strict = grants != nil
             let ok = allowedRoots.contains { root in
                 let r = Self.canonical(root)
+                if r == "/" { return false }                 // a root that resolves to / (e.g. swapped for a symlink) grants nothing
+                if strict, r != root { return false }         // grant-managed roots are stored canonical; one that moved is void
                 return real == r || real.hasPrefix(r.hasSuffix("/") ? r : r + "/")
             }
-            if !ok { return "cwd \(cwd) is outside the allowed roots (mcp.allowedRoots in ~/.strim/config.json); canonical path: \(real)." }
+            if !ok { return "cwd \(cwd) is outside the allowed roots (home plus folders granted in the Strim app, mcp.allowedRoots). Grant access to it from the Strim app." }
         }
         return nil
     }

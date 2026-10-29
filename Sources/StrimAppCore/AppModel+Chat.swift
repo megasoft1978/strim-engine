@@ -159,7 +159,11 @@ extension AppModel {
     }
 
     /// Deletes the project's chats (transcripts and sessions), never the folder.
-    public func removeProject(_ id: String) async {
+    public func removeProject(_ id: String, revokeAccess: Bool = false) async {
+        if revokeAccess, let p = project(id), let root = folderAccessRoot(p),
+           !projects.contains(where: { $0.id != id && !$0.isScratch && Self.contains(root, $0.path) }) {
+            await revokeFolder(root)
+        }
         for t in threads where t.projectId == id { await deleteThread(t.id, saving: false) }
         projects.removeAll { $0.id == id }
         saveIndex()
@@ -303,7 +307,7 @@ extension AppModel {
     /// Open host session for the thread, opening one (and closing the least-recent idle one at the cap) when needed.
     func ensureSession(_ tid: String) async -> ChatSession? {
         if let s = liveSessions[tid] { touchLive(tid); return s }
-        chatUnavailable[tid] = nil
+        chatUnavailable[tid] = nil; folderRefused.remove(tid)
         guard status != nil else { chatUnavailable[tid] = "Host offline"; return nil }
         guard let t = thread(tid), let p = project(t.projectId), let dir = cwd(for: t), !opening.contains(tid) else { return nil }
         if p.isScratch {
@@ -329,6 +333,7 @@ extension AppModel {
             return s
         } catch {
             chatUnavailable[tid] = isNotImplemented(error) ? ChatState.notAvailableYet : "Chat error: \(error.localizedDescription)"
+            if FolderMessages.isFolderRefusal(error) { folderRefused.insert(tid) }
             return nil
         }
     }

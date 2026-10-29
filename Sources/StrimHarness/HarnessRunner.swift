@@ -18,6 +18,7 @@ public actor HarnessRunner {
     let sandboxed: Bool
     let keepWorkspace: Bool
     let jobsDir: URL
+    let hostID: String
     let now: @Sendable () -> Date
     let priority: Priority
     let verifyTimeout: TimeInterval
@@ -33,7 +34,9 @@ public actor HarnessRunner {
                 jobsDir: URL = HarnessRunner.defaultJobsDir,
                 now: @escaping @Sendable () -> Date = { Date() }, priority: Priority = .background,
                 verifyTimeout: TimeInterval = HarnessRunner.defaultVerifyTimeout,
-                knobs: HarnessKnobs? = nil) {
+                knobs: HarnessKnobs? = nil,
+                hostID: String = HostIdentity.id(for: HostIdentity.defaultRoot)) {
+        self.hostID = hostID
         self.knobsOverride = knobs
         self.engine = engine; self.isolation = isolation; self.sandboxed = sandboxed
         self.keepWorkspace = keepWorkspace; self.jobsDir = jobsDir; self.now = now; self.priority = priority
@@ -216,7 +219,7 @@ public actor HarnessRunner {
         }
         let bashRunner = BashTool.makeRunner(workspaceRoot: ws.root, access: spec.access, jobTmp: jobTmp,
                                              gitWritable: gitWritable, gitControlDirs: gitControl,
-                                             sandboxed: sandboxed)
+                                             sandboxed: sandboxed, hostID: hostID)
         let loop = AgentLoop(engine: engine, tools: ToolCatalog.all(runner: bashRunner), systemPrompt: pack.systemPrompt,
                              limits: lim, date: Self.dateString(now()), clock: now, priority: priority, requireFinish: requireFinish,
                              knobs: knobsOverride ?? PackLoader.builtinKnobs())

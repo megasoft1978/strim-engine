@@ -203,6 +203,23 @@ struct ChatPane: View {
                 }
                 Text("Chats without a project work in their own folder here.").font(.system(size: 11)).foregroundStyle(.secondary)
             }
+            Section("Folder access") {
+                if model.grantedFolders.isEmpty {
+                    Text("Only your home folder. Opening a project elsewhere asks first.").font(.system(size: 11)).foregroundStyle(.secondary)
+                }
+                ForEach(model.grantedFolders, id: \.self) { f in
+                    HStack {
+                        Image(systemName: "lock.open").foregroundStyle(.secondary).font(.system(size: 11))
+                        Text(PathDisplay.tilde(f)).font(.system(size: 12, design: .monospaced)).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+                        Spacer(minLength: 4)
+                        Button("Revoke") { Task { await model.revokeFolder(f) } }
+                    }
+                }
+                if !model.grantedFolders.isEmpty {
+                    Text("Strim can read, change files and run commands in these folders, working in an isolated copy. Every change comes back as a patch you review.")
+                        .font(.system(size: 11)).foregroundStyle(.secondary)
+                }
+            }
             Section("History") {
                 Button("Delete all chat history…", role: .destructive) { confirmDelete = true }
                     .disabled(model.projects.isEmpty && model.threads.isEmpty)

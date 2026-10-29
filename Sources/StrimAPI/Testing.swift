@@ -24,6 +24,15 @@ public actor FakeControlClient: StrimControlClient {
     /// When set, `chatOpen` throws `max_sessions` while that many sessions are open (like the host).
     public private(set) var maxSessions: Int?
     public private(set) var openSessions: Set<String> = []
+    /// Folder grants as the host keeps them (home plus granted roots). With `enforceFolders`, `chatOpen` refuses a cwd
+    /// outside them the way the real host does.
+    public private(set) var folderHome = "/Users/test"
+    public private(set) var folderRoots: [String] = ["/Users/test"]
+    public private(set) var enforceFolders = false
+    /// When set, `grantFolder` throws it (then clears).
+    public var grantFailure: Error?
+    /// path -> what the host "stores" instead (simulates a folder swapped between the sheet and the click).
+    public private(set) var grantRewrite: [String: String] = [:]
     /// When set, the next call to any method throws it (then clears).
     public var failNext: Error?
 
@@ -48,6 +57,11 @@ public actor FakeControlClient: StrimControlClient {
     public func setFailNext(_ e: Error?) { failNext = e }
     public func setUniqueSessions(_ on: Bool) { uniqueSessions = on }
     public func setMaxSessions(_ n: Int?) { maxSessions = n }
+    public func setFolders(home: String = "/Users/test", roots: [String]? = nil, enforce: Bool = true) {
+        folderHome = home; folderRoots = roots ?? [home]; enforceFolders = enforce
+    }
+    public func setGrantRewrite(_ m: [String: String]) { grantRewrite = m }
+    public func setGrantFailure(_ e: Error?) { grantFailure = e }
 
     /// Events emitted before any subscriber exists are replayed to the first one.
     public func emit(_ e: StrimEvent) {
@@ -98,6 +112,9 @@ public actor FakeControlClient: StrimControlClient {
     }
     public func chatOpen(_ request: ChatOpenRequest) async throws -> ChatSession {
         try check(); calls.append("chat_open:\(request.cwd)")
+        if enforceFolders, !folderRoots.contains(where: { request.cwd == $0 || request.cwd.hasPrefix($0 == "/" ? $0 : $0 + "/") }) {
+            throw APIError(code: "forbidden", message: "cwd \(request.cwd) is outside the allowed roots (home plus folders granted in the Strim app, mcp.allowedRoots). Grant access to it from the Strim app.")
+        }
         var s = session; s.cwd = request.cwd; s.profile = request.profile
         if uniqueSessions { openCount += 1; s.sessionID = "s\(openCount)"; s.jobID = "j-s\(openCount)" }
         if let m = maxSessions, openSessions.count >= m { throw APIError(code: "max_sessions", message: "too many chat sessions") }
@@ -132,6 +149,22 @@ public actor FakeControlClient: StrimControlClient {
         let terminal: [JobStatusDTO] = [.done, .failed, .cancelled, .limit]
         if !terminal.contains(was) { jobList[i].status = .cancelled }
         return JobCancelResult(jobID: request.jobID, status: jobList[i].status, cancelled: !terminal.contains(was))
+    }
+    public func folders() async throws -> FolderList {
+        try check(); return FolderList(folders: folderRoots, home: folderHome)
+    }
+    public func grantFolder(path: String) async throws -> FolderList {
+        try check()
+        if let e = grantFailure { grantFailure = nil; throw e }
+        calls.append("grant:\(path)")
+        let stored = grantRewrite[path] ?? path
+        if !folderRoots.contains(stored) { folderRoots.append(stored) }
+        return FolderList(folders: folderRoots, home: folderHome)
+    }
+    public func revokeFolder(path: String) async throws -> FolderList {
+        try check(); calls.append("revoke:\(path)")
+        folderRoots.removeAll { $0 == path && $0 != folderHome }
+        return FolderList(folders: folderRoots, home: folderHome)
     }
     public func models() async throws -> ModelList { try check(); return modelList }
     public func pack() async throws -> PackInfo { try check(); return packValue }

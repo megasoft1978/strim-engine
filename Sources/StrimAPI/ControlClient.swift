@@ -21,6 +21,10 @@ public protocol StrimControlClient: Sendable {
     func cancelJob(_ request: JobCancelRequest) async throws -> JobCancelResult
     func models() async throws -> ModelList
     func pack() async throws -> PackInfo
+    /// Folder grants (control token only).
+    func folders() async throws -> FolderList
+    func grantFolder(path: String) async throws -> FolderList
+    func revokeFolder(path: String) async throws -> FolderList
 }
 
 public extension StrimControlClient {
@@ -30,4 +34,7 @@ public extension StrimControlClient {
     func cancelJob(_ request: JobCancelRequest) async throws -> JobCancelResult { throw APIError(code: "not_implemented", message: "cancel") }
     func models() async throws -> ModelList { throw APIError(code: "not_implemented", message: "models") }
     func pack() async throws -> PackInfo { throw APIError(code: "not_implemented", message: "pack") }
+    func folders() async throws -> FolderList { throw APIError(code: "not_implemented", message: "folders") }
+    func grantFolder(path: String) async throws -> FolderList { throw APIError(code: "not_implemented", message: "grant folder") }
+    func revokeFolder(path: String) async throws -> FolderList { throw APIError(code: "not_implemented", message: "revoke folder") }
 }

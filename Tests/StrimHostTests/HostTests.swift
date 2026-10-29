@@ -258,13 +258,14 @@ struct HostShutdownTests {
         try sign.run(); sign.waitUntilExit()
         let marked = Process()
         marked.executableURL = copy; marked.arguments = ["60"]
-        marked.environment = ["STRIM_JOB": "orphan-test-\(UUID().uuidString)", "PATH": "/usr/bin:/bin"]
+        let jobMarker = "orphan-test-\(UUID().uuidString)"
+        marked.environment = ["STRIM_JOB": jobMarker, "PATH": "/usr/bin:/bin"]
         let plain = Process()
         plain.executableURL = URL(fileURLWithPath: "/bin/sleep"); plain.arguments = ["60"]
         try marked.run(); try plain.run()
         defer { plain.terminate(); marked.terminate() }
         try await Task.sleep(for: .milliseconds(200))
-        #expect(OrphanSweep.killMarkedProcesses() >= 1)
+        #expect(OrphanSweep.killMarkedProcesses(marker: "STRIM_JOB=" + jobMarker) >= 1)
         try await Task.sleep(for: .milliseconds(200))
         #expect(!marked.isRunning)
         #expect(plain.isRunning)
