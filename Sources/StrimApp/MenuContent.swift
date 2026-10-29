@@ -31,7 +31,7 @@ struct MenuContent: View {
             if model.connection.isConnected {
                 ControlButtons(model: model)
             }
-            if let e = model.lastError {
+            if model.connection.isConnected, let e = model.lastError {
                 Label(e, systemImage: "exclamationmark.triangle.fill").font(.caption).foregroundStyle(Strim.C.coral).lineLimit(3)
             }
             Rectangle().fill(Strim.C.hairline).frame(height: 1)

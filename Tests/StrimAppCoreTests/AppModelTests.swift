@@ -37,7 +37,7 @@ private func awaitSubscribed(_ m: AppModel, _ fake: FakeControlClient) async -> 
         #expect(await waitFor { m.offlineBanner != nil })
         #expect(m.menuTitle == "Strim: offline")
         #expect(m.menuSymbol == "bolt.slash")
-        #expect(m.offlineBanner == "Strim host is not running at http://127.0.0.1:8203: Could not connect to the server..")
+        #expect(m.offlineBanner == "Strim host is not running at http://127.0.0.1:8203: Could not connect to the server.")
         #expect(m.hostCanBeStarted)
         m.stop()
     }

@@ -73,7 +73,7 @@ public enum OfflineBanner {
     public static func text(for error: Error, hostURL: String) -> String {
         if let e = error as? ControlClientError {
             switch e {
-            case .hostUnreachable(let d): return "Strim host is not running at \(hostURL): \(d)."
+            case .hostUnreachable(let d): return "Strim host is not running at \(hostURL): \(d.hasSuffix(".") ? String(d.dropLast()) : d)."
             case .timeout: return "Strim host at \(hostURL) did not respond (timeout)."
             case .unauthorized(let present):
                 return present ? "Host at \(hostURL) rejected the control token in ~/.strim/control-token (401). Restart the host to regenerate it."

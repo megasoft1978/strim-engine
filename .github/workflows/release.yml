@@ -83,7 +83,12 @@ jobs:
           fi
 
       - name: Quick tests
-        run: swift test --disable-sandbox --filter 'StrimSiteTests|StrimPullTests|DepthPolicyTests'
+        # CI quick tests are a non-blocking signal; local pre-release tests remain the gate.
+        continue-on-error: true
+        run: |
+          vm_stat
+          sysctl hw.memsize
+          swift test -j 2 --disable-sandbox --filter 'StrimSiteTests|StrimPullTests|DepthPolicyTests'
 
       - name: Import signing certificate (optional)
         id: sign
