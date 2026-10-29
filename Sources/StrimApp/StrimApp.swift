@@ -62,16 +62,16 @@ struct MenuBarLabel: View {
     }
 }
 
-/// Ends the open chat sessions on quit (best effort, at most 2 s) so the host does not keep them until its idle timeout.
+/// On quit: ends open chat sessions and stops the server this app started (best effort, at most 4 s).
 final class QuitHandler: NSObject, NSApplicationDelegate {
     @MainActor static var model: AppModel?
 
     @MainActor func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard let model = Self.model, !model.liveSessions.isEmpty else { return .terminateNow }
+        guard let model = Self.model else { return .terminateNow }
         Task { @MainActor in
             await withTaskGroup(of: Void.self) { g in
-                g.addTask { await model.closeAllSessions() }
-                g.addTask { try? await Task.sleep(for: .seconds(2)) }
+                g.addTask { await model.stopOwnedServerOnQuit() }
+                g.addTask { try? await Task.sleep(for: .seconds(4)) }
                 _ = await g.next()
                 g.cancelAll()
             }

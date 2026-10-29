@@ -96,6 +96,8 @@ public final class AppModel: ObservableObject {
     @Published public private(set) var modelDownloadState: ModelDownloadState = .idle
     public let modelDownloader: ModelDownloader
     @Published public private(set) var hostProcessPID: Int32?
+    /// Set only when this app launched the server, so quitting stops that one and never one started elsewhere.
+    private var ownedHostPID: Int32?
 
     public let testMode: Bool
     public let logLimit = 200
@@ -615,6 +617,7 @@ public final class AppModel: ObservableObject {
         switch launcher.start(settings: launchSettings) {
         case .started(let pid):
             hostProcessPID = pid
+            ownedHostPID = pid
             modelDownloader.serverDidStart()
             notice = "Started strim serve (pid \(pid)). Log: ~/.strim/host.log"
             log("started host pid \(pid)")
@@ -662,6 +665,19 @@ public final class AppModel: ObservableObject {
             }
             launchHostProcess()
         }
+    }
+
+    /// On quit: stop the server this app started (it holds ~16 GB), leave any other server alone.
+    public func stopOwnedServerOnQuit() async {
+        await closeAllSessions()
+        guard let pid = ownedHostPID, kill(pid, 0) == 0 else { return }
+        _ = kill(pid, SIGTERM)
+        for _ in 0..<30 {
+            if kill(pid, 0) != 0 { break }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        ownedHostPID = nil
+        hostProcessPID = nil
     }
 
     public func stopServer() async {

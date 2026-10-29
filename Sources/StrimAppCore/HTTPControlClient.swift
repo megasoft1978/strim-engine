@@ -258,7 +258,10 @@ public struct HTTPControlClient: StrimControlClient {
         switch status {
         case 401: return .unauthorized(tokenPresent: token.read() != nil)
         case 300..<400: return .redirectRefused
-        case 403: return .forbidden
+        case 403:
+            // The host explains its refusals (folder outside mcp.allowedRoots, wrong Host or Origin); show that, not a guess.
+            if let api, !api.message.isEmpty { return .http(status: 403, api: api) }
+            return .forbidden
         case 501: return .notImplemented
         default: return .http(status: status, api: api)
         }

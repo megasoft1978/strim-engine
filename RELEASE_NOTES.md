@@ -1,6 +1,11 @@
-# Strim 0.1.3
+# Strim 0.1.4
 
-## What's in 0.1.3
+## What's in 0.1.4
+
+- Quitting the app stops the server it started, so the model no longer stays in memory after Quit.
+- A refused chat (for example a project folder outside your home folder, which the host does not allow unless `mcp.allowedRoots` is set) now shows the host's reason instead of "loopback only".
+
+## Also in 0.1.3
 
 - Starting the server needs no manual setup: a blank or missing model path in `~/.strim/app.json` now means the default model, and the first-run download flow covers a missing model.
 - Corrected release build: the 0.1.2 app and DMG were built from stale compiled output and showed the old UI. 0.1.3 is a clean rebuild; if you installed 0.1.2 from the DMG or cask, update.
@@ -17,7 +22,7 @@ Everything in 0.1.1 is included: the redesigned app with per-project chats and a
 - CLI with Homebrew: `brew install megasoft1978/strim/strim`
 - App with Homebrew: `brew install --cask megasoft1978/strim/strim-app`
 - CLI with curl: `curl -fsSL https://raw.githubusercontent.com/megasoft1978/strim-engine/main/packaging/install.sh | bash`
-- App DMG: download `Strim-0.1.3-arm64.dmg` from the [latest release](https://github.com/megasoft1978/strim-engine/releases/latest) and move Strim to Applications.
+- App DMG: download `Strim-0.1.4-arm64.dmg` from the [latest release](https://github.com/megasoft1978/strim-engine/releases/latest) and move Strim to Applications.
 
 After installing, download the model with `strim pull`.
 

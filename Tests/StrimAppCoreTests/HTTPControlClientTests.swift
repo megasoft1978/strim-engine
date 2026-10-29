@@ -67,6 +67,16 @@ private let statusJSON = #"{"state":"ready","model":"m","memory":{"weights_gb":1
         await #expect(throws: ControlClientError.unauthorized(tokenPresent: false)) { _ = try await c.status() }
         #expect(StubProtocol.seen[0].value(forHTTPHeaderField: "Authorization") == nil)
     }
+    @Test func forbiddenShowsTheHostsReason() async throws {
+        let (c, p) = try makeClient(); defer { try? FileManager.default.removeItem(atPath: p) }
+        let reason = "folder is outside mcp.allowedRoots"
+        StubProtocol.handler = { _ in .response(status: 403, body: #"{"error":{"code":"forbidden","message":"\#(reason)"}}"#, headers: [:]) }
+        do { _ = try await c.status(); Issue.record("expected a throw") } catch {
+            #expect(error.localizedDescription.contains(reason))
+        }
+        StubProtocol.handler = { _ in .response(status: 403, body: "", headers: [:]) }
+        await #expect(throws: ControlClientError.forbidden) { _ = try await c.status() }
+    }
     @Test func unauthorizedWithToken() async throws {
         let (c, p) = try makeClient(); defer { try? FileManager.default.removeItem(atPath: p) }
         StubProtocol.handler = { _ in .response(status: 401, body: "", headers: [:]) }
