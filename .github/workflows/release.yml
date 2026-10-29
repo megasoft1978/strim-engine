@@ -69,14 +69,19 @@ jobs:
           restore-keys: spm-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Build (release)
-        run: swift build -c release --disable-sandbox --product strim --product StrimApp
+        run: |
+          swift build -c release --disable-sandbox --product strim
+          swift build -c release --disable-sandbox --product StrimApp
 
       - name: Version check
         id: ver
         run: |
-          v="$(.build/release/strim --version | head -n 1 | awk '{print $2}')"
+          build_dir="$(swift build --show-bin-path -c release)"
+          test -x "$build_dir/strim"
+          v="$("$build_dir/strim" --version | head -n 1 | awk '{print $2}')"
           echo "strim --version: $v"
           echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "build_dir=$build_dir" >> "$GITHUB_OUTPUT"
           if [ "${GITHUB_REF_TYPE}" = tag ] && [ "${GITHUB_REF_NAME}" != "v$v" ]; then
             echo "::error::tag ${GITHUB_REF_NAME} does not match binary version v$v; bump the version and re-tag"
             exit 1
@@ -136,13 +141,14 @@ jobs:
         env:
           IDENTITY: ${{ steps.sign.outputs.identity }}
           PROFILE: ${{ steps.notary.outputs.profile }}
+          BUILD_DIR: ${{ steps.ver.outputs.build_dir }}
         run: |
           sign=(); notarize=()
           if [ -n "$IDENTITY" ]; then sign=(--sign-identity "$IDENTITY"); fi
           if [ -n "$IDENTITY" ] && [ -n "$PROFILE" ]; then notarize=(--notarize "$PROFILE"); fi
           [ -n "$IDENTITY" ] || echo "Ad-hoc signing (no Developer ID secrets)."
-          packaging/release/make-release.sh --out dist ${sign[@]+"${sign[@]}"}
-          packaging/app/make-app.sh --out dist ${sign[@]+"${sign[@]}"} ${notarize[@]+"${notarize[@]}"}
+          packaging/release/make-release.sh --build-dir "$BUILD_DIR" --out dist ${sign[@]+"${sign[@]}"}
+          packaging/app/make-app.sh --build-dir "$BUILD_DIR" --out dist ${sign[@]+"${sign[@]}"} ${notarize[@]+"${notarize[@]}"}
           # make-dmg.sh skips the Finder layout by itself when Finder scripting is unavailable (headless runner).
           packaging/app/make-dmg.sh --app dist/Strim.app --out dist ${sign[@]+"${sign[@]}"} ${notarize[@]+"${notarize[@]}"}
           ls -l dist
