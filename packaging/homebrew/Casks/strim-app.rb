@@ -1,6 +1,6 @@
 cask "strim-app" do
-  version "0.1.7"
-  sha256 "4a4cb8bd854df506af4f0a715db00f4cbde3f730c79f2acf2e13b6bd2ee4d6d2"
+  version "0.1.8"
+  sha256 "e9441f5f365f5a88ffbbee6f2e4d74a00e673b329350894379831f4ec44824a1"
 
   url "https://github.com/megasoft1978/strim-engine/releases/download/v#{version}/Strim-#{version}-arm64.dmg"
   name "Strim"
