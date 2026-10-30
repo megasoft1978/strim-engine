@@ -1,0 +1,11 @@
+--- a/Package.swift
++++ b/Package.swift
+@@ -10,7 +10,7 @@
+         .executable(name: "StrimApp", targets: ["StrimApp"]),
+     ],
+     dependencies: [
+-        .package(url: "https://github.com/ml-explore/mlx-swift", exact: "0.32.3"),
++        .package(path: "/tmp/s4/mlx-swift"),
+     ],
+     targets: [
+         .target(name: "StrimCore", dependencies: [

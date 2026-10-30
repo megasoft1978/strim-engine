@@ -1,0 +1,58 @@
+diff --git a/src/main/java/inventory/Inventory.java b/src/main/java/inventory/Inventory.java
+index 1b5ebcb..424e57f 100644
+--- a/src/main/java/inventory/Inventory.java
++++ b/src/main/java/inventory/Inventory.java
+@@ -1,8 +1,11 @@
+ package inventory;
+ 
++import java.util.Comparator;
+ import java.util.LinkedHashMap;
++import java.util.List;
+ import java.util.Map;
+ import java.util.Optional;
++import java.util.stream.Collectors;
+ 
+ public final class Inventory {
+     private final Map<String, Item> items = new LinkedHashMap<>();
+@@ -18,4 +21,41 @@ public final class Inventory {
+     public int size() {
+         return items.size();
+     }
++
++    public Optional<Item> remove(String sku) {
++        return Optional.ofNullable(items.remove(sku));
++    }
++
++    public Item restock(String sku, int amount) {
++        if (amount <= 0) throw new IllegalArgumentException("amount must be positive");
++        Item item = items.get(sku);
++        if (item == null) throw new IllegalArgumentException("unknown sku: " + sku);
++        Item updated = item.withQuantity(item.quantity + amount);
++        items.put(sku, updated);
++        return updated;
++    }
++
++    public Item take(String sku, int amount) {
++        Item item = items.get(sku);
++        if (item == null) throw new IllegalArgumentException("unknown sku: " + sku);
++        if (item.quantity < amount) throw new IllegalStateException("insufficient stock for " + sku);
++        Item updated = item.withQuantity(item.quantity - amount);
++        items.put(sku, updated);
++        return updated;
++    }
++
++    public List<Item> lowStock(int threshold) {
++        return items.values().stream()
++                .filter(i -> i.quantity < threshold)
++                .sorted(Comparator.comparing(i -> i.sku))
++                .collect(Collectors.toList());
++    }
++
++    public Map<String, Integer> totalByCategory() {
++        Map<String, Integer> totals = new LinkedHashMap<>();
++        for (Item item : items.values()) {
++            totals.merge(item.category, item.quantity, Integer::sum);
++        }
++        return totals;
++    }
+ }

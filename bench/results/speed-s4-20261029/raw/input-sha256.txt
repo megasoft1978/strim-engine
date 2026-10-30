@@ -1,0 +1,4 @@
+b892396cb671fa5dac812e47db7012597aadb52a60cb6bfe9c202c9ee18da986  bench/ab_prompts.json
+14b65a0ee06517060a6bbd979bb1a8ff54e7b304b1a1f01d54344b88b8285e85  /Users/user/.strim/models/qwen38-4bit/config.json
+13b840162b4cb35c66fef7df072f7dbb4717908204364f5e5d9f9655a2758fa8  /Users/user/.strim/models/qwen38-4bit/model.safetensors.index.json
+06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523  /Users/user/.strim/models/qwen38-4bit/tokenizer.json

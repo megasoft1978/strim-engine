@@ -1,0 +1,7 @@
+checkbatchparity ctx=512 B=8 steps=16 lens=[512, 510, 508, 506, 504, 502, 500, 498]
+tokens: 124/128 equal (teacher-forced), max logit diff 5.5312 (step 0: 0.2188), mean abs diff 0.0668
+  MISMATCH step 0 seq 7 ref=197 batched=16 top1-top2 margin 0.0625
+  MISMATCH step 3 seq 4 ref=271 batched=220 top1-top2 margin 0.0625
+  MISMATCH step 5 seq 3 ref=20 batched=16 top1-top2 margin 0.1250
+  MISMATCH step 12 seq 4 ref=198 batched=248046 top1-top2 margin 0.0000
+RESULT 4 mismatches, max margin 0.1250 vs max logit diff 5.5312 -> explainable near-ties

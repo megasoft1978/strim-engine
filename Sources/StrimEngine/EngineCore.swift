@@ -649,6 +649,9 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
                 if let c = r.curTool { r.toolCalls.append(ToolCall(name: c.name, arguments: c.args)) }
                 r.curTool = nil
                 r.cont?.yield(.toolCallEnd)
+            case let .toolCallError(message):
+                r.curTool = nil
+                r.cont?.yield(.toolCallError(message))
             }
         }
         return text

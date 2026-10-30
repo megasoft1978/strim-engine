@@ -1,0 +1,320 @@
+{
+  "classification" : {
+    "label" : "bit-identical except nondeterminism",
+    "matched_cross_build_output_variants" : 2,
+    "matching_tokens_each_variant" : 480,
+    "new_logit_metrics" : "NOT_RUN: conditional step 2 not reached",
+    "previous_integration_different_float_bits" : 0,
+    "previous_integration_float32_values" : 71516160,
+    "previous_integration_logit_rows" : 288,
+    "previous_integration_max_abs_diff" : 0,
+    "same_arm_equal_positions" : 85,
+    "same_arm_total_positions" : 480,
+    "scope" : "Observed case-242 variants and the prior measured logit rows; not a claim about all tensors or all workloads.",
+    "upstream_B1_vs_B3_reference_metrics" : "NOT_RUN: conditional step 2 not reached"
+  },
+  "cleanup" : {
+    "all_four_processes_exited_normally" : true,
+    "committed" : false,
+    "dependency_files_modified" : false,
+    "models_modified" : false,
+    "owned_processes_remaining" : 0
+  },
+  "completed_abba_cycles" : 0,
+  "control_result" : {
+    "case" : 242,
+    "fork_self" : {
+      "equal_token_positions" : 85,
+      "identical" : false,
+      "sequences" : [
+        {
+          "equal_token_positions" : 23,
+          "first_difference" : 23,
+          "left_length" : 160,
+          "left_sha256" : "745e2a284b2ef94530577d1230f84d0f349a36a5942a0572e08d62e2bd7045f8",
+          "left_token" : 32,
+          "right_length" : 160,
+          "right_sha256" : "9b0cc2dc79894818ef9346b37381187830414f84d024718c3ed2c0f6ccfb9c49",
+          "right_token" : 17782,
+          "sequence" : 0
+        },
+        {
+          "equal_token_positions" : 20,
+          "first_difference" : 14,
+          "left_length" : 160,
+          "left_sha256" : "98847b487f01c953fd2df6e2ffaed0fc4945006dc808ed0164a6859bf5daf70e",
+          "left_token" : 314,
+          "right_length" : 160,
+          "right_sha256" : "e184d134d3e88ea6849ead56891be728d542d0058c07a8205b460be7a44e89ae",
+          "right_token" : 26,
+          "sequence" : 1
+        },
+        {
+          "equal_token_positions" : 42,
+          "first_difference" : 36,
+          "left_length" : 160,
+          "left_sha256" : "ed8520930d4d2065ca0a15417287483ba2c0eea2a62bd7f769def1de4b9462a5",
+          "left_token" : 198,
+          "right_length" : 160,
+          "right_sha256" : "8743f0e596dce4a711a0d66d34f1b7acc2c515711e0a6de0ec1f76fdb30b3864",
+          "right_token" : 271,
+          "sequence" : 2
+        }
+      ],
+      "total_token_positions" : 480
+    },
+    "fresh_processes_per_build" : 2,
+    "result" : "PRE_EXISTING_NONDETERMINISM",
+    "same_seed" : [
+      100,
+      101,
+      102
+    ],
+    "target_tokens_per_run" : 480,
+    "unique_complete_output_variants" : 2,
+    "upstream_1_vs_fork_2" : {
+      "equal_token_positions" : 480,
+      "identical" : true,
+      "sequences" : [
+        {
+          "equal_token_positions" : 160,
+          "first_difference" : null,
+          "left_length" : 160,
+          "left_sha256" : "9b0cc2dc79894818ef9346b37381187830414f84d024718c3ed2c0f6ccfb9c49",
+          "left_token" : null,
+          "right_length" : 160,
+          "right_sha256" : "9b0cc2dc79894818ef9346b37381187830414f84d024718c3ed2c0f6ccfb9c49",
+          "right_token" : null,
+          "sequence" : 0
+        },
+        {
+          "equal_token_positions" : 160,
+          "first_difference" : null,
+          "left_length" : 160,
+          "left_sha256" : "e184d134d3e88ea6849ead56891be728d542d0058c07a8205b460be7a44e89ae",
+          "left_token" : null,
+          "right_length" : 160,
+          "right_sha256" : "e184d134d3e88ea6849ead56891be728d542d0058c07a8205b460be7a44e89ae",
+          "right_token" : null,
+          "sequence" : 1
+        },
+        {
+          "equal_token_positions" : 160,
+          "first_difference" : null,
+          "left_length" : 160,
+          "left_sha256" : "8743f0e596dce4a711a0d66d34f1b7acc2c515711e0a6de0ec1f76fdb30b3864",
+          "left_token" : null,
+          "right_length" : 160,
+          "right_sha256" : "8743f0e596dce4a711a0d66d34f1b7acc2c515711e0a6de0ec1f76fdb30b3864",
+          "right_token" : null,
+          "sequence" : 2
+        }
+      ],
+      "total_token_positions" : 480
+    },
+    "upstream_2_vs_fork_1" : {
+      "equal_token_positions" : 480,
+      "identical" : true,
+      "sequences" : [
+        {
+          "equal_token_positions" : 160,
+          "first_difference" : null,
+          "left_length" : 160,
+          "left_sha256" : "745e2a284b2ef94530577d1230f84d0f349a36a5942a0572e08d62e2bd7045f8",
+          "left_token" : null,
+          "right_length" : 160,
+          "right_sha256" : "745e2a284b2ef94530577d1230f84d0f349a36a5942a0572e08d62e2bd7045f8",
+          "right_token" : null,
+          "sequence" : 0
+        },
+        {
+          "equal_token_positions" : 160,
+          "first_difference" : null,
+          "left_length" : 160,
+          "left_sha256" : "98847b487f01c953fd2df6e2ffaed0fc4945006dc808ed0164a6859bf5daf70e",
+          "left_token" : null,
+          "right_length" : 160,
+          "right_sha256" : "98847b487f01c953fd2df6e2ffaed0fc4945006dc808ed0164a6859bf5daf70e",
+          "right_token" : null,
+          "sequence" : 1
+        },
+        {
+          "equal_token_positions" : 160,
+          "first_difference" : null,
+          "left_length" : 160,
+          "left_sha256" : "ed8520930d4d2065ca0a15417287483ba2c0eea2a62bd7f769def1de4b9462a5",
+          "left_token" : null,
+          "right_length" : 160,
+          "right_sha256" : "ed8520930d4d2065ca0a15417287483ba2c0eea2a62bd7f769def1de4b9462a5",
+          "right_token" : null,
+          "sequence" : 2
+        }
+      ],
+      "total_token_positions" : 480
+    },
+    "upstream_self" : {
+      "equal_token_positions" : 85,
+      "identical" : false,
+      "sequences" : [
+        {
+          "equal_token_positions" : 23,
+          "first_difference" : 23,
+          "left_length" : 160,
+          "left_sha256" : "9b0cc2dc79894818ef9346b37381187830414f84d024718c3ed2c0f6ccfb9c49",
+          "left_token" : 17782,
+          "right_length" : 160,
+          "right_sha256" : "745e2a284b2ef94530577d1230f84d0f349a36a5942a0572e08d62e2bd7045f8",
+          "right_token" : 32,
+          "sequence" : 0
+        },
+        {
+          "equal_token_positions" : 20,
+          "first_difference" : 14,
+          "left_length" : 160,
+          "left_sha256" : "e184d134d3e88ea6849ead56891be728d542d0058c07a8205b460be7a44e89ae",
+          "left_token" : 26,
+          "right_length" : 160,
+          "right_sha256" : "98847b487f01c953fd2df6e2ffaed0fc4945006dc808ed0164a6859bf5daf70e",
+          "right_token" : 314,
+          "sequence" : 1
+        },
+        {
+          "equal_token_positions" : 42,
+          "first_difference" : 36,
+          "left_length" : 160,
+          "left_sha256" : "8743f0e596dce4a711a0d66d34f1b7acc2c515711e0a6de0ec1f76fdb30b3864",
+          "left_token" : 271,
+          "right_length" : 160,
+          "right_sha256" : "ed8520930d4d2065ca0a15417287483ba2c0eea2a62bd7f769def1de4b9462a5",
+          "right_token" : 198,
+          "sequence" : 2
+        }
+      ],
+      "total_token_positions" : 480
+    }
+  },
+  "evidence" : [
+    "control.json",
+    "raw\/upstream-1.txt",
+    "raw\/upstream-2.txt",
+    "raw\/fork-1.txt",
+    "raw\/fork-2.txt",
+    "raw\/run-controls.log",
+    "raw\/provenance.txt"
+  ],
+  "method" : {
+    "binary_rebuilt" : false,
+    "engine_harness_modified" : false,
+    "execution" : "headless CLI",
+    "gpu_lock" : "\/tmp\/strim-bench.lock",
+    "isolation" : "Existing STRIM_CD_* filters select sampled\/mixed\/B=3\/auto, one round, 160 tokens. Existing harness retains 3 solo references and 1 warmup per fresh process, resets prefix cache before every generation, and closes sessions afterward. No preceding full-matrix cases replayed.",
+    "persistent_engine_state" : "none; in-memory sessions only",
+    "ports_used" : [
+
+    ],
+    "scratch_helpers" : "\/tmp\/s4\/divergence",
+    "servers_started" : 0
+  },
+  "perf_gate" : "NOT_EVALUATED",
+  "perf_table" : [
+    {
+      "change_pct" : null,
+      "fork" : null,
+      "reason" : "Stopped after control 1 per instruction: upstream is not self-consistent; fork reproduces exactly the same two complete output variants.",
+      "size" : 1,
+      "status" : "NOT_RUN",
+      "upstream" : null,
+      "workload" : "decode"
+    },
+    {
+      "change_pct" : null,
+      "fork" : null,
+      "reason" : "Stopped after control 1 per instruction: upstream is not self-consistent; fork reproduces exactly the same two complete output variants.",
+      "size" : 4,
+      "status" : "NOT_RUN",
+      "upstream" : null,
+      "workload" : "decode"
+    },
+    {
+      "change_pct" : null,
+      "fork" : null,
+      "reason" : "Stopped after control 1 per instruction: upstream is not self-consistent; fork reproduces exactly the same two complete output variants.",
+      "size" : 8,
+      "status" : "NOT_RUN",
+      "upstream" : null,
+      "workload" : "decode"
+    },
+    {
+      "change_pct" : null,
+      "fork" : null,
+      "reason" : "Stopped after control 1 per instruction: upstream is not self-consistent; fork reproduces exactly the same two complete output variants.",
+      "size" : 3,
+      "status" : "NOT_RUN",
+      "upstream" : null,
+      "workload" : "verify"
+    },
+    {
+      "change_pct" : null,
+      "fork" : null,
+      "reason" : "Stopped after control 1 per instruction: upstream is not self-consistent; fork reproduces exactly the same two complete output variants.",
+      "size" : 5,
+      "status" : "NOT_RUN",
+      "upstream" : null,
+      "workload" : "verify"
+    },
+    {
+      "change_pct" : null,
+      "fork" : null,
+      "reason" : "Stopped after control 1 per instruction: upstream is not self-consistent; fork reproduces exactly the same two complete output variants.",
+      "size" : 8,
+      "status" : "NOT_RUN",
+      "upstream" : null,
+      "workload" : "verify"
+    },
+    {
+      "change_pct" : null,
+      "fork" : null,
+      "reason" : "Stopped after control 1 per instruction: upstream is not self-consistent; fork reproduces exactly the same two complete output variants.",
+      "size" : 4096,
+      "status" : "NOT_RUN",
+      "upstream" : null,
+      "workload" : "prefill"
+    },
+    {
+      "change_pct" : null,
+      "fork" : null,
+      "reason" : "Stopped after control 1 per instruction: upstream is not self-consistent; fork reproduces exactly the same two complete output variants.",
+      "size" : 16384,
+      "status" : "NOT_RUN",
+      "upstream" : null,
+      "workload" : "prefill"
+    }
+  ],
+  "quality_gate" : {
+    "arm" : "H",
+    "gate" : "NOT_EVALUATED",
+    "planned_rule" : "only_upstream <= only_fork AND pass-to-fail task drops <= 1",
+    "planned_task_count" : 21,
+    "reason" : "Stopped after control 1 per instruction: upstream is not self-consistent; fork reproduces exactly the same two complete output variants.",
+    "status" : "NOT_RUN",
+    "table" : [
+      {
+        "both_fail" : null,
+        "both_pass" : null,
+        "only_fork" : null,
+        "only_upstream" : null
+      }
+    ],
+    "tasks_run" : 0,
+    "thinking" : "off"
+  },
+  "recommendation" : {
+    "decision" : "keep",
+    "promotion_approved" : false,
+    "qualification" : "Fresh performance and task-quality gates remain unevaluated under the explicit stop-after-control rule.",
+    "scope" : "Keep the uncommitted fork candidate; the sampled mismatch is not grounds to kill it."
+  },
+  "slice" : "20261030-5-s4-div",
+  "status" : "DONE",
+  "stopped_after_step" : 1
+}

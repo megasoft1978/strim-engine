@@ -1,0 +1,20 @@
+diff --git a/Sources/RingBuffer/RingBuffer.swift b/Sources/RingBuffer/RingBuffer.swift
+index d484cc1..7475a1e 100644
+--- a/Sources/RingBuffer/RingBuffer.swift
++++ b/Sources/RingBuffer/RingBuffer.swift
+@@ -16,9 +16,12 @@ public struct RingBuffer<Element> {
+     public var isFull: Bool { stored == capacity }
+ 
+     public mutating func append(_ element: Element) {
+-        let tail = (head + stored) % capacity
+-        storage[tail] = element
+-        if stored < capacity {
++        if stored == capacity {
++            // Overwrite the oldest element and advance the head.
++            storage[head] = element
++            head = (head + 1) % capacity
++        } else {
++            storage[(head + stored) % capacity] = element
+             stored += 1
+         }
+     }

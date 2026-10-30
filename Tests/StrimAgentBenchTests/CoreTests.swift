@@ -305,6 +305,26 @@ import Testing
         }
     }
 
+    @Test func benchmarkServerConfigGrantsOnlyCanonicalWorkRoot() throws {
+        let base = tempDir("benchmark-server-state")
+        let root = base.appendingPathComponent("work")
+        let out = base.appendingPathComponent("out")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+        let state = try LocalServer.benchmarkState(workRoot: root, logDir: out)
+        let data = try Data(contentsOf: state.appendingPathComponent("config.json"))
+        let json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let mcp = try #require(json["mcp"] as? [String: Any])
+        let roots = try #require(mcp["allowedRoots"] as? [String])
+        #expect(roots == [PromptBuilder.canonicalPath(root.path)])
+        #expect(roots[0] != "/" && roots[0] != NSHomeDirectory())
+        let mode = try #require(try FileManager.default.attributesOfItem(atPath: state.appendingPathComponent("config.json").path)[.posixPermissions] as? Int)
+        #expect(mode & 0o077 == 0)
+        let link = base.appendingPathComponent("link")
+        try FileManager.default.createSymbolicLink(at: link, withDestinationURL: root)
+        #expect(throws: LedgerError.self) { try LocalServer.benchmarkState(workRoot: link, logDir: out) }
+    }
+
     @Test func oldRowsDecodeAndHarnessFieldsRoundTrip() throws {
         let old = #"{"task_id":"a","task_class":"c","arm":"H","rep":1,"success":true,"wall_s":1,"delegations":1,"polls":0,"claimed_done":true,"false_done":false,"redo":false,"timed_out":false,"infra_error":false,"dry_run":false,"ts":"","tests_tampered":false,"verify_note":""}"#
         let r = try JSONL.decoder().decode(LedgerRow.self, from: Data(old.utf8))

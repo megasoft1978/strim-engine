@@ -184,7 +184,9 @@ struct ChatRequest {
 
         var config = SessionConfig(tools: tools, enableThinking: enableThinking, toolChoice: toolChoice,
                                    reasoningEffort: effort, preserveThinking: preserve)
-        config.reasoningPolicy = .disableWhenTools
+        // Keep the server's historical tools policy when the caller omits the toggle, but let an
+        // explicit request opt into either value even when tools are available.
+        config.reasoningPolicy = enableThinking == nil ? .disableWhenTools : .templateDefault
 
         maxTokens = min(maxTokens, defaults.maxOutputTokens)
         if priority != .interactive {

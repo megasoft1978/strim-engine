@@ -1,0 +1,18 @@
+{
+  "arm" : "H",
+  "gate" : "NOT_EVALUATED",
+  "planned_rule" : "only_upstream <= only_fork AND pass-to-fail task drops <= 1",
+  "planned_task_count" : 21,
+  "reason" : "Stopped after control 1 per instruction: upstream is not self-consistent; fork reproduces exactly the same two complete output variants.",
+  "status" : "NOT_RUN",
+  "table" : [
+    {
+      "both_fail" : null,
+      "both_pass" : null,
+      "only_fork" : null,
+      "only_upstream" : null
+    }
+  ],
+  "tasks_run" : 0,
+  "thinking" : "off"
+}

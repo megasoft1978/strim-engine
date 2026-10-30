@@ -1,0 +1,15 @@
+--- a/Sources/StrimCLI/main.swift
++++ b/Sources/StrimCLI/main.swift
+@@ -29,6 +29,12 @@
+ 
+ let cfg = RuntimeConfig.measuredSpeed
+ let args = CommandLine.arguments
++if args.count > 1, args[1] == "s4" {
++    do { try runS4(Array(args.dropFirst(2))) } catch {
++        FileHandle.standardError.write(Data("S4 failed: \(error)\n".utf8)); exit(1)
++    }
++    exit(0)
++}
+ if runExtraCommand(args) { exit(0) }
+ 
+ /// A cache with fixed, already-evaluated state so repeated passes trace identical

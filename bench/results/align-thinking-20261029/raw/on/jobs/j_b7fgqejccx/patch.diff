@@ -1,0 +1,38 @@
+diff --git a/src/Pagination.jsx b/src/Pagination.jsx
+index a3aa6d9..86ca13f 100644
+--- a/src/Pagination.jsx
++++ b/src/Pagination.jsx
+@@ -18,7 +18,7 @@ export function Pagination({ current, total, siblings = 1 }) {
+           ),
+         )}
+       </ul>
+-      <button type="button" className="next" disabled={current > total}>
++      <button type="button" className="next" disabled={current >= total}>
+         Next
+       </button>
+     </nav>
+diff --git a/src/pages.js b/src/pages.js
+index 658c36d..1344859 100644
+--- a/src/pages.js
++++ b/src/pages.js
+@@ -5,12 +5,16 @@
+  */
+ export function pages(current, total, siblings = 1) {
+   if (total <= 0) return [];
+-  const start = Math.max(2, current - siblings);
+-  const end = Math.min(total - 1, current + siblings);
++  let start = Math.max(2, current - siblings);
++  let end = Math.min(total - 1, current + siblings);
++  const leftGap = start - 2;
++  const rightGap = total - 1 - end;
+   const out = [1];
+-  if (start > 2) out.push('…');
++  if (leftGap >= 2) out.push('…');
++  else start = 2;
++  if (rightGap < 2) end = total - 1;
+   for (let p = start; p <= end; p++) out.push(p);
+-  if (end < total - 1) out.push('…');
++  if (rightGap >= 2) out.push('…');
+   if (total > 1) out.push(total);
+   return out;
+ }

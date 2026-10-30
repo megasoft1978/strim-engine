@@ -1,0 +1,138 @@
+diff --git a/src/client/store.ts b/src/client/store.ts
+index 0729ae4..2daac7b 100644
+--- a/src/client/store.ts
++++ b/src/client/store.ts
+@@ -29,12 +29,23 @@ export function dismissBanner(state: State): State {
+  * An unknown id returns `state` itself.
+  */
+ export function applyOptimistic(state: State, opId: string, id: string, patch: ItemPatch): State {
+-  return state;
++  const idx = state.items.findIndex((item) => item.id === id);
++  if (idx === -1) return state;
++  const prev = state.items[idx];
++  const next: Item = { ...prev };
++  if (patch.title !== undefined) next.title = patch.title.trim();
++  if (patch.done !== undefined) next.done = patch.done;
++  const items = state.items.slice();
++  items[idx] = next;
++  return { items, pending: [{ opId, id, patch, prev }], banner: null };
+ }
+ 
+ /** Server accepted the op: the item becomes `saved` (server copy, new version) and the op is dropped. Unknown opId returns `state` itself. */
+ export function resolveOp(state: State, opId: string, saved: Item): State {
+-  return state;
++  const op = state.pending.find((o) => o.opId === opId);
++  if (!op) return state;
++  const items = state.items.map((item) => (item.id === op.id ? saved : item));
++  return { ...state, items, pending: state.pending.filter((o) => o.opId !== opId) };
+ }
+ 
+ /**
+@@ -45,7 +56,15 @@ export function resolveOp(state: State, opId: string, saved: Item): State {
+  * Unknown opId returns `state` itself.
+  */
+ export function rejectOp(state: State, opId: string, error: ApiErrorBody): State {
+-  return state;
++  const op = state.pending.find((o) => o.opId === opId);
++  if (!op) return state;
++  const conflict = error.code === 'version_conflict' && error.current !== undefined;
++  const replacement = conflict ? (error.current as Item) : op.prev;
++  const items = state.items.map((item) => (item.id === op.id ? replacement : item));
++  const banner = conflict
++    ? `Conflict: "${(error.current as Item).title}" was changed elsewhere. Showing the latest version.`
++    : error.message;
++  return { ...state, items, pending: state.pending.filter((o) => o.opId !== opId), banner };
+ }
+ 
+ export class ItemStore {
+@@ -62,6 +81,20 @@ export class ItemStore {
+    * transport throws, treat it as { code: "network", message: "Network error" }.
+    */
+   async edit(id: string, patch: ItemPatch): Promise<void> {
+-    void id; void patch; void this.api; void this.nextOpId;
++    const item = this.state.items.find((i) => i.id === id);
++    if (!item) return;
++    if (this.state.pending.some((op) => op.id === id)) {
++      this.state = { ...this.state, banner: `"${item.title}" is still saving.` };
++      return;
++    }
++    const opId = this.nextOpId();
++    const version = item.version;
++    this.state = applyOptimistic(this.state, opId, id, patch);
++    try {
++      const res = await this.api.patchItem(id, patch, version);
++      this.state = res.ok ? resolveOp(this.state, opId, res.value) : rejectOp(this.state, opId, res.error);
++    } catch {
++      this.state = rejectOp(this.state, opId, { code: 'network', message: 'Network error' });
++    }
+   }
+ }
+diff --git a/src/server/patch.ts b/src/server/patch.ts
+index 7a9b5b8..1e4de15 100644
+--- a/src/server/patch.ts
++++ b/src/server/patch.ts
+@@ -1,4 +1,4 @@
+-import type { HttpRequest, HttpResponse, Item } from '../shared/types.ts';
++import type { HttpRequest, HttpResponse, Item, ItemPatch } from '../shared/types.ts';
+ import { etagOf, fail, ok } from './etag.ts';
+ 
+ export type ItemDb = Map<string, Item>;
+@@ -19,6 +19,57 @@ const MAX_TITLE = 40;
+  *                                      -> 200 with the stored item, version NOT bumped
+  *  6. otherwise store the trimmed fields, bump version by 1 -> 200 with the new item and its new ETag.
+  */
++function validatePatch(body: unknown): { patch: ItemPatch } | { message: string } {
++  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
++    return { message: 'Patch must be an object' };
++  }
++  const o = body as Record<string, unknown>;
++  if (Object.keys(o).length === 0) return { message: 'Patch must contain at least one field' };
++  for (const key of Object.keys(o)) {
++    if (key !== 'title' && key !== 'done') return { message: `Unknown field "${key}"` };
++  }
++  const patch: ItemPatch = {};
++  if (o.title !== undefined) {
++    if (typeof o.title !== 'string') return { message: 'Title must be a string' };
++    const title = o.title.trim();
++    if (title.length < 1 || title.length > MAX_TITLE) return { message: 'Title must be 1-40 characters' };
++    patch.title = title;
++  }
++  if (o.done !== undefined) {
++    if (typeof o.done !== 'boolean') return { message: 'Done must be a boolean' };
++    patch.done = o.done;
++  }
++  return { patch };
++}
++
++/** True when any entry of the If-Match value matches the item's ETag ("*" matches anything). */
++function ifMatchMatches(ifMatch: string, item: Item): boolean {
++  if (ifMatch === '*') return true;
++  const etag = etagOf(item);
++  return ifMatch.split(',').some((entry) => entry.trim() === etag);
++}
++
+ export function patchItem(db: ItemDb, id: string, req: HttpRequest): HttpResponse {
+-  return fail(501, 'not_implemented', 'PATCH is not implemented');
++  const item = db.get(id);
++  if (!item) return fail(404, 'not_found', `Item ${id} not found`);
++
++  const ifMatch = req.headers['if-match'];
++  if (ifMatch === undefined) return fail(428, 'precondition_required', 'If-Match header is required');
++
++  const validated = validatePatch(req.body);
++  if ('message' in validated) return fail(422, 'invalid_patch', validated.message);
++
++  if (!ifMatchMatches(ifMatch, item)) {
++    return fail(412, 'version_conflict', 'Version conflict', item);
++  }
++
++  const { patch } = validated;
++  const changed =
++    (patch.title !== undefined && patch.title !== item.title) ||
++    (patch.done !== undefined && patch.done !== item.done);
++  if (!changed) return ok(item);
++
++  const next: Item = { ...item, ...patch, version: item.version + 1 };
++  db.set(id, next);
++  return ok(next);
+ }

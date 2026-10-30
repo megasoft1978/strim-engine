@@ -1,0 +1,13 @@
+diff --git a/Sources/RingBuffer/RingBuffer.swift b/Sources/RingBuffer/RingBuffer.swift
+index d484cc1..18d6fd8 100644
+--- a/Sources/RingBuffer/RingBuffer.swift
++++ b/Sources/RingBuffer/RingBuffer.swift
+@@ -20,6 +20,8 @@ public struct RingBuffer<Element> {
+         storage[tail] = element
+         if stored < capacity {
+             stored += 1
++        } else {
++            head = (head + 1) % capacity
+         }
+     }
+ 

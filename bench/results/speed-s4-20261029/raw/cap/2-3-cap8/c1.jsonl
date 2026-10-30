@@ -1,0 +1,5 @@
+{"date":"2026-10-29T22:39:18Z","fuse":"0","kind":"meta","mode":"decode"}
+{"aggregate_tps":32.373544850447892,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","rep":-1,"request_tps":32.373544850447892,"seconds":1.9769228329999999,"steps":64}
+{"aggregate_tps":32.287821714720444,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","rep":0,"request_tps":32.287821714720444,"seconds":1.9821715,"steps":64}
+{"aggregate_tps":32.285829141254261,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","rep":1,"request_tps":32.285829141254261,"seconds":1.9822938329999999,"steps":64}
+{"aggregate_tps":32.354983363247023,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","rep":2,"request_tps":32.354983363247023,"seconds":1.9780569589999999,"steps":64}

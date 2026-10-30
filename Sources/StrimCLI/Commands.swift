@@ -71,6 +71,7 @@ let cliCommands: [CLICommand] = [
     CLICommand(name: "benchprescreen2", summary: "developer bench: prescreen (v2)", run: { runPrescreen2($0) }),
     CLICommand(name: "benchdecodeanatomy", summary: "developer bench: decode anatomy", run: { runDecodeAnatomy($0) }),
     CLICommand(name: "benchbatchattn", summary: "developer bench: batch attention", run: { runBatchAttnMicro($0) }),
+    CLICommand(name: "benchsdpa", summary: "developer bench: long-context prefill SDPA", run: { runSdpaMicro($0) }),
     CLICommand(name: "benchbatchverify", summary: "developer bench: batch verify", run: { runBatchVerify($0) }),
     CLICommand(name: "checkgdnbatch", summary: "developer check: GDN batch", run: { runGDNBatch($0) }),
     CLICommand(name: "checkbatchparity", summary: "developer check: batch parity", run: { runBatchParity($0) }),

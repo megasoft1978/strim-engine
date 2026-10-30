@@ -3,6 +3,8 @@ import Foundation
 public enum ParserEvent: Equatable, Sendable {
     case text(String)
     case reasoning(String)
+    /// Truncated or malformed canonical call (after `<function=` started); the call must not execute.
+    case toolCallError(String)
     case toolCallBegin(name: String)
     /// Emitted when a `<parameter=KEY>` block closes; value typed per the tool schema.
     case toolCallArg(key: String, value: OrderedJSON)
@@ -35,7 +37,8 @@ extension Array where Element == ParserEvent {
 ///   right before a tool call is dropped, trailing content whitespace is held until more text or `finish()`.
 /// - A `<tool_call>` not followed by `<function=NAME>` is passed through as text.
 /// - Once `<function=NAME>` is seen, `toolCallBegin` is emitted and events stream; garbage between tags is
-///   dropped, a missing `</function>` is tolerated, a parameter cut off by end of stream is dropped.
+///   dropped, a missing `</function>` before `</tool_call>` is tolerated, and a call cut off inside its function or
+///   parameter by end of stream yields `toolCallError` (no `toolCallEnd`, so it never executes).
 /// - A `</parameter>` only closes a value when followed (modulo whitespace) by `<parameter=`, `</function>` or
 ///   `</tool_call>`, so values may contain a literal `</parameter>`.
 /// - Values: string-typed params stay raw strings (the template renders strings raw); other types are
@@ -46,6 +49,7 @@ public struct ToolCallParser {
     private enum State {
         case reasoning
         case content
+        case discardToolEnvelope
         case toolHead(inEnvelope: Bool)  // after `<tool_call>` (false) or after `</function>` (true), expecting `<function=`
         case funcBody
         case paramValue(key: String)
@@ -59,6 +63,7 @@ public struct ToolCallParser {
     private static let funcClose = Array("</function>".unicodeScalars)
     private static let paramOpen = Array("<parameter=".unicodeScalars)
     private static let paramClose = Array("</parameter>".unicodeScalars)
+    private static let incompleteMessage = "Malformed tool call: incomplete XML. Resend the complete <tool_call> block."
 
     private var schemas: [String: OrderedJSON] = [:]
     private let detectTools: Bool
@@ -103,8 +108,7 @@ public struct ToolCallParser {
         drain(&out, final: true)
         switch state {
         case .funcBody, .paramValue:
-            out.append(.toolCallEnd)
-            toolCallCount += 1
+            out.append(.toolCallError(Self.incompleteMessage))
         default: break
         }
         state = .content
@@ -239,6 +243,16 @@ public struct ToolCallParser {
                 pos = cut
                 return
 
+            case .discardToolEnvelope:
+                if let close = find(Self.toolClose, from: pos) {
+                    pos = close + Self.toolClose.count
+                    state = .content
+                    continue
+                }
+                pos = final ? buf.count : buf.count - partialSuffix(Self.toolClose)
+                if final { state = .content }
+                return
+
             case let .toolHead(inEnvelope):
                 let j = skipWS(pos)
                 if inEnvelope, hasTag(Self.toolClose, at: j) {
@@ -267,7 +281,7 @@ public struct ToolCallParser {
                         bad = true
                     }
                     if !bad && !final { return }  // name not complete yet
-                    reject(inEnvelope, &out)
+                    rejectFunction(inEnvelope, truncated: k >= buf.count, &out)
                     continue
                 }
                 if !final, j >= buf.count || isPartial(Self.funcOpen, at: j) || (inEnvelope && isPartial(Self.toolClose, at: j)) {
@@ -357,6 +371,21 @@ public struct ToolCallParser {
                 continue
             }
         }
+    }
+
+    /// `<function=` header cut off by end of stream: report instead of executing. A complete but malformed header is text, as in 0.1.6.
+    private mutating func rejectFunction(_ inEnvelope: Bool, truncated: Bool, _ out: inout [ParserEvent]) {
+        if !truncated { reject(inEnvelope, &out); return }
+        toolLead = ""
+        pendingWS = ""
+        if let end = find(Self.toolClose, from: pos) {
+            pos = end + Self.toolClose.count
+            state = .content
+        } else {
+            pos = buf.count - partialSuffix(Self.toolClose)
+            state = .discardToolEnvelope
+        }
+        out.append(.toolCallError(Self.incompleteMessage))
     }
 
     private mutating func reject(_ inEnvelope: Bool, _ out: inout [ParserEvent]) {

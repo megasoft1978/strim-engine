@@ -1,0 +1,65 @@
+{
+  "cap": [
+    {
+      "kind": "decode",
+      "size": 8,
+      "measured_rows": 24,
+      "distinct_output_hashes": 1,
+      "all_hashes_identical": true
+    },
+    {
+      "kind": "verify",
+      "size": 3,
+      "measured_rows": 24,
+      "distinct_output_hashes": 1,
+      "all_hashes_identical": true
+    },
+    {
+      "kind": "verify",
+      "size": 5,
+      "measured_rows": 24,
+      "distinct_output_hashes": 1,
+      "all_hashes_identical": true
+    },
+    {
+      "kind": "verify",
+      "size": 8,
+      "measured_rows": 24,
+      "distinct_output_hashes": 1,
+      "all_hashes_identical": true
+    },
+    {
+      "kind": "decode",
+      "size": 1,
+      "measured_rows": 24,
+      "distinct_output_hashes": 1,
+      "all_hashes_identical": true
+    },
+    {
+      "kind": "decode",
+      "size": 4,
+      "measured_rows": 24,
+      "distinct_output_hashes": 1,
+      "all_hashes_identical": true
+    }
+  ],
+  "fuse": [
+    {
+      "kind": "prefill",
+      "size": 16384,
+      "measured_rows": 24,
+      "distinct_output_hashes": 0,
+      "all_hashes_identical": null
+    },
+    {
+      "kind": "prefill",
+      "size": 4096,
+      "measured_rows": 24,
+      "distinct_output_hashes": 0,
+      "all_hashes_identical": null
+    }
+  ]
+}
+base: {:prompts=>8, :max_abs_diff=>0, :different_float_bits=>0, :teacher_forced_agreement=>512, :tokens=>512, :greedy_prompts_identical=>8}
+cap8: {:prompts=>8, :max_abs_diff=>0, :different_float_bits=>0, :teacher_forced_agreement=>512, :tokens=>512, :greedy_prompts_identical=>8}
+fuse: {:prompts=>8, :max_abs_diff=>0.6875, :different_float_bits=>13986964, :teacher_forced_agreement=>505, :tokens=>512, :greedy_prompts_identical=>2}

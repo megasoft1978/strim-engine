@@ -1,0 +1,5 @@
+{"date":"2026-10-29T22:26:55Z","fuse":"0","kind":"meta","mode":"decode"}
+{"aggregate_tps":32.173464585598772,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","rep":-1,"request_tps":32.173464585598772,"seconds":1.9892169159999999,"steps":64}
+{"aggregate_tps":32.067613231693073,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","rep":0,"request_tps":32.067613231693073,"seconds":1.9957830830000001,"steps":64}
+{"aggregate_tps":32.169643931105419,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","rep":1,"request_tps":32.169643931105419,"seconds":1.989453167,"steps":64}
+{"aggregate_tps":32.121695726421137,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","rep":2,"request_tps":32.121695726421137,"seconds":1.992422833,"steps":64}

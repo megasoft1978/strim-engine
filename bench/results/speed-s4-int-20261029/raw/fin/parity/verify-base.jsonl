@@ -1,0 +1,4 @@
+{"date":"2026-10-30T02:35:09Z","fuse":"0","kind":"meta","mlx_peak_bytes":0,"mode":"qualityverify"}
+{"compared_values":0,"different_float_bits":0,"has_reference":false,"hashes":["258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0"],"kind":"qualityverify","max_abs_diff":0,"mlx_peak_bytes":15820357263,"size":3,"teacher_forced_agreement":3,"tokens":3}
+{"compared_values":0,"different_float_bits":0,"has_reference":false,"hashes":["756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057"],"kind":"qualityverify","max_abs_diff":0,"mlx_peak_bytes":16131079030,"size":5,"teacher_forced_agreement":5,"tokens":5}
+{"compared_values":0,"different_float_bits":0,"has_reference":false,"hashes":["60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723"],"kind":"qualityverify","max_abs_diff":0,"mlx_peak_bytes":16594750850,"size":8,"teacher_forced_agreement":8,"tokens":8}

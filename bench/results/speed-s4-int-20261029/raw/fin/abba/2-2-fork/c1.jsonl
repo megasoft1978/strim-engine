@@ -1,0 +1,5 @@
+{"date":"2026-10-30T02:39:16Z","fuse":"0","kind":"meta","mlx_peak_bytes":0,"mode":"decode"}
+{"aggregate_tps":32.386880181512758,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","mlx_peak_bytes":15516655183,"rep":-1,"request_tps":32.386880181512758,"seconds":1.9761088330000001,"steps":64}
+{"aggregate_tps":32.00572169487311,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","mlx_peak_bytes":15516655183,"rep":0,"request_tps":32.00572169487311,"seconds":1.9996424580000001,"steps":64}
+{"aggregate_tps":32.228177511039256,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","mlx_peak_bytes":15516655183,"rep":1,"request_tps":32.228177511039256,"seconds":1.9858398749999999,"steps":64}
+{"aggregate_tps":32.274872306585756,"c":1,"hashes":["d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"],"kind":"decode","mlx_peak_bytes":15516655183,"rep":2,"request_tps":32.274872306585756,"seconds":1.982966792,"steps":64}

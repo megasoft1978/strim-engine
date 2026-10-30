@@ -1,0 +1,233 @@
+{
+  "status": "BLOCKED",
+  "summary": "Stopped on sampled auto-policy B=3 engine output mismatch. ABBA and remaining CLI parity cases were not run.",
+  "revisions": {
+    "engine": "a112d0d16895d5612a3f86811ca9a368ca96ddaf",
+    "mlx_swift_fork": "d881bd905948fb3e5e46864dc47cf29a8b19fde4",
+    "mlx_fork": "575068a4fa263b16ac08921751e8a5257f3e80b9",
+    "upstream_mlx_swift": "19601207e9a0de51e03ee6ec0c3c5f3784275075",
+    "upstream_mlx": "1f8e74e3f12f31365464a6867c6579f0e9b29d85"
+  },
+  "gates": {
+    "dependency_resolution": "PASS",
+    "fork_patch_provenance": "PASS",
+    "fresh_release_builds": "PASS",
+    "full_swift_test": "PASS",
+    "gen16": "PASS",
+    "benchspec0": "PASS",
+    "prefix4096": "PASS",
+    "prefix8192": "PASS",
+    "engine": {
+      "status": "BLOCKED",
+      "baseline_builtin": "ALL PASS",
+      "baseline_runs": 256,
+      "fork_complete_records_at_stop": 248,
+      "identical_runs_before_first_difference": 242,
+      "first_differing_run_zero_based": 242,
+      "mode": "sampled",
+      "policy": "auto",
+      "batch": 3,
+      "mix": "mixed",
+      "seed_indices": [
+        0,
+        1,
+        2
+      ],
+      "sampling_seeds": [
+        100,
+        101,
+        102
+      ],
+      "metadata_equal": true,
+      "sequences": [
+        {
+          "sequence": 0,
+          "first_difference": 23,
+          "base_length": 160,
+          "fork_length": 160,
+          "base_token": 17782,
+          "fork_token": 32,
+          "base_sha256": "9b0cc2dc79894818ef9346b37381187830414f84d024718c3ed2c0f6ccfb9c49",
+          "fork_sha256": "745e2a284b2ef94530577d1230f84d0f349a36a5942a0572e08d62e2bd7045f8"
+        },
+        {
+          "sequence": 1,
+          "first_difference": 14,
+          "base_length": 160,
+          "fork_length": 160,
+          "base_token": 26,
+          "fork_token": 314,
+          "base_sha256": "e184d134d3e88ea6849ead56891be728d542d0058c07a8205b460be7a44e89ae",
+          "fork_sha256": "98847b487f01c953fd2df6e2ffaed0fc4945006dc808ed0164a6859bf5daf70e"
+        },
+        {
+          "sequence": 2,
+          "first_difference": 36,
+          "base_length": 160,
+          "fork_length": 160,
+          "base_token": 271,
+          "fork_token": 198,
+          "base_sha256": "8743f0e596dce4a711a0d66d34f1b7acc2c515711e0a6de0ec1f76fdb30b3864",
+          "fork_sha256": "ed8520930d4d2065ca0a15417287483ba2c0eea2a62bd7f769def1de4b9462a5"
+        }
+      ],
+      "diff_file": "raw/gates/engine-live-diff.json"
+    },
+    "checkbatchparity_cli": {
+      "status": "NOT_RUN",
+      "batches": [
+        1,
+        4,
+        6,
+        7,
+        8
+      ],
+      "reason": "Stopped on engine output mismatch; separate batched logit/hash checks at these batches passed."
+    }
+  },
+  "quality": {
+    "qualitybatch": {
+      "cells": 5,
+      "compared_values": 51650560,
+      "different_float_bits": 0,
+      "max_abs_diff": 0,
+      "tokens": 1664,
+      "argmax_agreement": 1664
+    },
+    "qualityverify": {
+      "cells": 3,
+      "compared_values": 3973120,
+      "different_float_bits": 0,
+      "max_abs_diff": 0,
+      "tokens": 16,
+      "argmax_agreement": 16
+    },
+    "quality": {
+      "cells": 8,
+      "compared_values": 15892480,
+      "different_float_bits": 0,
+      "max_abs_diff": 0,
+      "tokens": 512,
+      "argmax_agreement": 512,
+      "all_free_greedy_identical": true
+    }
+  },
+  "abba": {
+    "status": "NOT_RUN",
+    "completed_cycles": 0,
+    "keep_rule": "NOT_EVALUATED",
+    "table": [
+      {
+        "kind": "decode",
+        "size": 1,
+        "status": "NOT_RUN",
+        "upstream": null,
+        "fork": null,
+        "change_pct": null
+      },
+      {
+        "kind": "decode",
+        "size": 4,
+        "status": "NOT_RUN",
+        "upstream": null,
+        "fork": null,
+        "change_pct": null
+      },
+      {
+        "kind": "decode",
+        "size": 8,
+        "status": "NOT_RUN",
+        "upstream": null,
+        "fork": null,
+        "change_pct": null
+      },
+      {
+        "kind": "verify",
+        "size": 3,
+        "status": "NOT_RUN",
+        "upstream": null,
+        "fork": null,
+        "change_pct": null
+      },
+      {
+        "kind": "verify",
+        "size": 5,
+        "status": "NOT_RUN",
+        "upstream": null,
+        "fork": null,
+        "change_pct": null
+      },
+      {
+        "kind": "verify",
+        "size": 8,
+        "status": "NOT_RUN",
+        "upstream": null,
+        "fork": null,
+        "change_pct": null
+      },
+      {
+        "kind": "prefill",
+        "size": 4096,
+        "status": "NOT_RUN",
+        "upstream": null,
+        "fork": null,
+        "change_pct": null
+      },
+      {
+        "kind": "prefill",
+        "size": 16384,
+        "status": "NOT_RUN",
+        "upstream": null,
+        "fork": null,
+        "change_pct": null
+      }
+    ]
+  },
+  "tests": {
+    "exit_code": 0,
+    "xctest": {
+      "passed": 113,
+      "skipped": 14
+    },
+    "failures": [
+
+    ],
+    "totals": {
+      "reported": 1835,
+      "passed": 1790,
+      "skipped": 45,
+      "failed": 0
+    },
+    "swift_testing": {
+      "summary_test_total": 1708,
+      "passed_test_lines": 1677,
+      "skipped_test_lines": 31,
+      "skipped_suite_lines": 1,
+      "passed_test_records": 1677,
+      "passed": 1677,
+      "skipped": 31
+    }
+  },
+  "files_changed": [
+    "Package.swift",
+    "Package.resolved",
+    "docs/SWIFT-PERF.md",
+    "bench/results/speed-s4-int-20261029/"
+  ],
+  "committed": false,
+  "cleanup": {
+    "owned_fork_engine_pid": 95216,
+    "action": "SIGTERM after first detected mismatch",
+    "owned_gpu_processes_remaining": 0,
+    "benchmark_http_servers_started": 0,
+    "lock_broken": false
+  },
+  "limitations": [
+    "No causal attribution to the dependency patch is established by this comparison. No reruns were made after the detected mismatch, per the stop rule.",
+    "The uncommitted dependency change remains for owner review; integration keep is not established.",
+    "Live GUI smoke tests were not enabled."
+  ],
+  "blockers": [
+    "Sampled auto-policy B=3 generated token sequences differ from unpatched upstream in engine run 242 (zero-based)."
+  ]
+}

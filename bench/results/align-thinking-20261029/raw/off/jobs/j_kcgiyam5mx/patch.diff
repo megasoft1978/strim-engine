@@ -1,0 +1,128 @@
+diff --git a/lib/lru.js b/lib/lru.js
+index 1829fea..51d0bd1 100644
+--- a/lib/lru.js
++++ b/lib/lru.js
+@@ -2,42 +2,110 @@
+ 
+ /**
+  * Least-recently-used cache.
+- *   new LRU({ max })            max entries (default 100)
+- * get(k) marks the entry as most recently used; set(k, v) inserts or replaces; delete(k); has(k); size; keys().
++ *   new LRU({ max, ttl, now, onEvict })
++ *     max      max entries (default 100)
++ *     ttl      default time-to-live in ms (default: no expiry)
++ *     now      () => current time in ms (default: Date.now)
++ *     onEvict  (key, value, reason) called when an entry leaves;
++ *              reason is 'capacity' | 'deleted' | 'expired' | 'replaced'
++ * get(k) marks the entry as most recently used; set(k, v, { ttl }) inserts or
++ * replaces (per-entry ttl overrides the default); peek(k) reads without
++ * refreshing recency; delete(k); has(k); size; keys().
+  */
+ class LRU {
+   constructor(opts = {}) {
+     this.max = opts.max === undefined ? 100 : opts.max;
+     if (!Number.isInteger(this.max) || this.max < 1) throw new RangeError('max must be a positive integer');
++    this.ttl = opts.ttl;
++    this.now = opts.now || Date.now;
++    this.onEvict = opts.onEvict;
+     this.map = new Map();
+   }
+ 
+-  get size() { return this.map.size; }
++  get size() {
++    const t = this.now();
++    let n = 0;
++    for (const [k, e] of this.map) {
++      if (e.exp === undefined || e.exp > t) n++;
++    }
++    return n;
++  }
+ 
+-  has(key) { return this.map.has(key); }
++  has(key) {
++    const e = this.map.get(key);
++    if (!e) return false;
++    if (e.exp !== undefined && e.exp <= this.now()) {
++      this.map.delete(key);
++      this._evict(key, e.value, 'expired');
++      return false;
++    }
++    return true;
++  }
+ 
+   get(key) {
+     if (!this.map.has(key)) return undefined;
+-    const v = this.map.get(key);
++    const e = this.map.get(key);
++    if (e.exp !== undefined && e.exp <= this.now()) {
++      this.map.delete(key);
++      this._evict(key, e.value, 'expired');
++      return undefined;
++    }
+     this.map.delete(key);
+-    this.map.set(key, v);
+-    return v;
++    this.map.set(key, e);
++    return e.value;
++  }
++
++  /** Read without refreshing recency; expired entries are removed. */
++  peek(key) {
++    const e = this.map.get(key);
++    if (!e) return undefined;
++    if (e.exp !== undefined && e.exp <= this.now()) {
++      this.map.delete(key);
++      this._evict(key, e.value, 'expired');
++      return undefined;
++    }
++    return e.value;
+   }
+ 
+-  set(key, value) {
+-    if (this.map.has(key)) this.map.delete(key);
+-    this.map.set(key, value);
++  set(key, value, opts = {}) {
++    const ttl = opts.ttl !== undefined ? opts.ttl : this.ttl;
++    const exp = ttl === undefined ? undefined : this.now() + ttl;
++    if (this.map.has(key)) {
++      const old = this.map.get(key);
++      this.map.delete(key);
++      this._evict(key, old.value, 'replaced');
++    }
++    this.map.set(key, { value, exp });
+     while (this.map.size > this.max) {
+       const oldest = this.map.keys().next().value;
++      const e = this.map.get(oldest);
+       this.map.delete(oldest);
++      this._evict(oldest, e.value, 'capacity');
+     }
+     return this;
+   }
+ 
+-  delete(key) { return this.map.delete(key); }
++  delete(key) {
++    const e = this.map.get(key);
++    if (!e) return false;
++    this.map.delete(key);
++    this._evict(key, e.value, 'deleted');
++    return true;
++  }
+ 
+-  /** Keys from least to most recently used. */
+-  keys() { return [...this.map.keys()]; }
++  _evict(key, value, reason) {
++    if (typeof this.onEvict === 'function') this.onEvict(key, value, reason);
++  }
++
++  /** Keys from least to most recently used, skipping expired entries. */
++  keys() {
++    const t = this.now();
++    const out = [];
++    for (const [k, e] of this.map) {
++      if (e.exp === undefined || e.exp > t) out.push(k);
++    }
++    return out;
++  }
+ }
+ 
+ module.exports = { LRU };

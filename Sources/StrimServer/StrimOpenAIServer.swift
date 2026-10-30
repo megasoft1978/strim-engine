@@ -351,6 +351,8 @@ public final class StrimOpenAIServer: @unchecked Sendable {
             throw APIError.from(error)
         }
         guard let (reason, usage) = done else { return true }   // cancelled by a disconnect
+        // A call truncated mid-function is never returned as something to execute.
+        calls = calls.enumerated().filter { !tr.abortedCalls.contains($0.offset) }.map(\.element)
         var msg: [(String, OrderedJSON)] = [("role", .string("assistant"))]
         msg.append(("content", content.isEmpty && !calls.isEmpty ? .null : .string(content)))
         if !reasoning.isEmpty { msg.append(("reasoning_content", .string(reasoning))) }

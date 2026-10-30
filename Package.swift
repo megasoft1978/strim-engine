@@ -10,7 +10,7 @@ let package = Package(
         .executable(name: "StrimApp", targets: ["StrimApp"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/ml-explore/mlx-swift", exact: "0.32.3"),
+        .package(url: "https://github.com/megasoft1978/mlx-swift", exact: "0.32.3-strim.1"),
     ],
     targets: [
         .target(name: "StrimCore", dependencies: [

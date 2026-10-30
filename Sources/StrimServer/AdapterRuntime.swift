@@ -151,6 +151,8 @@ extension StrimOpenAIServer {
         } catch {
             throw APIError.from(error)
         }
+        // Calls cut off mid-body were announced to the translator but are not executable: drop them.
+        c.calls = c.calls.enumerated().filter { !tr.abortedCalls.contains($0.offset) }.map(\.element)
         c.stopMatched = tr.stopMatched
         return c
     }

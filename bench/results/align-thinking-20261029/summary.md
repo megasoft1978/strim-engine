@@ -1,0 +1,20 @@
+# Local thinking A/B — 2026-10-29
+
+Predeclared rule: ON becomes a candidate default only if paired passes improve by at least 3 net and at least 5% relative, with mean task wall time growing by at most 60%; otherwise it remains opt-in. **Verdict: keep opt-in.** ON gained 3 verified paired passes (+18.75% relative to OFF's 16), but mean wall time grew 218.7% across all 24 runs (193.6% across the 21 verifiable pairs), exceeding the 60% limit.
+
+| Local H arm | Verified pass rate (Wilson 95% interval) | Mean task wall (all 24) | Generated tokens | Length cutoffs | Observed tool-result errors | Observed compactions |
+|---|---:|---:|---:|---|---:|---:|
+| OFF: default knobs | 16/21 = 76.2% (54.9–89.4%) | 85.2 s | ≥48,278 | unmeasured | ≥21 | ≥1 |
+| ON: all_turns, medium | 21/23 = 91.3% (73.2–97.6%) | 271.4 s | ≥174,872 | unmeasured | ≥2 | ≥4 |
+
+The pass-rate denominators differ because verifier errors are excluded independently by arm. The 21 tasks verifiable in both arms yielded **16 both pass, 0 only OFF, 3 only ON, 2 both fail**. Within these same 21 tasks OFF was 16/21 and ON was 19/21; three tasks were excluded from the paired result: hd-rx-02, hd2-rx-01, rx-01. Their OFF Bun verifier reports `PermissionDenied` on an ancestor directory. hd-rx-02 had the same issue in ON; hd2-rx-01 and rx-01 passed in ON. These errors are not counted as verified failures. ON recorded three 900-second task-limit results (hd-rx-02, hd2-js-01, tf-02); OFF recorded none at 900 seconds. The engine's length-finish and malformed/truncated-call errors are not reliably emitted in the archived event format and are unmeasured. The tool-result and compaction counts are lower bounds from parseable structured events; the OFF stream contains seven malformed lines caused by concurrent event writers. Tokens are summed from all 24 job result usage records, including limit results omitted by the ledger; cancelled jobs may omit an unfinished generation, so totals are lower bounds.
+
+## Setup and sample
+
+Commit 53c9d6e plus the narrowly scoped managed-server work-root fix in `Sources/StrimAgentBench/MCPClient.swift`; release built using `nice -n 19 swift build -c release --scratch-path /tmp/align1/bench-build` from the archive. The local model was `~/.strim/models/qwen38-4bit`; no MTP head was supplied. Arms used the same build, corpus, default sampling and seed 20261027. Only ON used `STRIM_PACK_DIR` with `thinking=all_turns` and `reasoningEffort=medium`. No paid, cloud, or Claude arm was used.
+
+The fixed stratified sample, chosen before these results, contains 24 tasks: js-01, js-03, jv-01, jv-03, me-06, qa-01, rb-01, rb-03, rs-01, rs-03, rx-01, rx-03, tf-02, tf-11, tf-12, ts-01, ts-03, hd-js-01, hd-rx-02, hd-ts-01, hd2-fs-02, hd2-js-01, hd2-rx-01, hd2-ts-01. It covers eight non-Python languages, all four classes and all six hard sets; Python was excluded under the no-Python instruction. The hard sets are untracked inputs, so task and snapshot hashes are recorded in `raw/corpus-sha256.txt`. Offline corpus validation passed 24/24. A separate end-to-end managed-server preflight passed qa-01. The focused unit suite passed 6/6. The managed server grants only its process-specific canonical work root and uses a private state directory. The preliminary OFF attempt was interrupted to correct canonical path spelling; its rows are not part of the A/B.
+
+## GPU and records
+
+Recorded engine prefill-plus-decode time: OFF 1,868.7 s, ON 5,984.1 s; including preflight and the interrupted preliminary run, **8,159.8 s (136.0 min)**. This is the sum of reported engine usage, a lower bound when cancellation cuts off a turn; the initial rejected attempt generated no tokens. Approximate server lifetimes across all attempts total **150.4 min**, including model loading, readiness and verification, and are not a direct GPU-utilization measurement. All benchmark servers were stopped; no other process was signalled. Raw ledgers, server job results and parseable event streams, validation, build/test logs, knobs, and analysis script/results are under `raw/`.

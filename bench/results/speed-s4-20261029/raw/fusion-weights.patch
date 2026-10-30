@@ -1,0 +1,30 @@
+--- a/Sources/StrimCore/Weights.swift
++++ b/Sources/StrimCore/Weights.swift
+@@ -57,6 +57,27 @@
+     public let index: ModelIndex
+     private var shards: [String: [String: MLXArray]] = [:]
+     private var gdnCompiled: [Int: ([MLXArray]) -> [MLXArray]] = [:]
++    private var s4GDNCache: [Int: (MLXArray, MLXArray, MLXArray, QuantSpec)] = [:]
++
++    public func s4GDN(_ layer: Int, _ x: MLXArray) throws -> MLXArray {
++        let p = "language_model.model.layers.\(layer).linear_attn."
++        if s4GDNCache[layer] == nil {
++            let names = ["in_proj_qkv", "in_proj_z", "in_proj_b", "in_proj_a"]
++            let spec = try quantSpec(p + names[0])
++            for name in names {
++                guard try quantSpec(p + name) == spec else { throw QuantError.badConfig("S4 fusion specs differ") }
++            }
++            let w = try concatenated(names.map { try tensor(p + $0 + ".weight") }, axis: 0)
++            let s = try concatenated(names.map { try tensor(p + $0 + ".scales") }, axis: 0)
++            let b = try concatenated(names.map { try tensor(p + $0 + ".biases") }, axis: 0)
++            eval(w, s, b)
++            s4GDNCache[layer] = (w, s, b, spec)
++            // Production fusion must replace originals rather than retain a second copy.
++            for name in names { for suffix in [".weight", ".scales", ".biases"] { drop(p + name + suffix) } }
++        }
++        let f = s4GDNCache[layer]!
++        return qmm(x, f.0, f.1, f.2, spec: f.3)
++    }
+     public private(set) var loadedShards: [String] = []
+     /// Set for checkpoints that store the MTP head under `language_model.mtp.` in the
+     /// main shards (oQ4e) instead of a separate prefixless head file.

@@ -1,0 +1,114 @@
+diff --git a/lib/tablefmt.rb b/lib/tablefmt.rb
+index eed59a0..9b7fc3e 100644
+--- a/lib/tablefmt.rb
++++ b/lib/tablefmt.rb
+@@ -1,10 +1,13 @@
+ # Plain-text tables.
+ class TableFmt
++  ALIGNMENTS = %i[left right center].freeze
++
+   attr_reader :headers, :rows
+ 
+   def initialize(headers)
+     @headers = headers.map(&:to_s)
+     @rows = []
++    @align = {}
+   end
+ 
+   def <<(row)
+@@ -13,4 +16,95 @@ class TableFmt
+     @rows << row.map(&:to_s)
+     self
+   end
++
++  # Set per-column alignment. Keys are header names, values :left, :right or :center.
++  def align(spec)
++    spec.each do |name, value|
++      unless @headers.include?(name.to_s)
++        raise KeyError, "unknown column: #{name.inspect}"
++      end
++      unless ALIGNMENTS.include?(value)
++        raise ArgumentError, "unknown alignment: #{value.inspect}"
++      end
++      @align[name.to_s] = value
++    end
++    self
++  end
++
++  # Width of each column: the max of the header and all cell strings.
++  def widths
++    @headers.each_index.map do |i|
++      [@headers[i].size, *@rows.map { |r| r[i].size }].max
++    end
++  end
++
++  # Render as a plain-text table. With max_width:, cells wider than the limit
++  # are truncated with a trailing ellipsis.
++  def to_s(max_width: nil)
++    widths = self.widths
++    lines = [render_row(@headers, widths, max_width)]
++    lines << widths.map { |w| '-' * w }.join(' ')
++    @rows.each { |row| lines << render_row(row, widths, max_width) }
++    lines.join("\n")
++  end
++
++  # Render as a GitHub-flavoured markdown table.
++  def to_markdown
++    widths = self.widths
++    lines = [render_md_row(@headers, widths)]
++    lines << widths.each_with_index.map { |w, i| md_separator(w, @align[@headers[i]] || :left) }.join('|')
++    @rows.each { |row| lines << render_md_row(row, widths) }
++    lines.join("\n")
++  end
++
++  # Sort rows in place by the column named +name+ (or by the block).
++  # Returns self so calls can be chained.
++  def sort_by!(name = nil, &block)
++    if name
++      i = @headers.index(name.to_s)
++      raise KeyError, "unknown column: #{name.inspect}" unless i
++
++      block = ->(row) { row[i] }
++    end
++    @rows = @rows.sort_by(&block)
++    self
++  end
++
++  private
++
++  def render_row(cells, widths, max_width)
++    cells.each_with_index.map do |cell, i|
++      cell = truncate(cell, max_width) if max_width
++      pad(cell, widths[i], @align[@headers[i]] || :left)
++    end.join(' ').rstrip
++  end
++
++  def render_md_row(cells, widths)
++    cells.each_with_index.map do |cell, i|
++      cell = cell.gsub('|', '\\|')
++      " #{pad(cell, widths[i], @align[@headers[i]] || :left)} "
++    end.join('|').rstrip
++  end
++
++  def md_separator(width, alignment)
++    case alignment
++    when :right then '-' * (width - 1) + ':'
++    when :center then ':' + '-' * (width - 2) + ':'
++    else ':' + '-' * (width - 1)
++    end
++  end
++
++  def pad(cell, width, alignment)
++    case alignment
++    when :right then cell.rjust(width)
++    when :center then cell.center(width)
++    else cell.ljust(width)
++    end
++  end
++
++  def truncate(cell, max_width)
++    return cell if cell.size <= max_width
++
++    cell[0...max_width - 1] + '…'
++  end
+ end

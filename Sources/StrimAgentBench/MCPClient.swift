@@ -95,12 +95,46 @@ public final class LocalServer: @unchecked Sendable {
         return argv + ["--port", String(port), "--token-file", PathArgs.absolute(tokenFile)]
     }
 
+    /// Agentbench creates this process-specific root before starting its server. Other users of
+    /// LocalServer do not create it and retain their existing server configuration.
+    static func benchmarkState(workRoot: URL, logDir: URL) throws -> URL {
+        var st = stat()
+        guard lstat(workRoot.path, &st) == 0, (st.st_mode & S_IFMT) == S_IFDIR,
+              st.st_uid == getuid(), st.st_mode & 0o022 == 0 else {
+            throw LedgerError.io("unsafe benchmark work root: \(workRoot.path)")
+        }
+        var resolved = [CChar](repeating: 0, count: Int(PATH_MAX))
+        guard realpath(workRoot.path, &resolved) != nil else {
+            throw LedgerError.io("cannot resolve benchmark work root: \(workRoot.path)")
+        }
+        let root = String(cString: resolved)
+        guard root != "/", root != NSHomeDirectory(), root.hasPrefix("/") else {
+            throw LedgerError.io("unsafe benchmark work root: \(root)")
+        }
+        var template = Array(logDir.appendingPathComponent("server-state-XXXXXX").path.utf8CString)
+        guard mkdtemp(&template) != nil else { throw LedgerError.io("cannot create benchmark server state") }
+        let state = URL(fileURLWithPath: String(cString: template), isDirectory: true)
+        let config: [String: Any] = ["mcp": ["allowedRoots": [root]]]
+        let data = try JSONSerialization.data(withJSONObject: config, options: [.sortedKeys])
+        let path = state.appendingPathComponent("config.json").path
+        let fd = try openSafe(path, flags: O_WRONLY | O_CREAT | O_EXCL, mode: 0o600)
+        defer { close(fd) }
+        let count = data.withUnsafeBytes { write(fd, $0.baseAddress, data.count) }
+        guard count == data.count else { throw LedgerError.io("cannot write benchmark server config") }
+        return state
+    }
+
     public static func spawn(strimBin: String, model: String, head: String?, port: UInt16, tokenFile: String,
                              logDir: URL, readyTimeout: TimeInterval,
                              extraEnv: [String: String] = [:]) throws -> LocalServer {
         guard !healthy(port: port) else { throw LedgerError.io("port \(port) already serves something; refusing to start a second host (use --attach)") }
-        let argv = serveArgv(strimBin: strimBin, model: model, head: head, port: port, tokenFile: tokenFile)
+        var argv = serveArgv(strimBin: strimBin, model: model, head: head, port: port, tokenFile: tokenFile)
         guard FileManager.default.fileExists(atPath: argv[2]) else { throw LedgerError.io("model directory not found: \(argv[2])") }
+        let workRoot = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("strim-agentbench-\(getpid())")
+        if FileManager.default.fileExists(atPath: workRoot.path) {
+            let state = try benchmarkState(workRoot: workRoot, logDir: logDir)
+            argv += ["--state-dir", state.path]
+        }
         var env = ProcessInfo.processInfo.environment
         env["STRIM_SERVER_LOG"] = "1"
         for (k, v) in extraEnv { env[k] = v }

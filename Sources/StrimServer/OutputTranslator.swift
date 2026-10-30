@@ -13,12 +13,16 @@ enum Out {
 
 /// Turns engine `GenEvent`s into OpenAI-level events: applies stop strings to the content text, streams tool
 /// call arguments as JSON fragments (their concatenation is the full arguments object), and picks the final
-/// finish reason (tool_calls beats stop/length, as in the Python reference front).
+/// finish reason (tool_calls beats stop/length, as in the Python reference front, but only for calls that completed).
 struct OutputTranslator {
     private var scanner: StopScanner
     private var toolIndex = -1
     private var argCount = 0
-    private(set) var toolCalls = 0
+    private var openCall = false
+    /// Calls whose `toolCallEnd` arrived; a truncated call never counts.
+    private(set) var completedCalls = 0
+    /// Indices of calls cut off inside the function body (`toolCallError` while open). Never executable.
+    private(set) var abortedCalls: Set<Int> = []
     /// A stop string matched; the caller should cancel the generation and keep draining to `.finished`.
     private(set) var stopHit = false
 
@@ -39,7 +43,7 @@ struct OutputTranslator {
             case .length: fr = stopHit ? "stop" : "length"
             case .stop, .cancelled: fr = "stop"
             }
-            if toolCalls > 0 { fr = "tool_calls" }
+            if completedCalls > 0 { fr = "tool_calls" }
             outs.append(.done(finishReason: fr, usage: usage))
             return outs
         }
@@ -56,7 +60,7 @@ struct OutputTranslator {
             var outs: [Out] = []
             let held = scanner.flush()
             if !held.isEmpty { outs.append(.content(held)) }
-            toolIndex += 1; toolCalls += 1; argCount = 0
+            toolIndex += 1; openCall = true; argCount = 0
             outs.append(.toolStart(index: toolIndex, id: "call_" + Self.randomId(), name: name))
             return outs
         case let .toolCallArg(key, value):
@@ -64,7 +68,14 @@ struct OutputTranslator {
             argCount += 1
             return [.toolArgs(index: toolIndex, fragment: frag)]
         case .toolCallEnd:
+            openCall = false; completedCalls += 1
             return [.toolArgs(index: toolIndex, fragment: argCount == 0 ? "{}" : "}")]
+        case .toolCallError:
+            // Parser diagnostics are for the harness, never assistant content for API clients. A call cut off
+            // mid-body was already announced (begin), so its args must never parse as valid JSON.
+            guard openCall else { return [] }
+            openCall = false; abortedCalls.insert(toolIndex)
+            return argCount == 0 ? [.toolArgs(index: toolIndex, fragment: "{")] : []
         case .finished:
             return []
         }

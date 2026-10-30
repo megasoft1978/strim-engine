@@ -1,0 +1,41 @@
+diff --git a/lib/numwords.rb b/lib/numwords.rb
+index 6946ba9..9f72851 100644
+--- a/lib/numwords.rb
++++ b/lib/numwords.rb
+@@ -17,20 +17,25 @@ module NumWords
+     parts = []
+     thousands, rest = n.divmod(1000)
+     parts << "#{below_thousand(thousands)} thousand" if thousands.positive?
+-    parts << below_thousand(rest) if rest.positive?
++    if rest.positive?
++      parts << below_thousand(rest, use_and: true)
++    elsif thousands.positive? && rest.zero?
++      # "one thousand" — no trailing "and"
++    end
+     parts.join(' ')
+   end
+ 
+-  def below_thousand(n)
++  def below_thousand(n, use_and: false)
+     words = []
+     hundreds, rest = n.divmod(100)
+     words << "#{ONES[hundreds]} hundred" if hundreds.positive?
+     if rest >= 20
+       tens, ones = rest.divmod(10)
+-      words << (ones.zero? ? TENS[tens] : "#{TENS[tens]} #{ONES[ones]}")
++      words << (ones.zero? ? TENS[tens] : "#{TENS[tens]}-#{ONES[ones]}")
+     elsif rest.positive?
+       words << ONES[rest]
+     end
++    words.insert(1, 'and') if use_and && hundreds.positive? && rest.positive?
+     words.join(' ')
+   end
+ 
+@@ -42,6 +47,7 @@ module NumWords
+              when 3 then 'rd'
+              else 'th'
+              end
++    suffix = 'th' if (11..13).include?(n % 100)
+     "#{n}#{suffix}"
+   end
+ end

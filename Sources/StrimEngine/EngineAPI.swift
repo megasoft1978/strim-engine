@@ -93,6 +93,8 @@ public enum GenEvent: Sendable {
     case toolCallBegin(name: String)
     case toolCallArg(key: String, value: OrderedJSON)
     case toolCallEnd
+    /// The model produced an incomplete tool-call envelope; no call was accepted.
+    case toolCallError(String)
     case finished(FinishReason, Usage)
 }
 

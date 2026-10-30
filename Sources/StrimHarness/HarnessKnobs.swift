@@ -15,6 +15,8 @@ public struct HarnessKnobs: Codable, Equatable, Sendable {
         case off
         /// Thinking on for the first assistant turn of a job (and of a fresh session after a compaction) only.
         case firstPlanningTurn = "first_planning_turn"
+        /// Thinking on for every assistant generation in the job.
+        case allTurns = "all_turns"
     }
 
     /// Context length the compaction fraction refers to. The shipped default threshold (28 000 tokens) is 0.855 of it.
@@ -38,25 +40,27 @@ public struct HarnessKnobs: Codable, Equatable, Sendable {
     public var compactionThreshold: Double?
     public var compactionSummaryPrompt: String?
     public var thinking: Thinking
+    public var reasoningEffort: String
     public var temperature: Double
     public var seed: UInt64
     /// "greedy" | "sampled": informational (evolve records it); `temperature` is what the loop uses.
     public var decoding: String?
 
     public init(resultCapChars: Int? = nil, compactionThreshold: Double? = nil, compactionSummaryPrompt: String? = nil,
-                thinking: Thinking = .off, temperature: Double = 0, seed: UInt64 = HarnessKnobs.defaultSeed,
+                thinking: Thinking = .off, reasoningEffort: String = "medium", temperature: Double = 0, seed: UInt64 = HarnessKnobs.defaultSeed,
                 decoding: String? = nil) {
         self.resultCapChars = resultCapChars.map { min(max($0, Self.resultCapRange.lowerBound), Self.resultCapRange.upperBound) }
         self.compactionThreshold = compactionThreshold.flatMap { $0.isFinite ? min(max($0, Self.compactionFractionRange.lowerBound), Self.compactionFractionRange.upperBound) : nil }
         self.compactionSummaryPrompt = Self.sanitizeGuidance(compactionSummaryPrompt)
         self.thinking = thinking
+        self.reasoningEffort = ["low", "medium", "high", "xhigh"].contains(reasoningEffort) ? reasoningEffort : "medium"
         self.temperature = temperature.isFinite ? min(max(temperature, Self.temperatureRange.lowerBound), Self.temperatureRange.upperBound) : 0
         self.seed = seed
         self.decoding = decoding
     }
 
     private enum Key: String, CodingKey, CaseIterable {
-        case resultCapChars, compactionThreshold, compactionSummaryPrompt, thinking, temperature, seed, decoding
+        case resultCapChars, compactionThreshold, compactionSummaryPrompt, thinking, reasoningEffort, temperature, seed, decoding
     }
 
     private struct AnyKey: CodingKey {
@@ -76,10 +80,15 @@ public struct HarnessKnobs: Codable, Equatable, Sendable {
         if let d = decoding, d != "greedy", d != "sampled" {
             throw DecodingError.dataCorrupted(.init(codingPath: [Key.decoding], debugDescription: "decoding must be greedy or sampled"))
         }
+        let effort = try c.decodeIfPresent(String.self, forKey: .reasoningEffort) ?? "medium"
+        guard ["low", "medium", "high", "xhigh"].contains(effort) else {
+            throw DecodingError.dataCorrupted(.init(codingPath: [Key.reasoningEffort], debugDescription: "reasoningEffort must be low, medium, high, or xhigh"))
+        }
         self.init(resultCapChars: try c.decodeIfPresent(Int.self, forKey: .resultCapChars),
                   compactionThreshold: try c.decodeIfPresent(Double.self, forKey: .compactionThreshold),
                   compactionSummaryPrompt: try c.decodeIfPresent(String.self, forKey: .compactionSummaryPrompt),
                   thinking: try c.decodeIfPresent(Thinking.self, forKey: .thinking) ?? .off,
+                  reasoningEffort: effort,
                   temperature: try c.decodeIfPresent(Double.self, forKey: .temperature) ?? 0,
                   seed: try c.decodeIfPresent(UInt64.self, forKey: .seed) ?? Self.defaultSeed,
                   decoding: decoding)

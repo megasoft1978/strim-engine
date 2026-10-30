@@ -247,7 +247,7 @@ private func runtime(_ spec: ConstraintSpec, _ v: FakeVocab) throws -> GrammarRu
                     if k == "deep" { if case .bool = v {} else { Issue.record("deep not bool: \(v)") } }
                     if k == "unit" { #expect(v == .string("c") || v == .string("f")) }
                 case .toolCallEnd: ends += 1
-                case .text, .reasoning: Issue.record("stray text in forced tool call: \(String(decoding: w.out, as: UTF8.self))")
+                case .text, .reasoning, .toolCallError: Issue.record("stray text in forced tool call: \(String(decoding: w.out, as: UTF8.self))")
                 }
             }
             #expect(begins == 1 && ends == 1)

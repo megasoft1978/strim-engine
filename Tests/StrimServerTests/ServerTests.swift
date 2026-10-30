@@ -142,6 +142,18 @@ struct ServerTests {
         #expect((usage?["prompt_tokens_details"] as? [String: Any])?["cached_tokens"] as? Int == 2)
     }
 
+    @Test("parser syntax errors are not surfaced as assistant content")
+    func toolCallErrorNotContent() async throws {
+        let h = try await Harness.start(); defer { h.server.stop() }
+        h.engine.script([.event(.tokens([1], "Hi")),
+                         .event(.toolCallError("Malformed tool call: incomplete XML. Resend the complete <tool_call> block.")),
+                         .event(.finished(.stop, makeUsage()))])
+        let (code, j) = try await h.json(h.request("/v1/chat/completions", body: chatBody()))
+        #expect(code == 200)
+        let msg = ((j["choices"] as? [[String: Any]])?.first)?["message"] as? [String: Any]
+        #expect(msg?["content"] as? String == "Hi")
+    }
+
     @Test("tool call streaming: name first, then argument fragments; finish tool_calls")
     func toolCallStream() async throws {
         let h = try await Harness.start(); defer { h.server.stop() }
@@ -202,6 +214,51 @@ struct ServerTests {
         let fn = call?["function"] as? [String: Any]
         #expect(fn?["name"] as? String == "f")
         #expect(fn?["arguments"] as? String == #"{"x": true}"#)
+    }
+
+    @Test("truncated tool call: stream finish is not tool_calls, args never parse")
+    func toolCallTruncatedStream() async throws {
+        let h = try await Harness.start(); defer { h.server.stop() }
+        h.engine.script([.event(.toolCallBegin(name: "lookup")), .event(.toolCallArg(key: "q", value: .string("x"))),
+                         .event(.toolCallError("Malformed tool call: incomplete XML.")), .event(.finished(.stop, makeUsage()))])
+        let tools = #""tools":[{"type":"function","function":{"name":"lookup"}}],"stream":true"#
+        let chunks = try await h.stream(chatBody(extra: tools))
+        #expect(chunks.compactMap(finish).last == "stop")
+        let args = chunks.compactMap { (delta($0)["tool_calls"] as? [[String: Any]])?.first }
+            .compactMap { ($0["function"] as? [String: Any])?["arguments"] as? String }.joined()
+        #expect(args == #"{"q": "x""#)
+        #expect((try? JSONSerialization.jsonObject(with: Data(args.utf8))) == nil)
+    }
+
+    @Test("truncated tool call: non-stream finish is not tool_calls, args never parse")
+    func toolCallTruncatedNonStream() async throws {
+        let h = try await Harness.start(); defer { h.server.stop() }
+        h.engine.script([.event(.toolCallBegin(name: "lookup")), .event(.toolCallError("Malformed tool call: incomplete XML.")),
+                         .event(.finished(.stop, makeUsage()))])
+        let (_, j) = try await h.json(h.request("/v1/chat/completions", body: chatBody(extra: #""tools":[{"type":"function","function":{"name":"lookup"}}]"#)))
+        let choice = (j["choices"] as? [[String: Any]])?.first
+        #expect(choice?["finish_reason"] as? String == "stop")
+        let msg = choice?["message"] as? [String: Any]
+        #expect(msg?["tool_calls"] == nil, "an aborted call is dropped from the non-stream response")
+    }
+
+    @Test("truncated tool call dropped from the Anthropic non-stream aggregate")
+    func toolCallTruncatedAnthropic() async throws {
+        let h = try await Harness.start(); defer { h.server.stop() }
+        let body = #"{"model":"fake-model","max_tokens":16,"messages":[{"role":"user","content":"hi"}],"tools":[{"name":"f","input_schema":{"type":"object"}}]}"#
+        h.engine.script([.event(.toolCallBegin(name: "lookup")), .event(.toolCallError("Malformed tool call: incomplete XML.")),
+                         .event(.toolCallBegin(name: "f")), .event(.toolCallArg(key: "x", value: .bool(true))),
+                         .event(.toolCallEnd), .event(.finished(.stop, makeUsage()))])
+        let (_, j) = try await h.json(h.request("/v1/messages", body: body))
+        #expect(j["stop_reason"] as? String == "tool_use")
+        let uses = ((j["content"] as? [[String: Any]]) ?? []).filter { $0["type"] as? String == "tool_use" }
+        #expect(uses.compactMap { $0["name"] as? String } == ["f"])
+        #expect((uses.first?["input"] as? [String: Any])?["x"] as? Bool == true)
+        h.engine.script([.event(.toolCallBegin(name: "lookup")), .event(.toolCallError("Malformed tool call: incomplete XML.")),
+                         .event(.finished(.stop, makeUsage()))])
+        let (_, j2) = try await h.json(h.request("/v1/messages", body: body))
+        #expect(j2["stop_reason"] as? String == "end_turn")
+        #expect(((j2["content"] as? [[String: Any]]) ?? []).allSatisfy { $0["type"] as? String != "tool_use" })
     }
 
     @Test("tool_choice none drops tools")
@@ -414,6 +471,29 @@ struct ServerTests {
         #expect(g2?.params.priority == .interactive)
         #expect(g2?.params.ignoreEOS == false)
         #expect(g2?.params.maxTokens == 4096)
+    }
+
+    @Test("explicit enable_thinking takes precedence over tools policy")
+    func explicitThinkingWithTools() async throws {
+        let h = try await Harness.start(); defer { h.server.stop() }
+        let tool = #""tools":[{"type":"function","function":{"name":"lookup","parameters":{"type":"object","properties":{}}}}]"#
+        for (tag, expected) in [("true", true), ("false", false)] {
+            h.engine.script([.event(.finished(.stop, makeUsage()))])
+            let body = chatBody(extra: tool + #", "enable_thinking":\#(tag)"#)
+            let (code, _) = try await h.json(h.request("/v1/chat/completions", body: body))
+            #expect(code == 200)
+            #expect(h.engine.snapshot { $0.opened.last?.1.enableThinking } == expected)
+        }
+
+    }
+
+    @Test("omitted enable_thinking retains the tools default")
+    func omittedThinkingWithTools() throws {
+        let tool = #""tools":[{"type":"function","function":{"name":"lookup","parameters":{"type":"object","properties":{}}}}]"#
+        let request = try ChatRequest.parse(Data(chatBody(extra: tool).utf8), headerPriority: nil, defaults: SamplingDefaults())
+        #expect(request.config.enableThinking == nil)
+        #expect(request.config.reasoningPolicy.resolve(enableThinking: request.config.enableThinking,
+                                                        hasTools: true, toolChoice: request.config.toolChoice) == false)
     }
 
     @Test("message conversion: developer role, content parts, tool messages and tool_calls")

@@ -83,6 +83,8 @@ public final class AgentLoop: Sendable {
 
     private struct TurnOutput {
         var text = ""
+        var reasoning = ""
+        var toolCallError: String?
         var calls: [PendingCall] = []
         var usage: Usage?
         var reason: FinishReason?
@@ -126,27 +128,28 @@ public final class AgentLoop: Sendable {
         var charsSince = 0      // chars appended since baseTokens was taken
         var entries: [Compaction.Entry] = []
         var tail: [Compaction.Exchange] = []   // last `verbatimTail` exchanges, whole steps only
-        /// The engine session was opened with thinking on for its next generation (thinking policy
-        /// `first_planning_turn`). It is replaced by a thinking-off session before anything else is appended.
+        /// The engine session was opened with thinking on for its next generation.
         var thinking = false
-        /// Messages the thinking session holds (no reasoning content), kept only while `thinking` is true.
+        /// Whether this conversation's configured policy/explicit chat request enables thinking after compaction.
+        var thinkingEnabled = false
+        /// Rebuild transcript for a thinking session, including generated reasoning.
         var transcript: [Message] = []
     }
 
     private var sessionConfig: SessionConfig { config(thinking: false) }
 
-    private var thinkingPolicyOn: Bool { knobs.thinking == .firstPlanningTurn }
+    private var thinkingPolicyOn: Bool { knobs.thinking != .off }
 
     /// Thinking off is today's config. Thinking on differs only in the generation prompt (`<think>\n` instead of
     /// `<think>\n\n</think>\n\n`): effort "medium" adds no reasoning instruction, so the system block, tools block and
     /// every rendered message are byte-identical to the thinking-off render (see docs/EVOLVE.md, Prefix cache).
     private func config(thinking: Bool) -> SessionConfig {
         thinking
-            ? SessionConfig(tools: tools.map(\.spec), reasoningPolicy: .templateDefault, enableThinking: true, reasoningEffort: "medium")
+            ? SessionConfig(tools: tools.map(\.spec), reasoningPolicy: .templateDefault, enableThinking: true, reasoningEffort: knobs.reasoningEffort)
             : SessionConfig(tools: tools.map(\.spec), reasoningPolicy: .disableWhenTools)
     }
 
-    /// Replaces a thinking session by a thinking-off one holding the same conversation without any reasoning
+    /// Replaces a thinking session by a thinking-off one holding the same conversation, including reasoning
     /// content, then `extra`. The old session is closed after the new one is recorded in `box`.
     private func leaveThinking(from old: SessionID, transcript: [Message], extra: [Message], box: SessionBox) async throws -> SessionID {
         let fresh = try await engine.openSession(config(thinking: false))
@@ -169,7 +172,10 @@ public final class AgentLoop: Sendable {
             let session = try await engine.openSession(self.config(thinking: thinkingPolicyOn))
             box.set(session)
             state = LoopState(session: session, charsSince: fixedChars + firstUser.count)
-            if thinkingPolicyOn { state.thinking = true; state.transcript = [.system(systemPrompt), .user(firstUser)] }
+            if thinkingPolicyOn {
+                state.thinking = true; state.thinkingEnabled = true
+                state.transcript = [.system(systemPrompt), .user(firstUser)]
+            }
             _ = try await engine.append(session, .messages([.system(systemPrompt), .user(firstUser)]))
         } catch {
             return Outcome(status: Task.isCancelled ? .cancelled : .failed, summary: "engine error: \(error)")
@@ -199,19 +205,26 @@ public final class AgentLoop: Sendable {
         var entries = state.entries
         var tail = state.tail
         var thinking = state.thinking
+        var thinkingEnabled = state.thinkingEnabled
         var transcript = state.transcript
         defer {
             state.session = session; state.baseTokens = baseTokens; state.charsSince = charsSince
             state.entries = entries; state.tail = tail
-            state.thinking = thinking; state.transcript = transcript
+            state.thinking = thinking; state.thinkingEnabled = thinkingEnabled
+            state.transcript = transcript
         }
 
         /// Appends to the session; a thinking session is first swapped for a thinking-off one (turn 2 onward).
         func appendMessages(_ msgs: [Message]) async throws {
             if thinking {
-                session = try await leaveThinking(from: session, transcript: transcript, extra: msgs, box: box)
-                thinking = false
-                transcript = []
+                if knobs.thinking == .firstPlanningTurn {
+                    session = try await leaveThinking(from: session, transcript: transcript, extra: msgs, box: box)
+                    thinking = false
+                    transcript = []
+                } else {
+                    _ = try await engine.append(session, .messages(msgs))
+                    transcript.append(contentsOf: msgs)
+                }
             } else {
                 _ = try await engine.append(session, .messages(msgs))
             }
@@ -265,16 +278,19 @@ public final class AgentLoop: Sendable {
                     } ?? "")
                     + (history.isEmpty ? "\n\nContinue the task above from here; do not redo finished work."
                                        : "\n\nContinue from the latest user message; do not redo finished work.")
+                // Earlier reasoning is not carried over: it would defeat the compaction, and a bare reasoning-only
+                // assistant message after the user turn renders as an empty finished turn. The summary carries progress.
+                let rebuilt = [Message.system(systemPrompt), .user(user)]
                 // The fresh session is closed on every path where it is not adopted; the old one is closed
                 // exactly once, after the fresh one is recorded in `box` (so run() never closes it twice).
                 let fresh: SessionID
                 do {
-                    fresh = try await engine.openSession(self.config(thinking: thinkingPolicyOn))
+                    fresh = try await engine.openSession(self.config(thinking: thinkingEnabled))
                 } catch {
                     return Outcome(status: Task.isCancelled ? .cancelled : .failed, summary: "compaction failed: \(error)")
                 }
                 do {
-                    _ = try await engine.append(fresh, .messages([.system(systemPrompt), .user(user)]))
+                    _ = try await engine.append(fresh, .messages(rebuilt))
                 } catch {
                     await engine.close(fresh)
                     return Outcome(status: Task.isCancelled ? .cancelled : .failed, summary: "compaction failed: \(error)")
@@ -285,8 +301,8 @@ public final class AgentLoop: Sendable {
                 compactions += 1
                 baseTokens = 0
                 charsSince = fixedChars + user.count
-                thinking = thinkingPolicyOn
-                transcript = thinkingPolicyOn ? [.system(systemPrompt), .user(user)] : []
+                thinking = thinkingEnabled
+                transcript = thinkingEnabled ? rebuilt : []
                 onEvent(.toolResult(name: "_compaction", output: Compaction.brief(summary, 200), isError: false))
             }
 
@@ -315,9 +331,13 @@ public final class AgentLoop: Sendable {
                         out.idCount += ids.count
                         if !text.isEmpty { out.text += text; onEvent(.textDelta(text)) }
                     case let .reasoning(t):
+                        out.reasoning += t
                         onEvent(.reasoningDelta(t))
                     case let .toolCallBegin(name):
                         cur = PendingCall(name: name)
+                    case let .toolCallError(message):
+                        out.toolCallError = message
+                        cur = nil
                     case let .toolCallArg(key, value):
                         cur?.args.append(.init(key, value))
                     case .toolCallEnd:
@@ -351,13 +371,13 @@ public final class AgentLoop: Sendable {
             let text = out.text.trimmingCharacters(in: .whitespacesAndNewlines)
             if !text.isEmpty { lastText = text }
             if thinking {
-                // The thinking session holds this turn with its reasoning; the replacement session gets it without.
                 transcript.append(.assistant(out.text.isEmpty && !out.calls.isEmpty ? nil : out.text,
+                                             reasoning: out.reasoning.isEmpty ? nil : out.reasoning,
                                              toolCalls: out.calls.map { ToolCall(name: $0.name, arguments: $0.args) }))
             }
 
             if out.calls.isEmpty {
-                if !text.isEmpty && out.reason != .length {
+                if out.toolCallError == nil && !text.isEmpty && out.reason != .length {
                     guard requireFinish else { return Outcome(status: .done, summary: text) }
                     // Prose without `finish` is not proof of completion: nudge once, then end as no_finish.
                     if finishNudged { return Outcome(status: .limit, summary: "no_finish: model replied without calling finish. " + text) }
@@ -370,9 +390,9 @@ public final class AgentLoop: Sendable {
                 if consecutiveErrors >= lim.maxConsecutiveErrors {
                     return Outcome(status: .failed, summary: "model produced no usable action. " + lastText)
                 }
-                pendingNudge = out.reason == .length
+                pendingNudge = out.toolCallError ?? (out.reason == .length
                     ? "Your last reply was cut off. Continue with a tool call, or call finish."
-                    : "Reply with a tool call, or call finish with a summary."
+                    : "Reply with a tool call, or call finish with a summary.")
                 continue
             }
 
@@ -423,7 +443,7 @@ public final class AgentLoop: Sendable {
                 entries.append(.init(name: call.name, head: Compaction.headFor(tool: call.name, args: strArgs),
                                      isError: result.isError, exit: exit, path: argsDict["path"]?.stringValue))
 
-                if let summary = result.finishSummary {
+                if let summary = result.finishSummary, out.toolCallError == nil {
                     var declined = false
                     switch argsDict["declined"] {
                     case .bool(true)?: declined = true
@@ -451,7 +471,16 @@ public final class AgentLoop: Sendable {
                 if tail.count > verbatimTail { tail.removeFirst(tail.count - verbatimTail) }
             }
             charsSince += results.reduce(0) { $0 + $1.count }
-            do { try await appendMessages(results.map { .tool($0) }) } catch {
+            var appended = results.map { Message.tool($0) }
+            if let syntaxError = out.toolCallError {
+                consecutiveErrors += 1
+                if consecutiveErrors >= lim.maxConsecutiveErrors {
+                    return Outcome(status: .failed, summary: "model returned an incomplete tool call repeatedly. " + lastText)
+                }
+                charsSince += syntaxError.count
+                appended.append(.user(syntaxError))
+            }
+            do { try await appendMessages(appended) } catch {
                 return Outcome(status: Task.isCancelled ? .cancelled : .failed, summary: "engine error: \(error)")
             }
         }
@@ -520,9 +549,14 @@ extension AgentLoop {
         do {
             if var st = c.state {
                 if st.thinking {
-                    st.session = try await leaveThinking(from: st.session, transcript: st.transcript, extra: [.user(text)], box: c.box)
-                    st.thinking = false
-                    st.transcript = []
+                    if knobs.thinking == .firstPlanningTurn {
+                        st.session = try await leaveThinking(from: st.session, transcript: st.transcript, extra: [.user(text)], box: c.box)
+                        st.thinking = false
+                        st.transcript = []
+                    } else {
+                        _ = try await engine.append(st.session, .messages([.user(text)]))
+                        st.transcript.append(.user(text))
+                    }
                 } else {
                     _ = try await engine.append(st.session, .messages([.user(text)]))
                 }
@@ -537,7 +571,10 @@ extension AgentLoop {
                 let session = try await engine.openSession(self.config(thinking: thinkingNow))
                 c.box.set(session)
                 var fresh = LoopState(session: session, charsSince: fixedChars + firstUser.count)
-                if thinkingNow { fresh.thinking = true; fresh.transcript = [.system(systemPrompt), .user(firstUser)] }
+                if thinkingNow {
+                    fresh.thinking = true; fresh.thinkingEnabled = true
+                    fresh.transcript = [.system(systemPrompt), .user(firstUser)]
+                }
                 c.state = fresh
                 _ = try await engine.append(session, .messages([.system(systemPrompt), .user(firstUser)]))
             }

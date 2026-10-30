@@ -1,0 +1,224 @@
+{
+  "exit_code": 0,
+  "xctest": {
+    "passed": 113,
+    "skipped": 14
+  },
+  "swift_testing": {
+    "summary_test_total": 1708,
+    "summary_runs": [
+      {
+        "tests": 0,
+        "suites": 0,
+        "seconds": 0.001
+      },
+      {
+        "tests": 29,
+        "suites": 0,
+        "seconds": 0.129
+      },
+      {
+        "tests": 44,
+        "suites": 9,
+        "seconds": 12.035
+      },
+      {
+        "tests": 74,
+        "suites": 13,
+        "seconds": 3.337
+      },
+      {
+        "tests": 70,
+        "suites": 7,
+        "seconds": 1.063
+      },
+      {
+        "tests": 0,
+        "suites": 0,
+        "seconds": 0.001
+      },
+      {
+        "tests": 18,
+        "suites": 0,
+        "seconds": 0.001
+      },
+      {
+        "tests": 50,
+        "suites": 6,
+        "seconds": 1.053
+      },
+      {
+        "tests": 34,
+        "suites": 0,
+        "seconds": 5.215
+      },
+      {
+        "tests": 70,
+        "suites": 7,
+        "seconds": 1.413
+      },
+      {
+        "tests": 56,
+        "suites": 12,
+        "seconds": 0.537
+      },
+      {
+        "tests": 360,
+        "suites": 27,
+        "seconds": 5.794
+      },
+      {
+        "tests": 29,
+        "suites": 5,
+        "seconds": 4.565
+      },
+      {
+        "tests": 53,
+        "suites": 6,
+        "seconds": 6.543
+      },
+      {
+        "tests": 71,
+        "suites": 13,
+        "seconds": 0.875
+      },
+      {
+        "tests": 77,
+        "suites": 5,
+        "seconds": 0.663
+      },
+      {
+        "tests": 89,
+        "suites": 12,
+        "seconds": 4.745
+      },
+      {
+        "tests": 80,
+        "suites": 13,
+        "seconds": 12.043
+      },
+      {
+        "tests": 0,
+        "suites": 0,
+        "seconds": 0.001
+      },
+      {
+        "tests": 9,
+        "suites": 2,
+        "seconds": 0.001
+      },
+      {
+        "tests": 363,
+        "suites": 47,
+        "seconds": 0.62
+      },
+      {
+        "tests": 85,
+        "suites": 20,
+        "seconds": 5.782
+      },
+      {
+        "tests": 27,
+        "suites": 3,
+        "seconds": 0.014
+      },
+      {
+        "tests": 20,
+        "suites": 3,
+        "seconds": 0.056
+      }
+    ],
+    "skip_lines": [
+      "/private/tmp/s4/src-int/Tests/StrimTokenizerTests/DraftVocabBuilderTests.swift:88: -[StrimTokenizerTests.DraftVocabBuilderTests testBuildOnSyntheticRepo] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimTokenizerTests.DraftVocabBuilderTests testBuildOnSyntheticRepo]' skipped (0.001 seconds).",
+      "Executed 7 tests, with 1 test skipped and 0 failures (0 unexpected) in 0.007 (0.007) seconds",
+      "/private/tmp/s4/src-int/Tests/StrimTokenizerTests/TokenizerParityTests.swift:26: -[StrimTokenizerTests.TokenizerParityTests testDecodeParity] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimTokenizerTests.TokenizerParityTests testDecodeParity]' skipped (0.000 seconds).",
+      "/private/tmp/s4/src-int/Tests/StrimTokenizerTests/TokenizerParityTests.swift:26: -[StrimTokenizerTests.TokenizerParityTests testEncodeParity] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimTokenizerTests.TokenizerParityTests testEncodeParity]' skipped (0.000 seconds).",
+      "/private/tmp/s4/src-int/Tests/StrimTokenizerTests/TokenizerParityTests.swift:26: -[StrimTokenizerTests.TokenizerParityTests testLoadTime] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimTokenizerTests.TokenizerParityTests testLoadTime]' skipped (0.000 seconds).",
+      "/private/tmp/s4/src-int/Tests/StrimTokenizerTests/TokenizerParityTests.swift:26: -[StrimTokenizerTests.TokenizerParityTests testRoundTrip] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimTokenizerTests.TokenizerParityTests testRoundTrip]' skipped (0.000 seconds).",
+      "/private/tmp/s4/src-int/Tests/StrimTokenizerTests/TokenizerParityTests.swift:26: -[StrimTokenizerTests.TokenizerParityTests testSpecialIds] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimTokenizerTests.TokenizerParityTests testSpecialIds]' skipped (0.000 seconds).",
+      "/private/tmp/s4/src-int/Tests/StrimTokenizerTests/TokenizerParityTests.swift:26: -[StrimTokenizerTests.TokenizerParityTests testSpeed] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimTokenizerTests.TokenizerParityTests testSpeed]' skipped (0.000 seconds).",
+      "/private/tmp/s4/src-int/Tests/StrimTokenizerTests/TokenizerParityTests.swift:26: -[StrimTokenizerTests.TokenizerParityTests testStreamHoldsPartialUTF8] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimTokenizerTests.TokenizerParityTests testStreamHoldsPartialUTF8]' skipped (0.000 seconds).",
+      "/private/tmp/s4/src-int/Tests/StrimTokenizerTests/TokenizerParityTests.swift:26: -[StrimTokenizerTests.TokenizerParityTests testStreamingAllChunkings] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimTokenizerTests.TokenizerParityTests testStreamingAllChunkings]' skipped (0.000 seconds).",
+      "Executed 8 tests, with 8 tests skipped and 0 failures (0 unexpected) in 0.001 (0.001) seconds",
+      "Executed 15 tests, with 9 tests skipped and 0 failures (0 unexpected) in 0.007 (0.008) seconds",
+      "Executed 15 tests, with 9 tests skipped and 0 failures (0 unexpected) in 0.007 (0.009) seconds",
+      "/private/tmp/s4/src-int/Tests/StrimPromptTests/TokenizeToolTests.swift:15: -[StrimPromptTests.TokenizeToolTests testChatIdsMatchPromptParityFixture] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimPromptTests.TokenizeToolTests testChatIdsMatchPromptParityFixture]' skipped (0.001 seconds).",
+      "/private/tmp/s4/src-int/Tests/StrimPromptTests/TokenizeToolTests.swift:15: -[StrimPromptTests.TokenizeToolTests testChatInputForms] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimPromptTests.TokenizeToolTests testChatInputForms]' skipped (0.000 seconds).",
+      "/private/tmp/s4/src-int/Tests/StrimPromptTests/TokenizeToolTests.swift:15: -[StrimPromptTests.TokenizeToolTests testChatInputRejectsBadShapes] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimPromptTests.TokenizeToolTests testChatInputRejectsBadShapes]' skipped (0.000 seconds).",
+      "/private/tmp/s4/src-int/Tests/StrimPromptTests/TokenizeToolTests.swift:15: -[StrimPromptTests.TokenizeToolTests testTextIdsMatchParityFixture] : Test skipped - needs models/qwen38-4bit (weights are not in the repository)",
+      "Test Case '-[StrimPromptTests.TokenizeToolTests testTextIdsMatchParityFixture]' skipped (0.000 seconds).",
+      "Executed 4 tests, with 4 tests skipped and 0 failures (0 unexpected) in 0.001 (0.001) seconds",
+      "Executed 4 tests, with 4 tests skipped and 0 failures (0 unexpected) in 0.001 (0.001) seconds",
+      "Executed 4 tests, with 4 tests skipped and 0 failures (0 unexpected) in 0.001 (0.002) seconds",
+      "/private/tmp/s4/src-int/Tests/StrimAppSnapshotTests/AppViewSnapshotTests.swift:25: -[StrimAppSnapshotTests.AppViewSnapshotTests testRecordPlatform] : Test skipped - records the platform only when regenerating goldens",
+      "Test Case '-[StrimAppSnapshotTests.AppViewSnapshotTests testRecordPlatform]' skipped (0.001 seconds).",
+      "Executed 11 tests, with 1 test skipped and 0 failures (0 unexpected) in 66.900 (66.902) seconds",
+      "Executed 14 tests, with 1 test skipped and 0 failures (0 unexpected) in 67.670 (67.672) seconds",
+      "Executed 14 tests, with 1 test skipped and 0 failures (0 unexpected) in 67.670 (67.673) seconds",
+      "➜ Test hfCompatMatchesHFOnAdversarialFixture() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test contentSpecialTokensDefaultsToDisabled() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test incompleteGenerationIsNotReused() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test newlineIdIsLookedUp() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test multiTurnReuseExact() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test coldBuildMatchesOracle() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test editedHistoryFallsBackAndStaysCorrect() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test adversarialBenignTwinsMatchHF() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test sentinelRestoreReproducesRender() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test toolOptionChangeInvalidatesHeader() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test multiTurnReuseWithDivergentGeneration() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test reasoningIsOptionalWhenMatching() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test rawSegmentBoundaryTokenization() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test defaultMatchesHFWithoutControlStrings() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test controlContentIsReusedAcrossTurns() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test adversarialContentIsPlainAndRoundTrips() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test fixtureSize() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test markerCollisionIsHandled() skipped: \"needs models/qwen38-4bit (weights are not in the repository)\"",
+      "➜ Test \"unload drops MLX active memory\" skipped.",
+      "➜ Test modelPrefillChunkInvariance() skipped.",
+      "➜ Test quantizedMatmulRowInvariance() skipped.",
+      "➜ Test logitsAndRollbackBitIdentical() skipped.",
+      "➜ Test speculativeLoopIdentical() skipped.",
+      "- skipped (pending): none",
+      "- skipped (pending): none",
+      "- skipped (pending): later",
+      "➜ Suite \"Live app smoke\" skipped: \"set STRIM_E2E=1 to run live smoke\"",
+      "➜ Test \"S3 chat\" skipped: \"set STRIM_E2E=1 to run live smoke\"",
+      "➜ Test \"S2 projects and threads\" skipped: \"set STRIM_E2E=1 to run live smoke\"",
+      "➜ Test \"S5 refusal\" skipped: \"set STRIM_E2E=1 to run live smoke\"",
+      "➜ Test \"S4 queue\" skipped: \"set STRIM_E2E=1 to run live smoke\"",
+      "➜ Test \"S1 start\" skipped: \"set STRIM_E2E=1 to run live smoke\"",
+      "➜ Test \"S8 status\" skipped: \"set STRIM_E2E=1 to run live smoke\"",
+      "➜ Test \"S7 quit\" skipped: \"set STRIM_E2E=1 to run live smoke\"",
+      "➜ Test \"S6 persistence\" skipped: \"set STRIM_E2E=1 to run live smoke\"",
+      "◇ Test skippedIsNotPassedAndDoesNotFailTheRun() started.",
+      "✔ Test skippedIsNotPassedAndDoesNotFailTheRun() passed after 0.016 seconds."
+    ],
+    "passed_test_lines": 1677,
+    "skipped_test_lines": 31,
+    "skipped_suite_lines": 1,
+    "passed_test_records": 1677,
+    "passed": 1677,
+    "skipped": 31
+  },
+  "failures": [
+
+  ],
+  "totals": {
+    "reported": 1835,
+    "passed": 1790,
+    "skipped": 45,
+    "failed": 0
+  }
+}

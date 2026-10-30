@@ -1,6 +1,14 @@
-# Strim 0.1.6
+# Strim 0.1.7
 
-## What's in 0.1.6
+## What's in 0.1.7
+
+- Faster with several requests at once: about 10% more total decode throughput at 8 concurrent requests on M5-class Macs (MLX kernel tuning; outputs identical; single-request speed unchanged).
+- Tool calls: a call cut off in the middle is no longer executed; everything else parses as before.
+- Server: an explicit `enable_thinking` in a request is now respected (omitted keeps the default).
+- Opt-in "thinking on every turn" for the agent (pack `knobs.json`: `"thinking": "all_turns"`, `"reasoningEffort"`): in our agent benchmark it solved more tasks (21/23 vs 16/21) but took about 3x longer, so it stays off by default.
+- Benchmarks: the local agent benchmark runs out of the box; Bun/TypeScript task checks fixed.
+
+## Also in 0.1.6
 
 Stability release: every release now goes through one automated gate (all tests, a headless end-to-end run, a clean build, and a self-test of the packaged app with the real model).
 

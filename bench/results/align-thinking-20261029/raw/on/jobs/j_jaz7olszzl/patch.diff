@@ -1,0 +1,104 @@
+diff --git a/lib/tablefmt.rb b/lib/tablefmt.rb
+index eed59a0..473220d 100644
+--- a/lib/tablefmt.rb
++++ b/lib/tablefmt.rb
+@@ -1,9 +1,13 @@
+ # Plain-text tables.
+ class TableFmt
++  ELLIPSIS = "…"
++  ALIGNMENTS = %i[left right].freeze
++
+   attr_reader :headers, :rows
+ 
+   def initialize(headers)
+     @headers = headers.map(&:to_s)
++    @alignments = Array.new(@headers.size, :left)
+     @rows = []
+   end
+ 
+@@ -13,4 +17,85 @@ class TableFmt
+     @rows << row.map(&:to_s)
+     self
+   end
++
++  # Width of each column: the longest of the header and all its cells.
++  def widths
++    @headers.each_index.map do |i|
++      [@headers[i].length, *@rows.map { |r| r[i].length }].max
++    end
++  end
++
++  # Set per-column alignment. Keys are header names, values :left or :right.
++  def align(spec)
++    spec.each do |name, value|
++      i = @headers.index(name.to_s)
++      raise KeyError, "unknown column #{name.inspect}" if i.nil?
++      raise ArgumentError, "unknown alignment #{value.inspect}" unless ALIGNMENTS.include?(value)
++
++      @alignments[i] = value
++    end
++    self
++  end
++
++  # Render as a plain-text table. Cells longer than +max_width+ are
++  # truncated with an ellipsis.
++  def to_s(max_width: nil)
++    ws = widths.map { |w| max_width ? [w, max_width].min : w }
++    lines = [text_row(@headers, ws, max_width: max_width)]
++    lines << ws.map { |w| "-" * w }.join(" ")
++    @rows.each { |row| lines << text_row(row, ws, max_width: max_width) }
++    lines.join("\n")
++  end
++
++  # Render as a GitHub-flavoured Markdown table.
++  def to_markdown
++    ws = widths
++    lines = [md_row(@headers, ws)]
++    lines << "|#{ws.each_index.map { |i| md_sep(ws[i], @alignments[i]) }.join("|")}|"
++    @rows.each { |row| lines << md_row(row, ws) }
++    lines.join("\n")
++  end
++
++  # Sort rows in place by the named column (optionally via a block that maps
++  # a cell to its sort key). Stable and chainable.
++  def sort_by!(column, &block)
++    i = @headers.index(column.to_s)
++    raise KeyError, "unknown column #{column.inspect}" if i.nil?
++
++    @rows.sort_by! { |row| block ? block.call(row[i]) : row[i] }
++    self
++  end
++
++  private
++
++  def text_row(cells, ws, max_width: nil)
++    cells.each_index.map do |i|
++      c = max_width ? truncate(cells[i], max_width) : cells[i]
++      pad(c, ws[i], @alignments[i])
++    end.join(" ").rstrip
++  end
++
++  def md_row(cells, ws)
++    cells.each_index.map do |i|
++      " " + pad(escape_md(cells[i]), ws[i], @alignments[i]) + " "
++    end.then { |parts| "|#{parts.join("|")}|" }
++  end
++
++  def md_sep(width, alignment)
++    alignment == :right ? ("-" * (width + 1) + ":") : (":" + "-" * (width + 1))
++  end
++
++  def pad(cell, width, alignment)
++    alignment == :right ? cell.rjust(width) : cell.ljust(width)
++  end
++
++  def truncate(cell, max_width)
++    return cell if cell.length <= max_width
++
++    cell[0...max_width - 1] + ELLIPSIS
++  end
++
++  def escape_md(cell)
++    cell.gsub("|", "\\|")
++  end
+ end

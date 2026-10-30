@@ -1,0 +1,28 @@
+--- a/Sources/StrimCore/GDN.swift
++++ b/Sources/StrimCore/GDN.swift
+@@ -267,13 +267,22 @@
+         let B = x.shape[0], S = x.shape[1]
+         let dtype = x.dtype
+ 
+-        let qkv = try OpTimer.linear(store, "gdn.proj", p + "in_proj_qkv", x)
+-        let z = try OpTimer.linear(store, "gdn.proj", p + "in_proj_z", x).reshaped([B, S, Hv, Dv])
+-        let ba = try OpTimer.timeMany("gdn.proj_ba", flops: Double(4 * B * S * Hv * 5120),
++        let qkv: MLXArray, z: MLXArray, ba: [MLXArray]
++        if ProcessInfo.processInfo.environment["STRIM_S4_FUSE"] == "1" {
++            let all = try store.s4GDN(layer, x)
++            qkv = all[0..., 0..., 0 ..< convDim]
++            z = all[0..., 0..., convDim ..< (convDim + valDim)].reshaped([B, S, Hv, Dv])
++            ba = [all[0..., 0..., (convDim + valDim) ..< (convDim + valDim + Hv)],
++                  all[0..., 0..., (convDim + valDim + Hv) ..< (convDim + valDim + 2 * Hv)]]
++        } else {
++        qkv = try OpTimer.linear(store, "gdn.proj", p + "in_proj_qkv", x)
++        z = try OpTimer.linear(store, "gdn.proj", p + "in_proj_z", x).reshaped([B, S, Hv, Dv])
++        ba = try OpTimer.timeMany("gdn.proj_ba", flops: Double(4 * B * S * Hv * 5120),
+                                       bytes: Double(x.nbytes + 2 * Hv * 5120 * 2), inputs: [x]) {
+             [try ChunkInvariantLinear.linear(store, p + "in_proj_b", x),
+              try ChunkInvariantLinear.linear(store, p + "in_proj_a", x)]
+         }
++        }
+         let bProj = ba[0], aProj = ba[1]
+ 
+         let convW = try store.tensor(p + "conv1d.weight")

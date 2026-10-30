@@ -1,0 +1,61 @@
+diff --git a/lib/numwords.rb b/lib/numwords.rb
+index 6946ba9..e73dd3b 100644
+--- a/lib/numwords.rb
++++ b/lib/numwords.rb
+@@ -6,7 +6,7 @@ module NumWords
+ 
+   module_function
+ 
+-  # to_words(0) => "zero", to_words(42) => "forty-two", to_words(1_205) => "one thousand two hundred five"
++  # to_words(0) => "zero", to_words(42) => "forty-two", to_words(1_205) => "one thousand two hundred and five"
+   # Numbers up to 999_999; negatives get a "minus " prefix.
+   def to_words(n)
+     raise ArgumentError, 'integer expected' unless n.is_a?(Integer)
+@@ -17,30 +17,39 @@ module NumWords
+     parts = []
+     thousands, rest = n.divmod(1000)
+     parts << "#{below_thousand(thousands)} thousand" if thousands.positive?
+-    parts << below_thousand(rest) if rest.positive?
++    parts << below_thousand(rest, last: thousands.positive?) if rest.positive?
+     parts.join(' ')
+   end
+ 
+-  def below_thousand(n)
++  def below_thousand(n, last: false)
+     words = []
+     hundreds, rest = n.divmod(100)
+     words << "#{ONES[hundreds]} hundred" if hundreds.positive?
+     if rest >= 20
+       tens, ones = rest.divmod(10)
+-      words << (ones.zero? ? TENS[tens] : "#{TENS[tens]} #{ONES[ones]}")
++      words << (ones.zero? ? TENS[tens] : "#{TENS[tens]}-#{ONES[ones]}")
+     elsif rest.positive?
+       words << ONES[rest]
+     end
++    if words.size == 2
++      words[1] = "and #{words[1]}"
++    elsif last && words.size == 1
++      words[0] = "and #{words[0]}"
++    end
+     words.join(' ')
+   end
+ 
+   # Ordinal suffix: 1 => "1st", 12 => "12th", 23 => "23rd".
+   def ordinal(n)
+-    suffix = case n % 10
+-             when 1 then 'st'
+-             when 2 then 'nd'
+-             when 3 then 'rd'
+-             else 'th'
++    suffix = case n % 100
++             when 11, 12, 13 then 'th'
++             else
++               case n % 10
++               when 1 then 'st'
++               when 2 then 'nd'
++               when 3 then 'rd'
++               else 'th'
++               end
+              end
+     "#{n}#{suffix}"
+   end

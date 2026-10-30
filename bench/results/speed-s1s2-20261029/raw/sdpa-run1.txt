@@ -1,0 +1,4 @@
+host: layers/iter=8 reps=7; TF/s = 1e-9*flops/ms; dense plateau reference 62.7 TF/s
+kv= 4096  sdpa causal    2.22 ms   40.7 TF/s (65% of 62.7)   sdpa nomask    2.54 ms   40.6 TF/s (full flops)   gemm QK  55.8 TF/s  PV 379.9 TF/s  QK+PV(full)  97.3 TF/s -> would-be causal-skipping time 0.93 ms (97.3 TF/s equiv)
+kv=16384  sdpa causal    9.46 ms   42.2 TF/s (67% of 62.7)   sdpa nomask   10.44 ms   39.5 TF/s (full flops)   gemm QK  56.7 TF/s  PV 1428.8 TF/s  QK+PV(full) 109.0 TF/s -> would-be causal-skipping time 3.66 ms (109.0 TF/s equiv)
+kv=32768  sdpa causal   20.10 ms   40.4 TF/s (64% of 62.7)   sdpa nomask   22.48 ms   36.7 TF/s (full flops)   gemm QK  56.9 TF/s  PV 2825.8 TF/s  QK+PV(full) 111.6 TF/s -> would-be causal-skipping time 7.27 ms (111.6 TF/s equiv)

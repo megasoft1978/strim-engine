@@ -1,0 +1,13 @@
+diff --git a/lib/semver.js b/lib/semver.js
+index 5978729..fd2403e 100644
+--- a/lib/semver.js
++++ b/lib/semver.js
+@@ -41,7 +41,7 @@ function compare(x, y) {
+   const a = parse(x), b = parse(y);
+   if (!a || !b) throw new TypeError(`invalid version: ${!a ? x : y}`);
+   for (const k of ['major', 'minor', 'patch']) {
+-    if (a[k] !== b[k]) return String(a[k]) < String(b[k]) ? -1 : 1;
++    if (a[k] !== b[k]) return a[k] < b[k] ? -1 : 1;
+   }
+   return comparePre(a.pre, b.pre);
+ }

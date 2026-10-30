@@ -4,8 +4,8 @@ import Foundation
 
 @Suite struct PackLoaderTests {
     /// Pinned fingerprint of the built-in pack. Update it deliberately (and only) when a pack file changes.
-    /// Updated deliberately: system.md gained decline/scope criteria and was trimmed under 650 words.
-    static let pinnedFingerprint = "adbf36aabb1788385040794016a53d59c5f523181b0e7a1b5f05c2d2f2371a16"
+    /// Updated deliberately when the nonexistent list_files depth option was removed from guidance.
+    static let pinnedFingerprint = "e0c20ab79b9e023dfde7e29ce6332505ccec20847b8ea4f45e0ab6726987789d"
 
     static func tempDir() throws -> URL {
         let dir = FileManager.default.temporaryDirectory

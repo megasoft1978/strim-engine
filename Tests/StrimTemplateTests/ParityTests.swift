@@ -133,3 +133,11 @@ private func firstDiff(_ a: String, _ b: String) -> String {
     #expect(ReasoningPolicy.off.resolve(enableThinking: nil, hasTools: false) == false)
     #expect(ReasoningPolicy.on.resolve(enableThinking: false, hasTools: true) == true)
 }
+
+@Test func policyFixtureDisableWhenToolsMatchesGoldenBytes() throws {
+    let fixture = try #require(loadCases().first { $0["id"]?.stringValue == "policy_disableWhenTools_read_tdef" })
+    let input = try RenderInput(fixture)
+    let actual = try ChatTemplate.render(messages: input.messages, tools: input.tools)
+    let expected = try #require(fixture["expected"]?.stringValue)
+    #expect(Array(actual.utf8) == Array(expected.utf8))
+}

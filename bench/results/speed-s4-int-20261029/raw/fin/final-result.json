@@ -1,0 +1,955 @@
+{
+  "abba_cycles" : 2,
+  "abba_order" : "upstream,fork,fork,upstream",
+  "abba_table" : [
+    {
+      "blocks" : [
+        {
+          "arm" : "base",
+          "block" : "1-1-base",
+          "cycle" : 1,
+          "index" : 1,
+          "median" : 32.25769394286273,
+          "output" : "[\n  \"d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136\"\n]\n",
+          "peak_bytes" : 15516653906,
+          "request_tps" : 32.25769394286273,
+          "samples" : [
+            32.25769394286273,
+            32.274815340501327,
+            32.25146398742924
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-2-fork",
+          "cycle" : 1,
+          "index" : 2,
+          "median" : 32.45327558156653,
+          "output" : "[\n  \"d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136\"\n]\n",
+          "peak_bytes" : 15520103091,
+          "request_tps" : 32.45327558156653,
+          "samples" : [
+            32.45327558156653,
+            32.420945450492837,
+            32.477022506576596
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-3-fork",
+          "cycle" : 1,
+          "index" : 3,
+          "median" : 32.360738631776044,
+          "output" : "[\n  \"d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136\"\n]\n",
+          "peak_bytes" : 15516658360,
+          "request_tps" : 32.360738631776044,
+          "samples" : [
+            32.469272996484236,
+            32.309770604172691,
+            32.360738631776044
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "1-4-base",
+          "cycle" : 1,
+          "index" : 4,
+          "median" : 32.36880477216809,
+          "output" : "[\n  \"d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136\"\n]\n",
+          "peak_bytes" : 15516644927,
+          "request_tps" : 32.36880477216809,
+          "samples" : [
+            32.36880477216809,
+            32.378012617369528,
+            32.330477419936891
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-1-base",
+          "cycle" : 2,
+          "index" : 1,
+          "median" : 32.365138099240134,
+          "output" : "[\n  \"d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136\"\n]\n",
+          "peak_bytes" : 15516648143,
+          "request_tps" : 32.365138099240134,
+          "samples" : [
+            32.439380591579514,
+            32.365138099240134,
+            32.343622003906191
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-2-fork",
+          "cycle" : 2,
+          "index" : 2,
+          "median" : 32.228177511039256,
+          "output" : "[\n  \"d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136\"\n]\n",
+          "peak_bytes" : 15516655183,
+          "request_tps" : 32.228177511039256,
+          "samples" : [
+            32.00572169487311,
+            32.228177511039256,
+            32.274872306585756
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-3-fork",
+          "cycle" : 2,
+          "index" : 3,
+          "median" : 32.330765277241234,
+          "output" : "[\n  \"d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136\"\n]\n",
+          "peak_bytes" : 15516640797,
+          "request_tps" : 32.330765277241234,
+          "samples" : [
+            32.340316471078516,
+            32.312281364691152,
+            32.330765277241234
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-4-base",
+          "cycle" : 2,
+          "index" : 4,
+          "median" : 32.331242323202254,
+          "output" : "[\n  \"d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136\"\n]\n",
+          "peak_bytes" : 15516657411,
+          "request_tps" : 32.331242323202254,
+          "samples" : [
+            32.336395522621835,
+            32.331242323202254,
+            32.30531551787724
+          ]
+        }
+      ],
+      "change_pct" : -0.0075375367111107927,
+      "cycles" : [
+        {
+          "change_pct" : 0.29019865762742736,
+          "cycle" : 1,
+          "fork" : 32.406974077196317,
+          "same_arm_noise_pct" : 0.34444752778102217,
+          "upstream" : 32.313201599916916
+        },
+        {
+          "change_pct" : -0.21254710338182159,
+          "cycle" : 2,
+          "fork" : 32.279430639691817,
+          "same_arm_noise_pct" : 0.31831699501729815,
+          "upstream" : 32.348185771545808
+        }
+      ],
+      "fork" : 32.345751954508643,
+      "fork_peak_bytes" : 15520103091,
+      "fork_request_tps" : 32.345751954508643,
+      "identical_outputs" : true,
+      "unit" : "aggregate tok\/s",
+      "upstream" : 32.348190211221194,
+      "upstream_peak_bytes" : 15516657411,
+      "upstream_request_tps" : 32.348190211221194,
+      "workload" : "c1"
+    },
+    {
+      "blocks" : [
+        {
+          "arm" : "base",
+          "block" : "1-1-base",
+          "cycle" : 1,
+          "index" : 1,
+          "median" : 102.41599397804838,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\"\n]\n",
+          "peak_bytes" : 16780963621,
+          "request_tps" : 25.603998494512094,
+          "samples" : [
+            102.59641570805228,
+            102.41599397804838,
+            102.38721523607255
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-2-fork",
+          "cycle" : 1,
+          "index" : 2,
+          "median" : 102.29953502299848,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\"\n]\n",
+          "peak_bytes" : 16781043678,
+          "request_tps" : 25.574883755749621,
+          "samples" : [
+            101.81822929093123,
+            102.36210215136178,
+            102.29953502299848
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-3-fork",
+          "cycle" : 1,
+          "index" : 3,
+          "median" : 102.27186190695824,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\"\n]\n",
+          "peak_bytes" : 16781088125,
+          "request_tps" : 25.567965476739559,
+          "samples" : [
+            102.26772524697486,
+            102.27186190695824,
+            102.56066809660169
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "1-4-base",
+          "cycle" : 1,
+          "index" : 4,
+          "median" : 102.2958423732955,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\"\n]\n",
+          "peak_bytes" : 16781037117,
+          "request_tps" : 25.573960593323875,
+          "samples" : [
+            102.39527105871765,
+            102.2958423732955,
+            102.26613706272708
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-1-base",
+          "cycle" : 2,
+          "index" : 1,
+          "median" : 102.26692344777926,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\"\n]\n",
+          "peak_bytes" : 16781040709,
+          "request_tps" : 25.566730861944816,
+          "samples" : [
+            102.16710497585228,
+            102.28805255931574,
+            102.26692344777926
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-2-fork",
+          "cycle" : 2,
+          "index" : 2,
+          "median" : 102.26853379980035,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\"\n]\n",
+          "peak_bytes" : 16781061677,
+          "request_tps" : 25.567133449950088,
+          "samples" : [
+            102.15068931153468,
+            102.33968442861116,
+            102.26853379980035
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-3-fork",
+          "cycle" : 2,
+          "index" : 3,
+          "median" : 102.27859530737015,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\"\n]\n",
+          "peak_bytes" : 16781001787,
+          "request_tps" : 25.569648826842538,
+          "samples" : [
+            102.28751613693449,
+            102.21149134650963,
+            102.27859530737015
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-4-base",
+          "cycle" : 2,
+          "index" : 4,
+          "median" : 102.20468512967848,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\"\n]\n",
+          "peak_bytes" : 16781126469,
+          "request_tps" : 25.55117128241962,
+          "samples" : [
+            102.24769861738673,
+            102.20468512967848,
+            102.18196412495018
+          ]
+        }
+      ],
+      "change_pct" : -0.0060170318371355336,
+      "cycles" : [
+        {
+          "change_pct" : -0.068587170862233204,
+          "cycle" : 1,
+          "fork" : 102.28569752911763,
+          "same_arm_noise_pct" : 0.11731722759887875,
+          "upstream" : 102.35590054551236
+        },
+        {
+          "change_pct" : 0.036938995354196535,
+          "cycle" : 2,
+          "fork" : 102.2735644298559,
+          "same_arm_noise_pct" : 0.060858698005683554,
+          "upstream" : 102.23579955260884
+        }
+      ],
+      "fork" : 102.27522860716419,
+      "fork_peak_bytes" : 16781088125,
+      "fork_request_tps" : 25.568807151791049,
+      "identical_outputs" : true,
+      "unit" : "aggregate tok\/s",
+      "upstream" : 102.28138291053739,
+      "upstream_peak_bytes" : 16781126469,
+      "upstream_request_tps" : 25.570345727634347,
+      "workload" : "c4"
+    },
+    {
+      "blocks" : [
+        {
+          "arm" : "base",
+          "block" : "1-1-base",
+          "cycle" : 1,
+          "index" : 1,
+          "median" : 118.86895147920889,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\",\n  \"c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33\",\n  \"89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb\",\n  \"2df310c5a8c01e46a25cc0fe83fd138efe307ee71b793a9fe00685ad33d84889\",\n  \"12df7ccb9619af10adf7a6422cd58b4eb772dcae0f2f17c1d4724ea327b7f998\"\n]\n",
+          "peak_bytes" : 18436056845,
+          "request_tps" : 14.858618934901111,
+          "samples" : [
+            118.86845243897399,
+            118.94980794368657,
+            118.86895147920889
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-2-fork",
+          "cycle" : 1,
+          "index" : 2,
+          "median" : 131.06396558178963,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\",\n  \"c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33\",\n  \"89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb\",\n  \"2df310c5a8c01e46a25cc0fe83fd138efe307ee71b793a9fe00685ad33d84889\",\n  \"12df7ccb9619af10adf7a6422cd58b4eb772dcae0f2f17c1d4724ea327b7f998\"\n]\n",
+          "peak_bytes" : 18435888205,
+          "request_tps" : 16.382995697723704,
+          "samples" : [
+            131.06325405049765,
+            131.10535739829356,
+            131.06396558178963
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-3-fork",
+          "cycle" : 1,
+          "index" : 3,
+          "median" : 131.11512323957299,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\",\n  \"c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33\",\n  \"89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb\",\n  \"2df310c5a8c01e46a25cc0fe83fd138efe307ee71b793a9fe00685ad33d84889\",\n  \"12df7ccb9619af10adf7a6422cd58b4eb772dcae0f2f17c1d4724ea327b7f998\"\n]\n",
+          "peak_bytes" : 18435989077,
+          "request_tps" : 16.389390404946624,
+          "samples" : [
+            131.11512323957299,
+            131.28129109605209,
+            130.92035724183671
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "1-4-base",
+          "cycle" : 1,
+          "index" : 4,
+          "median" : 118.88243774939988,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\",\n  \"c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33\",\n  \"89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb\",\n  \"2df310c5a8c01e46a25cc0fe83fd138efe307ee71b793a9fe00685ad33d84889\",\n  \"12df7ccb9619af10adf7a6422cd58b4eb772dcae0f2f17c1d4724ea327b7f998\"\n]\n",
+          "peak_bytes" : 18436011384,
+          "request_tps" : 14.860304718674985,
+          "samples" : [
+            118.90348691588689,
+            118.88243774939988,
+            118.85120331282648
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-1-base",
+          "cycle" : 2,
+          "index" : 1,
+          "median" : 118.95375756848249,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\",\n  \"c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33\",\n  \"89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb\",\n  \"2df310c5a8c01e46a25cc0fe83fd138efe307ee71b793a9fe00685ad33d84889\",\n  \"12df7ccb9619af10adf7a6422cd58b4eb772dcae0f2f17c1d4724ea327b7f998\"\n]\n",
+          "peak_bytes" : 18436026194,
+          "request_tps" : 14.869219696060311,
+          "samples" : [
+            119.03968107602883,
+            118.93287821598547,
+            118.95375756848249
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-2-fork",
+          "cycle" : 2,
+          "index" : 2,
+          "median" : 131.07685855985349,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\",\n  \"c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33\",\n  \"89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb\",\n  \"2df310c5a8c01e46a25cc0fe83fd138efe307ee71b793a9fe00685ad33d84889\",\n  \"12df7ccb9619af10adf7a6422cd58b4eb772dcae0f2f17c1d4724ea327b7f998\"\n]\n",
+          "peak_bytes" : 18435850805,
+          "request_tps" : 16.384607319981686,
+          "samples" : [
+            131.07685855985349,
+            130.98369393715623,
+            131.08273829792137
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-3-fork",
+          "cycle" : 2,
+          "index" : 3,
+          "median" : 131.10432088601939,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\",\n  \"c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33\",\n  \"89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb\",\n  \"2df310c5a8c01e46a25cc0fe83fd138efe307ee71b793a9fe00685ad33d84889\",\n  \"12df7ccb9619af10adf7a6422cd58b4eb772dcae0f2f17c1d4724ea327b7f998\"\n]\n",
+          "peak_bytes" : 18436060198,
+          "request_tps" : 16.388040110752424,
+          "samples" : [
+            131.10432088601939,
+            131.08682572283467,
+            131.12260283488604
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-4-base",
+          "cycle" : 2,
+          "index" : 4,
+          "median" : 118.86184443527696,
+          "output" : "[\n  \"ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf\",\n  \"8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566\",\n  \"97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97\",\n  \"2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af\",\n  \"c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33\",\n  \"89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb\",\n  \"2df310c5a8c01e46a25cc0fe83fd138efe307ee71b793a9fe00685ad33d84889\",\n  \"12df7ccb9619af10adf7a6422cd58b4eb772dcae0f2f17c1d4724ea327b7f998\"\n]\n",
+          "peak_bytes" : 18435906795,
+          "request_tps" : 14.857730554409621,
+          "samples" : [
+            118.93002927637117,
+            118.80639254047408,
+            118.86184443527696
+          ]
+        }
+      ],
+      "change_pct" : 10.275351196275761,
+      "cycles" : [
+        {
+          "change_pct" : 10.274469942213106,
+          "cycle" : 1,
+          "fork" : 131.0895419151486,
+          "same_arm_noise_pct" : 0.039032588062082318,
+          "upstream" : 118.87569442305474
+        },
+        {
+          "change_pct" : 10.245583292282067,
+          "cycle" : 2,
+          "fork" : 131.09058900379694,
+          "same_arm_noise_pct" : 0.07726795276106202,
+          "upstream" : 118.90779212102383
+        }
+      ],
+      "fork" : 131.09058972293644,
+      "fork_peak_bytes" : 18436060198,
+      "fork_request_tps" : 16.386323715367055,
+      "identical_outputs" : true,
+      "unit" : "aggregate tok\/s",
+      "upstream" : 118.87569461430439,
+      "upstream_peak_bytes" : 18436056845,
+      "upstream_request_tps" : 14.859461826788049,
+      "workload" : "c8"
+    },
+    {
+      "blocks" : [
+        {
+          "arm" : "base",
+          "block" : "1-1-base",
+          "cycle" : 1,
+          "index" : 1,
+          "median" : 36.585961833333336,
+          "output" : "[\n  \"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0\"\n]\n",
+          "peak_bytes" : 15961545459,
+          "samples" : [
+            36.334409666666666,
+            36.661124999999998,
+            36.585961833333336
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-2-fork",
+          "cycle" : 1,
+          "index" : 2,
+          "median" : 36.470621583333333,
+          "output" : "[\n  \"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0\"\n]\n",
+          "peak_bytes" : 15961546285,
+          "samples" : [
+            36.435729166666668,
+            36.470621583333333,
+            36.574041666666666
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-3-fork",
+          "cycle" : 1,
+          "index" : 3,
+          "median" : 36.671069500000002,
+          "output" : "[\n  \"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0\"\n]\n",
+          "peak_bytes" : 15961552198,
+          "samples" : [
+            36.162920166666666,
+            36.691986166666666,
+            36.671069500000002
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "1-4-base",
+          "cycle" : 1,
+          "index" : 4,
+          "median" : 36.743031250000001,
+          "output" : "[\n  \"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0\"\n]\n",
+          "peak_bytes" : 15961522043,
+          "samples" : [
+            36.794517416666672,
+            36.743031250000001,
+            36.697045166666669
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-1-base",
+          "cycle" : 2,
+          "index" : 1,
+          "median" : 36.629913250000001,
+          "output" : "[\n  \"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0\"\n]\n",
+          "peak_bytes" : 15961538835,
+          "samples" : [
+            36.520958333333333,
+            36.667132000000002,
+            36.629913250000001
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-2-fork",
+          "cycle" : 2,
+          "index" : 2,
+          "median" : 36.612524333333333,
+          "output" : "[\n  \"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0\"\n]\n",
+          "peak_bytes" : 15961531795,
+          "samples" : [
+            36.558607583333334,
+            36.612524333333333,
+            36.674836833333337
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-3-fork",
+          "cycle" : 2,
+          "index" : 3,
+          "median" : 36.64501383333333,
+          "output" : "[\n  \"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0\"\n]\n",
+          "peak_bytes" : 15961546289,
+          "samples" : [
+            36.616555583333337,
+            36.684659750000002,
+            36.64501383333333
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-4-base",
+          "cycle" : 2,
+          "index" : 4,
+          "median" : 36.55405558333333,
+          "output" : "[\n  \"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0\"\n]\n",
+          "peak_bytes" : 15961550579,
+          "samples" : [
+            36.532614583333334,
+            36.643857666666669,
+            36.55405558333333
+          ]
+        }
+      ],
+      "change_pct" : 0.056904439489247061,
+      "cycles" : [
+        {
+          "change_pct" : -0.2555726874493347,
+          "cycle" : 1,
+          "fork" : 36.57070820739758,
+          "same_arm_noise_pct" : 0.54961475281867234,
+          "upstream" : 36.664412431586491
+        },
+        {
+          "change_pct" : 0.100570499359387,
+          "cycle" : 2,
+          "fork" : 36.628765481084031,
+          "same_arm_noise_pct" : 0.20709212754325135,
+          "upstream" : 36.591964759400092
+        }
+      ],
+      "fork" : 36.628769083333331,
+      "fork_peak_bytes" : 15961552198,
+      "identical_outputs" : true,
+      "unit" : "ms\/verify step",
+      "upstream" : 36.607937541666672,
+      "upstream_peak_bytes" : 15961550579,
+      "workload" : "verify3"
+    },
+    {
+      "blocks" : [
+        {
+          "arm" : "base",
+          "block" : "1-1-base",
+          "cycle" : 1,
+          "index" : 1,
+          "median" : 43.732177083333333,
+          "output" : "[\n  \"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057\"\n]\n",
+          "peak_bytes" : 16253982423,
+          "samples" : [
+            44.017750000000007,
+            43.340465249999994,
+            43.732177083333333
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-2-fork",
+          "cycle" : 1,
+          "index" : 2,
+          "median" : 44.019763833333336,
+          "output" : "[\n  \"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057\"\n]\n",
+          "peak_bytes" : 16254048785,
+          "samples" : [
+            44.016569500000003,
+            44.05214933333334,
+            44.019763833333336
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-3-fork",
+          "cycle" : 1,
+          "index" : 3,
+          "median" : 43.93883683333334,
+          "output" : "[\n  \"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057\"\n]\n",
+          "peak_bytes" : 16254071082,
+          "samples" : [
+            43.849531250000005,
+            43.93883683333334,
+            44.026083333333332
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "1-4-base",
+          "cycle" : 1,
+          "index" : 4,
+          "median" : 43.855479166666669,
+          "output" : "[\n  \"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057\"\n]\n",
+          "peak_bytes" : 16253975391,
+          "samples" : [
+            43.826097250000004,
+            43.97502433333333,
+            43.855479166666669
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-1-base",
+          "cycle" : 2,
+          "index" : 1,
+          "median" : 43.968298583333336,
+          "output" : "[\n  \"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057\"\n]\n",
+          "peak_bytes" : 16254024951,
+          "samples" : [
+            44.091763833333339,
+            43.968298583333336,
+            43.950138916666667
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-2-fork",
+          "cycle" : 2,
+          "index" : 2,
+          "median" : 44.008364583333332,
+          "output" : "[\n  \"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057\"\n]\n",
+          "peak_bytes" : 16253952375,
+          "samples" : [
+            44.0241805,
+            43.989559000000007,
+            44.008364583333332
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-3-fork",
+          "cycle" : 2,
+          "index" : 3,
+          "median" : 43.860065916666663,
+          "output" : "[\n  \"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057\"\n]\n",
+          "peak_bytes" : 16254032405,
+          "samples" : [
+            43.860065916666663,
+            43.793048583333338,
+            44.028951416666665
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-4-base",
+          "cycle" : 2,
+          "index" : 4,
+          "median" : 44.030038166666664,
+          "output" : "[\n  \"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057\"\n]\n",
+          "peak_bytes" : 16254020311,
+          "samples" : [
+            43.909468750000002,
+            44.046142416666669,
+            44.030038166666664
+          ]
+        }
+      ],
+      "change_pct" : 0.14053559278446315,
+      "cycles" : [
+        {
+          "change_pct" : 0.42356921179074192,
+          "cycle" : 1,
+          "fork" : 43.979281718949224,
+          "same_arm_noise_pct" : 0.28194819365698898,
+          "upstream" : 43.793784730154371
+        },
+        {
+          "change_pct" : -0.14774116547831007,
+          "cycle" : 2,
+          "fork" : 43.934152677725542,
+          "same_arm_noise_pct" : 0.33697836325149444,
+          "upstream" : 43.999157545884472
+        }
+      ],
+      "fork" : 43.973600708333336,
+      "fork_peak_bytes" : 16254071082,
+      "identical_outputs" : true,
+      "unit" : "ms\/verify step",
+      "upstream" : 43.911888875000002,
+      "upstream_peak_bytes" : 16254024951,
+      "workload" : "verify5"
+    },
+    {
+      "blocks" : [
+        {
+          "arm" : "base",
+          "block" : "1-1-base",
+          "cycle" : 1,
+          "index" : 1,
+          "median" : 66.612645833333332,
+          "output" : "[\n  \"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723\"\n]\n",
+          "peak_bytes" : 16718783858,
+          "samples" : [
+            66.612645833333332,
+            66.741020833333337,
+            66.486336750000007
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-2-fork",
+          "cycle" : 1,
+          "index" : 2,
+          "median" : 61.115423583333332,
+          "output" : "[\n  \"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723\"\n]\n",
+          "peak_bytes" : 16718768300,
+          "samples" : [
+            61.107253416666659,
+            61.115423583333332,
+            61.240375
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "1-3-fork",
+          "cycle" : 1,
+          "index" : 3,
+          "median" : 61.171177083333333,
+          "output" : "[\n  \"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723\"\n]\n",
+          "peak_bytes" : 16718774213,
+          "samples" : [
+            61.171177083333333,
+            60.935604166666671,
+            61.223270833333338
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "1-4-base",
+          "cycle" : 1,
+          "index" : 4,
+          "median" : 66.737145833333344,
+          "output" : "[\n  \"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723\"\n]\n",
+          "peak_bytes" : 16718760442,
+          "samples" : [
+            66.850951333333327,
+            66.635475666666665,
+            66.737145833333344
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-1-base",
+          "cycle" : 2,
+          "index" : 1,
+          "median" : 66.724576416666665,
+          "output" : "[\n  \"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723\"\n]\n",
+          "peak_bytes" : 16718777234,
+          "samples" : [
+            66.532611083333336,
+            66.745378500000001,
+            66.724576416666665
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-2-fork",
+          "cycle" : 2,
+          "index" : 2,
+          "median" : 61.085697916666668,
+          "output" : "[\n  \"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723\"\n]\n",
+          "peak_bytes" : 16718770194,
+          "samples" : [
+            61.085697916666668,
+            61.020986083333327,
+            61.21815625
+          ]
+        },
+        {
+          "arm" : "fork",
+          "block" : "2-3-fork",
+          "cycle" : 2,
+          "index" : 3,
+          "median" : 61.162913166666669,
+          "output" : "[\n  \"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723\"\n]\n",
+          "peak_bytes" : 16718735536,
+          "samples" : [
+            61.116743000000007,
+            61.182069416666671,
+            61.162913166666669
+          ]
+        },
+        {
+          "arm" : "base",
+          "block" : "2-4-base",
+          "cycle" : 2,
+          "index" : 4,
+          "median" : 66.747840333333343,
+          "output" : "[\n  \"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723\"\n]\n",
+          "peak_bytes" : 16718772594,
+          "samples" : [
+            66.747840333333343,
+            66.703809000000007,
+            66.750968749999998
+          ]
+        }
+      ],
+      "change_pct" : -8.3794703915564206,
+      "cycles" : [
+        {
+          "change_pct" : -8.2963387301815743,
+          "cycle" : 1,
+          "fork" : 61.143293978481481,
+          "same_arm_noise_pct" : 0.18690144858006796,
+          "upstream" : 66.674866773945269
+        },
+        {
+          "change_pct" : -8.4090993993836012,
+          "cycle" : 2,
+          "fork" : 61.124293348899457,
+          "same_arm_noise_pct" : 0.12640479299317331,
+          "upstream" : 66.736207361289004
+        }
+      ],
+      "fork" : 61.139168374999997,
+      "fork_peak_bytes" : 16718774213,
+      "identical_outputs" : true,
+      "unit" : "ms\/verify step",
+      "upstream" : 66.730861125000004,
+      "upstream_peak_bytes" : 16718783858,
+      "workload" : "verify8"
+    }
+  ],
+  "c1_no_regression_beyond_noise" : true,
+  "c1_noise_pct" : 0.34444752778102217,
+  "c8_at_least_2pct" : true,
+  "keep" : true,
+  "parity" : {
+    "batch" : [
+      {
+        "c" : 6,
+        "identical" : true,
+        "summary" : [
+          "tokens: 93\/96 equal (teacher-forced), max logit diff 5.5312 (step 0: 0.2188), mean abs diff 0.0724",
+          "RESULT 3 mismatches, max margin 0.1250 vs max logit diff 5.5312 -> explainable near-ties"
+        ]
+      },
+      {
+        "c" : 7,
+        "identical" : true,
+        "summary" : [
+          "tokens: 109\/112 equal (teacher-forced), max logit diff 5.5312 (step 0: 0.2188), mean abs diff 0.0708",
+          "RESULT 3 mismatches, max margin 0.1250 vs max logit diff 5.5312 -> explainable near-ties"
+        ]
+      },
+      {
+        "c" : 8,
+        "identical" : true,
+        "summary" : [
+          "tokens: 124\/128 equal (teacher-forced), max logit diff 5.5312 (step 0: 0.2188), mean abs diff 0.0668",
+          "RESULT 4 mismatches, max margin 0.1250 vs max logit diff 5.5312 -> explainable near-ties"
+        ]
+      }
+    ],
+    "engine_case_242" : "pre-existing sampled B>1 nondeterminism; see divergence\/control.json",
+    "verify" : [
+      {
+        "compared_values" : 744960,
+        "different_float_bits" : 0,
+        "has_reference" : true,
+        "hashes" : [
+          "258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0"
+        ],
+        "kind" : "qualityverify",
+        "max_abs_diff" : 0,
+        "mlx_peak_bytes" : 15820361506,
+        "size" : 3,
+        "teacher_forced_agreement" : 3,
+        "tokens" : 3
+      },
+      {
+        "compared_values" : 1241600,
+        "different_float_bits" : 0,
+        "has_reference" : true,
+        "hashes" : [
+          "756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057"
+        ],
+        "kind" : "qualityverify",
+        "max_abs_diff" : 0,
+        "mlx_peak_bytes" : 16131074761,
+        "size" : 5,
+        "teacher_forced_agreement" : 5,
+        "tokens" : 5
+      },
+      {
+        "compared_values" : 1986560,
+        "different_float_bits" : 0,
+        "has_reference" : true,
+        "hashes" : [
+          "60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723"
+        ],
+        "kind" : "qualityverify",
+        "max_abs_diff" : 0,
+        "mlx_peak_bytes" : 16601794329,
+        "size" : 8,
+        "teacher_forced_agreement" : 8,
+        "tokens" : 8
+      }
+    ]
+  },
+  "slice" : "20261030-5-s4-fin",
+  "verdict" : "KEEP"
+}

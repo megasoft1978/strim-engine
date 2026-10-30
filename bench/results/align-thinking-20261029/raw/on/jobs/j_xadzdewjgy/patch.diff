@@ -1,0 +1,71 @@
+diff --git a/src/graph.ts b/src/graph.ts
+index c6ed9ed..9bf9109 100644
+--- a/src/graph.ts
++++ b/src/graph.ts
+@@ -31,7 +31,8 @@ export function topoOrder(nodes: Map<string, Node>): Ordering {
+       if (!nodes.has(dep)) continue;
+       const s = state.get(dep);
+       if (s === 'open') {
+-        const loop = canonical([...path, dep]);
++        const at = path.indexOf(dep);
++        const loop = canonical([...path.slice(at), dep]);
+         cycles.set(loop.join('>'), loop);
+       } else if (s === undefined) walk(dep);
+     }
+diff --git a/src/plan.ts b/src/plan.ts
+index 7f71fbd..3266a8b 100644
+--- a/src/plan.ts
++++ b/src/plan.ts
+@@ -3,7 +3,7 @@ import { resolve } from './resolver.ts';
+ import type { Registry } from './registry.ts';
+ import type { Manifest, Plan } from './types.ts';
+ 
+-const MS_PER_DECISECOND = 1000;
++const MS_PER_DECISECOND = 100;
+ 
+ /** Resolves the dependencies of `root`, orders the builds and estimates the wall-clock time. */
+ export function plan(root: Pick<Manifest, 'deps'>, registry: Registry): Plan {
+diff --git a/src/registry.ts b/src/registry.ts
+index d980407..a3d6927 100644
+--- a/src/registry.ts
++++ b/src/registry.ts
+@@ -1,3 +1,4 @@
++import { compare } from './semver.ts';
+ import type { Manifest } from './types.ts';
+ 
+ /** In-memory package index. */
+@@ -13,7 +14,7 @@ export class Registry {
+ 
+   /** All versions of `name`, lowest first (numeric semver order). Empty when the package is unknown. */
+   versions(name: string): string[] {
+-    return [...(this.pkgs.get(name)?.keys() ?? [])].sort();
++    return [...(this.pkgs.get(name)?.keys() ?? [])].sort(compare);
+   }
+ 
+   get(name: string, version: string): Manifest {
+diff --git a/src/resolver.ts b/src/resolver.ts
+index 622ca88..80a48df 100644
+--- a/src/resolver.ts
++++ b/src/resolver.ts
+@@ -14,7 +14,7 @@ export function resolve(root: Record<string, string>, registry: Registry): Resol
+   const nodes = new Map<string, Node>();
+ 
+   const pick = (name: string, range: string): string => {
+-    const id = name;
++    const id = `${name}@${range}`;
+     let version = cache.get(id);
+     if (version === undefined) {
+       version = registry.versions(name).filter((v) => satisfies(v, range)).pop();
+diff --git a/src/semver.ts b/src/semver.ts
+index 5db2ed3..74736d7 100644
+--- a/src/semver.ts
++++ b/src/semver.ts
+@@ -47,7 +47,7 @@ function expand(token: string): Comparator[] {
+   const { v, parts } = partial(m[2]);
+   switch (m[1]) {
+     case '^': {
+-      const level = v.major > 0 || parts < 3 ? 'major' : v.minor > 0 ? 'minor' : 'patch';
++      const level = v.major > 0 ? 'major' : v.minor > 0 ? 'minor' : v.patch > 0 ? 'patch' : parts === 1 ? 'major' : 'minor';
+       return [ge(v), lt(bump(v, level))];
+     }
+     case '~':

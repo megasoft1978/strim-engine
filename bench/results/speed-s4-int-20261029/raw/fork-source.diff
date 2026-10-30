@@ -1,0 +1,36 @@
+diff --git a/.gitmodules b/.gitmodules
+index 4b9b608..1b43c9b 100644
+--- a/.gitmodules
++++ b/.gitmodules
+@@ -1,6 +1,6 @@
+ [submodule "submodules/mlx"]
+ 	path = Source/Cmlx/mlx
+-	url = https://github.com/ml-explore/mlx
++	url = https://github.com/megasoft1978/mlx
+ [submodule "submodules/mlx-c"]
+ 	path = Source/Cmlx/mlx-c
+ 	url = https://github.com/ml-explore/mlx-c
+diff --git a/Source/Cmlx/mlx b/Source/Cmlx/mlx
+index 1f8e74e..575068a 160000
+--- a/Source/Cmlx/mlx
++++ b/Source/Cmlx/mlx
+@@ -1 +1 @@
+-Subproject commit 1f8e74e3f12f31365464a6867c6579f0e9b29d85
++Subproject commit 575068a4fa263b16ac08921751e8a5257f3e80b9
+diff --git a/mlx/backend/metal/quantized.cpp b/mlx/backend/metal/quantized.cpp
+index 1ae99a8e..bfaf1a7a 100644
+--- a/mlx/backend/metal/quantized.cpp
++++ b/mlx/backend/metal/quantized.cpp
+@@ -558,7 +558,11 @@ void qmv_wide(
+   // vecs_per_tg is the per-threadgroup input-vector tile. Each tile re-reads
+   // the weights, so use the fewest tiles, then the smallest tile that fills
+   // them.
+-  int n_tiles = (M + 4) / 5; // ceil(M / 5); tile size caps at 5
++  const int tile_cap =
++      d.get_architecture_gen() >= 17 && d.get_architecture().back() != 'd'
++      ? 8
++      : 5;
++  int n_tiles = (M + tile_cap - 1) / tile_cap;
+   int vecs_per_tg = (M + n_tiles - 1) / n_tiles;
+ 
+   // k_lanes: lanes reducing K per output row (32/k_lanes rows per simdgroup).

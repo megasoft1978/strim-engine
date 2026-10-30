@@ -1,0 +1,39 @@
+diff --git a/src/Pagination.jsx b/src/Pagination.jsx
+index a3aa6d9..8101d1a 100644
+--- a/src/Pagination.jsx
++++ b/src/Pagination.jsx
+@@ -4,7 +4,7 @@ export function Pagination({ current, total, siblings = 1 }) {
+   const items = pages(current, total, siblings);
+   return (
+     <nav aria-label="pagination">
+-      <button type="button" className="prev" disabled={current <= 1}>
++      <button type="button" className="prev" disabled={current <= 1 || total <= 0}>
+         Prev
+       </button>
+       <ul>
+@@ -18,7 +18,7 @@ export function Pagination({ current, total, siblings = 1 }) {
+           ),
+         )}
+       </ul>
+-      <button type="button" className="next" disabled={current > total}>
++      <button type="button" className="next" disabled={current >= total || total <= 0}>
+         Next
+       </button>
+     </nav>
+diff --git a/src/pages.js b/src/pages.js
+index 658c36d..3398ac2 100644
+--- a/src/pages.js
++++ b/src/pages.js
+@@ -12,5 +12,12 @@ export function pages(current, total, siblings = 1) {
+   for (let p = start; p <= end; p++) out.push(p);
+   if (end < total - 1) out.push('…');
+   if (total > 1) out.push(total);
++  // A gap of exactly one page is shown as that page instead of an ellipsis.
++  for (let i = 0; i < out.length; i++) {
++    if (out[i] === '…' && out[i + 1] !== undefined && out[i + 1] !== '…') {
++      out.splice(i, 2, out[i + 1]);
++      i--;
++    }
++  }
+   return out;
+ }

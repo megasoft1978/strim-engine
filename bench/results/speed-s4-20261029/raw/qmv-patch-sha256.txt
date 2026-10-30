@@ -1,0 +1,1 @@
+f81d58c998e6da6f8e731f9cc07764038c482d3fcfcd96ec790628061d6a58f2  bench/results/speed-s4-20261029/qmv-cap8.patch

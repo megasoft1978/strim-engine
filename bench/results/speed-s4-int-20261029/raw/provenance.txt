@@ -1,0 +1,13 @@
+d881bd905948fb3e5e46864dc47cf29a8b19fde4
+ 575068a4fa263b16ac08921751e8a5257f3e80b9 Source/Cmlx/mlx (remotes/origin/strim-0.32.3)
+ ebc88f10caa1b625e6b581437a8dea6df8a70085 Source/Cmlx/mlx-c (v0.6.0-9-gebc88f1)
+[submodule "submodules/mlx"]
+	path = Source/Cmlx/mlx
+	url = https://github.com/megasoft1978/mlx
+[submodule "submodules/mlx-c"]
+	path = Source/Cmlx/mlx-c
+	url = https://github.com/ml-explore/mlx-c
+patching file 'Source/Cmlx/mlx/mlx/backend/metal/quantized.cpp'
+df9aa1c1af84e68b244ad67faaa83f4ab97dabcd738611e8b522288619e4beab  Package.swift
+9c036f4b72db146eb139ff898994bb43ec1210a85473522e96c8b29d8bff8b9a  Package.resolved
+82b1f3c112dc10237c351be438fe251941c945cda9378cc9b3fb446b334f3f64  docs/SWIFT-PERF.md

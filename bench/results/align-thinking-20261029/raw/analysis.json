@@ -1,0 +1,64 @@
+{
+  "off-final": {
+    "passes": 16,
+    "valid": 21,
+    "interval": [
+      0.5490882631704985,
+      0.893719869773633
+    ],
+    "unverified": [
+      "hd-rx-02",
+      "hd2-rx-01",
+      "rx-01"
+    ],
+    "wall_mean": 85.15,
+    "wall_total": 2043.6000000000001,
+    "generated_tokens": 48278,
+    "engine_seconds": 1868.6820118427277,
+    "usage_missing": 0,
+    "observed_tool_errors": 21,
+    "observed_compactions": 1,
+    "parsed_event_lines": 2055,
+    "malformed_event_lines": 7,
+    "timeout_wall_rows": []
+  },
+  "on-final": {
+    "passes": 21,
+    "valid": 23,
+    "interval": [
+      0.7320401892425696,
+      0.9758199955157789
+    ],
+    "unverified": [
+      "hd-rx-02"
+    ],
+    "wall_mean": 271.39583333333337,
+    "wall_total": 6513.500000000001,
+    "generated_tokens": 174872,
+    "engine_seconds": 5984.052252531052,
+    "usage_missing": 0,
+    "observed_tool_errors": 2,
+    "observed_compactions": 4,
+    "parsed_event_lines": 1612,
+    "malformed_event_lines": 0,
+    "timeout_wall_rows": [
+      "hd-rx-02",
+      "hd2-js-01",
+      "tf-02"
+    ]
+  },
+  "pairs": {
+    "n": 21,
+    "both_pass": 16,
+    "only_off": 0,
+    "only_on": 3,
+    "both_fail": 2,
+    "excluded": [
+      "hd-rx-02",
+      "hd2-rx-01",
+      "rx-01"
+    ],
+    "off_mean": 82.5047619047619,
+    "on_mean": 242.2238095238096
+  }
+}

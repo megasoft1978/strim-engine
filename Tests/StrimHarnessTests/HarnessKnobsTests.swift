@@ -27,7 +27,9 @@ private func turn(_ steps: [FakeEngine.Step], prompt: Int = 100) -> [FakeEngine.
 private func read(_ p: String, prompt: Int = 100, think: String? = nil) -> [FakeEngine.Step] {
     turn((think.map { [FakeEngine.Step.event(.reasoning($0))] } ?? []) + call("read_file", [("path", .string(p))]), prompt: prompt)
 }
-private func finish(_ s: String) -> [FakeEngine.Step] { turn(call("finish", [("summary", .string(s))])) }
+private func finish(_ s: String, think: String? = nil) -> [FakeEngine.Step] {
+    turn((think.map { [FakeEngine.Step.event(.reasoning($0))] } ?? []) + call("finish", [("summary", .string(s))]))
+}
 private func prose(_ t: String) -> [FakeEngine.Step] { turn([.event(.tokens([1], t))]) }
 
 private let ws = Workspace(root: "/tmp/ws", base: "abc")
@@ -285,14 +287,13 @@ private func tempDir() -> URL {
         #expect(gens.map(\.session.raw) == [1, 2, 2])
         #expect(gens[0].params.maxTokens == HarnessKnobs.thinkingTurnTokens && gens[1].params.maxTokens == 4096)
         #expect(closed.contains(opened[0].0))
-        // The conversation moved over without any reasoning content.
+        // The conversation moved over with its planning reasoning.
         let h = histories(e)
         #expect(h.count == 1)
         let m = h[0]
         #expect(m.map(\.role) == [.system, .user, .assistant, .tool])
-        #expect(m.allSatisfy { $0.reasoningContent == nil })
+        #expect(m[2].reasoningContent == "SECRET-PLAN: touch a.txt first")
         #expect(m[2].toolCalls.map(\.name) == ["read_file"])
-        #expect(!String(describing: m).contains("SECRET-PLAN"))
         // Session 1 never received another append after its first one.
         let onFirst = e.snapshot { $0.appends.filter { $0.0 == opened[0].0 } }
         #expect(onFirst.count == 1)
@@ -303,6 +304,114 @@ private func tempDir() -> URL {
         e.script(read("a.txt", think: "x")); e.script(finish("ok"))
         _ = await loop(e, knobs: HarnessKnobs()).run(spec: jobSpec, workspace: ws, onEvent: { _ in })
         #expect(e.snapshot { $0.opened.count } == 1 && histories(e).isEmpty)
+    }
+
+    @Test func allTurnsThinkingRetainsReasoningAcrossToolResults() async throws {
+        let k = try json(#"{"thinking":"all_turns","reasoningEffort":"high"}"#)
+        #expect(k.thinking == .allTurns && k.reasoningEffort == "high")
+        #expect(throws: (any Error).self) { try json(#"{"reasoningEffort":"extreme"}"#) }
+        let e = FakeEngine()
+        e.script(read("a.txt", think: "plan one")); e.script(finish("ok", think: "plan two"))
+        let r = await loop(e, knobs: k).run(spec: jobSpec, workspace: ws, onEvent: { _ in })
+        #expect(r.status == .done)
+        let opened = e.snapshot { $0.opened }
+        #expect(opened.count == 1 && opened[0].1.enableThinking == true && opened[0].1.reasoningEffort == "high")
+        let msgs = e.snapshot { f in f.appends.flatMap { if case let .messages(m) = $0.1 { return m } else { return [] } } }
+        #expect(msgs.contains { $0.role == .tool })
+        // The engine session itself holds the assistant turn with its reasoning; the loop must never swap it off
+        // or replay it: one thinking session carries both generations, and only the tool result is appended.
+        #expect(histories(e).isEmpty)
+        #expect(e.snapshot { $0.generates.map(\.session.raw) } == [1, 1])
+        #expect(!msgs.contains { $0.role == .assistant })
+    }
+
+    @Test func compactionDropsEarlierReasoningAndNeverRendersAnEmptyAssistantTurn() async throws {
+        let e = FakeEngine()
+        let earlier = String(repeating: "A", count: 9_000) + " EARLIER-REASONING"
+        e.script(read("a", prompt: 15_000, think: earlier))
+        e.script(read("b", prompt: 15_000, think: "SECOND-REASONING"))
+        e.script(read("c")); e.script(finish("ok"))
+        let k = HarnessKnobs(compactionThreshold: 0.4, thinking: .firstPlanningTurn)
+        _ = await loop(e, knobs: k).run(spec: jobSpec, workspace: ws, onEvent: { _ in })
+        let rebuilds: [[Message]] = e.snapshot { f in
+            f.appends.compactMap { if case let .messages(m) = $0.1, m.count >= 2 { return m } else { return nil } }
+        }
+        #expect(rebuilds.count >= 2)
+        for m in rebuilds {
+            #expect(m.map(\.role) == [.system, .user])        // no reasoning-only assistant turn appended
+            #expect(m.allSatisfy { $0.reasoningContent == nil })
+            let prompt = try ChatTemplate.render(messages: m, tools: [])
+            #expect(!prompt.contains("EARLIER-REASONING") && !prompt.contains("SECOND-REASONING"))
+            #expect(prompt.components(separatedBy: "<|im_start|>assistant").count - 1 == 1)   // generation prompt only
+        }
+    }
+
+    @Test func defaultKnobsOpenTheReleasedSessionAndAppendNoReasoning() async {
+        let e = FakeEngine()
+        e.script(read("a.txt", think: "hidden")); e.script(finish("ok", think: "more"))
+        let r = await loop(e, knobs: HarnessKnobs()).run(spec: jobSpec, workspace: ws, onEvent: { _ in })
+        #expect(r.status == .done)
+        let opened = e.snapshot { $0.opened }
+        #expect(opened.count == 1)
+        let c = opened[0].1
+        #expect(c.reasoningPolicy == .disableWhenTools && c.enableThinking == nil && c.reasoningEffort == nil)
+        #expect(c.tools.map(\.name).contains("read_file"))
+        let msgs = e.snapshot { f in f.appends.flatMap { if case let .messages(m) = $0.1 { return m } else { return [] } } }
+        #expect(!msgs.isEmpty && msgs.allSatisfy { $0.reasoningContent == nil })
+        #expect(histories(e).isEmpty)
+    }
+
+    @Test func explicitChatThinkingSurvivesCompactionWithKnobsOff() async {
+        let e = FakeEngine()
+        e.script(read("a", prompt: 15_000, think: "chat-query-reasoning")); e.script(read("b")); e.script(finish("ok"))
+        let l = loop(e, knobs: HarnessKnobs(compactionThreshold: 0.4))
+        let c = l.openConversation(spec: jobSpec, workspace: ws)
+        c.thinking = true
+        _ = await l.runUserTurn(c, text: "user query", onEvent: { _ in })
+        let opened = e.snapshot { $0.opened }
+        #expect(opened.count >= 2 && opened.allSatisfy { $0.1.enableThinking == true })
+        let messages = e.snapshot { f in f.appends.flatMap { if case let .messages(m) = $0.1 { return m } else { return [] } } }
+        #expect(messages.allSatisfy { $0.reasoningContent == nil })
+        await l.closeConversation(c)
+    }
+
+    @Test func malformedCallAfterValidCallGetsRetryAfterToolResult() async {
+        let e = FakeEngine()
+        let syntax = "Malformed tool call: incomplete XML. Resend the complete <tool_call> block."
+        e.script(turn([.event(.reasoning("planning"))] + call("read_file", [("path", .string("a.txt"))])
+                      + [.event(.toolCallError(syntax))]))
+        e.script(finish("ok"))
+        _ = await loop(e, knobs: policy).run(spec: jobSpec, workspace: ws, onEvent: { _ in })
+        let h = histories(e)
+        #expect(h.count == 1)
+        #expect(h[0].map(\.role) == [.system, .user, .assistant, .tool, .user])
+        #expect(h[0][3].content == .text("ok") && h[0][4].content == .text(syntax))
+        #expect(h[0][2].reasoningContent == "planning")
+    }
+
+    @Test func malformedCallPreventsPrematureFinishAcceptance() async {
+        let e = FakeEngine()
+        let syntax = "Malformed tool call: incomplete XML. Resend the complete <tool_call> block."
+        e.script(turn(call("finish", [("summary", .string("premature"))]) + [.event(.toolCallError(syntax))]))
+        e.script(finish("corrected"))
+        let r = await loop(e, knobs: policy).run(spec: jobSpec, workspace: ws, onEvent: { _ in })
+        #expect(r.status == .done && r.summary == "corrected")
+        let h = histories(e)
+        #expect(h.count == 1 && h[0].map(\.role) == [.system, .user, .assistant, .tool, .user])
+        #expect(h[0][3].content == .text("finished") && h[0][4].content == .text(syntax))
+    }
+
+    @Test func malformedToolCallGetsSpecificRetryEvenAfterLengthCutoff() async {
+        let e = FakeEngine()
+        let error = "Malformed tool call: incomplete XML. Resend the complete <tool_call> block."
+        e.script([.event(.tokens([1], "I will read it")), .event(.toolCallError(error)),
+                  .event(.finished(.length, makeUsage(prompt: 100, completion: 10)))])
+        e.script(finish("ok"))
+        let result = await loop(e, knobs: policy).run(spec: jobSpec, workspace: ws, onEvent: { _ in })
+        #expect(result.status == .done)
+        let history = histories(e).first ?? []
+        #expect(history.contains { $0.role == .user && $0.content == .text(error) })
+        #expect(!history.contains { !$0.toolCalls.isEmpty })
     }
 
     @Test func aNudgeAfterAThinkingProseTurnIsNotAThinkingTurn() async {

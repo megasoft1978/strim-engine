@@ -1,0 +1,13 @@
+{"date":"2026-10-29T22:39:57Z","fuse":"0","kind":"meta","mode":"verify"}
+{"hash":"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0","kind":"verify","ms":36.299038250000002,"rep":-1,"steps":12,"width":3}
+{"hash":"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0","kind":"verify","ms":36.461069416666668,"rep":0,"steps":12,"width":3}
+{"hash":"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0","kind":"verify","ms":36.641555500000003,"rep":1,"steps":12,"width":3}
+{"hash":"258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0","kind":"verify","ms":36.529774333333336,"rep":2,"steps":12,"width":3}
+{"hash":"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057","kind":"verify","ms":44.172399250000005,"rep":-1,"steps":12,"width":5}
+{"hash":"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057","kind":"verify","ms":43.945152750000005,"rep":0,"steps":12,"width":5}
+{"hash":"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057","kind":"verify","ms":44.081486166666672,"rep":1,"steps":12,"width":5}
+{"hash":"756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057","kind":"verify","ms":43.84663891666667,"rep":2,"steps":12,"width":5}
+{"hash":"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723","kind":"verify","ms":61.284399333333333,"rep":-1,"steps":12,"width":8}
+{"hash":"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723","kind":"verify","ms":61.389045166666669,"rep":0,"steps":12,"width":8}
+{"hash":"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723","kind":"verify","ms":61.159194416666658,"rep":1,"steps":12,"width":8}
+{"hash":"60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723","kind":"verify","ms":61.323791666666665,"rep":2,"steps":12,"width":8}

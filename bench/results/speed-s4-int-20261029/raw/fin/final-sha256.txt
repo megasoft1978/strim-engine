@@ -1,0 +1,7 @@
+df9aa1c1af84e68b244ad67faaa83f4ab97dabcd738611e8b522288619e4beab  Package.swift
+9c036f4b72db146eb139ff898994bb43ec1210a85473522e96c8b29d8bff8b9a  Package.resolved
+5b2d98e8e0e3aad64e21d1b926fa76b766a208a4646422e64a8427e88e00d67c  docs/SWIFT-PERF.md
+ebcaf0e366dc3177b234c6be540cb549659273af74fe1b0c27dd6f0c6b1dd7d9  /tmp/s4/build-base-int/release/strim
+2744abfd465d15d7475ee4d32a12ea7364c60dccf8ee9b5e090d14b2d13a9c81  /tmp/s4/build-int/release/strim
+76b21255e77bd44cc3a4a6e31acbfddcd217500e6b8873bac0bdfbca04bad7a5  /tmp/s4/build-base-int/release/S4IntegrationBench
+7534049f7103f069d215e76b91642b025881ce05b6b468ec5f755ccc7d5afc95  /tmp/s4/build-int/release/S4IntegrationBench

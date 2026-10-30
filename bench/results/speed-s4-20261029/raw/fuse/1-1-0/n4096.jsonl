@@ -1,0 +1,5 @@
+{"date":"2026-10-29T22:25:28Z","fuse":"0","kind":"meta","mode":"prefill"}
+{"kind":"prefill","n":4096,"next":303,"rep":-1,"seconds":3.963135458,"tps":1033.5251074327523}
+{"kind":"prefill","n":4096,"next":303,"rep":0,"seconds":3.956143875,"tps":1035.351627599742}
+{"kind":"prefill","n":4096,"next":303,"rep":1,"seconds":3.9598901249999998,"tps":1034.3721342520837}
+{"kind":"prefill","n":4096,"next":303,"rep":2,"seconds":3.9588148749999998,"tps":1034.6530790985776}

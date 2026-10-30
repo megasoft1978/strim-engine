@@ -173,3 +173,18 @@ Reproduce the competitor's own numbers:
         --max-tokens 64 --temperature 0 --verbose \
         --draft-model models/qwen38-mtp-4bit --draft-kind mtp
 
+## MLX fork (2026-10-29)
+
+The dependency is pinned to `megasoft1978/mlx-swift` tag `0.32.3-strim.1`
+(`d881bd9`), based on upstream 0.32.3. Its MLX submodule pins
+`575068a4fa263b16ac08921751e8a5257f3e80b9`, which raises the `qmv_wide`
+tile cap from 5 to 8 on architecture generation >=17 with size != 'd'.
+Other device paths, dispatch thresholds and Metal arithmetic are unchanged.
+The S4 experiment measured +10.30% aggregate decode throughput at c=8 on
+M5 Max with identical greedy outputs; c=1 was within measured noise.
+See `bench/results/speed-s4-20261029/` for the patch and measurement scope,
+and `bench/results/speed-s4-int-20261029/` for integration validation.
+Other devices covered by the predicate remain unmeasured. Rollback: restore
+`.package(url: "https://github.com/ml-explore/mlx-swift", exact: "0.32.3")`
+and regenerate `Package.resolved` with `swift package resolve`.
+

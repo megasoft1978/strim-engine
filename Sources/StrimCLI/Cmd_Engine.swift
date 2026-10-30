@@ -93,7 +93,7 @@ private func collect(_ c: LocalEngineClient, _ s: SessionID, _ p: GenParams, t0:
         case let .reasoning(t):
             if r.tFirst.isNaN { r.tFirst = Date().timeIntervalSince(t0) }
             r.reasoning += t
-        case .toolCallBegin, .toolCallArg, .toolCallEnd: break
+        case .toolCallBegin, .toolCallArg, .toolCallEnd, .toolCallError: break
         case let .finished(reason, u): r.reason = reason; r.usage = u
         }
     }
@@ -671,6 +671,7 @@ func runEngineChat(_ args: [String]) {
                     case let .toolCallBegin(name): out("\n[tool_call \(name)]")
                     case let .toolCallArg(k, v): out(" \(k)=\(v.serialized())")
                     case .toolCallEnd: out("\n")
+                    case let .toolCallError(message): out("\n\(message)\n")
                     case let .finished(reason, u):
                         if inReasoning { out(tty ? "\u{1B}[0m" : "</think>"); inReasoning = false }
                         out("\n")

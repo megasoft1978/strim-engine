@@ -1,0 +1,270 @@
+{
+  "qualitybatch": {
+    "cells": 5,
+    "compared_values": 51650560,
+    "different_float_bits": 0,
+    "max_abs_diff": 0,
+    "tokens": 1664,
+    "argmax_agreement": 1664,
+    "rows": [
+      {
+        "compared_values": 1986560,
+        "different_float_bits": 0,
+        "has_reference": true,
+        "hashes": [
+          "d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"
+        ],
+        "kind": "qualitybatch",
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 15516624577,
+        "size": 1,
+        "teacher_forced_agreement": 64,
+        "tokens": 64
+      },
+      {
+        "compared_values": 7946240,
+        "different_float_bits": 0,
+        "has_reference": true,
+        "hashes": [
+          "ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf",
+          "8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566",
+          "97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97",
+          "2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af"
+        ],
+        "kind": "qualitybatch",
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 16829356980,
+        "size": 4,
+        "teacher_forced_agreement": 256,
+        "tokens": 256
+      },
+      {
+        "compared_values": 11919360,
+        "different_float_bits": 0,
+        "has_reference": true,
+        "hashes": [
+          "ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf",
+          "8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566",
+          "97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97",
+          "2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af",
+          "c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33",
+          "89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb"
+        ],
+        "kind": "qualitybatch",
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 17674289208,
+        "size": 6,
+        "teacher_forced_agreement": 384,
+        "tokens": 384
+      },
+      {
+        "compared_values": 13905920,
+        "different_float_bits": 0,
+        "has_reference": true,
+        "hashes": [
+          "ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf",
+          "8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566",
+          "97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97",
+          "2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af",
+          "c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33",
+          "89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb",
+          "2df310c5a8c01e46a25cc0fe83fd138efe307ee71b793a9fe00685ad33d84889"
+        ],
+        "kind": "qualitybatch",
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 18105219412,
+        "size": 7,
+        "teacher_forced_agreement": 448,
+        "tokens": 448
+      },
+      {
+        "compared_values": 15892480,
+        "different_float_bits": 0,
+        "has_reference": true,
+        "hashes": [
+          "ee3f27743c52fd290eb1fc71d3a85759ac09c7ba775840a4e30e44497f211ecf",
+          "8d8dd81510adfaf1dc90d344fd752dd73cbcec85beab35c725edbfae4b0f5566",
+          "97b45ac3b22240d4a76c4dfca5fa261be3e6335bb3a9632d21ff0f9bae622d97",
+          "2ac36de8dba1c4369eebd9d917900b5fc44d8bbf0eab3ed5ccbdb6bb89a030af",
+          "c1a8180202eaf01680bd609cd249894d27cb26477102d992586b69a0f7c8cc33",
+          "89f0f5a1eb452ec4961013f694495feebd1fe9c86f0fdc359871c7aab7b334bb",
+          "2df310c5a8c01e46a25cc0fe83fd138efe307ee71b793a9fe00685ad33d84889",
+          "12df7ccb9619af10adf7a6422cd58b4eb772dcae0f2f17c1d4724ea327b7f998"
+        ],
+        "kind": "qualitybatch",
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 18538480764,
+        "size": 8,
+        "teacher_forced_agreement": 512,
+        "tokens": 512
+      }
+    ]
+  },
+  "qualityverify": {
+    "cells": 3,
+    "compared_values": 3973120,
+    "different_float_bits": 0,
+    "max_abs_diff": 0,
+    "tokens": 16,
+    "argmax_agreement": 16,
+    "rows": [
+      {
+        "compared_values": 744960,
+        "different_float_bits": 0,
+        "has_reference": true,
+        "hashes": [
+          "258ff0a2287ba936986d823465365295e93d6f5dd70b81a1da5cc4aaaa8c02b0"
+        ],
+        "kind": "qualityverify",
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 15820347856,
+        "size": 3,
+        "teacher_forced_agreement": 3,
+        "tokens": 3
+      },
+      {
+        "compared_values": 1241600,
+        "different_float_bits": 0,
+        "has_reference": true,
+        "hashes": [
+          "756f49203806647772fd6cfe65bc40c0a7b194dd5d98cb55bbb7a978aafaf057"
+        ],
+        "kind": "qualityverify",
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 16131077495,
+        "size": 5,
+        "teacher_forced_agreement": 5,
+        "tokens": 5
+      },
+      {
+        "compared_values": 1986560,
+        "different_float_bits": 0,
+        "has_reference": true,
+        "hashes": [
+          "60bef18bec45160537915c79c88d5459c68526f2a14290f60010b049af435723"
+        ],
+        "kind": "qualityverify",
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 16601796743,
+        "size": 8,
+        "teacher_forced_agreement": 8,
+        "tokens": 8
+      }
+    ]
+  },
+  "quality": {
+    "cells": 8,
+    "compared_values": 15892480,
+    "different_float_bits": 0,
+    "max_abs_diff": 0,
+    "tokens": 512,
+    "argmax_agreement": 512,
+    "all_free_greedy_identical": true,
+    "rows": [
+      {
+        "different_float_bits": 0,
+        "free_greedy_identical": true,
+        "hash": "a71f1eedd9e65bef14d39ab06aeb93014be06625bef877f2f3846d90cfcef35a",
+        "kind": "quality",
+        "logit_rows": 8,
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 15972433440,
+        "prompt": "code",
+        "prompt_tokens": 105,
+        "steps": 64,
+        "teacher_forced_agreement": 64
+      },
+      {
+        "different_float_bits": 0,
+        "free_greedy_identical": true,
+        "hash": "4f352ded147f6f605340d5012b0b6a18953dfd38f1359cd0f5bca7bf3705f908",
+        "kind": "quality",
+        "logit_rows": 8,
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 15972433440,
+        "prompt": "csvpy",
+        "prompt_tokens": 38,
+        "steps": 64,
+        "teacher_forced_agreement": 64
+      },
+      {
+        "different_float_bits": 0,
+        "free_greedy_identical": true,
+        "hash": "3a1ffc7cf746affae830b8c56c1d0bdb0ab827b72b5bbe6da1dba2f16c1fc1e5",
+        "kind": "quality",
+        "logit_rows": 8,
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 15972433440,
+        "prompt": "json",
+        "prompt_tokens": 42,
+        "steps": 64,
+        "teacher_forced_agreement": 64
+      },
+      {
+        "different_float_bits": 0,
+        "free_greedy_identical": true,
+        "hash": "57e5300869cbd2d2564a45af209ad0b968266ffc15e567ae4098a1ebd0607b8c",
+        "kind": "quality",
+        "logit_rows": 8,
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 15972433440,
+        "prompt": "math",
+        "prompt_tokens": 53,
+        "steps": 64,
+        "teacher_forced_agreement": 64
+      },
+      {
+        "different_float_bits": 0,
+        "free_greedy_identical": true,
+        "hash": "88723c318c21085d261abd1daaceb7b3ab021bdf12a53be60f26d475b4d33f72",
+        "kind": "quality",
+        "logit_rows": 8,
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 15972433440,
+        "prompt": "natural",
+        "prompt_tokens": 71,
+        "steps": 64,
+        "teacher_forced_agreement": 64
+      },
+      {
+        "different_float_bits": 0,
+        "free_greedy_identical": true,
+        "hash": "38cbe4cff216793056dedee44e50d7a1d1fba23008f1484d27fae6d590a264b8",
+        "kind": "quality",
+        "logit_rows": 8,
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 15972433440,
+        "prompt": "prose",
+        "prompt_tokens": 63,
+        "steps": 64,
+        "teacher_forced_agreement": 64
+      },
+      {
+        "different_float_bits": 0,
+        "free_greedy_identical": true,
+        "hash": "cf67947c9de7fef8bffecdf958372994791a8be06fd93e404e7c4e90e252060a",
+        "kind": "quality",
+        "logit_rows": 8,
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 15972433440,
+        "prompt": "rust",
+        "prompt_tokens": 41,
+        "steps": 64,
+        "teacher_forced_agreement": 64
+      },
+      {
+        "different_float_bits": 0,
+        "free_greedy_identical": true,
+        "hash": "10655562f84fa70a050d405a7a98fc31e8fb4d82e3943addd20e5956f9ea976c",
+        "kind": "quality",
+        "logit_rows": 8,
+        "max_abs_diff": 0,
+        "mlx_peak_bytes": 15972433440,
+        "prompt": "sql",
+        "prompt_tokens": 45,
+        "steps": 64,
+        "teacher_forced_agreement": 64
+      }
+    ]
+  }
+}

@@ -69,6 +69,18 @@ private let readCall = "<tool_call>\n<function=read_file>\n<parameter=path>\nsrc
     #expect(ev == call("read_file", [("path", .string(v))]))
 }
 
+private let incompleteError = ParserEvent.toolCallError("Malformed tool call: incomplete XML. Resend the complete <tool_call> block.")
+private let readArgs: [(String, OrderedJSON)] = [("path", .string("src/main.ts")), ("limit", .int(20))]
+
+private func splits(_ text: String, _ check: (_ events: [ParserEvent], _ count: Int) -> Void) {
+    for split in 0...text.count {
+        var p = ToolCallParser(tools: tools)
+        let i = text.index(text.startIndex, offsetBy: split)
+        let ev = (p.feed(String(text[..<i])) + p.feed(String(text[i...])) + p.finish()).coalesced()
+        check(ev, p.toolCallCount)
+    }
+}
+
 @Test func unparseableBlockPassesThroughAsText() {
     #expect(parse("x <tool_call>garbage</tool_call> y") == [.text("x <tool_call>garbage</tool_call> y")])
     #expect(parse("<tool_call>{\"name\": \"read_file\", \"arguments\": {}}</tool_call>") == [.text("<tool_call>{\"name\": \"read_file\", \"arguments\": {}}</tool_call>")])
@@ -79,9 +91,55 @@ private let readCall = "<tool_call>\n<function=read_file>\n<parameter=path>\nsrc
     #expect(parse("a\n\n" + readCall, tools: []) == [.text("a\n\n" + readCall)])
 }
 
-@Test func truncatedCallIsClosedAndPartialParamDropped() {
-    let ev = parse("<tool_call>\n<function=read_file>\n<parameter=path>\nsrc/a.ts\n</parameter>\n<parameter=limit>\n2")
-    #expect(ev == call("read_file", [("path", .string("src/a.ts"))]))
+@Test func proseMentioningToolCallThenRealCallExecutesAtEverySplit() {
+    let text = "use <tool_call> tags. " + readCall
+    splits(text) { ev, count in
+        #expect(ev == [.text("use <tool_call> tags.")] + call("read_file", readArgs))
+        #expect(count == 1)
+    }
+}
+
+@Test func proseMentioningToolCallWithoutCloserIsTextOnly() {
+    for prose in ["the <tool_call> tag is used for calls", "see <tool_call>\nnot a call", "ends with <tool_call>"] {
+        splits(prose) { ev, count in
+            #expect(ev == [.text(prose)])
+            #expect(count == 0)
+        }
+    }
+}
+
+@Test func truncatedInsideParameterNeverExecutes() {
+    let truncated = "<tool_call>\n<function=read_file>\n<parameter=path>\nsrc/a.ts\n</parameter>\n<parameter=limit>\n2"
+    splits(truncated) { ev, count in
+        #expect(!ev.contains(.toolCallEnd))
+        #expect(ev.last == incompleteError)
+        #expect(count == 0)
+    }
+    // truncated inside the function header
+    splits("a <tool_call>\n<function=read_fi") { ev, count in
+        #expect(ev == [.text("a"), incompleteError])
+        #expect(count == 0)
+    }
+}
+
+@Test func argEventsStreamPerParameterBeforeEnvelopeCloses() {
+    var p = ToolCallParser(tools: tools)
+    #expect(p.feed("<tool_call>\n<function=read_file>\n") == [.toolCallBegin(name: "read_file")])
+    #expect(p.feed("<parameter=path>\nsrc/main.ts\n</parameter>\n").isEmpty)  // closer needs lookahead
+    #expect(p.feed("<parameter=limit>\n") == [.toolCallArg(key: "path", value: .string("src/main.ts"))])
+    #expect(p.feed("20\n</parameter>\n</function>") == [.toolCallArg(key: "limit", value: .int(20)), .toolCallEnd])
+    #expect(p.toolCallCount == 1)
+    #expect(p.feed("\n</tool_call>").isEmpty)
+    #expect(p.finish().isEmpty)
+}
+
+@Test func missingEnvelopeCloseStillExecutes() {
+    let noClose = "<tool_call>\n<function=read_file>\n<parameter=path>\na\n</parameter>\n</function>"
+    splits(noClose) { ev, count in
+        #expect(ev == call("read_file", [("path", .string("a"))]))
+        #expect(count == 1)
+    }
+    #expect(parse(noClose + " trailing") == call("read_file", [("path", .string("a"))]) + [.text("trailing")])
 }
 
 @Test func toleratesMissingFunctionClose() {

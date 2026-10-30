@@ -1,0 +1,49 @@
+diff --git a/src/discount.ts b/src/discount.ts
+index c8fa171..d420997 100644
+--- a/src/discount.ts
++++ b/src/discount.ts
+@@ -4,6 +4,6 @@ import type { Cents, Discount } from "./types.ts";
+ /** The amount taken off `subtotal`; never more than the subtotal itself. */
+ export function discountAmount(subtotal: Cents, d: Discount | undefined): Cents {
+   if (!d) return 0;
+-  const raw = d.kind === "percent" ? mulBps(subtotal, d.value * 100) : d.value;
++  const raw = d.kind === "percent" ? mulBps(subtotal, d.value) : d.value;
+   return Math.min(raw, subtotal);
+ }
+diff --git a/src/group.ts b/src/group.ts
+index 298262e..b2245e8 100644
+--- a/src/group.ts
++++ b/src/group.ts
+@@ -3,7 +3,7 @@ import type { Group, Line } from "./types.ts";
+ 
+ /** Groups sorted by name; within a group, lines keep their input order. */
+ export function groupLines(lines: Line[]): Group[] {
+-  const sorted = [...lines].sort((a, b) => (a.group > b.group ? 1 : -1));
++  const sorted = [...lines].sort((a, b) => (a.group < b.group ? -1 : a.group > b.group ? 1 : 0));
+   const out: Group[] = [];
+   for (const l of sorted) {
+     let g = out[out.length - 1];
+diff --git a/src/money.ts b/src/money.ts
+index 695fa7f..36a519e 100644
+--- a/src/money.ts
++++ b/src/money.ts
+@@ -2,7 +2,7 @@ import type { Bps, Cents } from "./types.ts";
+ 
+ /** cents * bps / 10000, rounded half up to a whole cent. */
+ export function mulBps(cents: Cents, bps: Bps): Cents {
+-  return Math.floor((cents * bps) / 10000);
++  return Math.round((cents * bps) / 10000);
+ }
+ 
+ export function lineTotal(unit: Cents, qty: number): Cents {
+diff --git a/src/shipping.ts b/src/shipping.ts
+index f59b683..604103a 100644
+--- a/src/shipping.ts
++++ b/src/shipping.ts
+@@ -6,5 +6,5 @@ export const FREE_SHIPPING_AT: Cents = 5000;
+ /** Orders whose discounted subtotal reaches the threshold ship free; empty orders ship free too. */
+ export function shippingFor(netSubtotal: Cents, itemCount: number): Cents {
+   if (itemCount === 0) return 0;
+-  return netSubtotal > FREE_SHIPPING_AT ? 0 : FLAT_SHIPPING;
++  return netSubtotal >= FREE_SHIPPING_AT ? 0 : FLAT_SHIPPING;
+ }

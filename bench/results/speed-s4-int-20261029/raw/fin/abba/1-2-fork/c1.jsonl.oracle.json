@@ -1,0 +1,46 @@
+[
+  {
+    "c": 1,
+    "hash": null,
+    "hashes": [
+      "d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"
+    ],
+    "kind": "decode",
+    "rep": -1,
+    "steps": 64,
+    "width": null
+  },
+  {
+    "c": 1,
+    "hash": null,
+    "hashes": [
+      "d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"
+    ],
+    "kind": "decode",
+    "rep": 0,
+    "steps": 64,
+    "width": null
+  },
+  {
+    "c": 1,
+    "hash": null,
+    "hashes": [
+      "d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"
+    ],
+    "kind": "decode",
+    "rep": 1,
+    "steps": 64,
+    "width": null
+  },
+  {
+    "c": 1,
+    "hash": null,
+    "hashes": [
+      "d142d2af29c7af32a3b3793e61198112856356aa11678d367bba5e7c11331136"
+    ],
+    "kind": "decode",
+    "rep": 2,
+    "steps": 64,
+    "width": null
+  }
+]

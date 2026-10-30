@@ -1,0 +1,18 @@
+{
+  "slice": "20261029-5-s4",
+  "repo_revision": "a112d0d16895d5612a3f86811ca9a368ca96ddaf",
+  "mlx_swift_version": "0.32.3",
+  "mlx_swift_revision": "19601207e9a0de51e03ee6ec0c3c5f3784275075",
+  "mlx_submodule_revision": "1f8e74e3f12f31365464a6867c6579f0e9b29d85",
+  "machine": "Apple M5 Max",
+  "build": "swift build -c release --disable-sandbox --package-path /tmp/s4/src --scratch-path /tmp/s4/build --product strim",
+  "binary_base_sha256": "00c8acf4efb8ff68d3345f1e8c7583042ed3c3324f547da5bc777c3e13c9e8c0",
+  "binary_cap8_sha256": "09abc759a944a6ab9e9fff219e373c6e562a643be2a229762b232ef06dc23daa",
+  "lock": "/tmp/strim-bench.lock",
+  "protocol": "Two ABBA cycles per part, three measured repetitions per block plus one excluded warmup; in-process synchronous GPU evaluation; fixed 1024 prefill chunks",
+  "decode_steps": 64,
+  "verify_steps_per_rep": 12,
+  "quality_steps_per_prompt": 64,
+  "quality_logit_rows_per_prompt": 8,
+  "servers_started": 0
+}

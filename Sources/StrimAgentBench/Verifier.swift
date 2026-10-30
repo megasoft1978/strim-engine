@@ -20,6 +20,30 @@ public enum Verifier {
     public static func sandboxProfile(work: URL, scratch: URL, home: String, extraReadable: [String] = []) -> String {
         SandboxProfile(access: .write, writableRoots: [work.path, scratch.path], jobTmp: scratch.path + "/tmp",
                        home: home, extraReadable: (toolchainReadable(home: home) + extraReadable).filter { !ReadableRoots.isForbidden($0, home: home) }).profile
+            + listingRules(work: work.path, home: home)
+    }
+
+    /// `bun test` lists the directories above its working dir. In a benchmark run those sit inside the denied temp area
+    /// (`$TMPDIR/strim-agentbench-<pid>/runs/`), so the read denial makes bun fail with `PermissionDenied`. Grant a directory
+    /// listing only (`file-read-data` on the literal path, no file reads) for each ancestor of `work` strictly inside a temp root.
+    /// The temp root itself, the home and anything under the home are never listed.
+    static func listingRules(work: String, home: String) -> String {
+        let tempRoots = ["/tmp", "/var/tmp", NSTemporaryDirectory()].map { p in p.count > 1 && p.hasSuffix("/") ? String(p.dropLast()) : p }
+            .flatMap(ClaudeSandbox.variants)
+        let homes = ClaudeSandbox.variants(home)
+        var dirs = Set<String>()
+        for start in ClaudeSandbox.variants(work) {
+            var cur = (start as NSString).deletingLastPathComponent
+            while cur != "/" && !cur.isEmpty {
+                for a in ClaudeSandbox.variants(cur) where tempRoots.contains(where: { a.hasPrefix($0 + "/") }) &&
+                    !homes.contains(where: { a == $0 || a.hasPrefix($0 + "/") }) && !ReadableRoots.isForbidden(a, home: home) {
+                    dirs.insert(a)
+                }
+                cur = (cur as NSString).deletingLastPathComponent
+            }
+        }
+        guard !dirs.isEmpty else { return "" }
+        return "(allow file-read-data\n  " + dirs.sorted().map { "(literal \(ClaudeSandbox.quote($0)))" }.joined(separator: "\n  ") + ")\n"
     }
 
     /// Toolchain dirs under the home that verify commands may need to read (never writable).
