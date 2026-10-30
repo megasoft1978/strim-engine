@@ -64,6 +64,11 @@ public struct BashTool: HarnessTool {
     }
 
     public func run(_ args: [String: OrderedJSON], context: ToolContext) async throws -> ToolResult {
+        try await run(args, context: context, structuredTest: false)
+    }
+
+    /// The original command is checked before adding execution options; sandbox and grammar are unchanged.
+    func run(_ args: [String: OrderedJSON], context: ToolContext, structuredTest: Bool) async throws -> ToolResult {
         guard let raw = args["command"]?.stringValue, !raw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return ToolResult(output: "error: 'command' must be a non-empty string", isError: true)
         }
@@ -74,7 +79,7 @@ public struct BashTool: HarnessTool {
         let timeout = Self.timeout(from: args["timeout_s"])
         let out: CommandOutput
         do {
-            out = try await runner.run(command, cwd: context.root, env: [:], timeout: timeout, outputCap: Self.outputCap)
+            out = try await runner.run(structuredTest ? "set -o pipefail\n" + command : command, cwd: context.root, env: [:], timeout: timeout, outputCap: Self.outputCap)
         } catch is CancellationError {
             throw CancellationError()
         } catch {

@@ -1,0 +1,21 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 30,
+  "id" : "h3-rs-02",
+  "language" : "rust",
+  "license" : "MIT",
+  "prompt" : "Implement LIMIT\/OFFSET-style row windows for the in-memory query engine. A window applies after its input plan, skips offset rows, then returns up to limit rows (or all remaining rows when no limit is supplied). Ordering must remain stable for equal keys. Optimized and unoptimized execution must produce the same rows, including for joins that discard or multiply input rows and for nested windows. Run `cargo test --offline --quiet` using the local Rust toolchain. Do not edit, delete, or skip protected tests.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-rust-tablecraft",
+  "snapshot" : "snapshot",
+  "snapshot_bytes" : 224,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/query.rs" : "ad9d4cf64127e4cd4cadd313eb34a2100e113d70d0cae8eb8c7eedd53ebc7c59"
+  },
+  "tree_sha256" : "ee5878a72ea7c63cfdd334f9262a6c1c60ec57fed70a4039b8a47d580152c43f",
+  "verify_cmd" : "cargo test --offline --quiet"
+}

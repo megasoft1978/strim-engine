@@ -1,0 +1,23 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 30,
+  "id" : "h3-py-02",
+  "language" : "python",
+  "license" : "MIT",
+  "prompt" : "Extend the three-way section merger to flag move-edit conflicts. Section identity is its stable key; title or body changes count as edits. For each branch, find moved keys by taking a longest common subsequence of the base and branch key orders after removing keys absent from either. Build suffix LCS lengths; while walking them, retain equal keys, otherwise skip the base key when the two choices tie (and take the longer choice otherwise). Shared keys outside that subsequence are moved. Insertions and deletions alone therefore do not move surviving sections. If an existing section is present on both branches and one branch moved it while the other edited it, report a single conflict with reason 'move-edit' and preserve the left version in the preview. A pre-existing content conflict takes precedence and must not be duplicated. Keep existing merge behavior otherwise. Run `python3 -I -B -m unittest discover -s tests -t .` from the repository root. Do not edit, delete, or skip the protected tests. Use only the standard library.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-section-review",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 5860,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/__init__.py" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests\/test_document.py" : "67124c5bcaba0a260463b8014f8c21f700fcfb7316f27d9788452d40a90299cc",
+    "tests\/test_merge.py" : "e2cb5edc3b21c15061eeb86d831672949b7928a94667671780eb14e9964bfca6"
+  },
+  "tree_sha256" : "d6cf24f8b462cd97ad6613526268e9a37eb6cfa1f3273c373b25381adb6532b7",
+  "verify_cmd" : "python3 -I -B -m unittest discover -s tests -t ."
+}

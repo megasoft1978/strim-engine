@@ -1,0 +1,68 @@
+--- a/graph.go
++++ b/graph.go
+@@ -35,5 +35,19 @@
+ 
+ // held reports whether an explicit hold applies to a job.
+ func (g *graph) held(id string, holds map[string]bool) bool {
++	seen := map[string]bool{}
++	queue := []string{id}
++	for len(queue) > 0 {
++		current := queue[0]
++		queue = queue[1:]
++		if seen[current] {
++			continue
++		}
++		seen[current] = true
++		if holds[current] {
++			return true
++		}
++		queue = append(queue, g.parents[current]...)
++	}
+ 	return false
+ }
+--- a/pause.go
++++ b/pause.go
+@@ -5,11 +5,23 @@
+ // Explicit holds are independent: resuming one job does not remove another
+ // hold. Unknown IDs return ErrUnknownJob.
+ func (s *Scheduler) Pause(id string) error {
++	s.mu.Lock()
++	defer s.mu.Unlock()
++	if _, ok := s.jobs[id]; !ok {
++		return ErrUnknownJob
++	}
++	s.holds[id] = true
+ 	return nil
+ }
+ 
+ // Resume removes only the explicit hold on id. Overdue work becomes eligible
+ // immediately, subject to any remaining holds and dependency readiness.
+ func (s *Scheduler) Resume(id string) error {
++	s.mu.Lock()
++	defer s.mu.Unlock()
++	if _, ok := s.jobs[id]; !ok {
++		return ErrUnknownJob
++	}
++	delete(s.holds, id)
+ 	return nil
+ }
+--- a/scheduler.go
++++ b/scheduler.go
+@@ -70,7 +70,7 @@
+ 	runs := []Run{}
+ 	for _, id := range ids {
+ 		st := s.jobs[id]
+-		if st.running || now.Before(st.next) || !s.ready(st) {
++		if st.running || now.Before(st.next) || s.graph.held(id, s.holds) || !s.ready(st) {
+ 			continue
+ 		}
+ 		st.running = true
+--- a/status.go
++++ b/status.go
+@@ -22,5 +22,5 @@
+ 		return Status{}, ErrUnknownJob
+ 	}
+ 	return Status{ID: id, Next: st.next, Running: st.running, Attempt: st.attempt,
+-		Successes: st.successes, Failures: st.failures, LastSuccess: st.lastSuccess}, nil
++		Successes: st.successes, Failures: st.failures, LastSuccess: st.lastSuccess, Paused: s.graph.held(id, s.holds)}, nil
+ }

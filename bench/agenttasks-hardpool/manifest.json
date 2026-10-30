@@ -1,0 +1,344 @@
+{
+  "balance": {
+    "go": {
+      "feature-impl": 1,
+      "test-fix": 2
+    },
+    "java": {
+      "feature-impl": 1,
+      "test-fix": 1
+    },
+    "javascript": {
+      "feature-impl": 3,
+      "test-fix": 3
+    },
+    "python": {
+      "feature-impl": 1,
+      "test-fix": 1
+    },
+    "react": {
+      "feature-impl": 3,
+      "test-fix": 6
+    },
+    "ruby": {
+      "test-fix": 1
+    },
+    "rust": {
+      "feature-impl": 1,
+      "test-fix": 1
+    },
+    "swift": {
+      "test-fix": 1
+    },
+    "typescript": {
+      "feature-impl": 2,
+      "test-fix": 4
+    }
+  },
+  "counts": {
+    "feature-impl": 12,
+    "test-fix": 20
+  },
+  "languages": {
+    "go": 3,
+    "java": 2,
+    "javascript": 6,
+    "python": 2,
+    "react": 9,
+    "ruby": 1,
+    "rust": 2,
+    "swift": 1,
+    "typescript": 6
+  },
+  "tasks": [
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "h3-go-01",
+      "language": "go",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "ea3cbb7a4203b1f4cb89119201dc7e2594fbb9a3344e8c776a5e75500bc6b388"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "h3-go-02",
+      "language": "go",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "5d5bbab146b1fe01373d3ccfa139bf6ea9e0207d72240d9b02da50e9073840cf"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "h3-go-03",
+      "language": "go",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "3b217e30e919ef7e66818ddfeb207a198eee9b6fa5866a3910f8cbe22985b064"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "h3-js-01",
+      "language": "javascript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "0b05374b257aedd080920de43832af9e344413bd1aae925239809360e510665a"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "h3-js-02",
+      "language": "javascript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "a7970b324a29aff1b9350c0ff17b34726018ea750bff8e8a684b60d2b804d97d"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "h3-jv-01",
+      "language": "java",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "030251373c2de66bc9139f3373394efbb93e1e2bf59051ddaf9116c0d60d7901"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "h3-jv-02",
+      "language": "java",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "9bd512e90d341dbf6ab73522c256da2838d2e9e8ad60df3dd0adf04412a89a06"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "h3-py-01",
+      "language": "python",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "bf368e036513dab532ae577d9370971a438d5e39cdfd039d01768a7279cc0eb7"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "h3-py-02",
+      "language": "python",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "d6cf24f8b462cd97ad6613526268e9a37eb6cfa1f3273c373b25381adb6532b7"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "h3-rb-01",
+      "language": "ruby",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "4ff1f4a2adf3628a01ea417b4e3bde0d8acadd4301c2eb235d3e10a5b6698016"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "h3-rs-01",
+      "language": "rust",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "e5c95b15289a9616553e2e1b0f5de1630528953664f481b46b7aa97cf9776ec0"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "h3-rs-02",
+      "language": "rust",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "ee5878a72ea7c63cfdd334f9262a6c1c60ec57fed70a4039b8a47d580152c43f"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "h3-rx-01",
+      "language": "react",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "7cefd43b404f7302f1b3b74e7c6972e14b20551b1702eeb77aa83ed17d82d08f"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "h3-sw-01",
+      "language": "swift",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "01a8e27047bb73db7fa28d8c8aee979ad0eeeaf2fc7e7a5904b194089de87592"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "h3-ts-01",
+      "language": "typescript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "88b0e9ddc5f0f7d5b6d1458a05c89df300e16cacd712fb2eec95b7c7551f970f"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "h3-ts-02",
+      "language": "typescript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "adb21da9f9ec6311c18dc557b67bea524536dd19bc6e302906138c619bfec8e4"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "hd-js-01",
+      "language": "javascript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "7a5074efdb1b3c5d23aeee4a568e452892a09ea5ad00b62e811d42b909c2aba1"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "hd-js-02",
+      "language": "javascript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "e23ac71ba372a2f5941a0cf7df77fb5146e738ac577ea0657b8aa6a7472833b6"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "hd-js-03",
+      "language": "javascript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "54988a08f8f18a4b2e6cf7b70651c85e9df58d3c070c2a7c64efc8a9aee85c4b"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "hd-rx-01",
+      "language": "react",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "ec31485d01a056af5c2848d155098bad5d5e04c6ceb07154bb195fb865478314"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "hd-rx-02",
+      "language": "react",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "e8a4a1369a87d7ef15a68264be77b013c5ca7282133b0fa851792fd40b0749e1"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "hd-rx-03",
+      "language": "react",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "e64eb8fa43e457fbb22fa9a6251fa303e98d6885ee086a368131b7c9f61affb8"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "hd-ts-01",
+      "language": "typescript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "adffc98c9f3c3745bf2c782cfd776ec9290c699af973a791e2e7f52e35c6b8b6"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "hd-ts-02",
+      "language": "typescript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "b8bd49e421551b313a1928061c97ed3cdb423d42347add2598711899381b90bb"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "hd-ts-03",
+      "language": "typescript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "9dd00208ebee268364e953341b81587b788dd33e46502dcecb4296f6b7bd8106"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "hd2-fs-01",
+      "language": "react",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "d4a555f204e0bdd7b7957eea561e51121dc369accbf40c8726b4190c06c7bf09"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "hd2-fs-02",
+      "language": "react",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "7cb7082daab61e35acf5d1e6349d5fbfc0a003e5342eed68e7b4e23595b6bac2"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "hd2-js-01",
+      "language": "javascript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "56d08accefd443090b753ebd803d0b0c15ef2ac10d287bd74b0488b7ac95fa58"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "hd2-rx-01",
+      "language": "react",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "7b82b27771dcb7ccadd5cc6b1255c1a429d54e05038a90b9914bbd3bfad78122"
+    },
+    {
+      "base_commit": "",
+      "class": "feature-impl",
+      "id": "hd2-rx-02",
+      "language": "react",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "ef24372c6dde787f8e0a7ab18f8e385b482f3a4a00eefa6db511da08ad286c48"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "hd2-ts-01",
+      "language": "typescript",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "82e2254cc8656b10433f148d350c95474ca46c44e587813d687be3e091dad4d1"
+    },
+    {
+      "base_commit": "",
+      "class": "test-fix",
+      "id": "rx-01",
+      "language": "react",
+      "license": "MIT",
+      "repo": "original (written for this benchmark)",
+      "tree_sha256": "ee18d122bf2bf82babbf3a33a31a52d4b6586bcc08486aa163cf5199023c1648"
+    }
+  ],
+  "version": 2
+}

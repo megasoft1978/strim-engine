@@ -196,6 +196,21 @@ public final class StrimOpenAIServer: @unchecked Sendable {
                 ("mlx_active_bytes", i(st.mlxActiveBytes)), ("mlx_cache_bytes", i(st.mlxCacheBytes)),
                 ("mlx_peak_bytes", i(st.mlxPeakBytes)), ("admitted_bytes", i(st.admittedBytes)),
                 ("budget_bytes", i(st.budgetBytes)),
+                ("mtp", .ordered([
+                    ("coverage", .string("completed_specstream_rounds")),
+                    ("batch_supported", .bool(false)),
+                    ("unsupported_batch_tokens", i(st.mtpUnsupportedBatchTokens)),
+                    ("lifetime", .string(st.mtpLifetime)),
+                    ("started_at", .string(ISO8601DateFormatter().string(from: st.mtpStartedAt))),
+                    ("resets", .string("engine_creation")),
+                    ("rounds", i(st.mtp.rounds)), ("emitted", i(st.mtp.emitted)),
+                    ("positions", .array((1...st.mtp.proposed.count).map { .int($0) })),
+                    ("proposed", .array(st.mtp.proposed.map { .int($0) })),
+                    ("reached", .array(st.mtp.reached.map { .int($0) })),
+                    ("accepted_prefix", .array(st.mtp.acceptedPrefix.map { .int($0) })),
+                    ("overflow_proposed", i(st.mtp.overflowProposed)),
+                ])),
+
             ])),
             ("server", .ordered([
                 ("requests_total", i(total)), ("requests_failed", i(failed)), ("requests_active", i(activeNow)),

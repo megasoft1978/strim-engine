@@ -1,6 +1,7 @@
 # Releasing Strim
 
 One tag drives everything: tag `v<version>` -> CI builds -> release assets -> Homebrew tap update.
+Set the repository variable `STRIM_RELEASE_RUNNER` to `true` to enable tag-triggered release jobs; manual runs remain available without it.
 
 ## Flow
 

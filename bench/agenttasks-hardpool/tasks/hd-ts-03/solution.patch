@@ -1,0 +1,17 @@
+diff --git a/src/util.ts b/src/util.ts
+index 90eaade..6625913 100644
+--- a/src/util.ts
++++ b/src/util.ts
+@@ -1,11 +1,10 @@
+ /** A sorted copy; the input array is left untouched. Ties keep their input order. */
+ export function sortBy<T>(xs: readonly T[], key: (x: T) => number): T[] {
+-  return (xs as T[]).sort((a, b) => key(a) - key(b));
++  return [...xs].sort((a, b) => key(a) - key(b));
+ }
+ 
+ /** Lower-cased, de-duplicated, alphabetically sorted copy of the tags. */
+ export function normalizeTags(tags: readonly string[]): string[] {
+-  (tags as string[]).sort();
+   const lower = tags.map((t) => t.trim().toLowerCase());
+   return [...new Set(lower)].sort();
+ }

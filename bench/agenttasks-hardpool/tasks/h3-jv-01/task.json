@@ -1,0 +1,23 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 30,
+  "id" : "h3-jv-01",
+  "language" : "java",
+  "license" : "MIT",
+  "prompt" : "Implement per-customer promotion usage limits in the discount engine. Limits are keyed by customer and stable rule ID and persist in a shared UsageStore across engine instances. A limit of zero is unlimited. Quotes observe existing usage without recording it; redemptions record only rules that actually apply a positive discount. Exhausted rules must not block other rules in their exclusive group. Preserve priority, stacking, minimum-subtotal and rounding behavior. Run `.\/scripts\/javatest.sh` offline. Do not edit, delete, or skip protected tests.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-java-promotions",
+  "snapshot" : "snapshot",
+  "snapshot_bytes" : 192,
+  "test_paths" : [
+    "src\/tests",
+    "scripts\/javatest.sh"
+  ],
+  "test_sha256" : {
+    "scripts\/javatest.sh" : "94490e91298ff5a65dea2bcaf1bbf8ad811c45923cafb3e15a5e8c21195b1940",
+    "src\/tests\/AllTests.java" : "2423be651a767f8a54c3e9638a10aaf6fa487f099585501a4eda6c516ee42edd"
+  },
+  "tree_sha256" : "030251373c2de66bc9139f3373394efbb93e1e2bf59051ddaf9116c0d60d7901",
+  "verify_cmd" : ".\/scripts\/javatest.sh"
+}

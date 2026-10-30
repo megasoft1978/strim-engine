@@ -1,0 +1,11 @@
+{"type":"turn","n":1}
+{"type":"reasoning","text":"Check the file."}
+{"type":"text","text":"Reading."}
+{"type":"tool_call","name":"read_file","args":"{\"path\":\"a.swift\"}"}
+{"type":"usage","prompt":100,"completion":20}
+{"type":"tool_result","name":"read_file","output":"let a = 1","is_error":false}
+{"type":"tool_call","name":"list_files","args":"{\"path\":\".\"}"}
+{"type":"tool_result","name":"list_files","output":"a.swift","is_error":false}
+{"type":"turn","n":2}
+{"type":"text","text":"Done."}
+{"type":"finished","status":"done"}

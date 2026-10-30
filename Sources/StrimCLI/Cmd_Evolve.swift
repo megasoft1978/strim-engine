@@ -4,15 +4,17 @@ import StrimEvolve
 
 // strim evolve plan   [common]
 // strim evolve run    [common] [--budget-minutes N] [--background] [--release-eval --split test]
+//                     [--candidate JSON|FILE [--against JSON|FILE|baseline]] (fixed paired train/val evaluation)
 //                     live: --model DIR [--head DIR] [--port N=8231] [--strim-bin P] [--lock-path P] [--lock-wait-s S]
 //                           [--lock-held] [--timeout-s 900] [--verify-timeout-s 300]
 // strim evolve report [common]
 // strim evolve adopt  [common] [--no-active]
 //
 // common: --out DIR (default bench/results/evolve-<date>)  --tasks-dir DIR (bench/agenttasks)  --dry-run (fake runner)
-//         --store DIR (~/.strim/packs)  --coordinates a,b (names as in Coordinate, default all 10)
+//         --store DIR (~/.strim/packs)  --coordinates a,b (names as in Coordinate, default all 12)
 //         --max-tasks N (search splits: first N per class, sorted ids; test untouched)  --train-reps N=1  --val-reps N=2
 //         --max-rounds N=2  --min-gain-pp X=5  --seed S
+//         --split FILE (reuse an existing split.json; search/test retain their existing meanings)
 // --include-unplumbed is deprecated and ignored (every coordinate is consumed by the harness since 7bb62fb).
 // See docs/EVOLVE.md.
 enum EvolveCommand {
@@ -62,6 +64,7 @@ struct EvolveContext {
     let config: EvolveConfig
     let tasks: [LoadedTask]
     let split: CorpusSplit
+    let splitFile: URL?
     let store: PackStore
 
     /// Dry-run data never mixes with real data. report/adopt without --dry-run fall back to the dry-run ledger only when no real one exists.
@@ -73,6 +76,7 @@ struct EvolveContext {
 
     init(opts: [String: String], flags: Set<String>) throws {
         self.opts = opts; self.flags = flags
+        splitFile = opts["split"].flatMap { $0 == "search" || SplitName(rawValue: $0) != nil ? nil : URL(fileURLWithPath: $0) }
         dry = flags.contains("dry-run")
         let stamp: String = { let f = DateFormatter(); f.dateFormat = "yyyyMMdd"; return f.string(from: Date()) }()
         out = URL(fileURLWithPath: opts["out"] ?? "bench/results/evolve-\(stamp)")
@@ -110,7 +114,10 @@ struct EvolveContext {
         let loaded = TaskLoader.load(root: tasksDir)
         guard !loaded.isEmpty else { throw EvolveError.usage("no tasks found under \(tasksDir.path)") }
         tasks = loaded
-        let full = try CorpusSplit.frozen(dir: out, tasks: loaded.map { ($0.id, $0.spec.taskClass) })
+        let assignment = loaded.map { ($0.id, $0.spec.taskClass) }
+        let full: CorpusSplit
+        if let splitFile { full = try CorpusSplit.frozen(file: splitFile, dir: out, tasks: assignment) }
+        else { full = try CorpusSplit.frozen(dir: out, tasks: assignment) }
         let classOf = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0.spec.taskClass) })
         split = cfg.maxTasksPerClass.map { full.limited(perClass: $0, classOf: classOf) } ?? full
     }
@@ -145,12 +152,32 @@ struct EvolveContext {
     // MARK: run
 
     func run() async throws -> Int32 {
-        try saveConfig()
         let wantsTest = opts["split"] == "test"
-        if let s = opts["split"], SplitName(rawValue: s) == nil && s != "search" { throw EvolveError.usage("--split takes search or test") }
         if wantsTest { try SplitGuard.check(.test, releaseEval: flags.contains("release-eval")) }
         if flags.contains("release-eval") && !wantsTest { throw EvolveError.usage("--release-eval needs --split test") }
-
+        let comparison: PairedEvaluation?
+        if let raw = opts["candidate"] {
+            guard wantsTest || opts["split"] == nil || opts["split"] == "search" || splitFile != nil else {
+                throw EvolveError.usage("--candidate requires --split search, test, or a split.json file")
+            }
+            let candidate = try PairedEvaluation.decode(raw)
+            let against = try opts["against"].map { $0 == "baseline" ? PackCandidate.baseline : try PairedEvaluation.decode($0) } ?? .baseline
+            comparison = PairedEvaluation(candidate: candidate, against: against)
+            try comparison?.validate()
+            if wantsTest {
+                for name in ["ledger.jsonl", "ledger.dry-run.jsonl"] {
+                    try comparison?.validateLedger(rows: FitnessLedger(url: out.appendingPathComponent(name)).read())
+                }
+            }
+            try comparison?.freeze(in: out)
+        } else {
+            guard opts["against"] == nil else { throw EvolveError.usage("--against requires --candidate") }
+            guard !FileManager.default.fileExists(atPath: out.appendingPathComponent(PairedEvaluation.fileName).path) else {
+                throw EvolveError.usage("this --out holds a paired evaluation; resume with --candidate or use a new --out")
+            }
+            comparison = nil
+        }
+        try saveConfig()
         Interrupt.install()
         if flags.contains("background") { setpriority(PRIO_PROCESS, 0, 15) }
         let deadline = opts["budget-minutes"].flatMap(Double.init).map { Date().addingTimeInterval($0 * 60) }
@@ -174,13 +201,13 @@ struct EvolveContext {
             let bin = opts["strim-bin"] ?? (Bundle.main.executablePath ?? CommandLine.arguments[0])
             let port = UInt16(opts["port"] ?? "") ?? 8231
             try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+            // The server must allow the task work root, so it exists before the spawn and is granted explicitly.
+            let work = try BenchTaskRunner.createWorkRoot()
             let s = try LocalServer.spawn(strimBin: bin, model: model, head: opts["head"], port: port, tokenFile: out.appendingPathComponent("server.token").path,
-                                          logDir: out, readyTimeout: 900, extraEnv: serverEnv)
+                                          logDir: out, readyTimeout: 900, extraEnv: serverEnv, workRoot: work)
             server = s
             var venv: [String: String] = [:]
             if let py = ProcessInfo.processInfo.environment["STRIM_BENCH_PYTHON"] { venv["PYTHON"] = py }
-            let work = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("strim-evolve-\(getpid())")
-            try FileManager.default.createDirectory(at: work, withIntermediateDirectories: true)
             runner = BenchTaskRunner(tasks: tasks, executor: HarnessArm(endpoint: s.endpoint), liveDir: liveDir, workRoot: work,
                                      outDir: out.appendingPathComponent("runs"),
                                      timeoutS: TimeInterval(opts["timeout-s"] ?? "") ?? 900,
@@ -191,7 +218,13 @@ struct EvolveContext {
                            stopRequested: { Interrupt.requested }, log: { print($0); fflush(stdout) })
 
         let summary: EvolveRunSummary
-        if wantsTest {
+        if let comparison {
+            if wantsTest {
+                summary = try await ev.releaseEval(chosen: comparison.candidate, baseline: comparison.against, reps: config.valReps)
+            } else {
+                summary = try await ev.pairedEval(comparison)
+            }
+        } else if wantsTest {
             let state = SearchPlanner.replay(rows: ledger.read(), split: split, config: config)
             guard state.finished else { throw EvolveError.refused("search is not finished (\(state.pending.count) runs pending); release eval needs the final pack") }
             summary = try await ev.releaseEval(chosen: state.incumbent, reps: config.valReps)
@@ -204,7 +237,7 @@ struct EvolveContext {
         if summary.infraStopped { return 4 }
         if summary.interrupted { return 5 }
         if summary.budgetStopped { return 3 }
-        if !wantsTest, SearchPlanner.replay(rows: ledger.read(), split: split, config: config).killed { return 6 }
+        if comparison == nil, !wantsTest, SearchPlanner.replay(rows: ledger.read(), split: split, config: config).killed { return 6 }
         return 0
     }
 
@@ -212,6 +245,11 @@ struct EvolveContext {
 
     func report() throws -> Int32 {
         let rs = rows()
+        if let comparison = try PairedEvaluation.read(from: out) {
+            print("ledger: \(ledgerURL.path)  rows \(rs.count)\(rs.contains(where: \.dryRun) ? "  (DRY RUN, fake data)" : "")")
+            for line in comparison.report(rows: rs, split: split, config: config, release: rs.contains { $0.phase == .release }) { print(line) }
+            return 0
+        }
         let st = SearchPlanner.replay(rows: rs, split: split, config: config)
         print("ledger: \(ledgerURL.path)  rows \(rs.count)\(rs.contains(where: \.dryRun) ? "  (DRY RUN, fake data)" : "")")
         print("candidate         label                                  train n fit  pass  fd%   | val n fit  pass  fd%   tokens")
@@ -253,6 +291,9 @@ struct EvolveContext {
     // MARK: adopt
 
     func adopt() throws -> Int32 {
+        guard !FileManager.default.fileExists(atPath: out.appendingPathComponent(PairedEvaluation.fileName).path) else {
+            throw EvolveError.refused("fixed paired evaluation does not select or adopt a pack; use a search --out")
+        }
         let rs = rows()
         let st = SearchPlanner.replay(rows: rs, split: split, config: config)
         if dry && opts["store"] == nil { throw EvolveError.refused("--dry-run adopt needs an explicit --store (fake data never goes to ~/.strim/packs)") }

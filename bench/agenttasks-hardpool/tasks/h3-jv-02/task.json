@@ -1,0 +1,23 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 25,
+  "id" : "h3-jv-02",
+  "language" : "java",
+  "license" : "MIT",
+  "prompt" : "The order desk sometimes accepts unexpected commands, mishandles deliveries, and reports surprising refund outcomes. Run `.\/scripts\/javatest.sh` from the repository root and fix the non-test source. The tests and test runner are protected; do not edit, delete, or skip them. Use the local JDK and no external dependencies.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-orderdesk",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 5459,
+  "test_paths" : [
+    "src\/tests",
+    "scripts\/javatest.sh"
+  ],
+  "test_sha256" : {
+    "scripts\/javatest.sh" : "e030df62baf8d138267cfac2682a9b7e831855d8e9bc5510ef9f07a8baa644ee",
+    "src\/tests\/AllTests.java" : "08cf6fc407edf859313a198df207932cbf6b3d13d4679c3cf754a0bf731dfade"
+  },
+  "tree_sha256" : "9bd512e90d341dbf6ab73522c256da2838d2e9e8ad60df3dd0adf04412a89a06",
+  "verify_cmd" : ".\/scripts\/javatest.sh"
+}

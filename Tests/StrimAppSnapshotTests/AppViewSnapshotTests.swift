@@ -66,6 +66,28 @@ final class AppViewSnapshotTests: XCTestCase {
         window("chat-empty", empty, .chat, sizes: Self.allSizes) { _ in ChatTab(model: empty).environmentObject(flow) }
     }
 
+    /// Composer with the mic button: idle, listening with a partial, and the permission-denied notice.
+    func testChatDictation() async {
+        let m = await Fixtures.model("dictation") { await SnapshotMode.projectsModel() }
+        let fake = FakeDictation()
+        m.dictationFactory = { fake }
+        let flow = ProjectsFlow()
+        m.selectThread("t-a4")
+        window("chat-dictation-idle", m, .chat, sizes: [Self.s800]) { _ in ChatTab(model: m).environmentObject(flow) }
+        fake.onStart = [.state(.preparing), .state(.listening), .partial("rename the timeout")]
+        m.toggleDictation(in: "t-a4", draft: "Please")
+        let drafts = ["t-a4": m.dictationOutput?.text ?? ""]
+        XCTAssertEqual(drafts["t-a4"], "Please rename the timeout")
+        for s in [Self.s640, Self.s800] {
+            window("chat-dictation-listening", m, .chat, sizes: [s]) { _ in ChatTab(model: m, drafts: drafts).environmentObject(flow) }
+        }
+        m.stopDictation()
+        fake.onStart = [.state(.preparing), .state(.error(.microphoneDenied))]
+        m.toggleDictation(in: "t-a4", draft: "")
+        window("chat-dictation-denied", m, .chat, sizes: [Self.s640, Self.s800]) { _ in ChatTab(model: m).environmentObject(flow) }
+        m.dismissDictationMessage()
+    }
+
     func testChatToolOutput() async {
         let m = await Fixtures.chatTools()
         let flow = ProjectsFlow()

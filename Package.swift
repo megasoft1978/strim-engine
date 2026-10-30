@@ -26,6 +26,7 @@ let package = Package(
         .testTarget(name: "StrimAppE2ETests", dependencies: ["StrimAppCore", "StrimAPI"]),
         .executableTarget(name: "StrimApp", dependencies: ["StrimAppCore", "StrimAPI"]),
         .testTarget(name: "StrimAppSnapshotTests", dependencies: ["StrimApp", "StrimAppCore", "StrimAPI"]),
+        .testTarget(name: "StrimCLITests", dependencies: ["StrimCLI"], resources: [.copy("Fixtures")]),
         .testTarget(name: "StrimCoreTests", dependencies: ["StrimCore"]),
         .testTarget(name: "StrimTokenizerTests", dependencies: ["StrimTokenizer"]),
         .target(name: "StrimTemplate"),

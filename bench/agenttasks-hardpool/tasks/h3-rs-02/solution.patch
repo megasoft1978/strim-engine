@@ -1,0 +1,41 @@
+diff --git a/src/execute.rs b/src/execute.rs
+index a922d18..b44596c 100644
+--- a/src/execute.rs
++++ b/src/execute.rs
+@@ -19,6 +19,13 @@ pub fn evaluate(plan: &Plan) -> Vec<Row> {
+             ordering::sort(&mut rows, keys);
+             rows
+         }
+-        Plan::Window { input, .. } => evaluate(input),
++        Plan::Window { input, offset, limit } => {
++            let rows = evaluate(input);
++            let remaining = rows.into_iter().skip(*offset);
++            match limit {
++                Some(count) => remaining.take(*count).collect(),
++                None => remaining.collect(),
++            }
++        },
+     }
+ }
+diff --git a/src/optimizer.rs b/src/optimizer.rs
+index 3461e64..f0106f1 100644
+--- a/src/optimizer.rs
++++ b/src/optimizer.rs
+@@ -16,14 +16,9 @@ pub fn optimize(plan: Plan) -> Plan {
+         },
+         Plan::Window { input, offset, limit } => {
+             let input = optimize(*input);
+-            // Move the row budget closer to the source to reduce join work.
+-            match input {
+-                Plan::Join { left, right, left_key, right_key } => Plan::Join {
+-                    left: Box::new(Plan::Window { input: left, offset, limit }),
+-                    right, left_key, right_key,
+-                },
+-                input => Plan::Window { input: Box::new(input), offset, limit },
+-            }
++            // A join can discard left rows or multiply them, so a window on
++            // its output cannot be moved to either input without changing it.
++            Plan::Window { input: Box::new(input), offset, limit }
+         }
+     }
+ }

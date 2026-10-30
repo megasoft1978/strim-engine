@@ -39,6 +39,7 @@ usage: strim --version | -V | version
 private let benchUsage = "usage: strim bench http <subcommand> [options]\n\n" + BenchHTTPCLI.usage
 
 let cliCommands: [CLICommand] = [
+    CLICommand(name: "mtpstats", summary: "offline MTP acceptance counters and prompt extraction", usage: MTPStatsCommand.usage, run: { runMTPStats($0) }),
     CLICommand(name: "serve", summary: "run the engine and the OpenAI-compatible server", usage: serveUsage, run: { runServe($0) }),
     CLICommand(name: "pull", summary: "download the pinned model and MTP head (resumable)", usage: pullUsage, run: { runPull($0) }),
     CLICommand(name: "doctor", summary: "GPU smoke test, runtime config and model directory status", usage: doctorUsage, run: { runDoctor($0) }),
@@ -72,6 +73,9 @@ let cliCommands: [CLICommand] = [
     CLICommand(name: "benchdecodeanatomy", summary: "developer bench: decode anatomy", run: { runDecodeAnatomy($0) }),
     CLICommand(name: "benchbatchattn", summary: "developer bench: batch attention", run: { runBatchAttnMicro($0) }),
     CLICommand(name: "benchsdpa", summary: "developer bench: long-context prefill SDPA", run: { runSdpaMicro($0) }),
+    CLICommand(name: "benchmacrogemm", summary: "developer bench: S3 macro GEMM", run: { runMacroGemm($0) }),
+    CLICommand(name: "benchmacroprefill", summary: "developer bench: S3 engine prefill", run: { runMacroPrefillBench($0) }),
+    CLICommand(name: "checkmacroquality", summary: "developer check: S3 logits and greedy parity", run: { runMacroQuality($0) }),
     CLICommand(name: "benchbatchverify", summary: "developer bench: batch verify", run: { runBatchVerify($0) }),
     CLICommand(name: "checkgdnbatch", summary: "developer check: GDN batch", run: { runGDNBatch($0) }),
     CLICommand(name: "checkbatchparity", summary: "developer check: batch parity", run: { runBatchParity($0) }),

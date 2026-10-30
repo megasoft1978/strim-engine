@@ -1,0 +1,198 @@
+diff --git a/lib/compose.js b/lib/compose.js
+index dce3703..192b301 100644
+--- a/lib/compose.js
++++ b/lib/compose.js
+@@ -1,9 +1,17 @@
+ /** Onion composition: each fn is (ctx, next); the result is run(ctx, last?) returning a promise. */
+ export function compose(fns) {
+   return function run(ctx, last) {
+-    const dispatch = async (i) => {
++    let index = -1;
++    const dispatch = (i) => {
++      if (i <= index) return Promise.reject(new Error('next() called multiple times'));
++      index = i;
+       const fn = i === fns.length ? last : fns[i];
+-      if (fn) await fn(ctx, () => dispatch(i + 1));
++      if (!fn) return Promise.resolve();
++      try {
++        return Promise.resolve(fn(ctx, () => dispatch(i + 1)));
++      } catch (err) {
++        return Promise.reject(err);
++      }
+     };
+     return dispatch(0);
+   };
+diff --git a/lib/pattern.js b/lib/pattern.js
+index d274aff..b023702 100644
+--- a/lib/pattern.js
++++ b/lib/pattern.js
+@@ -3,8 +3,24 @@ export function splitPath(path) {
+   return path.split(/[?#]/)[0].split('/').filter(Boolean);
+ }
+ 
+-/** '/users/:id' -> [{type:'static',value:'users'}, {type:'param',name:'id'}] */
++/** Percent-decode one segment; null when the encoding is malformed. */
++export function decodeSegment(segment) {
++  try {
++    return decodeURIComponent(segment);
++  } catch {
++    return null;
++  }
++}
++
++/** '/users/:id/files/*' -> [{type:'static',value:'users'}, {type:'param',name:'id'}, ..., {type:'wild'}] */
+ export function parsePattern(pattern) {
+-  return splitPath(pattern).map((part) =>
+-    part.startsWith(':') ? { type: 'param', name: part.slice(1) } : { type: 'static', value: part });
++  const parts = splitPath(pattern);
++  return parts.map((part, i) => {
++    if (part === '*') {
++      if (i !== parts.length - 1) throw new Error(`wildcard must be the last segment: ${pattern}`);
++      return { type: 'wild' };
++    }
++    if (part.startsWith(':')) return { type: 'param', name: part.slice(1) };
++    return { type: 'static', value: part };
++  });
+ }
+diff --git a/lib/router.js b/lib/router.js
+index b517fa5..c1718a8 100644
+--- a/lib/router.js
++++ b/lib/router.js
+@@ -1,16 +1,24 @@
+ import { Tree } from './tree.js';
+ import { compose } from './compose.js';
+-import { splitPath, parsePattern } from './pattern.js';
++import { splitPath, decodeSegment, parsePattern } from './pattern.js';
++
++const TEXT = { 400: 'Bad Request', 404: 'Not Found', 405: 'Method Not Allowed', 500: 'Internal Server Error' };
+ 
+ export class Router {
+   #tree = new Tree();
+   #mw = [];
++  #onError = null;
+ 
+   use(fn) {
+     this.#mw.push(fn);
+     return this;
+   }
+ 
++  onError(fn) {
++    this.#onError = fn;
++    return this;
++  }
++
+   route(method, pattern, ...handlers) {
+     this.#tree.insert(method.toUpperCase(), parsePattern(pattern), handlers);
+     return this;
+@@ -21,14 +29,49 @@ export class Router {
+   put(pattern, ...h) { return this.route('PUT', pattern, ...h); }
+   delete(pattern, ...h) { return this.route('DELETE', pattern, ...h); }
+ 
+-  /** req = { method, path }; resolves to { status, headers, body }. */
++  /** req = { method, path }; resolves to { status, headers, body }. Never rejects. */
+   async handle(req) {
+     const method = req.method.toUpperCase();
+     const ctx = { req, method, path: req.path, params: {}, status: undefined, headers: {}, body: undefined };
+-    const hit = this.#tree.lookup(method, splitPath(req.path));
+-    if (hit) hit.route.names.forEach((name, i) => { ctx.params[name] = hit.caps[i]; });
+-    await compose(this.#mw)(ctx, hit ? () => compose(hit.route.handlers)(ctx) : undefined);
+-    const status = ctx.status ?? (hit && ctx.body !== undefined ? 200 : 404);
+-    return { status, headers: ctx.headers, body: ctx.body };
++    let matched = false;
++    try {
++      await compose(this.#mw)(ctx, async () => { matched = await this.#dispatch(ctx, method); });
++    } catch (err) {
++      ctx.status = 500;
++      ctx.body = undefined;
++      ctx.headers = {};
++      if (this.#onError) {
++        try { await this.#onError(err, ctx); } catch { ctx.status = 500; }
++      }
++    }
++    const status = ctx.status ?? (!matched ? 404 : ctx.body !== undefined ? 200 : 204);
++    let body = ctx.body ?? TEXT[status];
++    if (method === 'HEAD') body = undefined;
++    return { status, headers: ctx.headers, body };
++  }
++
++  async #dispatch(ctx, method) {
++    const segs = splitPath(ctx.path).map(decodeSegment);
++    if (segs.includes(null)) {
++      ctx.status = 400;
++      return false;
++    }
++    const allowed = new Set();
++    for (const { routes, caps } of this.#tree.matches(segs)) {
++      for (const m of routes.keys()) allowed.add(m);
++      const route = routes.get(method) ?? (method === 'HEAD' ? routes.get('GET') : undefined);
++      if (!route) continue;
++      route.names.forEach((name, i) => { ctx.params[name] = caps[i]; });
++      await compose(route.handlers)(ctx);
++      return true;
++    }
++    if (allowed.size === 0) {
++      ctx.status = 404;
++    } else {
++      if (allowed.has('GET')) allowed.add('HEAD');
++      ctx.status = 405;
++      ctx.headers.allow = [...allowed].sort().join(', ');
++    }
++    return false;
+   }
+ }
+diff --git a/lib/tree.js b/lib/tree.js
+index 26988a6..f562508 100644
+--- a/lib/tree.js
++++ b/lib/tree.js
+@@ -1,8 +1,8 @@
+ function makeNode() {
+-  return { children: new Map(), param: null, routes: new Map() };
++  return { children: new Map(), param: null, wild: null, routes: new Map() };
+ }
+ 
+-/** Segment tree. Each node keeps routes by method. */
++/** Segment tree. Each node keeps routes by method; a wildcard hangs off its parent in `wild`. */
+ export class Tree {
+   #root = makeNode();
+ 
+@@ -13,24 +13,29 @@ export class Tree {
+       if (part.type === 'static') {
+         if (!node.children.has(part.value)) node.children.set(part.value, makeNode());
+         node = node.children.get(part.value);
+-      } else {
++      } else if (part.type === 'param') {
+         names.push(part.name);
+         node = node.param ??= makeNode();
++      } else {
++        names.push('*');
++        node = node.wild ??= makeNode();
+       }
+     }
++    if (node.routes.has(method)) throw new Error(`duplicate route: ${method}`);
+     node.routes.set(method, { names, handlers });
+   }
+ 
+-  /** Route for method and segments, or null. Takes the static child when there is one, else the param child. */
+-  lookup(method, segs) {
+-    let node = this.#root;
+-    const caps = [];
+-    for (const seg of segs) {
+-      if (node.children.has(seg)) node = node.children.get(seg);
+-      else if (node.param) { caps.push(seg); node = node.param; }
+-      else return null;
++  /** Every route set that matches `segs`, best first: static before param before wildcard at each segment. */
++  *matches(segs, i = 0, caps = [], node = this.#root) {
++    if (i === segs.length) {
++      if (node.routes.size > 0) yield { routes: node.routes, caps };
++      if (node.wild) yield { routes: node.wild.routes, caps: [...caps, ''] };
++      return;
+     }
+-    const route = node.routes.get(method);
+-    return route ? { route, caps } : null;
++    const seg = segs[i];
++    const next = node.children.get(seg);
++    if (next) yield* this.matches(segs, i + 1, caps, next);
++    if (node.param) yield* this.matches(segs, i + 1, [...caps, seg], node.param);
++    if (node.wild) yield { routes: node.wild.routes, caps: [...caps, segs.slice(i).join('/')] };
+   }
+ }

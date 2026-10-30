@@ -1,0 +1,19 @@
+ledger: /tmp/px1/run/ledger.jsonl  rows 44
+paired (phase paired): A 45e18dfdad89bb8c [thinking=all_turns_medium]
+                       B 18f91c5411914986 [tool_guidance=strict,playbook_test_fix=converge,thinking=all_turns_medium,stall_nudge=on,result_shape=errors_first]
+train A: n 18/18 pass 77.8% mean wall 369.41s mean local tokens 129594.8 false-done 0 (0.0%) timeouts 0
+train B: n 18/18 pass 88.9% mean wall 387.91s mean local tokens 167825.9 false-done 0 (0.0%) timeouts 0
+train hd-js-01: pairs 2/2 both-pass 2 only-A 0 only-B 0 neither 0
+train hd-js-02: pairs 2/2 both-pass 1 only-A 0 only-B 1 neither 0
+train hd-js-03: pairs 2/2 both-pass 2 only-A 0 only-B 0 neither 0
+train hd-rx-02: pairs 2/2 both-pass 2 only-A 0 only-B 0 neither 0
+train hd-ts-02: pairs 2/2 both-pass 1 only-A 0 only-B 1 neither 0
+train hd2-fs-01: pairs 2/2 both-pass 2 only-A 0 only-B 0 neither 0
+train hd2-rx-01: pairs 2/2 both-pass 1 only-A 1 only-B 0 neither 0
+train hd2-rx-02: pairs 2/2 both-pass 0 only-A 0 only-B 1 neither 1
+train rx-01: pairs 2/2 both-pass 2 only-A 0 only-B 0 neither 0
+val A: n 4/4 pass 100.0% mean wall 305.70s mean local tokens 157442.0 false-done 0 (0.0%) timeouts 0
+val B: n 4/4 pass 75.0% mean wall 499.40s mean local tokens 191598.5 false-done 0 (0.0%) timeouts 0
+val hd-rx-01: pairs 2/2 both-pass 2 only-A 0 only-B 0 neither 0
+val hd2-js-01: pairs 2/2 both-pass 1 only-A 1 only-B 0 neither 0
+paired evaluation: no search or adoption; test split: untouched

@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 18,
+  "id" : "hd-js-02",
+  "language" : "javascript",
+  "license" : "MIT",
+  "note" : "Node.js ESM: HTTP-style router (params, wildcards, precedence with fallback, 404\/405, HEAD, onion middleware, errors)",
+  "prompt" : "This Node.js package is a tiny HTTP-style router (no sockets: `router.handle({ method, path })` resolves to `{ status, headers, body }`). It currently supports only static and `:param` routes with a basic middleware chain. The test file test\/router.test.js already contains tests for the full behaviour (percent-decoding, wildcards, route precedence, 404\/405, HEAD, middleware order, error handling, duplicate routes). Run `node --test` from the repository root to see the failures. Implement the feature in the non-test source so the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what you changed.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-node",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 3934,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/router.test.js" : "45ac6f1e17bb64847d3b90e241650187f47430b29bbc52e912e8af6cadc8c8c5"
+  },
+  "tree_sha256" : "e23ac71ba372a2f5941a0cf7df77fb5146e738ac577ea0657b8aa6a7472833b6",
+  "verify_cmd" : "node --test"
+}

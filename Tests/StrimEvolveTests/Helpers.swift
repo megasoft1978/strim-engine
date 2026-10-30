@@ -8,7 +8,7 @@ func repoRoot() -> URL {
 }
 
 func tempDir(_ name: String = "evolve") -> URL {
-    let u = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("strim-evolve-test-\(name)-\(UUID().uuidString)")
+    let u = URL(fileURLWithPath: ProcessInfo.processInfo.environment["STRIM_EVOLVE_TEST_TMPDIR"] ?? NSTemporaryDirectory(), isDirectory: true).appendingPathComponent("strim-evolve-test-\(name)-\(UUID().uuidString)")
     try! FileManager.default.createDirectory(at: u, withIntermediateDirectories: true)
     return u
 }

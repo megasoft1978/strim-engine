@@ -1,0 +1,21 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 30,
+  "id" : "h3-go-02",
+  "language" : "go",
+  "license" : "MIT",
+  "prompt" : "Implement pause and resume for the recurring job scheduler. Pausing a job holds it and its transitive dependents, including dependents registered later. Each explicit pause is independent and idempotent; resuming removes only that job's explicit hold. In-flight runs may complete normally, retaining retry deadlines and attempt counts; overdue work becomes eligible when all applicable holds are removed, subject to dependency readiness. Status must report effective pause state. Unknown jobs return ErrUnknownJob. Run `go test -count=1 .\/...` offline from the repository root. Do not edit, delete, or skip protected tests.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-go-dispatch",
+  "snapshot" : "snapshot",
+  "snapshot_bytes" : 448,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/scheduler_test.go" : "4dc363a8ffeb3cb3b18131835deb4d25ebf176430f7a439f8aea3607166aa040"
+  },
+  "tree_sha256" : "5d5bbab146b1fe01373d3ccfa139bf6ea9e0207d72240d9b02da50e9073840cf",
+  "verify_cmd" : "go test -count=1 .\/..."
+}

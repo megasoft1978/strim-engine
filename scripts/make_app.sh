@@ -45,11 +45,12 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
+  <key>NSMicrophoneUsageDescription</key><string>Strim listens to your microphone only while you dictate a message in the chat. Speech is transcribed on this Mac and never leaves it.</string>
 </dict>
 </plist>
 PLIST
 
-codesign --force --deep -s - "$APP"
+codesign --force --deep -s - --entitlements packaging/app/Strim.entitlements "$APP"
 codesign -v --deep --strict "$APP"
 echo "built $APP ($CONFIG), codesign ok"
 

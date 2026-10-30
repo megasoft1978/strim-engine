@@ -55,11 +55,26 @@ public enum PromptBuilder {
     }
 }
 
+/// Local-model token usage of one harness job (`result.json` `usage`, or the reply's `usage:` line).
+struct JobUsage: Equatable {
+    var promptTokens: Int
+    var cachedTokens: Int
+    var completionTokens: Int
+    var turns: Int
+}
+
 // MARK: - H: the harness alone, through the MCP over HTTP
 
 public final class HarnessArm: ArmExecutor {
     let client: MCPClient
-    public init(endpoint: ServerEndpoint) { client = MCPClient(endpoint: endpoint) }
+    /// Where the host writes each job's `result.json`: `<state dir>/jobs` of the server this arm talks to. nil when that
+    /// state dir is unknown (attached server); then a job without a `usage:` reply line has unknown tokens. The real
+    /// `~/.strim` is never read.
+    let jobsDir: URL?
+    public init(endpoint: ServerEndpoint, jobsDir: URL? = nil) {
+        client = MCPClient(endpoint: endpoint)
+        self.jobsDir = jobsDir ?? endpoint.stateDir?.appendingPathComponent("jobs", isDirectory: true)
+    }
 
     public func execute(_ ctx: RunContext) -> ArmOutcome {
         var o = ArmOutcome()
@@ -72,6 +87,7 @@ public final class HarnessArm: ArmExecutor {
         var reply = client.call("strim_task", args, timeout: 60)
         if let e = reply.transportError { o.error = "infra: \(e)"; o.infraError = true; return o }
         var parsed = HarnessReply.parse(reply.text)
+        if let why = Self.setupRefusal(reply, parsed: parsed) { o.delegations = 0; o.error = why; o.infraError = true; return o }
         if reply.isError && parsed.jobId == nil { o.error = "strim_task error: \(reply.text.prefix(200))"; return o }
         while !parsed.terminal, let id = parsed.jobId {
             if Date().timeIntervalSince(t0) > ctx.timeout || Interrupt.requested {
@@ -87,11 +103,12 @@ public final class HarnessArm: ArmExecutor {
         o.harnessStatus = o.timedOut ? "timeout" : parsed.status
         o.harnessVerifyStatus = HarnessReply.verifyLabel(parsed)
         o.harnessVerifyExit = parsed.patchPath.flatMap(HarnessReply.verifyExit(besidePatch:))
-        o.localPromptTokens = parsed.promptTokens
-        o.localCachedTokens = parsed.cachedTokens
-        o.localCompletionTokens = parsed.completionTokens
-        o.localTurns = parsed.turns
-        o.turns = parsed.turns
+        let usage = Self.resolvedUsage(parsed, jobsDir: jobsDir)
+        o.localPromptTokens = usage?.promptTokens
+        o.localCachedTokens = usage?.cachedTokens
+        o.localCompletionTokens = usage?.completionTokens
+        o.localTurns = usage?.turns ?? parsed.turns
+        o.turns = usage?.turns ?? parsed.turns
         guard parsed.done else {
             if !o.timedOut { o.error = "job ended \(parsed.status ?? "unknown")" }
             return o
@@ -117,6 +134,42 @@ public final class HarnessArm: ArmExecutor {
             o.patchApplied = nil // no patch produced
         }
         return o
+    }
+
+    /// Local-model usage of a job. The reply text carries a `usage:` line only for a DONE job, so a job that ended
+    /// limit, failed or cancelled reports none there: its usage comes from the job's `result.json`.
+    static func resolvedUsage(_ parsed: HarnessReply, jobsDir: URL?, waitS: TimeInterval = 15) -> JobUsage? {
+        if let p = parsed.promptTokens {
+            return JobUsage(promptTokens: p, cachedTokens: parsed.cachedTokens ?? 0,
+                            completionTokens: parsed.completionTokens ?? 0, turns: parsed.turns ?? 0)
+        }
+        guard let id = parsed.jobId, parsed.status != "declined", let jobsDir else { return nil }
+        return jobUsage(jobId: id, jobsDir: jobsDir, waitS: waitS)
+    }
+
+    /// `usage` of `<jobsDir>/<jobId>/result.json`. The host writes it when the run concludes, which can lag the terminal
+    /// status (a wall-clock limit finalizes the job first, then cancels the run), so this polls for up to `waitS`.
+    static func jobUsage(jobId: String, jobsDir: URL, waitS: TimeInterval = 15) -> JobUsage? {
+        guard !jobId.isEmpty, !jobId.contains("/"), jobId != ".", jobId != ".." else { return nil }
+        let url = jobsDir.appendingPathComponent(jobId).appendingPathComponent("result.json")
+        let t0 = Date()
+        while true {
+            if let d = try? Data(contentsOf: url), let o = try? JSONSerialization.jsonObject(with: d) as? [String: Any],
+               let u = o["usage"] as? [String: Any] {
+                func n(_ k: String) -> Int { (u[k] as? NSNumber)?.intValue ?? 0 }
+                return JobUsage(promptTokens: n("prompt_tokens"), cachedTokens: n("cached_tokens"),
+                                completionTokens: n("completion_tokens"), turns: n("turns"))
+            }
+            if Date().timeIntervalSince(t0) >= waitS { return nil }
+            usleep(250_000)
+        }
+    }
+
+    /// A `strim_task` the host refused for its cwd, path or allowed-roots policy never started a job: setup, not a task
+    /// outcome. The row is infrastructure (rerun on resume), never a failed fitness row.
+    static func setupRefusal(_ reply: ToolReply, parsed: HarnessReply) -> String? {
+        guard parsed.jobId == nil, ClaudeParser.isPathRefusal(reply.text) else { return nil }
+        return "infra: strim_task refused: \(reply.text.prefix(200))"
     }
 }
 

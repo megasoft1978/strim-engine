@@ -1,0 +1,82 @@
+diff --git a/src/board.js b/src/board.js
+index 91587e3..d064f74 100644
+--- a/src/board.js
++++ b/src/board.js
+@@ -1,30 +1,49 @@
+ import * as commands from './commands.js';
+ import { BoardProjection } from './projection.js';
+ import { MemoryJournal } from './journal.js';
++import { emptyHistory, copyHistory, inverse, applyHistory } from './history.js';
+ 
+ export class Board {
+   constructor(journal = new MemoryJournal()) {
+     this.journal = journal;
+     const stored = journal.read();
+     this.projection = new BoardProjection(stored.snapshot?.state);
+-    for (const record of stored.events) this.projection.apply(record.event);
++    this.history = stored.snapshot?.history ? copyHistory(stored.snapshot.history) : emptyHistory();
++    for (const record of stored.events) {
++      this.projection.apply(record.event);
++      applyHistory(this.history, record);
++    }
+   }
+ 
+-  execute(event) {
+-    this.journal.append({ action: 'command', event });
++  record(action, event) {
++    const record = { action, event };
++    this.journal.append(record);
+     this.projection.apply(event);
++    applyHistory(this.history, record);
+   }
+ 
++  execute(event) { this.record('command', event); }
+   create(id, title, lane) { this.execute(commands.create(this.projection.state, id, title, lane)); }
+   rename(id, title) { this.execute(commands.rename(this.projection.state, id, title)); }
+   move(id, lane) { this.execute(commands.move(this.projection.state, id, lane)); }
+   remove(id) { this.execute(commands.remove(this.projection.state, id)); }
+ 
+-  undo() { return false; }
+-  redo() { return false; }
++  undo() {
++    const event = this.history.undo.at(-1);
++    if (!event) return false;
++    this.record('undo', inverse(event));
++    return true;
++  }
++
++  redo() {
++    const event = this.history.redo.at(-1);
++    if (!event) return false;
++    this.record('redo', event);
++    return true;
++  }
+ 
+   snapshot() {
+-    this.journal.compact({ state: this.projection.state });
++    this.journal.compact({ state: this.projection.state, history: this.history });
+   }
+ 
+   list(lane) { return this.projection.list(lane); }
+diff --git a/src/history.js b/src/history.js
+index 234c56f..df26e5c 100644
+--- a/src/history.js
++++ b/src/history.js
+@@ -21,3 +21,17 @@ export function inverse(event) {
+       throw new Error('event cannot be undone');
+   }
+ }
++
++// Rebuild both stacks from the same physical records used by projections.
++export function applyHistory(history, record) {
++  if (record.action === 'command') {
++    history.undo.push(record.event);
++    history.redo = [];
++  } else if (record.action === 'undo') {
++    history.redo.push(history.undo.pop());
++  } else if (record.action === 'redo') {
++    history.undo.push(history.redo.pop());
++  } else {
++    throw new Error('unknown history action');
++  }
++}

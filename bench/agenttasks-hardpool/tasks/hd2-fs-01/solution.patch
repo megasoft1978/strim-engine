@@ -1,0 +1,44 @@
+diff --git a/src/server/handler.ts b/src/server/handler.ts
+index 50092e2..b5e470c 100644
+--- a/src/server/handler.ts
++++ b/src/server/handler.ts
+@@ -1,11 +1,12 @@
+-import type { HttpRequest, HttpResponse } from '../shared/types.ts';
++import type { ApiError, HttpRequest, HttpResponse } from '../shared/types.ts';
+ import { CursorError, listPage, toWire, type OrderRecord } from './orders.ts';
+ 
+ const DEFAULT_LIMIT = 3;
+ const MAX_LIMIT = 5;
+ 
+ export function fail(status: number, code: string, message: string): HttpResponse {
+-  return { status, body: { code, message } };
++  const body: ApiError = { error: { code, message } };
++  return { status, body };
+ }
+ 
+ export function handle(req: HttpRequest, records: OrderRecord[]): HttpResponse {
+diff --git a/src/server/orders.ts b/src/server/orders.ts
+index 911e22c..b8c54bc 100644
+--- a/src/server/orders.ts
++++ b/src/server/orders.ts
+@@ -14,9 +14,9 @@ export class CursorError extends Error {}
+ export function toWire(r: OrderRecord): Order {
+   return {
+     id: r.id,
+-    totalCents: r.cents / 100,
+-    placedAt: new Date(r.placedAtSec).toISOString(),
+-    note: r.note ?? '',
++    totalCents: r.cents,
++    placedAt: new Date(r.placedAtSec * 1000).toISOString(),
++    note: r.note,
+     status: r.status,
+   };
+ }
+@@ -31,6 +31,6 @@ export function listPage(records: OrderRecord[], cursor: string | null, limit: n
+   const end = start + limit;
+   return {
+     items: records.slice(start, end).map(toWire),
+-    nextCursor: end < records.length ? String(end - 1) : null,
++    nextCursor: end < records.length ? String(end) : null,
+   };
+ }

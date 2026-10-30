@@ -82,6 +82,14 @@ public final class AppModel: ObservableObject {
     /// Why chat cannot start when no thread is selected (e.g. no project folder).
     @Published public internal(set) var chatProbeError: String?
     /// Repair / read-only message from loading `~/.strim/chats`.
+    /// Dictation in the chat composer (AppModel+Dictation.swift). The engine is created on first use, never at launch.
+    @Published public internal(set) var dictationState: DictationState = .idle
+    @Published public internal(set) var dictationOutput: DictationOutput?
+    var dictationText = DictationText()
+    var dictationThreadID: String?
+    var dictationSeq = 0
+    var dictationEngine: Dictation?
+    public var dictationFactory: @MainActor () -> Dictation = { SpeechDictation() }
     @Published public internal(set) var chatStoreNotice: String?
     @Published public internal(set) var chatReadOnly = false
     /// Thread id -> transcript lines that could not be read.

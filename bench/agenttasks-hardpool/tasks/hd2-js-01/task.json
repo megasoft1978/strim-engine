@@ -1,0 +1,24 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 30,
+  "id" : "hd2-js-01",
+  "language" : "javascript",
+  "license" : "MIT",
+  "note" : "Node.js ESM: async job scheduler on an injected fake clock (concurrency, priority, per-key serialization, retries with backoff, cancellation in three states, idle); scheduler.js, pqueue.js and backoff.js are stubs",
+  "prompt" : "This Node.js package is an async job scheduler (`new Scheduler({ concurrency, clock }).schedule(fn, options)`) driven entirely by an injected clock. src\/scheduler.js, src\/pqueue.js and src\/backoff.js are stubs that throw; the contract comment at the top of src\/scheduler.js and the doc comments in the other two stubs describe the required behaviour (concurrency, priority, per-key serialization, retries with backoff, cancellation while queued, backing off and running, idle\/stats), and the tests in test\/ already cover it. Run `node --test` from the repository root to see the failures (no build step, no npm install). Implement the stubs so the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what you changed.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-node",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 5958,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/helpers.js" : "4de9e71e0bc51a8e81960bfcab9b61964310a5dbac0c5a6ce6f90b0364a9221b",
+    "test\/scheduler.test.js" : "28ac5927194b356d7cfccd956f285e7efcfd4b646911fd3018961903c615d4c3",
+    "test\/units.test.js" : "c1780e4043dee8598f199cf7493921face9eb4680ee74e128d64825864fc893d"
+  },
+  "tree_sha256" : "56d08accefd443090b753ebd803d0b0c15ef2ac10d287bd74b0488b7ac95fa58",
+  "verify_cmd" : "node --test"
+}

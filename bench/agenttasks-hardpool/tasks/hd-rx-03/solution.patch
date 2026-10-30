@@ -1,0 +1,36 @@
+diff --git a/src/Summary.jsx b/src/Summary.jsx
+index a916f13..7a710b6 100644
+--- a/src/Summary.jsx
++++ b/src/Summary.jsx
+@@ -24,7 +24,7 @@ export function Summary({ items, discountPct = 0, taxPct = 8 }) {
+       <dt>Total</dt>
+       <dd className="total">{formatMoney(t.total)}</dd>
+       <dt>Weight</dt>
+-      <dd className="weight">{formatWeight(t.weightKg)}</dd>
++      <dd className="weight">{formatWeight(Math.round(t.weightKg * 1000))}</dd>
+     </dl>
+     </div>
+   );
+diff --git a/src/selectors.js b/src/selectors.js
+index 148fb2a..5bee475 100644
+--- a/src/selectors.js
++++ b/src/selectors.js
+@@ -17,7 +17,7 @@ export function makeTotalsSelector() {
+   let result = null;
+   return (items, discountPct, taxPct) => {
+     const args = [items, discountPct, taxPct];
+-    if (last && last[0] === items && last[2] === taxPct) return result;
++    if (last && args.every((a, i) => a === last[i])) return result;
+     last = args;
+     result = computeTotals(items, discountPct, taxPct);
+     return result;
+diff --git a/src/tax.js b/src/tax.js
+index f10f964..897cd3f 100644
+--- a/src/tax.js
++++ b/src/tax.js
+@@ -1,4 +1,4 @@
+ /** Tax in whole cents for an amount in cents at `ratePct` percent (8.5 means 8.5%), rounded half up. */
+ export function taxCents(amountCents, ratePct) {
+-  return Math.round(amountCents * ratePct) / 10000;
++  return Math.round((amountCents * ratePct) / 100);
+ }

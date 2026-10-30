@@ -174,6 +174,7 @@ final class Request {
     var joinedBatch = false
     var tPrefillStart: Date?
     var tFirst: Date?
+    var mtpSnapshot = MTPStats()
     var drafts0 = 0, accepted0 = 0, passes0 = 0
     var wantMTP = false
     var finished = false
@@ -233,10 +234,16 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
 
     private let statsLock = NSLock()
     private var statsSnap = EngineStats()
+    private var mtpTotals = MTPStats()
+    private let mtpLifetime = UUID().uuidString
+    private let mtpStartedAt = Date()
+    private var mtpUnsupportedBatchTokens = 0
 
     init(config: EngineConfig) {
         cfg = config
         hotLimit = config.hotSessions
+        statsSnap.mtpLifetime = mtpLifetime
+        statsSnap.mtpStartedAt = mtpStartedAt
     }
 
     var shouldStop: Bool { stopFlag }
@@ -299,6 +306,9 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
 
     func publishStats() {
         var s = EngineStats()
+        s.mtp = mtpTotals
+        s.mtpLifetime = mtpLifetime; s.mtpStartedAt = mtpStartedAt
+        s.mtpUnsupportedBatchTokens = mtpUnsupportedBatchTokens
         s.healthy = unhealthy == nil
         s.unhealthyReason = unhealthy
         s.lastHeartbeat = Date()
@@ -914,6 +924,7 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
             if let sm = r.sampler { r.stream!.enableSampling(sm.config) } else { r.stream!.disableSampling() }
             r.stream!.constraint = r.constraint
             first = r.stream!.pending
+            r.mtpSnapshot = r.stream!.stats.mtp
             r.drafts0 = r.stream!.stats.drafts; r.accepted0 = r.stream!.stats.acceptedDrafts; r.passes0 = r.stream!.stats.passes
         } else if var sm = r.sampler {
             first = sm.sample(r.constraint?.apply(logits) ?? logits)
@@ -937,6 +948,8 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
         if let st = r.stream {
             // pending was already emitted; step forwards it (and accepted drafts) and decides the next.
             let out = try st.step(remaining: remaining)
+            mtpTotals.add(st.stats.mtp.delta(since: r.mtpSnapshot))
+            r.mtpSnapshot = st.stats.mtp
             r.fed += out
             let newToks = Array(out.dropFirst()) + [st.pending]
             sched.record(r.id, tokens: newToks.count, ms: Date().timeIntervalSince(t0) * 1000)
@@ -987,6 +1000,7 @@ final class EngineCore: EngineWorker, @unchecked Sendable {
         } else {
             toks = members.enumerated().map { (i, r) in pick(r, lg[i, 0]) }
         }
+        mtpUnsupportedBatchTokens += toks.count
         var done: [(Request, FinishReason)] = []
         for (i, r) in members.enumerated() {
             r.fed.append(r.next)

@@ -1,0 +1,24 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 25,
+  "id" : "hd-ts-02",
+  "language" : "typescript",
+  "license" : "MIT",
+  "note" : "TypeScript: query\/filter DSL (lexer, parser with or\/and\/not precedence and implicit and, evaluator) with thirteen behavioural tests; lexer, parser and evaluator are stubs",
+  "prompt" : "This TypeScript package is a small query\/filter language (`compile(\"status:open and age>30\")` returns a predicate over records). src\/lexer.ts, src\/parser.ts and src\/evaluate.ts are stubs that throw; the tests in test\/ describe the required behaviour (precedence, implicit and, quoting, comma lists, dotted paths, comparison rules, ParseError positions) and the doc comments in the stubs summarise the contracts. Run `tsc --noEmit -p .` and `node --test` from the repository root (Node runs the .ts files directly with type stripping; no build step, no npm install). Implement the stubs so both pass. Tests and tsconfig.json are the specification and are restored and hash-checked before grading: do not edit, delete or skip any test. Keep the change focused. Report briefly what you changed.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-ts-hard",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 3030,
+  "test_paths" : [
+    "test",
+    "tsconfig.json"
+  ],
+  "test_sha256" : {
+    "test\/query.test.ts" : "7291729556bdff438494ef00964a90241d66259515573494679ce92e3dbe0cf7",
+    "tsconfig.json" : "3c6fe660eac7382c357050c57a33920a3734a6c7f68968ef808621df1c7502e4"
+  },
+  "tree_sha256" : "b8bd49e421551b313a1928061c97ed3cdb423d42347add2598711899381b90bb",
+  "verify_cmd" : "tsc --noEmit -p . && node --test"
+}

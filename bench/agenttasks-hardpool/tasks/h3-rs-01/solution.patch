@@ -1,0 +1,49 @@
+--- a/src/lexer.rs
++++ b/src/lexer.rs
+@@ -3,7 +3,16 @@
+ pub(crate) fn assignment(line: &str) -> Option<(String, String)> {
+     let mut separator = None;
+     let mut end = line.len();
++    let mut escaped = false;
+     for (index, ch) in line.char_indices() {
++        if escaped {
++            escaped = false;
++            continue;
++        }
++        if ch == '\\' {
++            escaped = true;
++            continue;
++        }
+         if ch == '#' {
+             end = index;
+             break;
+--- a/src/merge.rs
++++ b/src/merge.rs
+@@ -20,12 +20,12 @@
+     let text = sources.get(name).ok_or_else(|| ConfigError::MissingSource(name.to_owned()))?;
+     let doc = document::parse(name, text)?;
+     stack.push(name.to_owned());
+-    for (key, value) in doc.assignments {
+-        values.insert(key, value);
+-    }
+     for child in doc.includes {
+         visit(sources, &child, stack, values)?;
+     }
++    for (key, value) in doc.assignments {
++        values.insert(key, value);
++    }
+     stack.pop();
+     Ok(())
+ }
+--- a/src/resolver.rs
++++ b/src/resolver.rs
+@@ -32,9 +32,5 @@
+             out.push(ch);
+         }
+     }
+-    // A second pass catches substitutions introduced by escaped dollar signs.
+-    if out.contains("${") && out != raw {
+-        return expand(&out, env);
+-    }
+     Ok(out)
+ }

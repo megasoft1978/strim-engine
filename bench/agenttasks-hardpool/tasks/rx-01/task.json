@@ -1,0 +1,38 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 8,
+  "id" : "rx-01",
+  "language" : "react",
+  "license" : "MIT",
+  "note" : "React (server-rendered component tests under bun test): Pagination page window and next-button boundary",
+  "prompt" : "The automated tests of this React (JSX) package currently fail. Run `bun test` from the repository root (react and react-dom\/server are vendored in node_modules; there is no npm install and no network; the components are rendered to static markup in the tests). Change the non-test source so that the whole suite passes. The tests and node_modules are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-react",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 168321,
+  "test_paths" : [
+    "test",
+    "node_modules"
+  ],
+  "test_sha256" : {
+    "node_modules\/react-dom\/cjs\/react-dom-server-legacy.node.development.js" : "a1ece181be0c98e5449cfd6c89f27f4d0b8ace7745566fb09ece37d79f1084d4",
+    "node_modules\/react-dom\/cjs\/react-dom-server.node.development.js" : "6979be97ff88b4959a02c7af65a83f37084e1dd91cb59f95d9a6e8c3e039fbb6",
+    "node_modules\/react-dom\/index.js" : "b3704ce09d34a35d9b607cef9487e59ec94e38481ca1e522d2ae5e76aab17a49",
+    "node_modules\/react-dom\/LICENSE" : "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+    "node_modules\/react-dom\/package.json" : "a17d004beaf3eb50f20de1031b5d8adeb9d66249ca0d68f74d5798b6144881ec",
+    "node_modules\/react-dom\/server.js" : "b3704ce09d34a35d9b607cef9487e59ec94e38481ca1e522d2ae5e76aab17a49",
+    "node_modules\/react-dom\/server.node.js" : "41bf1c33fc01b39f67c35657a3e6c62aab99fc91ca2559cf10d2623fa3efd33b",
+    "node_modules\/react\/cjs\/react-jsx-dev-runtime.development.js" : "cd9394f47e01e9f1d87f7a8adcfc0ad8f8813d5c124ee74627791921f3277ac5",
+    "node_modules\/react\/cjs\/react-jsx-runtime.development.js" : "581f93fa33c32b3aa7ea35b85b80258922517de046f5447236047dcc2845d9ff",
+    "node_modules\/react\/cjs\/react.development.js" : "1ff3a1d9861a87984329584fa1172aea920855d79eb57dae0d1cebe54093d7e3",
+    "node_modules\/react\/index.js" : "5a9faa04547af23866f10161b6ae9f010259cd74918f3e408c49d863dfa1a32f",
+    "node_modules\/react\/jsx-dev-runtime.js" : "473e9d293cb28efb3932571dd0b7606d9417c2cf8546231c9ec91a144c15caa0",
+    "node_modules\/react\/jsx-runtime.js" : "cab5d58c3c8aaaa8908cf65fae8af66cd1a20239f86d28a8e9d0176677c3ccef",
+    "node_modules\/react\/LICENSE" : "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+    "node_modules\/react\/package.json" : "348497e190c6bb8eacdab4e3ce544e3ea24db8a0d6c6ac75b42754f71b45a26b",
+    "test\/pagination.test.jsx" : "f847f19a87cffa51810b6e3e3fa69903e317a7e98e6686bb80ec992488fb7590"
+  },
+  "tree_sha256" : "ee18d122bf2bf82babbf3a33a31a52d4b6586bcc08486aa163cf5199023c1648",
+  "verify_cmd" : "bun test"
+}

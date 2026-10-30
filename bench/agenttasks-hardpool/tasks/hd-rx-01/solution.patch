@@ -1,0 +1,51 @@
+diff --git a/src/DataTable.jsx b/src/DataTable.jsx
+index 2b7e226..49bcfe4 100644
+--- a/src/DataTable.jsx
++++ b/src/DataTable.jsx
+@@ -5,8 +5,8 @@ import { rangeLabel } from './range.js';
+ import { paginate } from './paginate.js';
+ 
+ export function DataTable({ rows, columns, sort = {}, query = '', page = 1, pageSize = 5 }) {
+-  const paged = paginate(sortRows(rows, sort.key, sort.dir), page, pageSize);
+-  const view = { ...paged, items: filterRows(paged.items, query, columns.map((c) => c.key)) };
++  const filtered = filterRows(rows, query, columns.map((c) => c.key));
++  const view = paginate(sortRows(filtered, sort.key, sort.dir), page, pageSize);
+   return (
+     <div className="table-wrap">
+       <table>
+diff --git a/src/paginate.js b/src/paginate.js
+index f24487b..6071164 100644
+--- a/src/paginate.js
++++ b/src/paginate.js
+@@ -1,6 +1,6 @@
+ /** Slice one page out of `rows`; `page` is 1-based and clamped into range, `pages` is at least 1. */
+ export function paginate(rows, page, size) {
+-  const pages = Math.floor(rows.length / size) || 1;
++  const pages = Math.max(1, Math.ceil(rows.length / size));
+   const current = Math.min(Math.max(1, page), pages);
+   const start = (current - 1) * size;
+   return { items: rows.slice(start, start + size), page: current, pages, total: rows.length };
+diff --git a/src/rows.js b/src/rows.js
+index d800fb0..1dbc5e3 100644
+--- a/src/rows.js
++++ b/src/rows.js
+@@ -13,15 +13,15 @@ export function compareValues(a, b) {
+ /** Stable sort that never mutates its input; rows that tie keep their original order in both directions. */
+ export function sortRows(rows, key, dir = 'asc') {
+   if (!key || dir === 'none') return rows.slice();
+-  const asc = rows
++  const sign = dir === 'desc' ? -1 : 1;
++  return rows
+     .map((row, i) => [row, i])
+-    .sort(([a, i], [b, j]) => compareValues(a[key], b[key]) || i - j)
++    .sort(([a, i], [b, j]) => sign * compareValues(a[key], b[key]) || i - j)
+     .map(([row]) => row);
+-  return dir === 'desc' ? asc.reverse() : asc;
+ }
+ 
+ /** Value for the aria-sort attribute of the column `key`. */
+ export function ariaSort(key, sort) {
+-  if (!sort || sort.key !== key) return undefined;
++  if (!sort || sort.key !== key) return 'none';
+   return sort.dir === 'desc' ? 'descending' : sort.dir === 'asc' ? 'ascending' : 'none';
+ }

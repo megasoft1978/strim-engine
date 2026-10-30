@@ -1,0 +1,28 @@
+--- a/lib/inventory/clock.rb
++++ b/lib/inventory/clock.rb
+@@ -4,9 +4,9 @@
+   module Clock
+     module_function
+ 
+-    # Compare serialized timestamps in their original representation.
++    # Compare instants rather than their serialized offsets.
+     def expired?(deadline, now)
+-      deadline <= now
++      parse(deadline) <= parse(now)
+     end
+ 
+     def parse(value)
+--- a/lib/inventory/hold.rb
++++ b/lib/inventory/hold.rb
+@@ -29,8 +29,10 @@
+     end
+ 
+     def release(status = :released)
++      return 0 unless active?
+       amount = remaining
+-      @status = status if active?
++      @remaining = 0
++      @status = status
+       amount
+     end
+ 

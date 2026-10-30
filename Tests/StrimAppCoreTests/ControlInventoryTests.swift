@@ -238,6 +238,46 @@ enum Controls {
             #expect(!r.model.chatGenerating && r.model.selectedThreadID == t.id)
         }
         add("chat.send", chat, "Button", "Send", "AppModel.submitDraft(_:in:available:)", submit)
+        let dictate: Drive = { r in
+            let fake = FakeDictation()
+            r.model.dictationFactory = { fake }
+            let t = await r.readyChat()
+            r.model.toggleDictation(in: t.id, draft: "Fix")
+            #expect(fake.startCount == 1 && r.model.dictationState(for: t.id) == .listening)
+            fake.emit(.partial("the parser"))
+            #expect(r.model.dictationOutput?.text == "Fix the parser")
+            #expect(r.model.queuedText(for: t.id) == nil && r.model.chatMessages.isEmpty, "dictation never sends")
+            r.model.toggleDictation(in: t.id, draft: "Fix the parser")
+            #expect(fake.stopCount == 1 && r.model.dictationState == .idle)
+        }
+        add("chat.dictation", chat, "Button", "Dictation (microphone)", "AppModel.toggleDictation(in:draft:)", dictate)
+        add("chat.dictation.shortcut", chat, "Shortcut", "Dictation", key: "⇧⌘D", "AppModel.toggleDictation(in:draft:)", dictate)
+        add("chat.dictation.esc", chat, "none", "Esc stops dictation", "AppModel.stopDictation()") { r in
+            let fake = FakeDictation()
+            r.model.dictationFactory = { fake }
+            let t = await r.readyChat()
+            r.model.toggleDictation(in: t.id, draft: "")
+            r.model.stopDictation()
+            #expect(fake.stopCount == 1 && r.model.dictationState == .idle)
+        }
+        add("chat.dictation.settings", chat, "Button", "Open Microphone Settings", "AppModel.dictationSettingsURL()") { r in
+            let fake = FakeDictation()
+            fake.onStart = [.state(.error(.microphoneDenied))]
+            r.model.dictationFactory = { fake }
+            let t = await r.readyChat()
+            r.model.toggleDictation(in: t.id, draft: "")
+            #expect(r.model.dictationState(for: t.id).error?.offersSettings == true)
+            #expect(AppModel.dictationSettingsURL()?.absoluteString == DictationInfo.settingsURL)
+        }
+        add("chat.dictation.dismiss", chat, "Button", "Dismiss dictation message", "AppModel.dismissDictationMessage()") { r in
+            let fake = FakeDictation()
+            fake.onStart = [.state(.error(.failed("x")))]
+            r.model.dictationFactory = { fake }
+            let t = await r.readyChat()
+            r.model.toggleDictation(in: t.id, draft: "")
+            r.model.dismissDictationMessage()
+            #expect(r.model.dictationState(for: t.id) == .idle)
+        }
         add("chat.copy", chat, "Button", "Copy message", "AppModel.copyMessage(_:)") { r in
             let t = await r.readyChat()
             await r.model.send("copy me", in: t.id)

@@ -1,0 +1,94 @@
+diff --git a/src/cursor.ts b/src/cursor.ts
+index 655857c..90b68b6 100644
+--- a/src/cursor.ts
++++ b/src/cursor.ts
+@@ -1,10 +1,26 @@
+-import type { Cursor } from './types.ts';
++import type { Cursor, Filter } from './types.ts';
++import { normalizeFilter } from './validate.ts';
+ 
+ /** A cursor is opaque to API callers and should be validated before use. */
+ export function encodeCursor(cursor: Cursor): string {
+   return encodeURIComponent(JSON.stringify(cursor));
+ }
+ 
+-export function decodeCursor(_raw: string): Cursor {
+-  throw new Error('cursor continuation is not implemented');
++export function decodeCursor(raw: string): Cursor {
++  try {
++    const data: unknown = JSON.parse(decodeURIComponent(raw));
++    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error();
++    const obj = data as Record<string, unknown>;
++    if (obj.version !== 1 || !Number.isSafeInteger(obj.after) || !Number.isSafeInteger(obj.ceiling)) throw new Error();
++    const after = obj.after as number, ceiling = obj.ceiling as number;
++    if (after < 0 || ceiling < 0 || after > ceiling) throw new Error();
++    if (!obj.filter || typeof obj.filter !== 'object' || Array.isArray(obj.filter)) throw new Error();
++    const filter = obj.filter as Record<string, unknown>;
++    for (const [key, value] of Object.entries(filter)) {
++      if (!['topic', 'actor', 'action', 'from', 'until'].includes(key) || typeof value !== 'string') throw new Error();
++    }
++    return { version: 1, after, ceiling, filter: normalizeFilter(filter as Filter) };
++  } catch {
++    throw new Error('invalid cursor');
++  }
+ }
+diff --git a/src/page.ts b/src/page.ts
+index 5c9c08c..dd27e39 100644
+--- a/src/page.ts
++++ b/src/page.ts
+@@ -1,10 +1,22 @@
+ import type { Cursor, Event, Filter, Page } from './types.ts';
+ import { select } from './filter.ts';
++import { encodeCursor } from './cursor.ts';
++
++function page(events: Event[], cursor: Cursor, limit: number): Page {
++  const eligible = select(events, cursor.filter)
++    .filter(event => event.seq > cursor.after && event.seq <= cursor.ceiling);
++  const selected = eligible.slice(0, limit);
++  const nextCursor = eligible.length > limit
++    ? encodeCursor({ ...cursor, after: selected[selected.length - 1].seq })
++    : null;
++  return { events: selected, nextCursor };
++}
+ 
+ export function firstPage(events: Event[], filter: Filter, limit: number): Page {
+-  return { events: select(events, filter).slice(0, limit), nextCursor: null };
++  const ceiling = events.length ? events[events.length - 1].seq : 0;
++  return page(events, { version: 1, after: 0, ceiling, filter }, limit);
+ }
+ 
+-export function continuedPage(_events: Event[], _cursor: Cursor, _limit: number): Page {
+-  throw new Error('cursor continuation is not implemented');
++export function continuedPage(events: Event[], cursor: Cursor, limit: number): Page {
++  return page(events, cursor, limit);
+ }
+diff --git a/src/service.ts b/src/service.ts
+index 4c123cf..05db402 100644
+--- a/src/service.ts
++++ b/src/service.ts
+@@ -1,6 +1,7 @@
+ import type { Page, PageRequest } from './types.ts';
+ import { EventStore } from './store.ts';
+-import { firstPage } from './page.ts';
++import { continuedPage, firstPage } from './page.ts';
++import { decodeCursor } from './cursor.ts';
+ import { normalizeFilter, pageLimit } from './validate.ts';
+ 
+ /** Read interface for clients of the event feed. */
+@@ -10,7 +11,14 @@ export class Feed {
+ 
+   list(request: PageRequest = {}): Page {
+     const limit = pageLimit(request.limit);
+-    const filter = normalizeFilter(request.filter);
+-    return firstPage(this.store.all(), filter, limit);
++    if (request.cursor !== undefined) {
++      const cursor = decodeCursor(request.cursor);
++      if (request.filter !== undefined &&
++          JSON.stringify(normalizeFilter(request.filter)) !== JSON.stringify(cursor.filter)) {
++        throw new Error('cursor filter differs from request');
++      }
++      return continuedPage(this.store.all(), cursor, limit);
++    }
++    return firstPage(this.store.all(), normalizeFilter(request.filter), limit);
+   }
+ }

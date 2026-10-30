@@ -1,0 +1,5 @@
+2026-10-30T05:19:28Z
+  PID  PPID ELAPSED COMMAND
+70044 69834   03:56 /tmp/ev1/build2/release/strim evolve run --out /tmp/ev1/run2 --tasks-dir /tmp/ev1/pool --model /Users/user/.strim/models/qwen38-4bit --head /Users/user/.strim/models/qwen38-mtp-4bit --budget-minutes 720 --background --port 8294 --strim-bin /tmp/ev1/build2/release/strim
+COMMAND   PID       USER   FD   TYPE DEVICE SIZE/OFF      NODE NAME
+strim   70044 megasoft78    3u   REG   1,15        0 153075882 /private/tmp/strim-bench.lock

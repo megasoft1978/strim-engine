@@ -1,0 +1,21 @@
+--- a/cache.go
++++ b/cache.go
+@@ -23,7 +23,7 @@
+ 	c.mu.Lock()
+ 	defer c.mu.Unlock()
+ 	e, ok := c.entries[key]
+-	if !ok || now.After(e.expires) {
++	if !ok || e.revision != revision || !now.Before(e.expires) {
+ 		c.misses++
+ 		return nil, false
+ 	}
+--- a/query.go
++++ b/query.go
+@@ -21,6 +21,6 @@
+ }
+ 
+ func matches(item Item, key queryKey) bool {
+-	return item.Active && (key.category == "" || item.Category == key.category) &&
++	return item.Active && (key.category == "" || strings.ToLower(item.Category) == key.category) &&
+ 		(key.search == "" || strings.Contains(strings.ToLower(item.Name), key.search))
+ }

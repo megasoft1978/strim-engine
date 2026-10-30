@@ -86,6 +86,7 @@ extension AppModel {
     @discardableResult
     public func submitDraft(_ draft: String, in tid: String, available: Bool) -> Task<Void, Never>? {
         guard Self.canSend(draft: draft, queued: queuedText(for: tid) != nil, available: available) else { return nil }
+        cancelDictation()
         return Task { @MainActor [weak self] in await self?.send(draft, in: tid) }
     }
     public static func canSend(draft: String, queued: Bool, available: Bool) -> Bool {

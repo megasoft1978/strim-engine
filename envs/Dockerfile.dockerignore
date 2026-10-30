@@ -1,0 +1,16 @@
+**
+!envs/
+!envs/pyproject.toml
+!envs/strim_envs/
+!envs/strim_envs/*.py
+!envs/strim_envs/expected_tests.json
+!envs/strim_envs/edit_policy.json
+!envs/strim_envs/graders/
+!envs/strim_envs/graders/*
+!bench/
+!bench/agenttasks/
+!bench/agenttasks/manifest.json
+!bench/agenttasks/tasks/
+!bench/agenttasks/tasks/*/
+!bench/agenttasks/tasks/*/task.json
+!bench/agenttasks/tasks/*/snapshot.tar.gz

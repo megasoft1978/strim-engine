@@ -1,0 +1,73 @@
+diff --git a/src/orders/DeliveryRegistry.java b/src/orders/DeliveryRegistry.java
+index bd15854..5c5e691 100644
+--- a/src/orders/DeliveryRegistry.java
++++ b/src/orders/DeliveryRegistry.java
+@@ -5,16 +5,17 @@ import java.util.Map;
+ 
+ /** Remembers accepted deliveries for retry handling. */
+ public final class DeliveryRegistry {
+-    private final Map<String, OrderEvent> accepted = new HashMap<>();
++    private final Map<String, Map<String, OrderEvent>> accepted = new HashMap<>();
+ 
+     public boolean isRetry(OrderEvent event) {
+-        OrderEvent previous = accepted.get(event.key);
++        Map<String, OrderEvent> orderDeliveries = accepted.get(event.orderId);
++        OrderEvent previous = orderDeliveries == null ? null : orderDeliveries.get(event.key);
+         if (previous == null) return false;
+         if (!previous.samePayload(event)) throw new IllegalStateException("key reused with different payload");
+         return true;
+     }
+ 
+     public void remember(OrderEvent event) {
+-        accepted.put(event.key, event);
++        accepted.computeIfAbsent(event.orderId, ignored -> new HashMap<>()).put(event.key, event);
+     }
+ }
+diff --git a/src/orders/OrderService.java b/src/orders/OrderService.java
+index a731207..e9e380e 100644
+--- a/src/orders/OrderService.java
++++ b/src/orders/OrderService.java
+@@ -28,8 +28,8 @@ public final class OrderService {
+     /** Returns false on a successful retry and true for a new event. */
+     public boolean deliver(OrderEvent event) {
+         Order order = get(event.orderId);
+-        policy.check(order, event);
+         if (deliveries.isRetry(event)) return false;
++        policy.check(order, event);
+         reducer.apply(order, event);
+         journal.append(event);
+         deliveries.remember(event);
+diff --git a/src/orders/Reducer.java b/src/orders/Reducer.java
+index bcc390a..46b2abd 100644
+--- a/src/orders/Reducer.java
++++ b/src/orders/Reducer.java
+@@ -14,7 +14,7 @@ public final class Reducer {
+                 order.update(Status.CANCELLED, 0);
+                 break;
+             case REFUND:
+-                order.update(Status.REFUNDED, event.amount);
++                order.update(event.amount == order.retained() ? Status.REFUNDED : order.status(), event.amount);
+                 break;
+             default:
+                 throw new IllegalArgumentException("unknown event");
+diff --git a/src/orders/TransitionPolicy.java b/src/orders/TransitionPolicy.java
+index dfe240f..031c060 100644
+--- a/src/orders/TransitionPolicy.java
++++ b/src/orders/TransitionPolicy.java
+@@ -4,6 +4,16 @@ package orders;
+ public final class TransitionPolicy {
+     public void check(Order order, OrderEvent event) {
+         if (!order.id().equals(event.orderId)) throw new IllegalArgumentException("wrong order");
++        Status status = order.status();
++        boolean allowed;
++        switch (event.type) {
++            case PAY: allowed = status == Status.CREATED; break;
++            case SHIP: allowed = status == Status.PAID; break;
++            case CANCEL: allowed = status == Status.CREATED; break;
++            case REFUND: allowed = status == Status.PAID || status == Status.SHIPPED; break;
++            default: allowed = false;
++        }
++        if (!allowed) throw new IllegalStateException("transition not allowed");
+         switch (event.type) {
+             case PAY:
+                 if (event.amount != order.total()) throw new IllegalStateException("payment amount");

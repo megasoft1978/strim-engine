@@ -1,0 +1,23 @@
+{
+  "base_commit": "",
+  "class": "test-fix",
+  "est_solo_turns": 30,
+  "id": "h3-ts-02",
+  "language": "typescript",
+  "license": "MIT",
+  "prompt": "Form submissions sometimes show validation messages beside the wrong fields, and the displayed result can regress during rapid edits. Run `tsc --noEmit -p . && node --test` and fix the non-test source. Each check returns its own result; the session displays only the latest requested check. Do not edit, delete, or skip protected tests or tsconfig.json. Use the offline toolchain; no installation is needed.",
+  "repo": "original (written for this benchmark)",
+  "repo_key": "strim-agentbench-hard3-fieldnote",
+  "snapshot": "snapshot.tar.gz",
+  "snapshot_bytes": 6433,
+  "test_paths": [
+    "test",
+    "tsconfig.json"
+  ],
+  "test_sha256": {
+    "test/form.test.mjs": "045e4fc8005e169519818192677b5f89314154141e8da78ffe8982b7db476c99",
+    "tsconfig.json": "ad19bd11a9386e9dff6ae4a21f26992604f840fc83b8a07235c870778da0b8cf"
+  },
+  "tree_sha256": "adb21da9f9ec6311c18dc557b67bea524536dd19bc6e302906138c619bfec8e4",
+  "verify_cmd": "tsc --noEmit -p . && node --test"
+}

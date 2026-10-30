@@ -486,7 +486,7 @@ public final class PrefixStore {
 
 public enum PrefixPrefill {
     /// Prefill chunk size; boundaries sit at absolute multiples of this.
-    public static let chunk = 1024
+    public static let chunk = MacroPrefill.enabled ? MacroPrefill.rows : 1024
 
     /// Cut policy shared by every cached or uncached prefill. `<|im_start|>` cuts (blocks of at
     /// least `STRIM_PREFIX_CUT_MIN` tokens, at most `STRIM_PREFIX_CUT_MAX`) make a previous turn's end a trie node;
@@ -495,6 +495,7 @@ public enum PrefixPrefill {
     public static let defaultMinBlock = 1024
 
     public static var defaultPolicy: CutPolicy {
+        if MacroPrefill.enabled { return .fixed(MacroPrefill.rows) }
         let env = ProcessInfo.processInfo.environment
         if env["STRIM_PREFIX_CUTS"] == "fixed" { return .fixed(chunk) }
         let assistantMin = env["STRIM_PREFIX_ASSISTANT_MIN"] == "off" ? 0 : (Int(env["STRIM_PREFIX_ASSISTANT_MIN"] ?? "") ?? defaultAssistantMin)

@@ -1,0 +1,9 @@
+{
+  "source": "bench/results/align-thinking-20261029/raw/{off,on}",
+  "sample_note": "24 rows per arm; paired valid n=21; small task-mixed sample; A/B ledger and traces only",
+  "off": {"passes":16,"valid":21,"pass_rate":0.762,"mean_wall_s":85.15,"mean_completion_tokens_per_row":801,"mean_prompt_tokens_per_row":39654,"tool_calls":{"bash":213,"list_files":48,"read_file":133,"edit_file":113,"write_file":9,"grep":9,"finish":16},"tool_errors":21,"tool_result_chars":521893,"tool_results_over_4000":21,"compactions":1,"malformed_event_lines":7,"limit_rows":["hd-js-01","hd-rx-02","hd2-js-01","hd2-rx-01","rb-01","rb-03","rx-01","tf-02"]},
+  "on": {"passes":21,"valid":23,"pass_rate":0.913,"mean_wall_s":271.40,"mean_completion_tokens_per_row":4524,"mean_prompt_tokens_per_row":64774,"tool_calls":{"bash":83,"list_files":74,"read_file":145,"edit_file":47,"write_file":8,"grep":4,"finish":21},"tool_errors":2,"tool_result_chars":363437,"tool_results_over_4000":18,"compactions":4,"limit_rows_900s":["hd-rx-02","hd2-js-01","tf-02"]},
+  "paired": {"n":21,"both_pass":16,"only_off":0,"only_on":3,"both_fail":2,"off_mean_wall_s":82.50,"on_mean_wall_s":242.22},
+  "prompt_bytes": {"system_md":3492,"tool_guidance_md":864,"system_plus_guidance":4356,"token_estimate_chars_div_4":1089,"schema_token_count":"not isolated in traces; do not infer exact value"},
+  "example_jobs": {"off_rb03":"j_tazvvs6bux","off_tf02":"j_qxkb3qemmc","on_hdl_rx02":"j_2dba6dj6be","on_hd2js01":"j_n36lzem7tl","on_tf02":"j_osrwijwqye"}
+}

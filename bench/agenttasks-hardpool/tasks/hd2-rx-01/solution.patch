@@ -1,0 +1,47 @@
+diff --git a/src/heights.js b/src/heights.js
+index d6dc343..239fda1 100644
+--- a/src/heights.js
++++ b/src/heights.js
+@@ -9,7 +9,7 @@ export function rowHeight(measured, index, fallback = DEFAULT_ROW) {
+ // offsets[i] is the top of row i; offsets[count] is the total height (so offsets.length === count + 1).
+ export function buildOffsets(count, measured = {}, fallback = DEFAULT_ROW) {
+   const offsets = [0];
+-  for (let i = 0; i < count - 1; i++) {
++  for (let i = 0; i < count; i++) {
+     offsets.push(offsets[i] + rowHeight(measured, i, fallback));
+   }
+   return offsets;
+diff --git a/src/selection.js b/src/selection.js
+index d7a76de..8c2476b 100644
+--- a/src/selection.js
++++ b/src/selection.js
+@@ -28,7 +28,7 @@ export function selectionReducer(state, action) {
+       if (shift && state.anchor !== null) {
+         const range = span(state.anchor, index);
+         const selected = ctrl ? normalize([...state.selected, ...range]) : range;
+-        return { selected, anchor: index };
++        return { selected, anchor: state.anchor };
+       }
+       if (ctrl) {
+         const has = state.selected.includes(index);
+diff --git a/src/window.js b/src/window.js
+index 4c5c0e2..7f82e08 100644
+--- a/src/window.js
++++ b/src/window.js
+@@ -17,12 +17,12 @@ export function findIndex(offsets, y) {
+ export function computeRange({ offsets, scrollTop = 0, viewport = 0, headerHeight = 0, overscan = 0 }) {
+   const count = offsets.length - 1;
+   if (count <= 0) return { start: 0, end: 0 };
+-  const top = Math.max(0, scrollTop - headerHeight);
+-  const bottom = scrollTop + viewport;
++  const top = Math.max(0, scrollTop);
++  const bottom = top + Math.max(0, viewport - headerHeight);
+   const first = findIndex(offsets, top);
+-  const last = findIndex(offsets, Math.max(top, bottom));
++  const last = findIndex(offsets, Math.max(top, bottom - 1));
+   return {
+     start: Math.max(0, first - overscan),
+-    end: last + 1 + overscan,
++    end: Math.min(count, last + 1 + overscan),
+   };
+ }

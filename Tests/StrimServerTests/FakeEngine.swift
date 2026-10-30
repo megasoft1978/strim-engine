@@ -31,6 +31,7 @@ final class FakeEngine: EngineClient, @unchecked Sendable {
     /// Overrides the ledger length `append` returns (default 1).
     var appendCounter: (@Sendable (TurnInput) -> Int)?
     var openError: EngineError?
+    var reportedStats = EngineStats()
     var unhealthy: String?
 
     /// Queue one script per expected `generate` call (the last one used repeats when the queue is empty).
@@ -101,7 +102,7 @@ final class FakeEngine: EngineClient, @unchecked Sendable {
     func close(_ session: SessionID) async { lock.withLock { closed.append(session) } }
 
     func stats() -> EngineStats {
-        var s = EngineStats()
+        var s = reportedStats
         if let u = lock.withLock({ unhealthy }) { s.healthy = false; s.unhealthyReason = u }
         return s
     }

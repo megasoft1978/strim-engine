@@ -1,0 +1,9 @@
+ledger: /tmp/ev1/run2/ledger.jsonl  rows 36
+candidate         label                                  train n fit  pass  fd%   | val n fit  pass  fd%   tokens
+010498d957b46c4f  baseline                                 9  0.44   44%   0% |   4  0.75   75%   0%  165890
+2533bfa0c5e449bd  thinking=all_turns_medium,temperature=   1  0.00    0%   0% | -  0
+45e18dfdad89bb8c  thinking=all_turns_medium                9  0.89   89%   0% |   4  1.00  100%   0%  206985
+75ac0d39e9675f86  thinking=first_planning_turn             9  0.44   44%   0% | -  46110
+r1 thinking: 45e18dfdad89bb8c val gain +25.0 pp (per rep +50.0/+0.0) fd 0%->0% pairs 4: ADOPT
+search in progress: 8 runs pending for the current step; current pack 45e18dfdad89bb8c
+test split: untouched

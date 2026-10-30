@@ -1,0 +1,31 @@
+// Trusted first-initialised package (grader-owned). It is a dependency of the package under
+// test, so its init runs before any package-level variable or init() of that package. It reads
+// the per-run nonce from a descriptor the grader pre-filled and closes it.
+package strimguard
+
+import (
+	"encoding/json"
+	"io"
+	"os"
+	"strings"
+	"syscall"
+)
+
+var nonce string
+var out *os.File
+
+func init() {
+	n := os.NewFile(@NFD@, "nonce")
+	b, _ := io.ReadAll(n)
+	n.Close()
+	nonce = strings.TrimSpace(string(b))
+	syscall.CloseOnExec(@CFD@)
+	out = os.NewFile(@CFD@, "result")
+}
+
+// Finish records the test binary's exit code; it is only reached when m.Run returned.
+func Finish(pkg string, code int) int {
+	rec, _ := json.Marshal(map[string]interface{}{"k": "end", "pkg": pkg, "code": code})
+	out.Write([]byte(nonce + " " + string(rec) + "\n"))
+	return code
+}

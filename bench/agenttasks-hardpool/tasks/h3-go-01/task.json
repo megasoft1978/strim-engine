@@ -1,0 +1,21 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 20,
+  "id" : "h3-go-01",
+  "language" : "go",
+  "license" : "MIT",
+  "prompt" : "Customers report that catalog searches sometimes miss products and that changes are not reflected promptly in search results. Run `go test -count=1 .\/...` offline from the repository root. Correct the non-test source so the suite passes and catalog results meet the behavior documented in the code. Do not edit, delete, or skip tests; they are restored and hash-checked before grading.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-go-catalog",
+  "snapshot" : "snapshot",
+  "snapshot_bytes" : 544,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/catalog_test.go" : "8478e8f6d88d08baca6708f04cdf00d30bddd49ed69a5d2944120f57e0c5c83b"
+  },
+  "tree_sha256" : "ea3cbb7a4203b1f4cb89119201dc7e2594fbb9a3344e8c776a5e75500bc6b388",
+  "verify_cmd" : "go test -count=1 .\/..."
+}

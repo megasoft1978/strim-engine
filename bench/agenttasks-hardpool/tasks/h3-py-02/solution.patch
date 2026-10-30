@@ -1,0 +1,61 @@
+--- a/docmerge/order.py
++++ b/docmerge/order.py
+@@ -17,3 +17,29 @@
+         if key in included and key not in result:
+             result.append(key)
+     return tuple(result)
++
++
++def moved_keys(base, branch):
++    """Return keys outside a deterministic LCS of the shared sections."""
++    shared = set(base) & set(branch)
++    a = [k for k in base if k in shared]
++    b = [k for k in branch if k in shared]
++    lengths = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]
++    for i in range(len(a) - 1, -1, -1):
++        for j in range(len(b) - 1, -1, -1):
++            if a[i] == b[j]:
++                lengths[i][j] = 1 + lengths[i + 1][j + 1]
++            else:
++                lengths[i][j] = max(lengths[i + 1][j], lengths[i][j + 1])
++    retained = set()
++    i = j = 0
++    while i < len(a) and j < len(b):
++        if a[i] == b[j]:
++            retained.add(a[i])
++            i += 1
++            j += 1
++        elif lengths[i + 1][j] >= lengths[i][j + 1]:
++            i += 1
++        else:
++            j += 1
++    return shared - retained
+--- a/docmerge/merge.py
++++ b/docmerge/merge.py
+@@ -1,16 +1,24 @@
+ """Three-way section merge, retaining a usable preview on conflicts."""
+ from .model import Conflict, Document, MergeResult
+-from .order import merge_order
++from .order import merge_order, moved_keys
+ 
+ 
+ def merge(base, left, right):
+     old, a, b = base.by_key(), left.by_key(), right.by_key()
++    left_moved = moved_keys(base.keys(), left.keys())
++    right_moved = moved_keys(base.keys(), right.keys())
+     resolved = {}
+     conflicts = []
+     for key in dict.fromkeys((*base.keys(), *left.keys(), *right.keys())):
+         ancestor, lval, rval = old.get(key), a.get(key), b.get(key)
+-        if lval == rval:
++        moved_and_edited = (ancestor is not None and lval is not None and rval is not None
++                            and ((key in left_moved and rval != ancestor)
++                                 or (key in right_moved and lval != ancestor)))
++        if moved_and_edited and not (lval != ancestor and rval != ancestor and lval != rval):
++            conflicts.append(Conflict(key, 'move-edit', ancestor, lval, rval))
+             value = lval
++        elif lval == rval:
++            value = lval
+         elif lval == ancestor:
+             value = rval
+         elif rval == ancestor:

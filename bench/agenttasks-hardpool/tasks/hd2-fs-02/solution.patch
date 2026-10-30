@@ -1,0 +1,120 @@
+diff --git a/src/client/store.ts b/src/client/store.ts
+index 0729ae4..4093015 100644
+--- a/src/client/store.ts
++++ b/src/client/store.ts
+@@ -1,5 +1,5 @@
+ import type { ApiErrorBody, Item, ItemPatch } from '../shared/types.ts';
+-import type { Api } from './api.ts';
++import type { Api, Result } from './api.ts';
+ 
+ export interface PendingOp {
+   opId: string;
+@@ -29,12 +29,26 @@ export function dismissBanner(state: State): State {
+  * An unknown id returns `state` itself.
+  */
+ export function applyOptimistic(state: State, opId: string, id: string, patch: ItemPatch): State {
+-  return state;
++  const prev = state.items.find((i) => i.id === id);
++  if (!prev) return state;
++  const next: Item = { ...prev };
++  if (patch.title !== undefined) next.title = patch.title.trim();
++  if (patch.done !== undefined) next.done = patch.done;
++  return {
++    items: state.items.map((i) => (i.id === id ? next : i)),
++    pending: [...state.pending, { opId, id, patch, prev }],
++    banner: null,
++  };
+ }
+ 
+ /** Server accepted the op: the item becomes `saved` (server copy, new version) and the op is dropped. Unknown opId returns `state` itself. */
+ export function resolveOp(state: State, opId: string, saved: Item): State {
+-  return state;
++  if (!state.pending.some((op) => op.opId === opId)) return state;
++  return {
++    ...state,
++    items: state.items.map((i) => (i.id === saved.id ? saved : i)),
++    pending: state.pending.filter((op) => op.opId !== opId),
++  };
+ }
+ 
+ /**
+@@ -45,7 +59,15 @@ export function resolveOp(state: State, opId: string, saved: Item): State {
+  * Unknown opId returns `state` itself.
+  */
+ export function rejectOp(state: State, opId: string, error: ApiErrorBody): State {
+-  return state;
++  const op = state.pending.find((p) => p.opId === opId);
++  if (!op) return state;
++  const conflict = error.code === 'version_conflict' && error.current ? error.current : null;
++  const restored = conflict ?? op.prev;
++  return {
++    items: state.items.map((i) => (i.id === op.id ? restored : i)),
++    pending: state.pending.filter((p) => p.opId !== opId),
++    banner: conflict ? `Conflict: "${conflict.title}" was changed elsewhere. Showing the latest version.` : error.message,
++  };
+ }
+ 
+ export class ItemStore {
+@@ -62,6 +84,20 @@ export class ItemStore {
+    * transport throws, treat it as { code: "network", message: "Network error" }.
+    */
+   async edit(id: string, patch: ItemPatch): Promise<void> {
+-    void id; void patch; void this.api; void this.nextOpId;
++    const item = this.state.items.find((i) => i.id === id);
++    if (!item) return;
++    if (this.state.pending.some((op) => op.id === id)) {
++      this.state = { ...this.state, banner: `"${item.title}" is still saving.` };
++      return;
++    }
++    const opId = this.nextOpId();
++    this.state = applyOptimistic(this.state, opId, id, patch);
++    let result: Result<Item>;
++    try {
++      result = await this.api.patchItem(id, patch, item.version);
++    } catch {
++      result = { ok: false, error: { code: 'network', message: 'Network error' } };
++    }
++    this.state = result.ok ? resolveOp(this.state, opId, result.value) : rejectOp(this.state, opId, result.error);
+   }
+ }
+diff --git a/src/server/patch.ts b/src/server/patch.ts
+index 7a9b5b8..c016a80 100644
+--- a/src/server/patch.ts
++++ b/src/server/patch.ts
+@@ -20,5 +20,35 @@ const MAX_TITLE = 40;
+  *  6. otherwise store the trimmed fields, bump version by 1 -> 200 with the new item and its new ETag.
+  */
+ export function patchItem(db: ItemDb, id: string, req: HttpRequest): HttpResponse {
+-  return fail(501, 'not_implemented', 'PATCH is not implemented');
++  const item = db.get(id);
++  if (!item) return fail(404, 'not_found', `Item ${id} not found`);
++  const ifMatch = req.headers['if-match'];
++  if (ifMatch === undefined) return fail(428, 'precondition_required', 'If-Match header is required');
++
++  const body = req.body;
++  if (typeof body !== 'object' || body === null || Array.isArray(body)) return fail(422, 'invalid_patch', 'Patch must be an object');
++  const patch = body as Record<string, unknown>;
++  const keys = Object.keys(patch);
++  if (keys.length === 0 || keys.some((k) => k !== 'title' && k !== 'done')) {
++    return fail(422, 'invalid_patch', 'Patch must contain title and/or done');
++  }
++  let title: string | undefined;
++  if ('title' in patch) {
++    title = typeof patch.title === 'string' ? patch.title.trim() : '';
++    if (title.length === 0 || title.length > MAX_TITLE) return fail(422, 'invalid_patch', `Title must be 1-${MAX_TITLE} characters`);
++  }
++  if ('done' in patch && typeof patch.done !== 'boolean') return fail(422, 'invalid_patch', 'done must be a boolean');
++
++  const tags = ifMatch.split(',').map((t) => t.trim());
++  if (!tags.includes('*') && !tags.includes(etagOf(item))) {
++    return fail(412, 'version_conflict', `Item ${id} changed on the server`, item);
++  }
++
++  const next: Item = { ...item };
++  if (title !== undefined) next.title = title;
++  if (typeof patch.done === 'boolean') next.done = patch.done;
++  if (next.title === item.title && next.done === item.done) return ok(item);
++  next.version = item.version + 1;
++  db.set(id, next);
++  return ok(next);
+ }

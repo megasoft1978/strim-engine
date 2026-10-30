@@ -55,7 +55,7 @@ import Testing
         let names = Set(try FileManager.default.contentsOfDirectory(atPath: dir.path))
         #expect(names == ["system.md", "tool_guidance.md", "memory.md", "knobs.json", "candidate.json", "FINGERPRINT", "pack.sha256", "provenance.jsonl"])
         let knobs = try JSONSerialization.jsonObject(with: Data(contentsOf: dir.appendingPathComponent("knobs.json"))) as? [String: Any]
-        let allowed: Set<String> = ["compactionThreshold", "compactionSummaryPrompt", "resultCapChars", "thinking", "temperature", "decoding"]
+        let allowed: Set<String> = ["compactionThreshold", "compactionSummaryPrompt", "resultCapChars", "thinking", "reasoningEffort", "temperature", "decoding"]
         #expect(Set((knobs ?? [:]).keys).isSubset(of: allowed))
         #expect(knobs?["temperature"] as? Double == 0.6)
     }

@@ -1,0 +1,13 @@
+{
+  "fingerprint" : "45e18dfdad89bb8c",
+  "compaction_summary" : "harness_default",
+  "compaction_threshold" : "harness_default",
+  "playbook_mechanical_edit" : "off",
+  "playbook_repo_qa" : "off",
+  "playbook_test_fix" : "off",
+  "result_cap" : "harness_default",
+  "system_prompt" : "baseline",
+  "temperature" : "greedy",
+  "thinking" : "all_turns_medium",
+  "tool_guidance" : "baseline"
+}

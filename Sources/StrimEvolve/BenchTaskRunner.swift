@@ -32,6 +32,14 @@ public final class BenchTaskRunner: TaskRunner, @unchecked Sendable {
     /// and so every other child it spawns, is left alone.
     public static func environmentForServer(liveDir: URL) -> [String: String] { ["STRIM_PACK_DIR": liveDir.path] }
 
+    /// The work root (`$TMPDIR/strim-evolve-<pid>`). Create it before `LocalServer.spawn(workRoot:)` so the host is
+    /// started with exactly this root granted; the runs live under `<root>/runs`.
+    public static func createWorkRoot() throws -> URL {
+        let work = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("strim-evolve-\(getpid())")
+        try FileManager.default.createDirectory(at: work, withIntermediateDirectories: true)
+        return work
+    }
+
     public func run(_ r: TaskRunRequest) async -> TaskRunResult {
         await Task.detached { [self] in runSync(r) }.value
     }
@@ -42,6 +50,12 @@ public final class BenchTaskRunner: TaskRunner, @unchecked Sendable {
             if liveFingerprint != r.fingerprint {
                 try PackStore.materialize(r.candidate, into: liveDir, fingerprint: r.fingerprint)
                 liveFingerprint = r.fingerprint
+            }
+            // The bench seed otherwise only shuffles task order; pass each Qwen row's seed to the harness.
+            if r.candidate.sampling == .qwen {
+                var knobs = PackLibrary.render(r.candidate).knobs
+                knobs.seed = r.seed
+                try PackStore.write(Canonical.json(knobs), to: liveDir.appendingPathComponent("knobs.json"))
             }
         } catch { return TaskRunResult(pass: false, claimedDone: false, infraError: true, error: "cannot write pack: \(error)") }
 
@@ -59,6 +73,6 @@ public final class BenchTaskRunner: TaskRunner, @unchecked Sendable {
         }
         return TaskRunResult(pass: row.success, claimedDone: row.claimedDone, testsTampered: row.testsTampered,
                              localTokens: (row.localPromptTokens ?? 0) + (row.localCompletionTokens ?? 0), wallS: row.wallS,
-                             infraError: row.infraError, error: row.error)
+                             infraError: row.infraError, error: row.error, timedOut: row.timedOut)
     }
 }

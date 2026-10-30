@@ -1,0 +1,21 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 30,
+  "id" : "h3-js-02",
+  "language" : "javascript",
+  "license" : "MIT",
+  "prompt" : "Implement undo and redo for the event-sourced board. Each successful command is undoable; undo and redo return true when they change the board and false when their stack is empty. A new command after undo discards the redo branch. History must survive snapshot compaction and reopening the journal, and every projection must reflect replayed actions. Preserve task order when restoring a removed task. Run `node --test`. Do not edit, delete, or skip protected tests. Use the built-in Node toolchain only.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-board-journal",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 5201,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/board.test.js" : "b88255562e249b882967b8d2a8c83b59edd5a8abc5e921326827de47168baa09"
+  },
+  "tree_sha256" : "a7970b324a29aff1b9350c0ff17b34726018ea750bff8e8a684b60d2b804d97d",
+  "verify_cmd" : "node --test"
+}

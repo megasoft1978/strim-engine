@@ -1,6 +1,15 @@
-# Strim 0.1.7
+# Strim 0.1.8
 
-## What's in 0.1.7
+## What's in 0.1.8
+
+- Dictation in the chat composer: click the mic or press Cmd-Shift-D, Esc to stop. On-device speech recognition; nothing leaves your Mac.
+- MTP: per-position acceptance counters in `/metrics`, and `strim mtpstats` to replay them.
+- Agent harness, opt-in (pack `knobs.json`, all off by default): a progress gate that asks for a diagnosis and an edit after a failing test run and stops a run that keeps repeating the same failing tests; structured test results that keep the real exit code when output is piped and summarize the failures; thinking only after the agent gets stuck. Also opt-in: a converge playbook, a stall nudge and errors-first result shaping.
+- Thinking on every turn was tested against the default on the full 51-task agent benchmark: 46/51 vs 45/51 at about 3x the time, so the default stays thinking off.
+- Opt-in `STRIM_PREFILL_MACRO_BF16=1`: about 3% faster cold prefill on long prompts.
+- Benchmarks and evolve: token usage recorded for failed jobs; paired and one-time release evaluations.
+
+## Also in 0.1.7
 
 - Faster with several requests at once: about 10% more total decode throughput at 8 concurrent requests on M5-class Macs (MLX kernel tuning; outputs identical; single-request speed unchanged).
 - Tool calls: a call cut off in the middle is no longer executed; everything else parses as before.

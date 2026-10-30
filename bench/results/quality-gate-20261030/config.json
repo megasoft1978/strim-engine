@@ -1,0 +1,23 @@
+{
+  "coordinates" : [
+    "system_prompt",
+    "tool_guidance",
+    "playbook_test_fix",
+    "playbook_repo_qa",
+    "playbook_mechanical_edit",
+    "result_cap",
+    "compaction_threshold",
+    "compaction_summary",
+    "thinking",
+    "temperature",
+    "stall_nudge",
+    "result_shape"
+  ],
+  "maxFalseDoneRate" : 0.05,
+  "maxRounds" : 2,
+  "minCoverage" : 0.8,
+  "minGainPP" : 5,
+  "seed" : 20261027,
+  "trainReps" : 1,
+  "valReps" : 2
+}

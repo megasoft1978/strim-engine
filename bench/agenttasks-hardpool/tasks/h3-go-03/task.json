@@ -1,0 +1,21 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 20,
+  "id" : "h3-go-03",
+  "language" : "go",
+  "license" : "MIT",
+  "prompt" : "Some tenants are unexpectedly denied requests after waiting, and capacity changes produce surprising balances. Run `go test -count=1 .\/...` offline from the repository root. Fix the non-test source so the suite passes and the service follows the behavior documented in the code. Do not edit, delete, or skip the protected tests.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-go-tenantlimit",
+  "snapshot" : "snapshot",
+  "snapshot_bytes" : 416,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/limiter_test.go" : "cf49190b7c8663c6a5b595073f492968c7bc39d63e7019b444c1927def554a8a"
+  },
+  "tree_sha256" : "3b217e30e919ef7e66818ddfeb207a198eee9b6fa5866a3910f8cbe22985b064",
+  "verify_cmd" : "go test -count=1 .\/..."
+}

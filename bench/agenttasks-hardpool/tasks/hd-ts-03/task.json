@@ -1,0 +1,25 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 14,
+  "id" : "hd-ts-03",
+  "language" : "typescript",
+  "license" : "MIT",
+  "note" : "TypeScript: ticket report whose tests fail in store and report code while the root cause is in-place mutation in util (sortBy, normalizeTags)",
+  "prompt" : "This TypeScript package currently fails both its type check and its tests. Run `tsc --noEmit -p .` and `node --test` from the repository root (Node runs the .ts files directly with type stripping; there is no build step and no npm install). Change the non-test source so that both pass. The test files and tsconfig.json are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-ts-hard",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 2919,
+  "test_paths" : [
+    "test",
+    "tsconfig.json"
+  ],
+  "test_sha256" : {
+    "test\/report.test.ts" : "d3aa9245bc09b4d56450fdf36f4e2ccc8ee9a96bf75a4cea44edadc4be143b25",
+    "test\/store.test.ts" : "e7d9dc817aa19a0783973f90e6a198f53049b33bd93d996ca4b7742e5eabaffd",
+    "tsconfig.json" : "3c6fe660eac7382c357050c57a33920a3734a6c7f68968ef808621df1c7502e4"
+  },
+  "tree_sha256" : "9dd00208ebee268364e953341b81587b788dd33e46502dcecb4296f6b7bd8106",
+  "verify_cmd" : "tsc --noEmit -p . && node --test"
+}

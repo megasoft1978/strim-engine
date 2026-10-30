@@ -1,0 +1,142 @@
+{
+ "js-01": {
+  "dirs": [
+   "lib"
+  ],
+  "files": [
+   "lib/semver.js"
+  ]
+ },
+ "js-02": {
+  "dirs": [
+   "lib"
+  ],
+  "files": [
+   "lib/parse.js",
+   "lib/tokenize.js"
+  ]
+ },
+ "jv-01": {
+  "dirs": [
+   "src/main/java/textwrap"
+  ],
+  "files": [
+   "src/main/java/textwrap/Wrapper.java"
+  ]
+ },
+ "jv-02": {
+  "dirs": [
+   "src/main/java/bank"
+  ],
+  "files": [
+   "src/main/java/bank/Account.java",
+   "src/main/java/bank/Bank.java"
+  ]
+ },
+ "py-01": {
+  "dirs": [
+   "pageranges"
+  ],
+  "files": [
+   "pageranges/parse.py"
+  ]
+ },
+ "py-02": {
+  "dirs": [
+   "tpl"
+  ],
+  "files": [
+   "tpl/filters.py",
+   "tpl/render.py"
+  ]
+ },
+ "rb-01": {
+  "dirs": [
+   "lib"
+  ],
+  "files": [
+   "lib/numwords.rb"
+  ]
+ },
+ "rb-02": {
+  "dirs": [
+   "lib/ini"
+  ],
+  "files": [
+   "lib/ini/lexer.rb",
+   "lib/ini/parser.rb"
+  ]
+ },
+ "rs-01": {
+  "dirs": [
+   "src"
+  ],
+  "files": [
+   "src/lib.rs"
+  ]
+ },
+ "rs-02": {
+  "dirs": [
+   "src"
+  ],
+  "files": [
+   "src/field.rs",
+   "src/record.rs"
+  ]
+ },
+ "rx-02": {
+  "dirs": [
+   "src"
+  ],
+  "files": [
+   "src/Cart.jsx",
+   "src/CartRow.jsx",
+   "src/format.js"
+  ]
+ },
+ "rx-03": {
+  "dirs": [
+   "src"
+  ],
+  "files": [
+   "src/Field.jsx",
+   "src/SignupForm.jsx",
+   "src/validate.js"
+  ]
+ },
+ "tf-02": {
+  "dirs": [
+   "."
+  ],
+  "files": [
+   "bigbytes.go",
+   "bytes.go"
+  ]
+ },
+ "tf-03": {
+  "dirs": [
+   "."
+  ],
+  "files": [
+   "bool.go",
+   "flag.go"
+  ]
+ },
+ "ts-01": {
+  "dirs": [
+   "src"
+  ],
+  "files": [
+   "src/result.ts"
+  ]
+ },
+ "ts-02": {
+  "dirs": [
+   "src"
+  ],
+  "files": [
+   "src/pricing.ts",
+   "src/report.ts"
+  ]
+ }
+}

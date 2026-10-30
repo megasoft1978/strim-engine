@@ -1,0 +1,51 @@
+--- a/src/path.ts
++++ b/src/path.ts
+@@ -2,7 +2,7 @@
+ 
+ /** Append a child without mutating a parent shared by sibling walks. */
+ export function childPath(parent: Path, segment: Segment): Path {
+-  return [...parent, String(segment)];
++  return [...parent, segment];
+ }
+ 
+ /** Dot notation for fields and bracket notation for numeric indices. */
+--- a/src/session.ts
++++ b/src/session.ts
+@@ -1,10 +1,12 @@
+ import type { Listener, Result, Schema } from './types.ts';
+ import { validate } from './validate.ts';
++import { RequestSequence } from './sequence.ts';
+ 
+ /** Holds the most recent result for a form and notifies its subscribers. */
+ export class FormSession {
+   private listeners = new Set<Listener>();
+   private latest: Result | null = null;
++  private sequence = new RequestSequence();
+ 
+   private readonly schema: Schema;
+ 
+@@ -20,9 +22,12 @@
+   }
+ 
+   async check(input: unknown): Promise<Result> {
++    const generation = this.sequence.begin();
+     const result = await validate(this.schema, input);
+-    this.latest = result;
+-    for (const listener of this.listeners) listener(result);
++    if (this.sequence.isCurrent(generation)) {
++      this.latest = result;
++      for (const listener of this.listeners) listener(result);
++    }
+     return result;
+   }
+ }
+--- a/src/sequence.ts
++++ b/src/sequence.ts
+@@ -7,6 +7,6 @@
+   }
+ 
+   isCurrent(request: number): boolean {
+-    return request <= this.current;
++    return request === this.current;
+   }
+ }

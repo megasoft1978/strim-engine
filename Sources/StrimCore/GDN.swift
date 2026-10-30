@@ -263,13 +263,30 @@ nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["ST
     }
 
     public static func forward(_ x: MLXArray, store: WeightStore, layer: Int = 0, state: GDNState? = nil) throws -> MLXArray {
+        if MacroPrefill.splits(x), state?.recording != true {
+            let p = "language_model.model.layers.\(layer).linear_attn."
+            let projections = try ["in_proj_qkv", "in_proj_z", "in_proj_b", "in_proj_a"].map {
+                try store.linear(p + $0, x)
+            }
+            let live = state ?? GDNState()
+            let parts = try MacroPrefill.ranges(count: x.shape[1]).map { r in
+                try forwardRange(x[0..., r, 0...], store: store, layer: layer, state: live,
+                                 projections: projections.map { $0[0..., r, 0...] }, deferOutput: true)
+            }
+            return try store.linear(p + "out_proj", concatenated(parts, axis: 1))
+        }
+        return try forwardRange(x, store: store, layer: layer, state: state)
+    }
+
+    private static func forwardRange(_ x: MLXArray, store: WeightStore, layer: Int, state: GDNState?,
+                                     projections: [MLXArray]? = nil, deferOutput: Bool = false) throws -> MLXArray {
         let p = "language_model.model.layers.\(layer).linear_attn."
         let B = x.shape[0], S = x.shape[1]
         let dtype = x.dtype
 
-        let qkv = try OpTimer.linear(store, "gdn.proj", p + "in_proj_qkv", x)
-        let z = try OpTimer.linear(store, "gdn.proj", p + "in_proj_z", x).reshaped([B, S, Hv, Dv])
-        let ba = try OpTimer.timeMany("gdn.proj_ba", flops: Double(4 * B * S * Hv * 5120),
+        let qkv = try projections?[0] ?? OpTimer.linear(store, "gdn.proj", p + "in_proj_qkv", x)
+        let z = try (projections?[1] ?? OpTimer.linear(store, "gdn.proj", p + "in_proj_z", x)).reshaped([B, S, Hv, Dv])
+        let ba = try projections.map { [$0[2], $0[3]] } ?? OpTimer.timeMany("gdn.proj_ba", flops: Double(4 * B * S * Hv * 5120),
                                       bytes: Double(x.nbytes + 2 * Hv * 5120 * 2), inputs: [x]) {
             [try ChunkInvariantLinear.linear(store, p + "in_proj_b", x),
              try ChunkInvariantLinear.linear(store, p + "in_proj_a", x)]
@@ -354,6 +371,7 @@ nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["ST
                 let normedM = MLXFast.rmsNorm(yAllM, weight: normWM, eps: 1e-6)
                 return Fused.gatedNorm(z, normedM)
             }
+            if deferOutput { return gatedM.reshaped([B, S, valDim]) }
             return try OpTimer.linear(store, "gdn.out", p + "out_proj", gatedM.reshaped([B, S, valDim]))
         }
         if GDN.useMetal && B == 1 && S <= GDN.metalMaxS {
@@ -370,6 +388,7 @@ nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["ST
             let normWM = try store.tensor(p + "norm.weight")
             let normedM = MLXFast.rmsNorm(yAllM, weight: normWM, eps: 1e-6)
             let gatedM = Fused.gatedNorm(z, normedM)
+            if deferOutput { return gatedM.reshaped([B, S, valDim]) }
             return try store.linear(p + "out_proj", gatedM.reshaped([B, S, valDim]))
         }
         if GDN.useMetal && GDN.batchDecode && B > 1 && S <= GDN.metalMaxS && S < 512 && !recording {
@@ -427,6 +446,7 @@ nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["ST
         let normW = try store.tensor(p + "norm.weight")
         let normed = MLXFast.rmsNorm(yAll, weight: normW, eps: 1e-6)
         let gated = Fused.gatedNorm(z, normed)
+        if deferOutput { return gated.reshaped([B, S, valDim]) }
         return try store.linear(p + "out_proj", gated.reshaped([B, S, valDim]))
     }
 }

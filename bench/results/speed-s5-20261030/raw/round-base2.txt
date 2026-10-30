@@ -1,0 +1,2 @@
+BYTES layer_weights=13.697 GB lm_head=0.715 GB total=14.412 GB -> roofline@530GB/s 27.19 ms
+ROUND ctx=16384 depth=2 (synthetic cache, real SpecStream, timing_env=off) rounds=54 mean=44.35 median=44.16 min=43.25 ms/round tokens/round=1.26

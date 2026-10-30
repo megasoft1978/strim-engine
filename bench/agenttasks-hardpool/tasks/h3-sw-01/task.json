@@ -1,0 +1,22 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 30,
+  "id" : "h3-sw-01",
+  "language" : "swift",
+  "license" : "MIT",
+  "note" : "Ledger balances after mutations and statement boundaries.",
+  "prompt" : "The ledger sometimes reports outdated balances after transactions change, and some statements have incorrect opening and closing amounts. Run `swift test --build-system native --disable-sandbox` from the repository root and fix the non-test source. Tests define the expected behavior: do not edit, delete or skip them. No network or dependency installation is needed.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-swift-hard3",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 3863,
+  "test_paths" : [
+    "Tests"
+  ],
+  "test_sha256" : {
+    "Tests\/LedgerTests\/LedgerTests.swift" : "025bbe9dfbcd4e7e6f00cdca54c1a79dd360ae91a80b416ad24675083ff71613"
+  },
+  "tree_sha256" : "01a8e27047bb73db7fa28d8c8aee979ad0eeeaf2fc7e7a5904b194089de87592",
+  "verify_cmd" : "swift test --build-system native --disable-sandbox"
+}

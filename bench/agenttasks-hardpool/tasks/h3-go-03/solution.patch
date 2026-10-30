@@ -1,0 +1,25 @@
+--- a/bucket.go
++++ b/bucket.go
+@@ -18,8 +18,8 @@
+ 		return
+ 	}
+ 	elapsed := now.Sub(b.last).Seconds()
+-	// Refill in whole tokens to avoid accumulating floating point noise.
+-	b.tokens += float64(int(elapsed * b.policy.Rate))
++	// Retain fractional credit across accounting calls.
++	b.tokens += elapsed * b.policy.Rate
+ 	if b.tokens > float64(b.policy.Burst) {
+ 		b.tokens = float64(b.policy.Burst)
+ 	}
+--- a/reload.go
++++ b/reload.go
+@@ -13,8 +13,8 @@
+ 	defer s.mu.Unlock()
+ 	s.policy = p
+ 	for _, b := range s.buckets {
+-		b.policy = p
+ 		b.advance(now)
++		b.policy = p
+ 		if b.tokens > float64(p.Burst) {
+ 			b.tokens = float64(p.Burst)
+ 		}

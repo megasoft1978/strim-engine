@@ -9,11 +9,15 @@ struct ChatTab: View {
     @EnvironmentObject var flow: ProjectsFlow
     /// Screenshots only: show every tool card and reasoning block open.
     var expandAll = false
-    @State private var drafts: [String: String] = [:]
+    @State private var drafts: [String: String]
     @State private var expanded = Set<UUID>()
     @State private var removeProject: ChatProject?
     @State private var dismissedNotice: String?
     @Environment(\.layoutClass) private var layout
+
+    init(model: AppModel, expandAll: Bool = false, drafts: [String: String] = [:]) {
+        self.model = model; self.expandAll = expandAll; _drafts = State(initialValue: drafts)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Strim.S.md) {
@@ -30,6 +34,8 @@ struct ChatTab: View {
         .padding(layout == .compact ? 16 : Strim.S.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Strim.C.bg)
+        // Dictated text lands in the chat it was started in, after what was typed there.
+        .onChange(of: model.dictationOutput) { _, out in if let out { drafts[out.threadID] = out.text } }
         .confirmationDialog(removeProject.map { model.removalPlan(for: $0).title } ?? "Remove project?", isPresented: Binding(get: { removeProject != nil }, set: { if !$0 { removeProject = nil } }),
                             titleVisibility: .visible, presenting: removeProject) { p in
             Button("Remove Project", role: .destructive) { Task { await model.removeProject(p.id) } }
@@ -83,10 +89,24 @@ struct ChatTab: View {
                 } else if let why = avail.reason {
                     Label(why, systemImage: "lock").font(.system(size: 12)).foregroundStyle(Strim.C.muted)
                 }
+                if let e = model.dictationState(for: t.id).error { dictationNotice(e) }
                 ChatComposer(model: model, thread: t, draft: draftBinding(t.id), available: avail.enabled)
                 Text(safetyLine(t)).font(.system(size: 11)).foregroundStyle(Strim.C.tertiary)
                     .accessibilityLabel(safetyLine(t))
             }
+        }
+    }
+
+    private func dictationNotice(_ e: DictationError) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Label(e.message, systemImage: "mic.slash").font(.system(size: 12)).foregroundStyle(Strim.C.danger)
+                .fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+            Spacer(minLength: 0)
+            if e.offersSettings, let url = AppModel.dictationSettingsURL() {
+                Button("Open Microphone Settings") { NSWorkspace.shared.open(url) }.buttonStyle(StrimButtonStyle(.secondary))
+            }
+            Button { model.dismissDictationMessage() } label: { Image(systemName: "xmark") }
+                .buttonStyle(.plain).foregroundStyle(Strim.C.muted).help("Dismiss").accessibilityLabel("Dismiss dictation message")
         }
     }
 
@@ -96,7 +116,7 @@ struct ChatTab: View {
     }
 
     private func draftBinding(_ id: String) -> Binding<String> {
-        Binding(get: { drafts[id] ?? "" }, set: { drafts[id] = $0 })
+        Binding(get: { drafts[id] ?? "" }, set: { drafts[id] = $0; model.dictationDraftChanged($0, in: id) })
     }
 }
 
@@ -294,6 +314,8 @@ struct ChatComposer: View {
     let thread: ChatThread
     @Binding var draft: String
     var available = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var pulse = false
 
     /// Before the first message the toggle edits the default; afterwards it shows what the chat uses (the host reads it once).
     private var thinking: Binding<Bool> {
@@ -303,6 +325,8 @@ struct ChatComposer: View {
     var body: some View {
         let queued = model.queuedText(for: thread.id) != nil
         let locked = thread.messageCount > 0
+        let dictation = model.dictationState(for: thread.id)
+        let fieldOff = model.chatGenerating || queued || !available
         HStack(spacing: 8) {
             HStack(spacing: 5) {
                 Image(systemName: "brain").font(.system(size: 11)).foregroundStyle(Strim.C.muted)
@@ -315,8 +339,9 @@ struct ChatComposer: View {
             .accessibilityLabel("Thinking")
             .accessibilityValue(thinking.wrappedValue ? "on" : "off")
             .accessibilityHint(locked ? "Applies to new chats" : "")
-            TextField(queued ? "One message is waiting" : "Message", text: $draft).textFieldStyle(.plain).font(.system(size: 13))
+            TextField(queued ? "One message is waiting" : placeholder(dictation), text: $draft).textFieldStyle(.plain).font(.system(size: 13))
                 .onSubmit(send).disabled(model.chatGenerating || queued || !available)
+            dictationButton(dictation, disabled: fieldOff)
             if model.chatGenerating {
                 Button { Task { await model.cancel(thread.id) } } label: {
                     Image(systemName: "stop.fill").font(.system(size: 11, weight: .bold)).foregroundStyle(Strim.C.text)
@@ -334,11 +359,45 @@ struct ChatComposer: View {
                 .buttonStyle(.plain).disabled(off).accessibilityLabel("Send")
             }
         }
+        .onExitCommand { model.stopDictation() }
         .padding(.horizontal, 6).frame(minHeight: 36)
         .background(Strim.C.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Strim.C.hairline, lineWidth: 1))
         .opacity(available ? 1 : 0.6)
     }
+    private func placeholder(_ d: DictationState) -> String {
+        switch d {
+        case .listening: "Listening…"
+        case .preparing: "Preparing dictation…"
+        default: "Message"
+        }
+    }
+
+    /// Mic toggle. Cmd-Shift-D too; Esc and a pause in speech stop it.
+    private func dictationButton(_ d: DictationState, disabled: Bool) -> some View {
+        let listening = d == .listening, preparing = d == .preparing
+        let elsewhere = model.dictationBusyElsewhere(for: thread.id)
+        return Button { model.toggleDictation(in: thread.id, draft: draft) } label: {
+            Group {
+                if preparing { ProgressView().controlSize(.small).scaleEffect(0.7) }
+                else { Image(systemName: listening ? "mic.fill" : "mic").font(.system(size: 12, weight: .medium)) }
+            }
+            .foregroundStyle(listening ? Strim.C.onAccent : Strim.C.muted)
+            .frame(width: 26, height: 26)
+            .background(listening ? Strim.C.danger : Strim.C.surface2, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .opacity(listening && pulse ? 0.65 : 1)
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: pulse)
+        }
+        .buttonStyle(.plain).keyboardShortcut("d", modifiers: [.command, .shift])
+        .disabled((disabled && !d.isActive) || elsewhere)
+        .help(elsewhere ? "Finishing dictation in another chat" : listening ? "Stop dictation (\(DictationInfo.shortcut) or Esc)" : "Dictate (\(DictationInfo.shortcut))")
+        .accessibilityLabel("Dictation")
+        .accessibilityValue(listening ? "listening" : preparing ? "preparing" : "off")
+        .accessibilityHint(listening ? "Stops dictation" : "Speak to fill the message. Nothing is sent.")
+        .accessibilityAddTraits(listening ? .isSelected : [])
+        .onChange(of: listening) { _, now in pulse = now }   // last: the lint chain parser stops at a trailing closure
+    }
+
     private func send() {
         let t = draft
         guard model.submitDraft(t, in: thread.id, available: available) != nil else { return }

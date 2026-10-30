@@ -1,0 +1,12 @@
+diff --git a/lib/tiers.js b/lib/tiers.js
+index 6a3c532..a81d2de 100644
+--- a/lib/tiers.js
++++ b/lib/tiers.js
+@@ -1,6 +1,6 @@
+ /** Tiers ordered from the highest threshold down. */
+ export function byThresholdDesc(tiers) {
+-  return tiers.sort((a, b) => b.min - a.min);
++  return [...tiers].sort((a, b) => b.min - a.min);
+ }
+ 
+ /** The discount rate for a subtotal: the tier with the highest threshold not above it. */

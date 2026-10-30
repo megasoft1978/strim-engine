@@ -1,0 +1,24 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 20,
+  "id" : "h3-py-01",
+  "language" : "python",
+  "license" : "MIT",
+  "prompt" : "The settlement service produces incorrect account balances for some payment workflows and occasionally drops a valid delivery. Run `python3 -I -B -m unittest discover -s tests -t .` from the repository root. Fix the non-test source so the full suite passes. The tests are protected; do not edit, delete or skip them. Use the standard library only.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-settlement",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 7193,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/__init__.py" : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests\/test_audit.py" : "4f02bd616d71be2bfcee2e60f51fc1c63be4eaa9e4f6e74843df6f72e0681387",
+    "tests\/test_export.py" : "d0597d08c6b5b74de5d89f14ccb092918308febaad304564784082032a388c33",
+    "tests\/test_service.py" : "1602b9db4baafd8f2cb3ccc51d8b81c64201162a47a44b0bba6ae4d855081f44"
+  },
+  "tree_sha256" : "bf368e036513dab532ae577d9370971a438d5e39cdfd039d01768a7279cc0eb7",
+  "verify_cmd" : "python3 -I -B -m unittest discover -s tests -t ."
+}

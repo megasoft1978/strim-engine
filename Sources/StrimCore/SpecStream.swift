@@ -57,6 +57,10 @@ public final class SpecStream {
     /// Optional token constraint (grammar / forced tokens). nil: no masking and no extra work per round.
     public var constraint: VerifyConstraint?
 
+    /// Offline diagnostics only. Draft ids are already materialized by verification.
+    /// Called only after a successful round; nil on the production/default path.
+    public var onRound: ((_ depth: Int, _ accepted: Int, _ drafts: [Int32]) -> Void)?
+
     private var d: Int
     /// Ceiling of the cost-per-token policy: 3 unless STRIM_MTP_MAX_DEPTH is set (depth 4 lost to fixed 3 on low-acceptance agent prompts, L16).
     private var policyMax: Int { SpecStream.envMaxDepth ? maxDepth : min(maxDepth, 3) }
@@ -300,6 +304,8 @@ public final class SpecStream {
             if trace {
                 FileHandle.standardError.write(Data(String(format: "TRACE ctx=%d d=%d acc=%d ms=%.2f\n", cache.position, roundDepth, accepted, Date().timeIntervalSince(tA) * 1000).utf8))
             }
+            stats.mtp.recordRound(depth: roundDepth, accepted: accepted)
+            onRound?(roundDepth, accepted, drafts)
             return Array(feed.prefix(keep))
         } else {
             cache.beginVerify()
@@ -320,6 +326,8 @@ public final class SpecStream {
                 try replayHead(tokens: [pending], hidden: vNorm)
                 lastHidden = vNorm
             }
+            stats.mtp.recordRound(depth: 0, accepted: 0)
+            onRound?(0, 0, [])
             return [b]
         }
     }

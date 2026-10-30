@@ -1,4 +1,5 @@
 import Foundation
+import StrimCore
 import StrimPrompt
 import StrimTemplate
 
@@ -109,7 +110,15 @@ public struct LedgerSnapshot: Sendable {
 }
 
 public struct EngineStats: Sendable {
+    /// Completed SpecStream rounds only. Published with the engine's existing locked
+    /// value snapshot. Monotonic across session reuse/eviction, reset on engine creation.
+    public var mtp = MTPStats()
+    public var mtpLifetime = ""
+    public var mtpStartedAt = Date(timeIntervalSince1970: 0)
+    /// BatchModel currently uses plain decode; these output tokens have no MTP coverage.
+    public var mtpUnsupportedBatchTokens = 0
     public var healthy = true
+
     public var unhealthyReason: String?
     public var lastHeartbeat = Date()
     public var unitsRun = 0

@@ -1,7 +1,113 @@
 import Foundation
 import MLX
 
+/// CPU-only completed-round accounting. Positions are one-based; the bounded counters
+/// cover depths 1...4. Larger experimental depths are counted in overflowProposed.
+/// A cancelled/failed round is never recorded. No token/logit/device access here.
+public struct MTPStats: Sendable, Equatable, Codable {
+    public static let positionLimit = 4
+    // Scalar storage keeps stream snapshots and per-round deltas allocation-free.
+    private var proposed1 = 0, proposed2 = 0, proposed3 = 0, proposed4 = 0
+    private var reached1 = 0, reached2 = 0, reached3 = 0, reached4 = 0
+    private var acceptedPrefix1 = 0, acceptedPrefix2 = 0, acceptedPrefix3 = 0, acceptedPrefix4 = 0
+    public var proposed: [Int] { [proposed1, proposed2, proposed3, proposed4] }
+    public var reached: [Int] { [reached1, reached2, reached3, reached4] }
+    public var acceptedPrefix: [Int] { [acceptedPrefix1, acceptedPrefix2, acceptedPrefix3, acceptedPrefix4] }
+    public private(set) var rounds = 0
+    public private(set) var emitted = 0
+    public private(set) var overflowProposed = 0
+    public init() {}
+
+    public mutating func recordRound(depth: Int, accepted: Int) {
+        let depth = max(depth, 0)
+        let a = min(max(accepted, 0), depth)
+        rounds += 1
+        emitted += a + 1
+        overflowProposed += max(0, depth - Self.positionLimit)
+        if depth >= 1 {
+            proposed1 += 1
+            reached1 += 1
+            if a >= 1 { acceptedPrefix1 += 1 }
+        }
+        if depth >= 2 {
+            proposed2 += 1
+            if a >= 1 { reached2 += 1 }
+            if a >= 2 { acceptedPrefix2 += 1 }
+        }
+        if depth >= 3 {
+            proposed3 += 1
+            if a >= 2 { reached3 += 1 }
+            if a >= 3 { acceptedPrefix3 += 1 }
+        }
+        if depth >= 4 {
+            proposed4 += 1
+            if a >= 3 { reached4 += 1 }
+            if a >= 4 { acceptedPrefix4 += 1 }
+        }
+    }
+
+    public mutating func add(_ other: MTPStats) {
+        rounds += other.rounds; emitted += other.emitted
+        overflowProposed += other.overflowProposed
+        proposed1 += other.proposed1; proposed2 += other.proposed2
+        proposed3 += other.proposed3; proposed4 += other.proposed4
+        reached1 += other.reached1; reached2 += other.reached2
+        reached3 += other.reached3; reached4 += other.reached4
+        acceptedPrefix1 += other.acceptedPrefix1; acceptedPrefix2 += other.acceptedPrefix2
+        acceptedPrefix3 += other.acceptedPrefix3; acceptedPrefix4 += other.acceptedPrefix4
+    }
+
+    /// Both snapshots must belong to the same stream lifetime, in time order.
+    public func delta(since previous: MTPStats) -> MTPStats {
+        var result = self
+        result.rounds -= previous.rounds; result.emitted -= previous.emitted
+        result.overflowProposed -= previous.overflowProposed
+        result.proposed1 -= previous.proposed1; result.proposed2 -= previous.proposed2
+        result.proposed3 -= previous.proposed3; result.proposed4 -= previous.proposed4
+        result.reached1 -= previous.reached1; result.reached2 -= previous.reached2
+        result.reached3 -= previous.reached3; result.reached4 -= previous.reached4
+        result.acceptedPrefix1 -= previous.acceptedPrefix1; result.acceptedPrefix2 -= previous.acceptedPrefix2
+        result.acceptedPrefix3 -= previous.acceptedPrefix3; result.acceptedPrefix4 -= previous.acceptedPrefix4
+        return result
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case proposed, reached, acceptedPrefix, rounds, emitted, overflowProposed
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(proposed, forKey: .proposed)
+        try container.encode(reached, forKey: .reached)
+        try container.encode(acceptedPrefix, forKey: .acceptedPrefix)
+        try container.encode(rounds, forKey: .rounds)
+        try container.encode(emitted, forKey: .emitted)
+        try container.encode(overflowProposed, forKey: .overflowProposed)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let proposed = try container.decode([Int].self, forKey: .proposed)
+        let reached = try container.decode([Int].self, forKey: .reached)
+        let acceptedPrefix = try container.decode([Int].self, forKey: .acceptedPrefix)
+        for (key, count) in [(CodingKeys.proposed, proposed.count), (.reached, reached.count), (.acceptedPrefix, acceptedPrefix.count)] {
+            guard count == Self.positionLimit else {
+                throw DecodingError.dataCorruptedError(forKey: key, in: container,
+                                                       debugDescription: "Expected \(Self.positionLimit) position counters")
+            }
+        }
+        proposed1 = proposed[0]; proposed2 = proposed[1]; proposed3 = proposed[2]; proposed4 = proposed[3]
+        reached1 = reached[0]; reached2 = reached[1]; reached3 = reached[2]; reached4 = reached[3]
+        acceptedPrefix1 = acceptedPrefix[0]; acceptedPrefix2 = acceptedPrefix[1]
+        acceptedPrefix3 = acceptedPrefix[2]; acceptedPrefix4 = acceptedPrefix[3]
+        rounds = try container.decode(Int.self, forKey: .rounds)
+        emitted = try container.decode(Int.self, forKey: .emitted)
+        overflowProposed = try container.decode(Int.self, forKey: .overflowProposed)
+    }
+}
+
 public struct SpecStats {
+    public var mtp = MTPStats()
     public var emitted = 0
     public var passes = 0
     public var drafts = 0
@@ -143,7 +249,8 @@ public enum QwenModel {
                                     head: WeightStore, depth: Int = 2, layers: Int = 64,
                                     chain: DraftChain = QwenModel.defaultDraftChain,
                                     adaptive: Bool = QwenModel.defaultAdaptiveDepth,
-                                    maxDepth: Int = QwenModel.defaultMaxDepth) throws -> ([Int32], SpecStats) {
+                                    maxDepth: Int = QwenModel.defaultMaxDepth,
+                                    onRound: ((Int, Int, [Int32]) -> Void)? = nil) throws -> ([Int32], SpecStats) {
         var stats = SpecStats()
         stats.promptTokens = prompt.count
         guard maxTokens > 0 else { return (prompt, stats) }
@@ -169,6 +276,7 @@ public enum QwenModel {
         let stream = SpecStream(store: store, head: head, cache: cache, mtp: mtp, seedToken: b,
                                 lastHidden: lastHidden, depth: depth, layers: layers, chain: chain,
                                 adaptive: adaptive, maxDepth: maxDepth, maintainHead: false)
+        stream.onRound = onRound
         while out.count - prompt.count < maxTokens {
             out.append(contentsOf: try stream.step(remaining: maxTokens - (out.count - prompt.count)))
         }
@@ -176,6 +284,7 @@ public enum QwenModel {
         stats.passes = stream.stats.passes
         stats.drafts = stream.stats.drafts
         stats.acceptedDrafts = stream.stats.acceptedDrafts
+        stats.mtp = stream.stats.mtp
         stats.seconds = Date().timeIntervalSince(t0)
         stream.printTiming()
         return (out, stats)

@@ -231,7 +231,12 @@ public final class WeightStore {
 
     /// Quantized matmul with explicit (config-derived) quantization.
     public func qmm(_ x: MLXArray, _ w: MLXArray, _ s: MLXArray, _ b: MLXArray, spec: QuantSpec) -> MLXArray {
-        quantizedMatmul(rotation?.apply(x) ?? x, w, scales: s, biases: b, transpose: true,
+        if MacroPrefill.dense(x, spec: spec, rotated: rotation != nil) {
+            let dense = dequantized(w, scales: s, biases: b, groupSize: spec.groupSize,
+                                    bits: spec.bits).asType(.bfloat16)
+            return matmul(x, dense.transposed(-1, -2))
+        }
+        return quantizedMatmul(rotation?.apply(x) ?? x, w, scales: s, biases: b, transpose: true,
                         groupSize: spec.groupSize, bits: spec.bits)
     }
 

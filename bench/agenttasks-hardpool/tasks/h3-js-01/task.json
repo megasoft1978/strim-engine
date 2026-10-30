@@ -1,0 +1,23 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 30,
+  "id" : "h3-js-01",
+  "language" : "javascript",
+  "license" : "MIT",
+  "note" : "Catalog cache: expiry boundary and invalidation with overlapping asynchronous requests.",
+  "prompt" : "The catalog occasionally returns stale data after a save or reset, and entries sometimes survive longer than expected. Run `node --test` from the repository root and fix the non-test source so the suite passes. Keep the public behavior described by the code and tests. Do not edit, delete, or skip tests; they are restored and hash-checked before grading. No network or installation is required.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-js-hard3",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 5301,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/catalog.test.js" : "eb70c15daf904e40e40ad255ef3349c8765333fac0c8e90255b9f02e2ab16c3c",
+    "test\/search.test.js" : "696dffe9c38b7ec468a46863ff947a188da1c48a9db7a41c880464bcb6c858bd"
+  },
+  "tree_sha256" : "0b05374b257aedd080920de43832af9e344413bd1aae925239809360e510665a",
+  "verify_cmd" : "node --test"
+}

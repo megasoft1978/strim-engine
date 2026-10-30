@@ -1,7 +1,7 @@
 import Foundation
 import StrimAgentBench
 
-public enum Phase: String, Codable, Sendable { case search, release }
+public enum Phase: String, Codable, Sendable { case search, release, paired }
 
 /// One JSONL line per (candidate, split, task, rep). `fitness` = pass - 2 * falseDone, tie-break local tokens then wall.
 public struct FitnessRow: Codable, Equatable, Sendable {
@@ -26,6 +26,8 @@ public struct FitnessRow: Codable, Equatable, Sendable {
     public var infraError: Bool = false
     public var dryRun: Bool = false
     public var error: String?
+    /// Absent for legacy outcomes, so their encoded rows remain unchanged.
+    public var timedOut: Bool?
     public var ts: String = ""
 
     public static let falseDonePenalty = 2.0
@@ -92,10 +94,12 @@ public struct TaskRunResult: Sendable, Equatable {
     public var wallS: Double
     public var infraError: Bool
     public var error: String?
+    public var timedOut: Bool?
     public init(pass: Bool, claimedDone: Bool, testsTampered: Bool = false, localTokens: Int = 0, wallS: Double = 0,
-                infraError: Bool = false, error: String? = nil) {
+                infraError: Bool = false, error: String? = nil, timedOut: Bool? = nil) {
         self.pass = pass; self.claimedDone = claimedDone; self.testsTampered = testsTampered; self.localTokens = localTokens
         self.wallS = wallS; self.infraError = infraError; self.error = error
+        self.timedOut = timedOut
     }
 }
 
@@ -112,8 +116,9 @@ public enum RowBuilder {
         row.phase = phase; row.round = round; row.coordinate = coordinate
         row.claimedDone = result.claimedDone; row.testsTampered = result.testsTampered
         row.localTokens = result.localTokens; row.wallS = result.wallS
-        row.seed = r.seed; row.decoding = r.candidate.temperature == .greedy ? "greedy" : "sampled"
+        row.seed = r.seed; row.decoding = r.candidate.isSampled ? "sampled" : "greedy"
         row.infraError = result.infraError; row.error = result.error; row.dryRun = dryRun
+        row.timedOut = result.timedOut
         row.ts = ISO8601DateFormatter().string(from: Date())
         return row
     }

@@ -11,12 +11,32 @@ import Foundation
 ///   context, temperature within 0...1. Non-finite numbers fall back to the default.
 /// - The default value of every field reproduces today's behaviour exactly (`HarnessKnobs() == nil knobs`).
 public struct HarnessKnobs: Codable, Equatable, Sendable {
+    public enum Context: String, Codable, Sendable {
+        case standard, long, xlong
+        public var requestedTokens: Int {
+            switch self { case .standard: 32_768; case .long: 65_536; case .xlong: 131_072 }
+        }
+        /// Conservative ceiling within MemoryModel.requestReserveBytes, including MTP (docs/EVOLVE.md).
+        public var tokens: Int { min(requestedTokens, 65_536) }
+        public var compactionTokens: Int { self == .standard ? 28_000 : 56_000 }
+        public var turnTokens: Int { self == .standard ? 4096 : 8192 }
+        public var thinkingTokens: Int { self == .standard ? 8192 : 16_384 }
+    }
+    public enum Sampling: String, Codable, Sendable { case greedy, qwen }
+    public enum PreserveThinking: String, Codable, Sendable { case off, on }
+    public enum ProgressGate: String, Codable, Sendable { case off, on }
+    public enum TestStatus: String, Codable, Sendable { case plain, structured }
+    public enum StallNudge: String, Codable, Sendable { case off, on }
+    public enum ResultShape: String, Codable, Sendable { case headTail = "head_tail", errorsFirst = "errors_first" }
+
     public enum Thinking: String, Codable, Sendable {
         case off
         /// Thinking on for the first assistant turn of a job (and of a fresh session after a compaction) only.
         case firstPlanningTurn = "first_planning_turn"
         /// Thinking on for every assistant generation in the job.
         case allTurns = "all_turns"
+        /// One recovery generation after an unchanged failure recurrence or a stall reminder.
+        case onStall = "on_stall"
     }
 
     /// Context length the compaction fraction refers to. The shipped default threshold (28 000 tokens) is 0.855 of it.
@@ -36,6 +56,14 @@ public struct HarnessKnobs: Codable, Equatable, Sendable {
     /// Still bounded by the job's `maxGeneratedTokens`.
     public static let thinkingTurnTokens = 8192
 
+    public var context: Context
+    /// nil preserves the existing temperature knob; explicit greedy overrides it.
+    public var sampling: Sampling?
+    public var preserve_thinking: PreserveThinking
+    public var progress_gate: ProgressGate
+    public var test_status: TestStatus
+    public var stall_nudge: StallNudge
+    public var result_shape: ResultShape
     public var resultCapChars: Int?
     public var compactionThreshold: Double?
     public var compactionSummaryPrompt: String?
@@ -48,7 +76,16 @@ public struct HarnessKnobs: Codable, Equatable, Sendable {
 
     public init(resultCapChars: Int? = nil, compactionThreshold: Double? = nil, compactionSummaryPrompt: String? = nil,
                 thinking: Thinking = .off, reasoningEffort: String = "medium", temperature: Double = 0, seed: UInt64 = HarnessKnobs.defaultSeed,
-                decoding: String? = nil) {
+                decoding: String? = nil, stall_nudge: StallNudge = .off, result_shape: ResultShape = .headTail,
+                progress_gate: ProgressGate = .off, test_status: TestStatus = .plain,
+                context: Context = .standard, sampling: Sampling? = nil, preserve_thinking: PreserveThinking = .off) {
+        self.context = context
+        self.sampling = sampling
+        self.preserve_thinking = preserve_thinking
+        self.progress_gate = progress_gate
+        self.test_status = test_status
+        self.stall_nudge = stall_nudge
+        self.result_shape = result_shape
         self.resultCapChars = resultCapChars.map { min(max($0, Self.resultCapRange.lowerBound), Self.resultCapRange.upperBound) }
         self.compactionThreshold = compactionThreshold.flatMap { $0.isFinite ? min(max($0, Self.compactionFractionRange.lowerBound), Self.compactionFractionRange.upperBound) : nil }
         self.compactionSummaryPrompt = Self.sanitizeGuidance(compactionSummaryPrompt)
@@ -60,7 +97,7 @@ public struct HarnessKnobs: Codable, Equatable, Sendable {
     }
 
     private enum Key: String, CodingKey, CaseIterable {
-        case resultCapChars, compactionThreshold, compactionSummaryPrompt, thinking, reasoningEffort, temperature, seed, decoding
+        case context, sampling, preserve_thinking, progress_gate, test_status, stall_nudge, result_shape, resultCapChars, compactionThreshold, compactionSummaryPrompt, thinking, reasoningEffort, temperature, seed, decoding
     }
 
     private struct AnyKey: CodingKey {
@@ -91,7 +128,34 @@ public struct HarnessKnobs: Codable, Equatable, Sendable {
                   reasoningEffort: effort,
                   temperature: try c.decodeIfPresent(Double.self, forKey: .temperature) ?? 0,
                   seed: try c.decodeIfPresent(UInt64.self, forKey: .seed) ?? Self.defaultSeed,
-                  decoding: decoding)
+                  decoding: decoding,
+                  stall_nudge: try c.decodeIfPresent(StallNudge.self, forKey: .stall_nudge) ?? .off,
+                  result_shape: try c.decodeIfPresent(ResultShape.self, forKey: .result_shape) ?? .headTail,
+                  progress_gate: try c.decodeIfPresent(ProgressGate.self, forKey: .progress_gate) ?? .off,
+                  test_status: try c.decodeIfPresent(TestStatus.self, forKey: .test_status) ?? .plain,
+                  context: try c.decodeIfPresent(Context.self, forKey: .context) ?? .standard,
+                  sampling: try c.decodeIfPresent(Sampling.self, forKey: .sampling),
+                  preserve_thinking: try c.decodeIfPresent(PreserveThinking.self, forKey: .preserve_thinking) ?? .off)
+    }
+
+    /// Keep legacy encoded bytes: only the new opt-in values add keys.
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: Key.self)
+        if context != .standard { try c.encode(context, forKey: .context) }
+        try c.encodeIfPresent(sampling, forKey: .sampling)
+        if preserve_thinking != .off { try c.encode(preserve_thinking, forKey: .preserve_thinking) }
+        try c.encode(stall_nudge, forKey: .stall_nudge)
+        try c.encode(result_shape, forKey: .result_shape)
+        try c.encodeIfPresent(resultCapChars, forKey: .resultCapChars)
+        try c.encodeIfPresent(compactionThreshold, forKey: .compactionThreshold)
+        try c.encodeIfPresent(compactionSummaryPrompt, forKey: .compactionSummaryPrompt)
+        try c.encode(thinking, forKey: .thinking)
+        try c.encode(reasoningEffort, forKey: .reasoningEffort)
+        try c.encode(temperature, forKey: .temperature)
+        try c.encode(seed, forKey: .seed)
+        try c.encodeIfPresent(decoding, forKey: .decoding)
+        if progress_gate != .off { try c.encode(progress_gate, forKey: .progress_gate) }
+        if test_status != .plain { try c.encode(test_status, forKey: .test_status) }
     }
 
     public static func decode(_ data: Data) throws -> HarnessKnobs {
@@ -105,10 +169,32 @@ public struct HarnessKnobs: Codable, Equatable, Sendable {
 
     /// Estimated prompt tokens above which the loop compacts.
     public var compactionTokens: Int {
-        compactionThreshold.map { Int(Double(Self.contextTokens) * $0) } ?? Self.defaultCompactionTokens
+        compactionThreshold.map { Int(Double(context.tokens) * $0) } ?? context.compactionTokens
     }
 
-    public var isSampled: Bool { temperature > 0 }
+    public var isSampled: Bool { sampling.map { $0 == .qwen } ?? (temperature > 0) }
+
+    /// Presets override temperature only when explicitly selected. Omission keeps legacy warm/greedy traffic.
+    public func samplingValues(thinking: Bool) -> (temperature: Float, topP: Float, topK: Int) {
+        switch sampling {
+        case .qwen: (thinking ? 1 : 0.7, thinking ? 0.95 : 0.8, 20)
+        case .greedy: (0, 1, 0)
+        case nil: (Float(temperature), isSampled ? Self.sampledTopP : 1, isSampled ? Self.sampledTopK : 0)
+        }
+    }
+
+    /// Match ServerLimits without coupling the harness to the HTTP server. Applied only to larger contexts.
+    public func outputCap(thinking: Bool, promptTokens: Int, turnCap: Int, background: Bool,
+                          environment: [String: String] = ProcessInfo.processInfo.environment) -> Int {
+        guard context != .standard else { return thinking ? max(turnCap, Self.thinkingTurnTokens) : turnCap }
+        func ceiling(_ key: String, _ fallback: Int) -> Int {
+            min(max(Int(environment[key] ?? "") ?? fallback, 1), 1 << 24)
+        }
+        return max(1, min(thinking ? context.thinkingTokens : context.turnTokens,
+                          context.tokens - max(0, promptTokens),
+                          ceiling("STRIM_MAX_OUTPUT_TOKENS", 1 << 20),
+                          background ? ceiling("STRIM_BACKGROUND_MAX_TOKENS", 32_768) : Int.max))
+    }
 
     /// Seed of the n-th generation (1-based) of a drive: fixed base plus the ordinal, so a rerun with the same
     /// knobs and the same engine output samples identically. Unused (nil) when greedy.

@@ -62,7 +62,7 @@ public final class AgentLoop: Sendable {
         self.date = date
         self.clock = clock
         self.knobs = knobs
-        self.compactionThreshold = knobs.compactionThreshold == nil ? compactionThreshold : knobs.compactionTokens
+        self.compactionThreshold = knobs.compactionThreshold == nil && knobs.context == .standard ? compactionThreshold : knobs.compactionTokens
         self.priority = priority
         self.maxTurnTokens = maxTurnTokens
         self.requireFinish = requireFinish
@@ -138,15 +138,18 @@ public final class AgentLoop: Sendable {
 
     private var sessionConfig: SessionConfig { config(thinking: false) }
 
-    private var thinkingPolicyOn: Bool { knobs.thinking != .off }
+    private var thinkingPolicyOn: Bool { knobs.thinking == .firstPlanningTurn || knobs.thinking == .allTurns }
 
     /// Thinking off is today's config. Thinking on differs only in the generation prompt (`<think>\n` instead of
     /// `<think>\n\n</think>\n\n`): effort "medium" adds no reasoning instruction, so the system block, tools block and
     /// every rendered message are byte-identical to the thinking-off render (see docs/EVOLVE.md, Prefix cache).
     private func config(thinking: Bool) -> SessionConfig {
-        thinking
+        var config = thinking
             ? SessionConfig(tools: tools.map(\.spec), reasoningPolicy: .templateDefault, enableThinking: true, reasoningEffort: knobs.reasoningEffort)
             : SessionConfig(tools: tools.map(\.spec), reasoningPolicy: .disableWhenTools)
+        // nil retains the historical template default; on explicitly preserves reasoning even across user turns.
+        if knobs.preserve_thinking == .on { config.preserveThinking = true }
+        return config
     }
 
     /// Replaces a thinking session by a thinking-off one holding the same conversation, including reasoning
@@ -172,8 +175,8 @@ public final class AgentLoop: Sendable {
             let session = try await engine.openSession(self.config(thinking: thinkingPolicyOn))
             box.set(session)
             state = LoopState(session: session, charsSince: fixedChars + firstUser.count)
-            if thinkingPolicyOn {
-                state.thinking = true; state.thinkingEnabled = true
+            if thinkingPolicyOn { state.thinking = true; state.thinkingEnabled = true }
+            if thinkingPolicyOn || knobs.thinking == .onStall || knobs.preserve_thinking == .on {
                 state.transcript = [.system(systemPrompt), .user(firstUser)]
             }
             _ = try await engine.append(session, .messages([.system(systemPrompt), .user(firstUser)]))
@@ -217,16 +220,17 @@ public final class AgentLoop: Sendable {
         /// Appends to the session; a thinking session is first swapped for a thinking-off one (turn 2 onward).
         func appendMessages(_ msgs: [Message]) async throws {
             if thinking {
-                if knobs.thinking == .firstPlanningTurn {
+                if knobs.thinking == .firstPlanningTurn || knobs.thinking == .onStall {
                     session = try await leaveThinking(from: session, transcript: transcript, extra: msgs, box: box)
                     thinking = false
-                    transcript = []
+                    transcript = (knobs.thinking == .onStall || knobs.preserve_thinking == .on) ? transcript + msgs : []
                 } else {
                     _ = try await engine.append(session, .messages(msgs))
                     transcript.append(contentsOf: msgs)
                 }
             } else {
                 _ = try await engine.append(session, .messages(msgs))
+                if knobs.thinking == .onStall || knobs.preserve_thinking == .on { transcript.append(contentsOf: msgs) }
             }
         }
 
@@ -240,7 +244,11 @@ public final class AgentLoop: Sendable {
         var finishNudged = false
         var consecutiveErrors = 0
         var compactions = 0
+        var stallTracker = StallTracker()
         var pendingNudge: String?
+        var progress = TestProgress()
+        let tracksProgress = knobs.progress_gate == .on || knobs.thinking == .onStall
+        let trackedFiles = tracksProgress ? await TrackedFileSnapshot.load(root: workspace.root) : TrackedFileSnapshot(root: workspace.root, paths: [])
 
         while true {
             if Task.isCancelled { return Outcome(status: .cancelled, summary: "cancelled") }
@@ -302,7 +310,7 @@ public final class AgentLoop: Sendable {
                 baseTokens = 0
                 charsSince = fixedChars + user.count
                 thinking = thinkingEnabled
-                transcript = thinkingEnabled ? rebuilt : []
+                transcript = (thinkingEnabled || knobs.thinking == .onStall || knobs.preserve_thinking == .on) ? rebuilt : []
                 onEvent(.toolResult(name: "_compaction", output: Compaction.brief(summary, 200), isError: false))
             }
 
@@ -314,15 +322,36 @@ public final class AgentLoop: Sendable {
                 }
             }
 
+            // Recovery thinking lasts exactly one assistant generation. Replay on a fresh immutable-config session.
+            if knobs.thinking == .onStall, progress.takeThinkingTurn(), !thinking {
+                do {
+                    let fresh = try await engine.openSession(self.config(thinking: true))
+                    do { _ = try await engine.append(fresh, .history(transcript)) }
+                    catch { await engine.close(fresh); throw error }
+                    box.set(fresh)
+                    await engine.close(session)
+                    session = fresh
+                    thinking = true
+                } catch {
+                    return Outcome(status: Task.isCancelled ? .cancelled : .failed, summary: "engine error: \(error)")
+                }
+            }
+
             // Generate.
             var out = TurnOutput()
             var timedOut = false
             do {
-                let turnCap = thinking ? max(maxTurnTokens, HarnessKnobs.thinkingTurnTokens) : maxTurnTokens
+                let promptTokens = baseTokens + Compaction.estimateTokens(chars: charsSince)
+                if knobs.context != .standard, promptTokens >= knobs.context.tokens {
+                    return Outcome(status: .failed, summary: "blocked: context budget exceeded after compaction")
+                }
+                let turnCap = knobs.outputCap(thinking: thinking, promptTokens: promptTokens,
+                                              turnCap: maxTurnTokens, background: priority == .background)
+                let sampling = knobs.samplingValues(thinking: thinking)
                 let params = GenParams(maxTokens: max(1, min(turnCap, lim.maxGeneratedTokens - generated)),
-                                       temperature: Float(knobs.temperature),
-                                       topP: knobs.isSampled ? HarnessKnobs.sampledTopP : 1,
-                                       topK: knobs.isSampled ? HarnessKnobs.sampledTopK : 0,
+                                       temperature: sampling.temperature,
+                                       topP: sampling.topP,
+                                       topK: sampling.topK,
                                        seed: knobs.seed(forGeneration: turn), priority: priority)
                 var cur: PendingCall?
                 for try await ev in engine.generate(session, params) {
@@ -361,16 +390,16 @@ public final class AgentLoop: Sendable {
                 usage.seconds += u.prefillSeconds + u.decodeSeconds
                 generated += max(u.completionTokens, out.idCount)
                 if u.promptTokens > 0 { baseTokens = u.promptTokens + u.completionTokens; charsSince = 0 }
-                else { charsSince += out.text.count }
+                else { charsSince += out.text.count + (knobs.preserve_thinking == .on ? out.reasoning.count : 0) }
                 onEvent(.usage(u))
             } else {
                 generated += out.idCount
-                charsSince += out.text.count
+                charsSince += out.text.count + (knobs.preserve_thinking == .on ? out.reasoning.count : 0)
             }
             if timedOut { return Outcome(status: .limit, summary: "time limit (\(Int(lim.maxSeconds))s) reached. " + lastText) }
             let text = out.text.trimmingCharacters(in: .whitespacesAndNewlines)
             if !text.isEmpty { lastText = text }
-            if thinking {
+            if thinking || knobs.thinking == .onStall || knobs.preserve_thinking == .on {
                 transcript.append(.assistant(out.text.isEmpty && !out.calls.isEmpty ? nil : out.text,
                                              reasoning: out.reasoning.isEmpty ? nil : out.reasoning,
                                              toolCalls: out.calls.map { ToolCall(name: $0.name, arguments: $0.args) }))
@@ -406,11 +435,15 @@ public final class AgentLoop: Sendable {
                 let argsJSON = OrderedJSON.object(call.args).serialized()
                 onEvent(.toolCall(name: call.name, args: Redactor.redact(argsJSON)))
 
+                let command = call.name == "bash" ? argsDict["command"]?.stringValue : nil
+                let testRun = (tracksProgress || knobs.test_status == .structured)
+                    && (command.map { TestCommand.isTest($0, verify: spec.verify) } ?? false)
+                let shellBefore = tracksProgress && command != nil && !testRun ? trackedFiles.capture() : nil
                 let key = call.name + "\u{0}" + argsJSON
                 var result: ToolResult
                 var guarded = false
                 // Repetition guard: the same call that already returned the same result `max - 1` times in a row.
-                if key == lastCall, sameResultRun >= lim.maxRepeatedCalls - 1 {
+                if !(knobs.progress_gate == .on && testRun), key == lastCall, sameResultRun >= lim.maxRepeatedCalls - 1 {
                     if nudged {
                         return Outcome(status: .limit, summary: "aborted: identical \(call.name) call repeated. " + lastText)
                     }
@@ -418,7 +451,13 @@ public final class AgentLoop: Sendable {
                     guarded = true
                     result = ToolResult(output: "You have made this exact call \(sameResultRun + 1) times with the same result. Do not repeat it; change approach or call finish.")
                 } else if let tool = toolByName[call.name] {
-                    do { result = try await tool.run(argsDict, context: ctx) } catch is CancellationError {
+                    do {
+                        if let bash = tool as? BashTool, testRun, knobs.test_status == .structured {
+                            result = try await bash.run(argsDict, context: ctx, structuredTest: true)
+                        } else {
+                            result = try await tool.run(argsDict, context: ctx)
+                        }
+                    } catch is CancellationError {
                         return Outcome(status: .cancelled, summary: "cancelled")
                     } catch {
                         result = ToolResult(output: "tool error: \(error)", isError: true)
@@ -426,19 +465,45 @@ public final class AgentLoop: Sendable {
                 } else {
                     result = ToolResult(output: "Unknown tool '\(Compaction.sanitize(call.name, max: 80))'. Valid tools: \(validNames)", isError: true)
                 }
+                let refused = call.name == "bash" && result.output.hasPrefix("bash: refused:")
+                if tracksProgress, !guarded, !refused {
+                    if !result.isError, call.name == "edit_file" || call.name == "write_file" { progress.edited() }
+                    if !result.isError, call.name == "read_file", let path = argsDict["path"]?.stringValue { progress.read(path: path) }
+                    if let before = shellBefore, before != trackedFiles.capture() { progress.edited() }
+                }
                 // Redact every result before it is capped, emitted or appended to the session.
                 let output = Redactor.redact(result.output)
                 if !guarded {
                     let h = output.hashValue
                     if key == lastCall, h == lastResultHash { sameResultRun += 1 } else { lastCall = key; lastResultHash = h; sameResultRun = 1 }
                 }
-                let shown = Compaction.capToolOutput(output, cap: knobs.toolOutputCap)
+                let bashExit = call.name == "bash" ? Compaction.exitCode(output: output, isError: result.isError) : 0
+                var shown = FailureFeedback.shape(output, tool: call.name, exitCode: bashExit,
+                                                 shape: knobs.result_shape, cap: knobs.toolOutputCap)
+                let evidence = testRun && !guarded && !refused ? TestEvidence(output: output, exit: bashExit) : nil
+                if knobs.test_status == .structured, let evidence { shown = evidence.digest + "\n\n" + shown }
+                var blocked: String?
+                if tracksProgress, !guarded, let evidence {
+                    let decision = progress.record(evidence, gate: knobs.progress_gate == .on, sourcePaths: spec.files + trackedFiles.paths)
+                    if let note = decision.note { shown += "\n\n" + note }
+                    blocked = decision.blocked
+                }
+                if knobs.stall_nudge == .on, !guarded, !refused {
+                    if !result.isError, call.name == "edit_file" || call.name == "write_file" { stallTracker.edited() }
+                    if call.name == "bash",
+                       let note = stallTracker.note(signature: FailureFeedback.signature(output: output, exitCode: bashExit), turn: turn) {
+                        // Append metadata after shaping; raw output, exit extraction and repetition hashes stay untouched.
+                        shown += "\n\n" + note
+                        if knobs.thinking == .onStall { progress.stallNudged() }
+                    }
+                }
                 onEvent(.toolResult(name: call.name, output: shown, isError: result.isError))
                 var exit: Int32?
                 if call.name == "bash", let cmd = argsDict["command"]?.stringValue {
                     exit = Compaction.exitCode(output: output, isError: result.isError)
                     commands.append(CommandRecord(cmd: Redactor.redact(cmd), exit: exit!))
                 }
+                if let blocked { return Outcome(status: .failed, summary: blocked) }
                 let strArgs = argsDict.compactMapValues(\.stringValue)
                 entries.append(.init(name: call.name, head: Compaction.headFor(tool: call.name, args: strArgs),
                                      isError: result.isError, exit: exit, path: argsDict["path"]?.stringValue))
@@ -549,16 +614,17 @@ extension AgentLoop {
         do {
             if var st = c.state {
                 if st.thinking {
-                    if knobs.thinking == .firstPlanningTurn {
+                    if knobs.thinking == .firstPlanningTurn || knobs.thinking == .onStall {
                         st.session = try await leaveThinking(from: st.session, transcript: st.transcript, extra: [.user(text)], box: c.box)
                         st.thinking = false
-                        st.transcript = []
+                        st.transcript = (knobs.thinking == .onStall || knobs.preserve_thinking == .on) ? st.transcript + [.user(text)] : []
                     } else {
                         _ = try await engine.append(st.session, .messages([.user(text)]))
                         st.transcript.append(.user(text))
                     }
                 } else {
                     _ = try await engine.append(st.session, .messages([.user(text)]))
+                    if knobs.thinking == .onStall || knobs.preserve_thinking == .on { st.transcript.append(.user(text)) }
                 }
                 st.charsSince += text.count
                 c.state = st
@@ -571,8 +637,8 @@ extension AgentLoop {
                 let session = try await engine.openSession(self.config(thinking: thinkingNow))
                 c.box.set(session)
                 var fresh = LoopState(session: session, charsSince: fixedChars + firstUser.count)
-                if thinkingNow {
-                    fresh.thinking = true; fresh.thinkingEnabled = true
+                if thinkingNow { fresh.thinking = true; fresh.thinkingEnabled = true }
+                if thinkingNow || knobs.thinking == .onStall || knobs.preserve_thinking == .on {
                     fresh.transcript = [.system(systemPrompt), .user(firstUser)]
                 }
                 c.state = fresh

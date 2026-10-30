@@ -221,6 +221,7 @@ extension AppModel {
 
     public func selectThread(_ id: String) {
         guard thread(id) != nil else { return }
+        if id != dictationThreadID { stopDictation() }
         selectedThreadID = id
         chatProbeError = nil
         loadMessages(id)

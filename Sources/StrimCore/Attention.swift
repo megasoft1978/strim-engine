@@ -11,12 +11,28 @@ public enum Attention {
 
     public static func forward(_ x: MLXArray, store: WeightStore, prefix: String,
                                cache: AttentionCache? = nil, offsetOverride: Int? = nil) throws -> MLXArray {
+        if MacroPrefill.splits(x) {
+            let projected = try ["q_proj", "k_proj", "v_proj"].map { try store.linear(prefix + $0, x) }
+            let live = cache ?? AttentionCache()
+            let parts = try MacroPrefill.ranges(count: x.shape[1]).map { r in
+                try forwardRange(x[0..., r, 0...], store: store, prefix: prefix, cache: live,
+                                 offsetOverride: offsetOverride.map { $0 + r.lowerBound },
+                                 projections: projected.map { $0[0..., r, 0...] }, deferOutput: true)
+            }
+            return try store.linear(prefix + "o_proj", concatenated(parts, axis: 1))
+        }
+        return try forwardRange(x, store: store, prefix: prefix, cache: cache, offsetOverride: offsetOverride)
+    }
+
+    private static func forwardRange(_ x: MLXArray, store: WeightStore, prefix: String,
+                                     cache: AttentionCache?, offsetOverride: Int?,
+                                     projections: [MLXArray]? = nil, deferOutput: Bool = false) throws -> MLXArray {
         let p = prefix
         let B = x.shape[0], S = x.shape[1]
 
-        let qProj = try OpTimer.linear(store, "attn.proj", p + "q_proj", x)
-        let kProj = try OpTimer.linear(store, "attn.proj", p + "k_proj", x).reshaped([B, S, Hkv, D])
-        let vProj = try OpTimer.linear(store, "attn.proj", p + "v_proj", x).reshaped([B, S, Hkv, D])
+        let qProj = try projections?[0] ?? OpTimer.linear(store, "attn.proj", p + "q_proj", x)
+        let kProj = try (projections?[1] ?? OpTimer.linear(store, "attn.proj", p + "k_proj", x)).reshaped([B, S, Hkv, D])
+        let vProj = try (projections?[2] ?? OpTimer.linear(store, "attn.proj", p + "v_proj", x)).reshaped([B, S, Hkv, D])
 
         let qkv = try OpTimer.timeMany("attn.qknorm", flops: Double(B * S * (Hq + Hkv) * D) * 4,
                                        bytes: Double(qProj.nbytes + kProj.nbytes) * 1.5,
@@ -66,6 +82,7 @@ public enum Attention {
             let flat = out.transposed(0, 2, 1, 3).reshaped([B, S, Hq * D])
             return Fused.attnGate(flat, gate)
         }
+        if deferOutput { return gated }
         return try OpTimer.linear(store, "attn.o", p + "o_proj", gated)
     }
 }

@@ -1,0 +1,21 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 20,
+  "id" : "h3-rb-01",
+  "language" : "ruby",
+  "license" : "MIT",
+  "prompt" : "Warehouse staff report incorrect availability after order updates, and some holds do not behave as expected around their deadlines. Run `ruby -Ilib -Itest test\/all_test.rb` from the repository root. Fix the non-test source so the full suite passes and the documented reservation behavior is preserved. Tests are protected; do not edit, delete, or skip them. Use the standard library only.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-ruby-inventory",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 4904,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/all_test.rb" : "3528e4f55c0383a7d90de118274df8e0b5f3b763f8d5a8d3afa8e0ca66dd201a"
+  },
+  "tree_sha256" : "4ff1f4a2adf3628a01ea417b4e3bde0d8acadd4301c2eb235d3e10a5b6698016",
+  "verify_cmd" : "ruby -Ilib -Itest test\/all_test.rb"
+}

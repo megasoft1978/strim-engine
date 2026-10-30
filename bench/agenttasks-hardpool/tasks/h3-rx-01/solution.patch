@@ -1,0 +1,22 @@
+--- a/src/model.js
++++ b/src/model.js
+@@ -9,7 +9,7 @@
+   const options = parseParams(search);
+   const matching = selectOrders(orders, options);
+   const sorted = sortOrders(matching, options);
+-  const pagination = paginate(sorted, options.page, options.pageSize, orders.length);
+-  const groups = summarizeGroups(orders, options.group);
++  const pagination = paginate(sorted, options.page, options.pageSize);
++  const groups = summarizeGroups(sorted, options.group);
+   return { options, groups, ...pagination };
+ }
+--- a/src/pagination.js
++++ b/src/pagination.js
+@@ -1,5 +1,6 @@
+ /** Page numbers are one-based, including for an empty result. */
+-export function paginate(orders, requestedPage, pageSize, total) {
++export function paginate(orders, requestedPage, pageSize) {
++  const total = orders.length;
+   const pages = Math.max(1, Math.ceil(total / pageSize));
+   const page = Math.min(requestedPage, pages);
+   const start = (page - 1) * pageSize;

@@ -1,0 +1,59 @@
+ledger: /tmp/qg1/run/ledger.jsonl  rows 102
+paired (phase paired): A 010498d957b46c4f [baseline]
+                       B 45e18dfdad89bb8c [thinking=all_turns_medium]
+train A: n 51/51 pass 88.2% mean wall 51.58s mean local tokens 103638.6 false-done 0 (0.0%) timeouts 0
+train B: n 51/51 pass 90.2% mean wall 152.15s mean local tokens 80804.3 false-done 0 (0.0%) timeouts 0
+train js-01: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train js-02: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train js-03: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train js-04: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train jv-01: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train jv-02: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train jv-03: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train jv-04: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train me-06: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train me-07: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train me-08: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train py-01: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train py-02: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train py-03: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train py-04: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train qa-01: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train qa-07: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train rb-01: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train rb-02: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train rb-03: pairs 1/1 both-pass 0 only-A 0 only-B 0 neither 1
+train rb-04: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train rs-01: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train rs-02: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train rs-03: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train rs-04: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train rx-01: pairs 1/1 both-pass 0 only-A 0 only-B 1 neither 0
+train rx-02: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train rx-03: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train rx-04: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-02: pairs 1/1 both-pass 0 only-A 0 only-B 0 neither 1
+train tf-03: pairs 1/1 both-pass 0 only-A 0 only-B 0 neither 1
+train tf-04: pairs 1/1 both-pass 0 only-A 1 only-B 0 neither 0
+train tf-05: pairs 1/1 both-pass 0 only-A 0 only-B 0 neither 1
+train tf-11: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-12: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-13: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-14: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-15: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-16: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-17: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-18: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-19: pairs 1/1 both-pass 0 only-A 0 only-B 1 neither 0
+train tf-20: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-21: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-22: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-23: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train tf-24: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train ts-01: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train ts-02: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train ts-03: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+train ts-04: pairs 1/1 both-pass 1 only-A 0 only-B 0 neither 0
+val A: n 0/0 pass 0.0% mean wall 0.00s mean local tokens 0.0 false-done 0 (0.0%) timeouts 0
+val B: n 0/0 pass 0.0% mean wall 0.00s mean local tokens 0.0 false-done 0 (0.0%) timeouts 0
+paired evaluation: no search or adoption; test split: untouched

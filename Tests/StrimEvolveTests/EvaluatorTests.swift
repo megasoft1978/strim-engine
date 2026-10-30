@@ -76,6 +76,13 @@ import Testing
         #expect(s3.budgetStopped)
     }
 
+    @Test func workRootIsCreatedPerProcessBeforeTheServerStarts() throws {
+        let root = try BenchTaskRunner.createWorkRoot()
+        #expect(root.lastPathComponent == "strim-evolve-\(getpid())")
+        var isDir: ObjCBool = false
+        #expect(FileManager.default.fileExists(atPath: root.path, isDirectory: &isDir) && isDir.boolValue)
+    }
+
     @Test func releaseEvalOnlyOnTestAndRecordsReleasePhase() async throws {
         let dir = tempDir("release")
         let split = CorpusSplit.make(tasks)

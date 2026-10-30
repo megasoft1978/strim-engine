@@ -170,7 +170,7 @@ import Testing
         // rows of other candidates (stale ledger from an older variant text) are simply unused
         let stale = mkRows("0000000000000000", .train, ids: split.train, reps: 1, passIds: Set(split.train))
         let st = SearchPlanner.replay(rows: stale, split: split, config: config([.systemPrompt]))
-        #expect(!st.finished && st.pending.count == 3 * split.train.count)
+        #expect(!st.finished && st.pending.count == 4 * split.train.count)
     }
 
     @Test func secondRoundBuildsOnFirst() {

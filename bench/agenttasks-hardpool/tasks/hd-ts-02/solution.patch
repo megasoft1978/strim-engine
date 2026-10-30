@@ -1,0 +1,199 @@
+diff --git a/src/evaluate.ts b/src/evaluate.ts
+index 5d5b8c7..3231884 100644
+--- a/src/evaluate.ts
++++ b/src/evaluate.ts
+@@ -1,13 +1,48 @@
+-import type { Node, Rec } from "./types.ts";
+-
+-/**
+- * Evaluates a Node against a record.
+- * - field paths are dotted ("owner.name"); a missing path has no values.
+- * - ":" matches when any scalar value of the field (array elements included) equals any wanted value, case-insensitively,
+- *   comparing numbers and booleans by their string form. "!=" is the exact negation of ":" (so true for a missing field).
+- * - < <= > >= compare only real numbers with a numeric right-hand side; anything else is false.
+- * - a bare term matches when any top-level string value (or string element of a top-level array) contains it, case-insensitively.
+- */
++import type { Node, Rec, Value } from "./types.ts";
++
++function lookup(rec: Rec, path: string): Value {
++  let cur: Value = rec;
++  for (const key of path.split(".")) {
++    if (cur === null || typeof cur !== "object" || Array.isArray(cur)) return undefined;
++    cur = cur[key];
++  }
++  return cur;
++}
++
++function scalars(v: Value): (string | number | boolean)[] {
++  if (Array.isArray(v)) return v.flatMap(scalars);
++  return typeof v === "string" || typeof v === "number" || typeof v === "boolean" ? [v] : [];
++}
++
++function equals(v: string | number | boolean, wanted: string): boolean {
++  return String(v).toLowerCase() === wanted.toLowerCase();
++}
++
++function numeric(s: string): number {
++  return s.trim() === "" ? NaN : Number(s);
++}
++
+ export function evaluate(n: Node, rec: Rec): boolean {
+-  throw new Error("not implemented");
++  switch (n.k) {
++    case "all": return true;
++    case "and": return evaluate(n.l, rec) && evaluate(n.r, rec);
++    case "or": return evaluate(n.l, rec) || evaluate(n.r, rec);
++    case "not": return !evaluate(n.e, rec);
++    case "term": {
++      const needle = n.text.toLowerCase();
++      return Object.values(rec).some((v) => scalars(v).some((s) => typeof s === "string" && s.toLowerCase().includes(needle)));
++    }
++    case "cmp": {
++      const vals = scalars(lookup(rec, n.field));
++      const hit = vals.some((v) => n.values.some((w) => equals(v, w)));
++      if (n.op === ":") return hit;
++      if (n.op === "!=") return !hit;
++      const rhs = numeric(n.values[0]);
++      return vals.some((v) => {
++        const lhs = typeof v === "number" ? v : NaN;
++        if (Number.isNaN(lhs) || Number.isNaN(rhs)) return false;
++        return n.op === "<" ? lhs < rhs : n.op === "<=" ? lhs <= rhs : n.op === ">" ? lhs > rhs : lhs >= rhs;
++      });
++    }
++  }
+ }
+diff --git a/src/lexer.ts b/src/lexer.ts
+index d69e7db..849554d 100644
+--- a/src/lexer.ts
++++ b/src/lexer.ts
+@@ -1,10 +1,43 @@
++import { ParseError } from "./types.ts";
+ import type { Token } from "./types.ts";
+ 
+-/**
+- * Splits a query into tokens. Words stop at whitespace, parentheses, quotes and operator characters.
+- * "and" / "or" / "not" (any case, unquoted) become keyword tokens. Quoted words support \" and \\ escapes.
+- * Throws ParseError (with the offset of the opening quote) for an unterminated string and for a lone "!" or "=".
+- */
++const STOP = new Set([" ", "\t", "\n", "(", ")", ":", "<", ">", "!", "=", '"']);
++
+ export function lex(q: string): Token[] {
+-  throw new Error("not implemented");
++  const out: Token[] = [];
++  let i = 0;
++  while (i < q.length) {
++    const c = q[i];
++    if (c === " " || c === "\t" || c === "\n") { i++; continue; }
++    if (c === "(") { out.push({ t: "lparen", pos: i++ }); continue; }
++    if (c === ")") { out.push({ t: "rparen", pos: i++ }); continue; }
++    if (c === ":") { out.push({ t: "op", op: ":", pos: i++ }); continue; }
++    if (c === "<" || c === ">") {
++      const eq = q[i + 1] === "=";
++      out.push({ t: "op", op: (c + (eq ? "=" : "")) as "<" | "<=" | ">" | ">=", pos: i });
++      i += eq ? 2 : 1;
++      continue;
++    }
++    if (c === "!" && q[i + 1] === "=") { out.push({ t: "op", op: "!=", pos: i }); i += 2; continue; }
++    if (c === '"') {
++      const start = i++;
++      let text = "";
++      while (i < q.length && q[i] !== '"') {
++        if (q[i] === "\\" && i + 1 < q.length) i++;
++        text += q[i++];
++      }
++      if (i >= q.length) throw new ParseError("unterminated string", start);
++      i++;
++      out.push({ t: "word", text, quoted: true, pos: start });
++      continue;
++    }
++    if (c === "!" || c === "=") throw new ParseError(`unexpected '${c}'`, i);
++    const start = i;
++    while (i < q.length && !STOP.has(q[i])) i++;
++    const text = q.slice(start, i);
++    const kw = text.toLowerCase();
++    if (kw === "and" || kw === "or" || kw === "not") out.push({ t: kw, pos: start });
++    else out.push({ t: "word", text, quoted: false, pos: start });
++  }
++  return out;
+ }
+diff --git a/src/parser.ts b/src/parser.ts
+index b302006..05c4cd0 100644
+--- a/src/parser.ts
++++ b/src/parser.ts
+@@ -1,12 +1,66 @@
+-import type { Node } from "./types.ts";
+-
+-/**
+- * Parses a query into a Node. Precedence, loosest to tightest: or, and (also implicit between adjacent terms), not.
+- * An empty query is { k: "all" }. `word op word` is a cmp (an unquoted value splits on "," into values; a quoted value is one value),
+- * a bare word is a term. Relational operators (< <= > >=) reject lists of more than one value.
+- * Throws ParseError; pos is: the "(" for an unclosed group, the ")" for an unmatched one, the offending token otherwise,
+- * and query.length when the query ends too early.
+- */
++import { lex } from "./lexer.ts";
++import { ParseError } from "./types.ts";
++import type { Node, Token } from "./types.ts";
++
++/** Precedence, loosest to tightest: or, and (also implicit between adjacent terms), not. */
+ export function parse(query: string): Node {
+-  throw new Error("not implemented");
++  const toks = lex(query);
++  if (toks.length === 0) return { k: "all" };
++  let i = 0;
++  const peek = (): Token | undefined => toks[i];
++
++  function parseOr(): Node {
++    let l = parseAnd();
++    while (peek()?.t === "or") {
++      i++;
++      l = { k: "or", l, r: parseAnd() };
++    }
++    return l;
++  }
++
++  function parseAnd(): Node {
++    let l = parseNot();
++    for (;;) {
++      const t = peek();
++      if (!t || t.t === "or" || t.t === "rparen") return l;
++      if (t.t === "and") i++;
++      l = { k: "and", l, r: parseNot() };
++    }
++  }
++
++  function parseNot(): Node {
++    if (peek()?.t === "not") {
++      i++;
++      return { k: "not", e: parseNot() };
++    }
++    return parsePrimary();
++  }
++
++  function parsePrimary(): Node {
++    const t = peek();
++    if (!t) throw new ParseError("unexpected end of query", query.length);
++    i++;
++    if (t.t === "lparen") {
++      const e = parseOr();
++      const close = peek();
++      if (!close || close.t !== "rparen") throw new ParseError("missing ')'", t.pos);
++      i++;
++      return e;
++    }
++    if (t.t !== "word") throw new ParseError(`unexpected ${t.t === "op" ? t.op : t.t}`, t.pos);
++    const op = peek();
++    if (op?.t !== "op") return { k: "term", text: t.text };
++    i++;
++    const v = peek();
++    if (v?.t !== "word") throw new ParseError("missing value", v ? v.pos : query.length);
++    i++;
++    const values = v.quoted ? [v.text] : v.text.split(",");
++    if (op.op !== ":" && op.op !== "!=" && values.length > 1) throw new ParseError("list not allowed here", v.pos);
++    return { k: "cmp", field: t.text, op: op.op, values };
++  }
++
++  const ast = parseOr();
++  const rest = peek();
++  if (rest) throw new ParseError(rest.t === "rparen" ? "unmatched ')'" : "unexpected token", rest.pos);
++  return ast;
+ }

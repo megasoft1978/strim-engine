@@ -1,0 +1,53 @@
+diff --git a/src/discount/Engine.java b/src/discount/Engine.java
+--- a/src/discount/Engine.java
++++ b/src/discount/Engine.java
+@@ -26,11 +26,13 @@
+         Set<String> groups = new HashSet<>();
+         for (Rule rule : book.rules()) {
+             if (!rule.matches(cart)) continue;
++            if (!rule.available(usage.count(cart.customer(), rule.id()))) continue;
+             if (rule.group() != null && groups.contains(rule.group())) continue;
+             long amount = rule.discount(remaining);
+             if (amount <= 0) continue;
+             remaining -= amount;
+             applied.add(new Applied(rule.id(), amount));
++            if (redeem) usage.record(cart.customer(), rule.id());
+             if (rule.group() != null) groups.add(rule.group());
+         }
+         return new Result(cart.subtotal(), remaining, applied);
+diff --git a/src/discount/Rule.java b/src/discount/Rule.java
+--- a/src/discount/Rule.java
++++ b/src/discount/Rule.java
+@@ -27,6 +27,7 @@
+     public int priority() { return priority; }
+     public String group() { return group; }
+     public int limit() { return limit; }
++    public boolean available(int uses) { return limit == 0 || uses < limit; }
+     public boolean matches(Cart cart) { return cart.subtotal() >= minimum; }
+     public long discount(long remaining) { return discount.amount(remaining); }
+ }
+diff --git a/src/discount/UsageStore.java b/src/discount/UsageStore.java
+--- a/src/discount/UsageStore.java
++++ b/src/discount/UsageStore.java
+@@ -1,12 +1,19 @@
+ package discount;
+ 
++import java.util.HashMap;
++import java.util.Map;
++
+ /** Usage is scoped to a customer and a stable promotion ID. */
+ public final class UsageStore {
++    private final Map<String, Map<String, Integer>> counts = new HashMap<>();
++
+     public int count(String customer, String rule) {
+-        return 0;
++        Map<String, Integer> customerCounts = counts.get(customer);
++        return customerCounts == null ? 0 : customerCounts.getOrDefault(rule, 0);
+     }
+ 
+     public void record(String customer, String rule) {
+-        // Usage persistence is not implemented yet.
++        Map<String, Integer> customerCounts = counts.computeIfAbsent(customer, k -> new HashMap<>());
++        customerCounts.put(rule, customerCounts.getOrDefault(rule, 0) + 1);
+     }
+ }

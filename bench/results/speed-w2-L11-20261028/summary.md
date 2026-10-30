@@ -1,6 +1,6 @@
 # L11: wired limit and batched decode attention (2026-10-28) - both KILLED
 
-Same binary for every arm (HEAD snapshot + this slice's knob, built in /tmp/strim-snap-l11); the knob is unset in arm A and in all committed defaults. Load average 2.5-12 from other workers' CPU builds and short GPU runs; treat < 3% as noise. Raw in `raw/`; scripts: `srv_abab.sh`, `idle.sh`, `agg.py`, `gates.sh`, `gates_rest.sh`, `wd_run.sh`.
+Same binary for every arm (HEAD snapshot + this slice's knob, built in /tmp/strim-snap-l11); the knob is unset in arm A and in all committed defaults. Load average 2.5-12 from other workers' CPU builds and short GPU runs; treat < 3% as noise. Raw in `raw/`; scripts: `srv_abab.sh`, `idle.sh`, `agg.py.txt` (kept as a text record; Python is not used in this repo), `gates.sh`, `gates_rest.sh`, `wd_run.sh`.
 
 ## A. Wired limit (`STRIM_WIRED_LIMIT_GB`, new, default off)
 - API: mlx-swift `WiredMemoryManager` ticket (`WiredSumPolicy`, `.active`, size N GiB) started once before the first `WeightStore` init (`WiredLimit.applyFromEnvOnce`, Model.swift; call in Weights.swift). A `.reservation` ticket applies 0, so `.active` is required. Engine log line: "wired limit: requested 40 GiB, applied 40960 MiB". System `iogpu.wired_limit_mb` is 57344 here and was not touched.

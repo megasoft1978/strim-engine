@@ -96,6 +96,7 @@ cat > "$app/Contents/Info.plist" <<PLIST
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
+  <key>NSMicrophoneUsageDescription</key><string>Strim listens to your microphone only while you dictate a message in the chat. Speech is transcribed on this Mac and never leaves it.</string>
   <key>NSHumanReadableCopyright</key><string>Copyright 2026 Gabriele Ferreri. MIT License.</string>
 </dict>
 </plist>
@@ -111,8 +112,10 @@ else
 fi
 for b in "${STRIM_RESOURCE_BUNDLES[@]}"; do "${sign[@]}" "$app/Contents/Resources/$b"; done
 "${sign[@]}" "$app/Contents/Resources/strim"
-"${sign[@]}" "$app/Contents/MacOS/Strim"
-"${sign[@]}" "$app"
+# Only the app itself carries an entitlement: the microphone (chat dictation). Nothing else is granted.
+app_sign=("${sign[@]}" --entitlements "$here/Strim.entitlements")
+"${app_sign[@]}" "$app/Contents/MacOS/Strim"
+"${app_sign[@]}" "$app"
 codesign --verify --deep --strict "$app"
 codesign -dv "$app" 2>&1 | grep -E "Identifier=|Signature=|flags=|TeamIdentifier=" | sed 's/^/codesign: /'
 [ -n "$identity" ] || echo "note: ad-hoc signed only (not notarized; Gatekeeper blocks quarantined copies). Owner-gated: see packaging/RELEASING.md" >&2

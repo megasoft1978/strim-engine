@@ -325,6 +325,37 @@ import Testing
         #expect(throws: LedgerError.self) { try LocalServer.benchmarkState(workRoot: link, logDir: out) }
     }
 
+    @Test func serverArgvGrantsTheExplicitWorkRootExactly() throws {
+        let base = tempDir("server-argv-root")
+        let root = base.appendingPathComponent("strim-evolve-1")
+        let out = base.appendingPathComponent("out")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+        let argv = try LocalServer.serverArgv(strimBin: "build/strim", model: "models/q", head: nil, port: 8231, tokenFile: "out/t",
+                                              workRoot: root, logDir: out)
+        let i = try #require(argv.firstIndex(of: "--state-dir"))
+        #expect(argv.filter { $0 == "--state-dir" }.count == 1 && i + 1 < argv.count)
+        let data = try Data(contentsOf: URL(fileURLWithPath: argv[i + 1]).appendingPathComponent("config.json"))
+        let json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let roots = try #require((json["mcp"] as? [String: Any])?["allowedRoots"] as? [String])
+        #expect(roots == [PromptBuilder.canonicalPath(root.path)])
+        // an explicit root that does not exist is refused, never silently replaced by another grant
+        let missing = base.appendingPathComponent("never-created")
+        #expect(throws: LedgerError.self) { try LocalServer.stateArgv(workRoot: missing, logDir: out) }
+        // no root and no legacy `strim-agentbench-<pid>` directory: nothing is granted
+        #expect(try LocalServer.stateArgv(workRoot: nil, logDir: out).isEmpty)
+    }
+
+    @Test func refusedStrimTaskIsSetupNotAFailedDelegation() {
+        let refused = ToolReply(text: "cwd /var/folders/T/strim-evolve-6713/runs/hd-js-01-H-1 is outside the allowed roots",
+                                isError: true, transportError: nil)
+        let started = ToolReply(text: "strim job j-1 running", isError: false, transportError: nil)
+        #expect(HarnessArm.setupRefusal(refused, parsed: HarnessReply.parse(refused.text))?.hasPrefix("infra: ") == true)
+        #expect(HarnessArm.setupRefusal(started, parsed: HarnessReply.parse(started.text)) == nil)
+        let other = ToolReply(text: "model load failed", isError: true, transportError: nil)
+        #expect(HarnessArm.setupRefusal(other, parsed: HarnessReply.parse(other.text)) == nil)
+    }
+
     @Test func oldRowsDecodeAndHarnessFieldsRoundTrip() throws {
         let old = #"{"task_id":"a","task_class":"c","arm":"H","rep":1,"success":true,"wall_s":1,"delegations":1,"polls":0,"claimed_done":true,"false_done":false,"redo":false,"timed_out":false,"infra_error":false,"dry_run":false,"ts":"","tests_tampered":false,"verify_note":""}"#
         let r = try JSONL.decoder().decode(LedgerRow.self, from: Data(old.utf8))

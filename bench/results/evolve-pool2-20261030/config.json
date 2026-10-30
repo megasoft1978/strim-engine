@@ -1,0 +1,15 @@
+{
+  "coordinates" : [
+    "thinking",
+    "temperature",
+    "result_cap",
+    "compaction_threshold"
+  ],
+  "maxFalseDoneRate" : 0.05,
+  "maxRounds" : 2,
+  "minCoverage" : 0.8,
+  "minGainPP" : 5,
+  "seed" : 20261027,
+  "trainReps" : 1,
+  "valReps" : 2
+}

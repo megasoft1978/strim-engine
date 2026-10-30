@@ -1,0 +1,21 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 20,
+  "id" : "h3-rs-01",
+  "language" : "rust",
+  "license" : "MIT",
+  "prompt" : "Some deployments load unexpected settings, and values containing punctuation or template text are not preserved. Run `cargo test --offline --quiet` from the repository root. Fix the non-test source so the suite passes and behavior matches the project documentation. Do not edit, delete, or skip tests; they are restored and hash-checked before grading. Use the standard library only.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-hard3-rust-layered-config",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 5927,
+  "test_paths" : [
+    "tests"
+  ],
+  "test_sha256" : {
+    "tests\/load.rs" : "6a338b65d795b2e4537cce50f467f22a1780d29231af1ece72e1fb60db6481f2"
+  },
+  "tree_sha256" : "e5c95b15289a9616553e2e1b0f5de1630528953664f481b46b7aa97cf9776ec0",
+  "verify_cmd" : "cargo test --offline --quiet"
+}

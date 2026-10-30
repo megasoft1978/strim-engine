@@ -58,6 +58,7 @@ step() {
 }
 preflight() {
   cd "$root" || return
+  "$root/packaging/release/check-python-paths.sh" || return
   git diff --quiet && git diff --cached --quiet || { echo 'tracked working tree is dirty' >&2; return 1; }
   [[ -d "$scratch/checkouts" && -f "$scratch/workspace-state.json" ]] || { echo "warm scratch missing: $scratch" >&2; return 1; }
   # The warm scratch seeds the release build: refuse one another user owns or can write (planted dependencies).
@@ -147,6 +148,9 @@ checks() {
   [[ $("$out/Strim.app/Contents/Resources/strim" --version) == "strim $version" ]] || return 1
   mkdir "$work/tar" || return
   tar -xzf "$tarball" -C "$work/tar" || return
+  if [[ -n "$(find "$work/tar" "$out/Strim.app" -type d -name envs -print -quit)" ]]; then
+    echo 'envs directory found in release artifact' >&2; return 1
+  fi
   [[ $("$work/tar/strim-$version/libexec/strim" --version) == "strim $version" ]] || return 1
   if [[ -n "$identity" ]]; then
     codesign --verify --deep --strict "$out/Strim.app" || return

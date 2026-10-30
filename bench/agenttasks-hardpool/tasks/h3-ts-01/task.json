@@ -1,0 +1,24 @@
+{
+  "base_commit" : "",
+  "class" : "feature-impl",
+  "est_solo_turns" : 30,
+  "id" : "h3-ts-01",
+  "language" : "typescript",
+  "license" : "MIT",
+  "note" : "Stable filtered cursor pagination over an append-only event feed.",
+  "prompt" : "Implement cursor pagination for the event feed. The first request captures the current end of the feed; subsequent pages must return matching events from that same snapshot in sequence order, even if more events are appended. A continuation retains its filter, may use a different page size, and rejects malformed cursors or an explicitly changed filter. Return a next cursor only when another matching event remains. Run `tsc --noEmit -p . && node --test`; Node runs TypeScript directly and no installation is needed. Do not edit, delete, or skip protected tests or tsconfig.json.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-ts-hard3",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 4964,
+  "test_paths" : [
+    "test",
+    "tsconfig.json"
+  ],
+  "test_sha256" : {
+    "test\/feed.test.mjs" : "a57b72fa264c9dc5374d722da5f25981adcac30948f475155b6e1c80fe133364",
+    "tsconfig.json" : "dda56dd2ea102517fd2bcb84885884f98cf9d7832e37b0330bafe1cf0c6ae781"
+  },
+  "tree_sha256" : "88b0e9ddc5f0f7d5b6d1458a05c89df300e16cacd712fb2eec95b7c7551f970f",
+  "verify_cmd" : "tsc --noEmit -p . && node --test"
+}

@@ -1,0 +1,419 @@
+diff --git a/Sources/StrimCLI/Cmd_SdpaMicro.swift b/Sources/StrimCLI/Cmd_SdpaMicro.swift
+index 7be5331e..750a1cf5 100644
+--- a/Sources/StrimCLI/Cmd_SdpaMicro.swift
++++ b/Sources/StrimCLI/Cmd_SdpaMicro.swift
+@@ -11,6 +11,10 @@ import MLXRandom
+ //                an upper bound for any flash kernel built on the same matrix pipe.
+ // Layers are chained (output feeds the next query) so MLX cannot overlap them. Min of reps after one warm-up.
+ func runSdpaMicro(_ args: [String]) {
++    if args.count > 2, args[2] == "gdn" { runGDNPreMicro(args); return }
++    if args.count > 2, args[2] == "s5decode" { runS5Decode(args); return }
++    if args.count > 2, args[2] == "s5quality" { runS5Quality(args); return }
++    if args.count > 2, args[2] == "s5verify" { runS5Verify(args); return }
+     let reps = args.count >= 3 ? Int(args[2]) ?? 7 : 7
+     let layers = args.count >= 4 ? Int(args[3]) ?? 8 : 8
+     let Hq = 24, Hkv = 4, D = 256, S = 1024
+diff --git a/Sources/StrimCore/GDN.swift b/Sources/StrimCore/GDN.swift
+index 74fac1a3..a634f5ad 100644
+--- a/Sources/StrimCore/GDN.swift
++++ b/Sources/StrimCore/GDN.swift
+@@ -296,6 +296,17 @@ nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["ST
+         let convW = try store.tensor(p + "conv1d.weight")
+         let convState = state?.conv ?? MLXArray.zeros([B, 3, convDim], dtype: dtype)
+         let convIn = concatenated([convState, qkv], axis: 1)
++        // Only the opt-in decode path consumes these outputs. The ordinary conv graph below
++        // still updates the exact rollback views; its unused GPU nodes remain unevaluated.
++        let pre: [MLXArray]?
++        if GDNPre.enabled && GDNPre.supports(batch: B, tokens: S, dtype: dtype)
++            && GDN.useMetal && (B == 1 || GDN.batchDecode)
++            && ProcessInfo.processInfo.environment["STRIM_CONV_TENSOR"] == nil {
++            pre = GDNPre.run(convIn: convIn, weight: convW, a: aProj, b: bProj,
++                             aLog: try store.tensor(p + "A_log"), dt: try store.tensor(p + "dt_bias"))
++        } else {
++            pre = nil
++        }
+         let convOut = OpTimer.time("gdn.conv", flops: Double(B * S * convDim) * 10,
+                                    bytes: Double(qkv.nbytes * 2), inputs: [qkv]) {
+             if let state {
+@@ -317,7 +328,8 @@ nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["ST
+         let inv = pow(Float(Dk), -0.5)
+         let qkbg = try OpTimer.timeMany("gdn.qknorm_bg", flops: Double(B * S * (2 * keyDim)) * 4,
+                                         bytes: Double(B * S * 2 * keyDim * 2 * 2),
+-                                        inputs: [convOut, bProj, aProj]) {
++                                        inputs: pre ?? [convOut, bProj, aProj]) {
++            if let pre { return [pre[0], pre[1], pre[3], pre[4]] }
+             let qRaw = convOut[0..., 0..., 0 ..< keyDim].reshaped([B, S, Hk, Dk])
+             let kRaw = convOut[0..., 0..., keyDim ..< (2 * keyDim)].reshaped([B, S, Hk, Dk])
+             let q: MLXArray, k: MLXArray
+@@ -336,11 +348,11 @@ nonisolated(unsafe) static let skipRec = ProcessInfo.processInfo.environment["ST
+             return [q, k, beta, g]
+         }
+         let q = qkbg[0], k = qkbg[1], beta = qkbg[2], g = qkbg[3]
+-        let v = convOut[0..., 0..., (2 * keyDim) ..< convDim].reshaped([B, S, Hv, Dv])
++        let v = pre?[2] ?? convOut[0..., 0..., (2 * keyDim) ..< convDim].reshaped([B, S, Hv, Dv])
+ 
+         let rep = GDN.repIndex
+-        let qr = q.take(rep, axis: 2)                // [B,S,Hv,Dk]
+-        let kr = k.take(rep, axis: 2)
++        let qr = pre != nil ? q : q.take(rep, axis: 2) // [B,S,Hv,Dk]
++        let kr = pre != nil ? k : k.take(rep, axis: 2)
+ 
+         // One graph for every decode step (speculative or not) so the arithmetic is
+         // identical in both paths; the per-token stack is only consumed when recording.
+diff --git a/Sources/StrimCore/GDNPre.swift b/Sources/StrimCore/GDNPre.swift
+new file mode 100644
+index 00000000..6d0505be
+--- /dev/null
++++ b/Sources/StrimCore/GDNPre.swift
+@@ -0,0 +1,73 @@
++import Foundation
++import MLX
++import MLXFast
++
++/// Opt-in decode/verify convolution, normalization, head replication and beta/g fusion.
++/// Float32 g can differ by a few ulps from the compiled tensor expression.
++public enum GDNPre {
++    public static let enabled = ProcessInfo.processInfo.environment["STRIM_GDN_PRE_FUSE"] == "1"
++
++    /// The kernel specializes the 27B bf16 layout. Preserve reference/debug paths and prefill.
++    public static func supports(batch: Int, tokens: Int, dtype: DType) -> Bool {
++        batch > 0 && (1...8).contains(tokens) && dtype == .bfloat16
++    }
++    nonisolated(unsafe) static let kernel = MLXFast.metalKernel(
++        name: "s5_gdn_pre", inputNames: ["convIn", "w", "a", "b", "al", "dt", "dims"],
++        outputNames: ["q", "k", "v", "beta", "g"], source: """
++        #pragma clang fp contract(off)
++        uint lane = thread_position_in_threadgroup.x;
++        uint row = threadgroup_position_in_grid.x;
++        uint tok = threadgroup_position_in_grid.y;
++        uint S = dims[0];
++        uint batch = tok / S, t = tok % S;
++        uint base = (batch * (S + 3) + t) * 10240;
++        float vals[4];
++        float acc = 0.0f;
++        for (uint i=0; i<4; ++i) {
++            uint c = row * 128 + lane * 4 + i;
++            bfloat16_t x = convIn[base+c] * w[c*4];
++            x = x + convIn[base+10240+c] * w[c*4+1];
++            x = x + convIn[base+20480+c] * w[c*4+2];
++            x = x + convIn[base+30720+c] * w[c*4+3];
++            bfloat16_t one = static_cast<bfloat16_t>(1.0f);
++            bfloat16_t z = one / (one + metal::exp(metal::abs(x)));
++            bfloat16_t sig = (x < static_cast<bfloat16_t>(0.0f)) ? z : one-z;
++            bfloat16_t out = static_cast<bfloat16_t>(float(x)*float(sig));
++            vals[i] = float(out);
++            // MLX RMS norm is compiled with contraction enabled.
++            acc = metal::fma(vals[i], vals[i], acc);
++        }
++        if (row < 32) {
++            float ss = simd_sum(acc);
++            float inv = metal::precise::rsqrt(ss/128.0f + 1.0e-6f);
++            bfloat16_t scale = static_cast<bfloat16_t>(row < 16 ? 0.0078125f : 0.08838834764831845f);
++            for (uint i=0; i<4; ++i) {
++                bfloat16_t n = static_cast<bfloat16_t>(vals[i] * inv);
++                bfloat16_t out = scale * n;
++                for (uint r=0; r<3; ++r) {
++                    uint dest = (tok*48 + (row%16)*3+r)*128 + lane*4+i;
++                    if (row < 16) q[dest] = out; else k[dest] = out;
++                }
++            }
++        } else {
++            uint h = row-32;
++            for (uint i=0; i<4; ++i) v[(tok*48+h)*128+lane*4+i] = static_cast<bfloat16_t>(vals[i]);
++            if (lane==0) {
++                bfloat16_t x = b[tok*48+h];
++                bfloat16_t one = static_cast<bfloat16_t>(1.0f);
++                bfloat16_t z = one / (one + metal::exp(metal::abs(x)));
++                beta[tok*48+h] = float(x < static_cast<bfloat16_t>(0.0f) ? z : one-z);
++                float ap = float(a[tok*48+h]) + dt[h];
++                g[tok*48+h] = metal::exp(-metal::exp(al[h]) * metal::log(1.0f+metal::exp(ap)));
++            }
++        }
++        """, header: "")
++    public static func run(convIn: MLXArray, weight: MLXArray, a: MLXArray, b: MLXArray,
++                           aLog: MLXArray, dt: MLXArray) -> [MLXArray] {
++        let B = convIn.shape[0], S = convIn.shape[1]-3
++        return kernel([convIn.contiguous(), weight, a.contiguous(), b.contiguous(), aLog.asType(.float32), dt.asType(.float32), MLXArray([Int32(S)])],
++                      grid: (80*32, B*S, 1), threadGroup: (32,1,1),
++                      outputShapes: [[B,S,48,128],[B,S,48,128],[B,S,48,128],[B,S,48],[B,S,48]],
++                      outputDTypes: [.bfloat16,.bfloat16,.bfloat16,.float32,.float32])
++    }
++}
+diff --git a/Sources/StrimCLI/Cmd_GDNPreMicro.swift b/Sources/StrimCLI/Cmd_GDNPreMicro.swift
+new file mode 100644
+index 00000000..cc40925e
+--- /dev/null
++++ b/Sources/StrimCLI/Cmd_GDNPreMicro.swift
+@@ -0,0 +1,62 @@
++import Foundation
++import MLX
++import MLXRandom
++import StrimCore
++import StrimBenchHTTP
++
++func runGDNPreMicro(_ args: [String]) {
++    let lock = GPULock(path: "/tmp/strim-bench.lock")
++    while !lock.tryAcquire() { if let e = lock.openError { fatalError(e) }; Thread.sleep(forTimeInterval: 0.25) }
++    defer { lock.release() }
++    let reps = args.count > 3 ? Int(args[3]) ?? 9 : 9
++    MLXRandom.seed(20261030)
++    func emit(_ row: [String: Any]) { print(String(decoding: try! JSONSerialization.data(withJSONObject: row, options: [.sortedKeys]), as: UTF8.self)); fflush(stdout) }
++    func load() -> [Double] { var x=[Double](repeating:0,count:3); _=getloadavg(&x,3); return x }
++    func median(_ xs: [Double]) -> Double { let s=xs.sorted(); return (s[(s.count-1)/2]+s[s.count/2])/2 }
++    func rnd(_ shape: [Int]) -> MLXArray { (MLXRandom.normal(shape)*0.1).asType(.bfloat16) }
++    emit(["type":"meta","reps":reps,"layers":48,"schedule":"ABBAABBA","load":load(),"device":Compute.deviceName])
++    for B in [1,4] { for S in [1,3,5,8] {
++        let ci=rnd([B,S+3,10240]), w=rnd([10240,1,4]), a=rnd([B,S,48]), b=rnd([B,S,48]), al=rnd([48]).asType(.float32), dt=rnd([48]).asType(.float32)
++        let rep=MLXArray((0..<16).flatMap { [Int32](repeating:Int32($0),count:3) })
++        let ones=MLXArray.ones([128],dtype:.bfloat16), qs=ones*Float(1.0/128.0), ks=ones*Float(1.0/sqrt(128.0))
++        eval(ci,w,a,b,al,dt,rep,qs,ks)
++        func run(_ arm:String, _ ci:MLXArray, _ a:MLXArray, _ b:MLXArray) -> [MLXArray] {
++            if arm=="B" { return GDNPre.run(convIn:ci,weight:w,a:a,b:b,aLog:al,dt:dt) }
++            let co = B==1 ? GDNMetal.convSilu(convIn:ci,weight:w) : GDNMetal.convSiluBatch(convIn:ci,weight:w)
++            let q=MLXFast.rmsNorm(co[0...,0...,0..<2048].reshaped([B,S,16,128]),weight:qs,eps:1e-6).take(rep,axis:2)
++            let k=MLXFast.rmsNorm(co[0...,0...,2048..<4096].reshaped([B,S,16,128]),weight:ks,eps:1e-6).take(rep,axis:2)
++            let bg=Fused.betaG(b,a,aLog:al,dtBias:dt)
++            return [q,k,co[0...,0...,4096..<10240].reshaped([B,S,48,128]),bg.0.asType(.float32),bg.1]
++        }
++        let ref=run("A",ci,a,b), cand=run("B",ci,a,b); eval(ref);eval(cand)
++        for i in 0..<5 { emit(["type":"parity","B":B,"S":S,"output":i,"max_abs":abs(ref[i].asType(.float32)-cand[i].asType(.float32)).max().item(Float.self),"equal":arrayEqual(ref[i],cand[i]).item(Bool.self)]) }
++        // Both paths retain all outputs. The first Q element feeds the next layer,
++        // like the established decode-anatomy benchmark. Build is outside GPU timer.
++        func chain(_ arm:String) -> [MLXArray] {
++            var link=MLXArray.zeros([B,S,1],dtype:.bfloat16)
++            var keep:[MLXArray]=[]
++            for _ in 0..<48 {
++                let input=concatenated([ci[0...,0..<3,0...],ci[0...,3...,0...]+link],axis:1)
++                let ys=run(arm,input,a+link,b+link)
++                keep += ys
++                link=ys[0][0...,0...,0..<1,0..<1].reshaped([B,S,1])
++            }
++            return keep
++        }
++        eval(chain("A"));eval(chain("B"))
++        var aa:[Double]=[],bb:[Double]=[]
++        for (block,arm) in ["A","B","B","A","A","B","B","A"].enumerated() {
++            var samples:[Double]=[]
++            for r in 0..<reps {
++                let bt=DispatchTime.now().uptimeNanoseconds; let outs=chain(arm)
++                let t=DispatchTime.now().uptimeNanoseconds; eval(outs)
++                let ms=Double(DispatchTime.now().uptimeNanoseconds-t)/1e6
++                let build=Double(t-bt)/1e6
++                samples.append(ms); emit(["type":"sample","B":B,"S":S,"block":block,"arm":arm,"rep":r,"ms48":ms,"build_ms48":build])
++            }
++            let m=median(samples); if arm=="A" { aa.append(m) } else { bb.append(m) }
++            emit(["type":"block","B":B,"S":S,"block":block,"arm":arm,"ms48":m,"load":load()])
++        }
++        emit(["type":"summary","B":B,"S":S,"A_ms48":median(aa),"B_ms48":median(bb),"saved_ms48":median(aa)-median(bb)])
++    } }
++}
+diff --git a/Sources/StrimCLI/Cmd_S5.swift b/Sources/StrimCLI/Cmd_S5.swift
+new file mode 100644
+index 00000000..d7c575dd
+--- /dev/null
++++ b/Sources/StrimCLI/Cmd_S5.swift
+@@ -0,0 +1,165 @@
++import Foundation
++import CryptoKit
++import MLX
++import StrimCore
++import StrimEngine
++import StrimTokenizer
++import StrimBenchHTTP
++
++private func s5emit(_ row: [String: Any]) {
++    print(String(decoding: try! JSONSerialization.data(withJSONObject: row, options: [.sortedKeys]), as: UTF8.self)); fflush(stdout)
++}
++private func s5load() -> [Double] { var a = [Double](repeating: 0, count: 3); _ = getloadavg(&a, 3); return a }
++private func s5hash(_ ids: [Int32]) -> String { ids.withUnsafeBytes { SHA256.hash(data: Data($0)).map { String(format: "%02x", $0) }.joined() } }
++private func s5lock() -> GPULock {
++    let l = GPULock(path: "/tmp/strim-bench.lock")
++    while !l.tryAcquire() { if let e = l.openError { fatalError(e) }; Thread.sleep(forTimeInterval: 0.25) }
++    return l
++}
++private func s5prefill(_ ids: [Int32], _ store: WeightStore) throws -> (ModelCache, MLXArray) {
++    let c = ModelCache(); var lg: MLXArray!
++    for start in stride(from: 0, to: ids.count, by: 1024) {
++        lg = try QwenModel.forwardAll(tokens: Array(ids[start..<min(start + 1024, ids.count)]), store: store, cache: c, lastTokenOnly: true).logits
++        eval(lg, c)
++    }
++    return (c, lg)
++}
++
++// benchsdpa s5decode <model> <head> <ctx> <c> <reps> <gen>
++// Hot sessions isolate decode from cold prefill. Reps advance the same sessions equally in both arms.
++func runS5Decode(_ args: [String]) {
++    guard args.count == 9, let ctx = Int(args[5]), let count = Int(args[6]), let reps = Int(args[7]), let gen = Int(args[8]),
++          ctx >= 1024, [1,4].contains(count), reps > 0, gen >= 16 else { fatalError("benchsdpa s5decode model head ctx c reps gen") }
++    exitAsync {
++        let lock = GPULock(path: "/tmp/strim-bench.lock")
++        guard await lock.acquire() else { throw NSError(domain: "S5 lock", code: 1) }
++        defer { lock.release() }
++        var cfg = EngineConfig.fromEnvironment(modelDir: args[3], headDir: args[4])
++        cfg.hotSessions = count; cfg.prefixCacheBytes = nil
++        let client = try await LocalEngineClient.start(cfg)
++        do {
++            let corpus = try JSONSerialization.jsonObject(with: Data(contentsOf: URL(fileURLWithPath: "bench/ab_prompts.json"))) as! [String: String]
++            let text = corpus["code"]!
++            let pattern = try await client.perform { try $0.tokenizer.encode(text) }
++            var sessions: [SessionID] = []
++            for b in 0..<count {
++                let s = try await client.openSession(SessionConfig(enableThinking: false))
++                // Distinct first token; same length and deterministic repeated code thereafter.
++                var ids = (0..<ctx).map { pattern[($0 + b * 7) % pattern.count] }; ids[0] = Int32(100 + b)
++                _ = try await client.append(s, .ids(ids)); sessions.append(s)
++                for try await _ in client.generate(s, GenParams(maxTokens: 1, ignoreEOS: true)) {}
++            }
++            struct Observation: Sendable { var b: Int; var first: Double; var last: Double; var ids: [Int32]; var usage: Usage }
++            s5emit(["type":"meta", "ctx":ctx,"c":count,"reps":reps,"gen":gen,"fuse":GDNPre.enabled,"load":s5load(),"policy":ProcessInfo.processInfo.environment["STRIM_DECODE_POLICY"] ?? "auto"])
++            for rep in -1..<reps {
++                let rows = try await withThrowingTaskGroup(of: Observation.self) { group in
++                    for (b,s) in sessions.enumerated() {
++                        group.addTask {
++                            var ids: [Int32] = [], first = 0.0, last = 0.0, u = Usage()
++                            for try await e in client.generate(s, GenParams(maxTokens: gen, seed: 20261030, ignoreEOS: true)) {
++                                if case let .tokens(ts, _) = e {
++                                    let t = Date().timeIntervalSince1970
++                                    if first == 0 { first = t }; last = t; ids += ts
++                                }
++                                if case let .finished(_, usage) = e { u = usage }
++                            }
++                            return Observation(b:b,first:first,last:last,ids:ids,usage:u)
++                        }
++                    }
++                    var rows: [Observation] = []; for try await r in group { rows.append(r) }; return rows.sorted { $0.b < $1.b }
++                }
++                let first = rows.map(\.first).min()!, last = rows.map(\.last).max()!
++                guard rows.allSatisfy({ $0.ids.count == gen && $0.usage.mtpPasses > 0 && $0.usage.decodeSeconds > 0 }), last > first else {
++                    throw NSError(domain: "S5 short run or no MTP", code: 1)
++                }
++                s5emit(["type":rep < 0 ? "warmup" : "decode", "ctx":ctx,"c":count,"rep":rep,"fuse":GDNPre.enabled,
++                        "aggregate_tps":Double(count * (gen - 1))/(last-first),"request_tps":rows.map { Double(gen-1)/$0.usage.decodeSeconds },
++                        "decode_window_s":last-first,"prefill_s":rows.map{$0.usage.prefillSeconds},"mtp_passes":rows.map{$0.usage.mtpPasses},
++                        "accept":rows.map{$0.usage.mtpAccept ?? -1},"hashes":rows.map{s5hash($0.ids)},"tokens":rows.map(\.ids),"load":s5load()])
++            }
++            for s in sessions { await client.close(s) }
++            await client.shutdown(); return 0
++        } catch { await client.shutdown(); throw error }
++    }
++}
++
++private func s5drift(_ value: MLXArray, _ reference: MLXArray) -> [String: Any] {
++    let a = value.asType(.float32).asArray(Float.self), b = reference.asType(.float32).asArray(Float.self)
++    precondition(a.count == b.count)
++    let width = value.shape.last!, n = a.count / width
++    var maxAbs = 0.0, meanAbs = 0.0, bits = 0, top1 = 0, kl = 0.0
++    for row in 0..<n {
++        let r = row*width..<(row+1)*width
++        let am = Double(a[r].max()!), bm = Double(b[r].max()!)
++        let az = log(a[r].reduce(0.0) { $0+exp(Double($1)-am) })+am
++        let bz = log(b[r].reduce(0.0) { $0+exp(Double($1)-bm) })+bm
++        var ai = r.lowerBound, bi = r.lowerBound, k = 0.0
++        for i in r {
++            let d = abs(Double(a[i])-Double(b[i])); maxAbs = max(maxAbs,d); meanAbs += d
++            if a[i].bitPattern != b[i].bitPattern { bits += 1 }
++            if a[i] > a[ai] { ai = i }; if b[i] > b[bi] { bi = i }
++            let lp = Double(b[i])-bz, lq = Double(a[i])-az; k += exp(lp)*(lp-lq)
++        }
++        if ai == bi { top1 += 1 }; kl += k
++    }
++    return ["max_abs":maxAbs,"mean_abs":meanAbs/Double(a.count),"different_bits":bits,"values":a.count,"kl_ref_to_flag_mean":kl/Double(n),"top1_agree":top1,"rows":n]
++}
++
++// benchsdpa s5quality <model> <output> [reference]: sixteen teacher-forced full-vocab rows
++// and independent greedy16 on all eight corpus prompts repeated to 4096 tokens.
++func runS5Quality(_ args: [String]) {
++    guard args.count == 5 || args.count == 6 else { fatalError("benchsdpa s5quality model output [reference]") }
++    let lock = s5lock(); defer { lock.release() }
++    do {
++        let out = URL(fileURLWithPath: args[4]); try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
++        let store = try WeightStore(dir: URL(fileURLWithPath: args[3])), tok = try Tokenizer.load(modelDir: args[3])
++        let corpus = try JSONSerialization.jsonObject(with: Data(contentsOf: URL(fileURLWithPath: "bench/ab_prompts.json"))) as! [String: String]
++        for key in corpus.keys.sorted() {
++            let base = tok.encode(corpus[key]!), ids = (0..<4096).map { base[$0 % base.count] }
++            let (cache, initial) = try s5prefill(ids,store), freeCache = cache.snapshot()
++            let ref = args.count == 6 ? try loadArrays(url: URL(fileURLWithPath: args[5]).appendingPathComponent(key+".safetensors")) : nil
++            let forced = ref?["tokens"]?.asArray(Int32.self)
++            var lg = initial, tokens: [Int32] = [], rows: [MLXArray] = []
++            for step in 0..<16 {
++                rows.append(lg.reshaped([1,-1]).asType(.float32)); tokens.append(argMax(lg).item(Int32.self))
++                if step < 15 { lg = try QwenModel.forward(tokens:[forced?[step] ?? tokens.last!],store:store,cache:cache).logits }
++            }
++            let all = concatenated(rows,axis:0); eval(all)
++            var free: [Int32] = [], flg = initial
++            for step in 0..<16 {
++                free.append(argMax(flg).item(Int32.self))
++                if step < 15 { flg = try QwenModel.forward(tokens:[free.last!],store:store,cache:freeCache).logits }
++            }
++            try save(arrays:["logits":all,"tokens":MLXArray(tokens),"free":MLXArray(free)],url:out.appendingPathComponent(key+".safetensors"))
++            var row: [String:Any] = ["type":"quality","prompt":key,"ctx":4096,"fuse":GDNPre.enabled,"hash":s5hash(free),"generated":free,"load":s5load()]
++            if let ref { row.merge(s5drift(all,ref["logits"]!)) { _,n in n }; row["greedy_exact"] = free == ref["free"]!.asArray(Int32.self) }
++            s5emit(row)
++        }
++    } catch { FileHandle.standardError.write(Data("S5 quality: \(error)\n".utf8)); exit(1) }
++}
++
++// benchsdpa s5verify <model> <output> [reference], long-context fixed state and exact rollback.
++func runS5Verify(_ args: [String]) {
++    guard args.count == 5 || args.count == 6 else { fatalError("benchsdpa s5verify model output [reference]") }
++    let lock = s5lock(); defer { lock.release() }
++    do {
++        let out = URL(fileURLWithPath: args[4]); try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
++        let store = try WeightStore(dir: URL(fileURLWithPath: args[3])), tok = try Tokenizer.load(modelDir: args[3])
++        let base = tok.encode("Write a Swift function that parses a CSV file and returns rows as dictionaries.\n")
++        let (cache, _) = try s5prefill((0..<16384).map{base[$0 % base.count]},store)
++        for width in [3,5,8] {
++            let c = cache.snapshot(); c.beginVerify()
++            let lg = try QwenModel.forwardAll(tokens:Array(base.suffix(width)),store:store,cache:c).logits.asType(.float32)
++            eval(lg,c); let values = lg.asArray(Float.self)
++            let hash = values.withUnsafeBytes { SHA256.hash(data:Data($0)).map{String(format:"%02x",$0)}.joined() }
++            let file = "width\(width).safetensors"
++            try save(arrays:["logits":lg],url:out.appendingPathComponent(file))
++            var row: [String:Any] = ["type":"verify","width":width,"ctx":16384,"fuse":GDNPre.enabled,"hash":hash,"tokens":argMax(lg,axis:-1).asArray(Int32.self),"load":s5load()]
++            if args.count == 6 {
++                let ref = try loadArrays(url: URL(fileURLWithPath:args[5]).appendingPathComponent(file))
++                row.merge(s5drift(lg,ref["logits"]!)) { _,n in n }
++            }
++            s5emit(row)
++        }
++    } catch { FileHandle.standardError.write(Data("S5 verify: \(error)\n".utf8)); exit(1) }
++}
+diff --git a/Tests/StrimCoreTests/GDNPreTests.swift b/Tests/StrimCoreTests/GDNPreTests.swift
+new file mode 100644
+index 00000000..00629bcf
+--- /dev/null
++++ b/Tests/StrimCoreTests/GDNPreTests.swift
+@@ -0,0 +1,33 @@
++import MLX
++import MLXRandom
++import Testing
++@testable import StrimCore
++
++@Test func gdnPreFusionSpecializationBounds() {
++    #expect(GDNPre.supports(batch: 1, tokens: 1, dtype: .bfloat16))
++    #expect(GDNPre.supports(batch: 4, tokens: 8, dtype: .bfloat16))
++    #expect(!GDNPre.supports(batch: 1, tokens: 9, dtype: .bfloat16))
++    #expect(!GDNPre.supports(batch: 1, tokens: 0, dtype: .bfloat16))
++    #expect(!GDNPre.supports(batch: 0, tokens: 1, dtype: .bfloat16))
++    #expect(!GDNPre.supports(batch: 1, tokens: 3, dtype: .float32))
++}
++
++@Test func gdnPreFusionBatchIndexingAndConvolution() {
++    MLXRandom.seed(20261030)
++    for S in [1, 3, 5, 8] {
++        let B = 4
++        func rnd(_ shape: [Int]) -> MLXArray { (MLXRandom.normal(shape) * 0.5).asType(.bfloat16) }
++        let ci = rnd([B,S+3,10240]), w = rnd([10240,1,4])
++        let a = rnd([B,S,48]), b = rnd([B,S,48]), al = rnd([48]).asType(.float32), dt = rnd([48]).asType(.float32)
++        let batch = GDNPre.run(convIn:ci,weight:w,a:a,b:b,aLog:al,dt:dt)
++        eval(batch)
++        let conv = GDNMetal.convSiluBatch(convIn:ci,weight:w)
++        let referenceV = conv[0...,0...,4096..<10240].reshaped([B,S,48,128])
++        #expect(arrayEqual(batch[2],referenceV).item(Bool.self))
++        #expect(arrayEqual(batch[3],sigmoid(b).asType(.float32)).item(Bool.self))
++        for i in 0..<B {
++            let one = GDNPre.run(convIn:ci[i..<(i+1)],weight:w,a:a[i..<(i+1)],b:b[i..<(i+1)],aLog:al,dt:dt)
++            for j in 0..<5 { #expect(arrayEqual(batch[j][i..<(i+1)],one[j]).item(Bool.self)) }
++        }
++    }
++}

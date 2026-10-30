@@ -19,7 +19,11 @@ public struct ServerEndpoint: Sendable {
     public var port: UInt16
     public var token: String
     public var modelId: String
-    public init(port: UInt16, token: String, modelId: String) { self.port = port; self.token = token; self.modelId = modelId }
+    /// The server's `--state-dir` (jobs under `<stateDir>/jobs`), when this process started it with one; nil when unknown.
+    public var stateDir: URL?
+    public init(port: UInt16, token: String, modelId: String, stateDir: URL? = nil) {
+        self.port = port; self.token = token; self.modelId = modelId; self.stateDir = stateDir
+    }
     public var baseURL: String { "http://127.0.0.1:\(port)" }
 }
 
@@ -68,6 +72,9 @@ public final class LocalServer: @unchecked Sendable {
     private let handle: ProcHandle?
 
     init(endpoint: ServerEndpoint, handle: ProcHandle?) { self.endpoint = endpoint; self.handle = handle }
+
+    /// The state dir the server was started with (`--state-dir`, granting the work root); nil when attached or unknown.
+    public var stateDir: URL? { endpoint.stateDir }
 
     public static func healthy(port: UInt16) -> Bool {
         var req = URLRequest(url: URL(string: "http://127.0.0.1:\(port)/health")!)
@@ -124,17 +131,43 @@ public final class LocalServer: @unchecked Sendable {
         return state
     }
 
+    /// `--state-dir` arguments granting the host exactly one work root. An explicit `workRoot` must exist and pass
+    /// `benchmarkState`'s checks. Without one, the legacy `strim-agentbench-<pid>` root is granted when it exists
+    /// (agentbench CLI and MCP client command still rely on that name).
+    static func stateGrant(workRoot: URL?, logDir: URL) throws -> URL? {
+        if let workRoot { return try benchmarkState(workRoot: workRoot, logDir: logDir) }
+        let legacy = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("strim-agentbench-\(getpid())")
+        guard FileManager.default.fileExists(atPath: legacy.path) else { return nil }
+        return try benchmarkState(workRoot: legacy, logDir: logDir)
+    }
+
+    static func stateArgv(workRoot: URL?, logDir: URL) throws -> [String] {
+        try stateGrant(workRoot: workRoot, logDir: logDir).map { ["--state-dir", $0.path] } ?? []
+    }
+
+    /// The full `strim serve` argv, including the state dir that grants `workRoot`.
+    static func serverArgv(strimBin: String, model: String, head: String?, port: UInt16, tokenFile: String,
+                           workRoot: URL?, logDir: URL) throws -> [String] {
+        try serverLaunch(strimBin: strimBin, model: model, head: head, port: port, tokenFile: tokenFile,
+                         workRoot: workRoot, logDir: logDir).argv
+    }
+
+    /// The argv plus the state dir it grants (nil when none), created once.
+    static func serverLaunch(strimBin: String, model: String, head: String?, port: UInt16, tokenFile: String,
+                             workRoot: URL?, logDir: URL) throws -> (argv: [String], stateDir: URL?) {
+        let state = try stateGrant(workRoot: workRoot, logDir: logDir)
+        let argv = serveArgv(strimBin: strimBin, model: model, head: head, port: port, tokenFile: tokenFile)
+        return (argv + (state.map { ["--state-dir", $0.path] } ?? []), state)
+    }
+
+    /// `workRoot`: the directory the server must accept as cwd (created by the caller before this call).
     public static func spawn(strimBin: String, model: String, head: String?, port: UInt16, tokenFile: String,
                              logDir: URL, readyTimeout: TimeInterval,
-                             extraEnv: [String: String] = [:]) throws -> LocalServer {
+                             extraEnv: [String: String] = [:], workRoot: URL? = nil) throws -> LocalServer {
         guard !healthy(port: port) else { throw LedgerError.io("port \(port) already serves something; refusing to start a second host (use --attach)") }
-        var argv = serveArgv(strimBin: strimBin, model: model, head: head, port: port, tokenFile: tokenFile)
-        guard FileManager.default.fileExists(atPath: argv[2]) else { throw LedgerError.io("model directory not found: \(argv[2])") }
-        let workRoot = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("strim-agentbench-\(getpid())")
-        if FileManager.default.fileExists(atPath: workRoot.path) {
-            let state = try benchmarkState(workRoot: workRoot, logDir: logDir)
-            argv += ["--state-dir", state.path]
-        }
+        guard FileManager.default.fileExists(atPath: PathArgs.absolute(model)) else { throw LedgerError.io("model directory not found: \(PathArgs.absolute(model))") }
+        let launch = try serverLaunch(strimBin: strimBin, model: model, head: head, port: port, tokenFile: tokenFile, workRoot: workRoot, logDir: logDir)
+        let argv = launch.argv
         var env = ProcessInfo.processInfo.environment
         env["STRIM_SERVER_LOG"] = "1"
         for (k, v) in extraEnv { env[k] = v }
@@ -147,7 +180,8 @@ public final class LocalServer: @unchecked Sendable {
             if Interrupt.requested { h.terminate(); throw LedgerError.io("interrupted") }
             if healthy(port: port) {
                 let tok = try readToken(tokenFile)
-                return LocalServer(endpoint: ServerEndpoint(port: port, token: tok, modelId: URL(fileURLWithPath: argv[2]).lastPathComponent), handle: h)
+                return LocalServer(endpoint: ServerEndpoint(port: port, token: tok, modelId: URL(fileURLWithPath: argv[2]).lastPathComponent,
+                                                                      stateDir: launch.stateDir), handle: h)
             }
             usleep(500_000)
         }

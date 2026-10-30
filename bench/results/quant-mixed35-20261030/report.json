@@ -1,0 +1,1804 @@
+{
+  "status": "BLOCKED",
+  "task_class": "impl_hard",
+  "slice": "20261030-9-q35",
+  "date": "2026-10-30",
+  "repo_head": "a8c2b9d2",
+  "summary": "New recipe in the supplied research scope; stop condition reached: no Swift model quantize/convert command exists. No model produced or local GPU evaluation run.",
+  "stages": {
+    "research": "COMPLETE",
+    "swift_conversion": "BLOCKED_MISSING_TOOL",
+    "performance_and_quality_gate": "NOT_RUN"
+  },
+  "new_or_known": {
+    "decision": "NEW_TO_SUPPLIED_RESEARCH",
+    "already_evaluated_with_local_results": false,
+    "scope": [
+      "docs/QUANTIZATION-2026-10-25.md",
+      "docs/RESEARCH-QUANT-TIERS-2026-10-27.md",
+      "docs/RESEARCH-QUANT-UPDATE-2026-10-28.md",
+      "bench/results/quant-update-20261028/"
+    ],
+    "reason": "The supplied documents discuss mixed allocation generally and other low-bit recipes, but do not identify Rapid-MLX activation-aware 2/3/4-bit allocation. The supplied results contain only bits.txt and empty bits.err: synthetic one-shape matmul timings, explicitly no model-level or quality runs. External vendor evaluations are not our paired quality gate."
+  },
+  "recipe": {
+    "repo": "rapid-mlx/Qwen3.8-27B-mixed-3.5bpw-MLX",
+    "revision": "052cd9bad54ba78ef98b07ae01048bad90f26786",
+    "advertised_bpw": 3.5,
+    "bpw_note": "Advertised target, not a measured effective bpw here. Module counts are not parameter-weighted. Affine scale/bias storage and nonquantized tensors add overhead.",
+    "method": "English activation calibration captures mean input magnitude per language Linear; score activation-weighted quantization error at 2/3/4/8 bits; greedy knapsack allocation under target size. This borrows AWQ salience but is not AWQ uniform-bit per-channel scaling.",
+    "format": "MLX affine",
+    "group_size": 64,
+    "global_bits": 4,
+    "language_modules_by_bits": {
+      "3": 257,
+      "2": 9,
+      "4": 232
+    },
+    "vision_quantized_modules": 84,
+    "vision_bits": 4,
+    "embedding_bits": 3,
+    "lm_head_bits": 3,
+    "two_bit_modules": [
+      "language_model.model.layers.0.linear_attn.out_proj",
+      "language_model.model.layers.1.linear_attn.in_proj_b",
+      "language_model.model.layers.10.linear_attn.in_proj_b",
+      "language_model.model.layers.12.linear_attn.in_proj_b",
+      "language_model.model.layers.16.linear_attn.in_proj_b",
+      "language_model.model.layers.25.linear_attn.in_proj_b",
+      "language_model.model.layers.28.linear_attn.in_proj_b",
+      "language_model.model.layers.58.mlp.down_proj",
+      "language_model.model.layers.9.linear_attn.in_proj_b"
+    ],
+    "exact_mapping": "tensor-bits.tsv (all 582 modules with scales in the published index); rapid-config.json contains the original per-module overrides",
+    "layers": [
+      {
+        "layer": 0,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 2,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 1,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 2,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 4,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 2,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 4,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 3,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 4,
+          "self_attn.o_proj": 3,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 3
+        }
+      },
+      {
+        "layer": 4,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 4,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 5,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 6,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 7,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 4,
+          "self_attn.o_proj": 3,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 3
+        }
+      },
+      {
+        "layer": 8,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 9,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 2,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 10,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 2,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 11,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 4,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 4
+        }
+      },
+      {
+        "layer": 12,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 2,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 13,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 14,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 15,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 4,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 4
+        }
+      },
+      {
+        "layer": 16,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 2,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 17,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 18,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 19,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 3
+        }
+      },
+      {
+        "layer": 20,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 21,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 22,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 4,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 23,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 4
+        }
+      },
+      {
+        "layer": 24,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 4,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 25,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 2,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 26,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 27,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 3
+        }
+      },
+      {
+        "layer": 28,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 2,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 29,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 30,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 31,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 3
+        }
+      },
+      {
+        "layer": 32,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 33,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 34,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 35,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 4
+        }
+      },
+      {
+        "layer": 36,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 37,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 38,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 39,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 3
+        }
+      },
+      {
+        "layer": 40,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 4,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 41,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 42,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 43,
+        "modules": {
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 3
+        }
+      },
+      {
+        "layer": 44,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 45,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 3,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 46,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 47,
+        "modules": {
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 4
+        }
+      },
+      {
+        "layer": 48,
+        "modules": {
+          "linear_attn.in_proj_a": 4,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 49,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 50,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 51,
+        "modules": {
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 4
+        }
+      },
+      {
+        "layer": 52,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 53,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 54,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 4,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 55,
+        "modules": {
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 4
+        }
+      },
+      {
+        "layer": 56,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 57,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 58,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 3,
+          "mlp.down_proj": 2,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 59,
+        "modules": {
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 3,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 3
+        }
+      },
+      {
+        "layer": 60,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 61,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 62,
+        "modules": {
+          "linear_attn.in_proj_a": 3,
+          "linear_attn.in_proj_b": 3,
+          "linear_attn.in_proj_qkv": 3,
+          "linear_attn.in_proj_z": 3,
+          "linear_attn.out_proj": 4,
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 3,
+          "mlp.up_proj": 4
+        }
+      },
+      {
+        "layer": 63,
+        "modules": {
+          "mlp.down_proj": 4,
+          "mlp.gate_proj": 4,
+          "mlp.up_proj": 4,
+          "self_attn.k_proj": 3,
+          "self_attn.o_proj": 4,
+          "self_attn.q_proj": 3,
+          "self_attn.v_proj": 4
+        }
+      }
+    ],
+    "allocation_by_module": [
+      {
+        "module": "linear_attn.in_proj_a",
+        "layers_by_bits": {
+          "3": [
+            0,
+            9,
+            16,
+            18,
+            20,
+            21,
+            22,
+            25,
+            26,
+            28,
+            30,
+            32,
+            33,
+            34,
+            41,
+            42,
+            44,
+            49,
+            50,
+            52,
+            53,
+            54,
+            56,
+            57,
+            58,
+            60,
+            61,
+            62
+          ],
+          "4": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            8,
+            10,
+            12,
+            13,
+            14,
+            17,
+            24,
+            29,
+            36,
+            37,
+            38,
+            40,
+            45,
+            46,
+            48
+          ]
+        }
+      },
+      {
+        "module": "linear_attn.in_proj_b",
+        "layers_by_bits": {
+          "2": [
+            1,
+            9,
+            10,
+            12,
+            16,
+            25,
+            28
+          ],
+          "3": [
+            0,
+            2,
+            4,
+            5,
+            6,
+            8,
+            13,
+            14,
+            17,
+            18,
+            20,
+            21,
+            22,
+            24,
+            26,
+            29,
+            30,
+            32,
+            33,
+            34,
+            36,
+            37,
+            38,
+            40,
+            41,
+            42,
+            44,
+            45,
+            46,
+            48,
+            49,
+            50,
+            52,
+            53,
+            54,
+            56,
+            57,
+            58,
+            60,
+            61,
+            62
+          ]
+        }
+      },
+      {
+        "module": "linear_attn.in_proj_qkv",
+        "layers_by_bits": {
+          "3": [
+            0,
+            20,
+            21,
+            22,
+            32,
+            33,
+            36,
+            37,
+            38,
+            52,
+            53,
+            56,
+            57,
+            58,
+            60,
+            61,
+            62
+          ],
+          "4": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            8,
+            9,
+            10,
+            12,
+            13,
+            14,
+            16,
+            17,
+            18,
+            24,
+            25,
+            26,
+            28,
+            29,
+            30,
+            34,
+            40,
+            41,
+            42,
+            44,
+            45,
+            46,
+            48,
+            49,
+            50,
+            54
+          ]
+        }
+      },
+      {
+        "module": "linear_attn.in_proj_z",
+        "layers_by_bits": {
+          "3": [
+            0,
+            5,
+            6,
+            8,
+            9,
+            10,
+            12,
+            13,
+            14,
+            16,
+            17,
+            18,
+            20,
+            21,
+            25,
+            26,
+            28,
+            29,
+            30,
+            32,
+            33,
+            34,
+            36,
+            37,
+            38,
+            41,
+            42,
+            44,
+            45,
+            46,
+            48,
+            49,
+            50,
+            52,
+            53,
+            54,
+            56,
+            57,
+            58,
+            60,
+            61,
+            62
+          ],
+          "4": [
+            1,
+            2,
+            4,
+            22,
+            24,
+            40
+          ]
+        }
+      },
+      {
+        "module": "linear_attn.out_proj",
+        "layers_by_bits": {
+          "2": [
+            0
+          ],
+          "3": [
+            1,
+            2,
+            5,
+            8,
+            9,
+            16,
+            18,
+            20,
+            21,
+            22,
+            58
+          ],
+          "4": [
+            4,
+            6,
+            10,
+            12,
+            13,
+            14,
+            17,
+            24,
+            25,
+            26,
+            28,
+            29,
+            30,
+            32,
+            33,
+            34,
+            36,
+            37,
+            38,
+            40,
+            41,
+            42,
+            44,
+            45,
+            46,
+            48,
+            49,
+            50,
+            52,
+            53,
+            54,
+            56,
+            57,
+            60,
+            61,
+            62
+          ]
+        }
+      },
+      {
+        "module": "mlp.down_proj",
+        "layers_by_bits": {
+          "2": [
+            58
+          ],
+          "3": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            43,
+            44,
+            45
+          ],
+          "4": [
+            18,
+            32,
+            33,
+            34,
+            42,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            59,
+            60,
+            61,
+            62,
+            63
+          ]
+        }
+      },
+      {
+        "module": "mlp.gate_proj",
+        "layers_by_bits": {
+          "3": [
+            0,
+            1,
+            3,
+            4,
+            5,
+            7,
+            8,
+            9,
+            10,
+            14,
+            20,
+            21,
+            22,
+            24,
+            27,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            43,
+            44,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62
+          ],
+          "4": [
+            2,
+            6,
+            11,
+            12,
+            13,
+            15,
+            16,
+            17,
+            18,
+            19,
+            23,
+            25,
+            26,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            42,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            63
+          ]
+        }
+      },
+      {
+        "module": "mlp.up_proj",
+        "layers_by_bits": {
+          "4": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63
+          ]
+        }
+      },
+      {
+        "module": "self_attn.k_proj",
+        "layers_by_bits": {
+          "3": [
+            19,
+            23,
+            27,
+            31,
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ],
+          "4": [
+            3,
+            7,
+            11,
+            15
+          ]
+        }
+      },
+      {
+        "module": "self_attn.o_proj",
+        "layers_by_bits": {
+          "3": [
+            3,
+            7,
+            59
+          ],
+          "4": [
+            11,
+            15,
+            19,
+            23,
+            27,
+            31,
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            63
+          ]
+        }
+      },
+      {
+        "module": "self_attn.q_proj",
+        "layers_by_bits": {
+          "3": [
+            3,
+            7,
+            11,
+            15,
+            19,
+            23,
+            27,
+            31,
+            35,
+            39,
+            43,
+            47,
+            51,
+            55,
+            59,
+            63
+          ]
+        }
+      },
+      {
+        "module": "self_attn.v_proj",
+        "layers_by_bits": {
+          "3": [
+            3,
+            7,
+            19,
+            27,
+            31,
+            39,
+            43,
+            59
+          ],
+          "4": [
+            11,
+            15,
+            23,
+            35,
+            47,
+            51,
+            55,
+            63
+          ]
+        }
+      }
+    ],
+    "reproducibility_limits": [
+      "Card does not identify the English calibration examples, sample count, seed, or exact allocator tie-breaking. Published config fixes the allocation for this checkpoint.",
+      "GitHub recursive tree at the cited revision exposes no Qwen3.8 mixed-3.5-specific converter by quant/calibration/allocation filename search; only metadata paths were inspected. This is not a claim that all repository contents were searched.",
+      "Published weights were not downloaded; quantized payloads, effective parameter-weighted bpw and exact rounding cannot be verified from config/index alone."
+    ],
+    "mtp": {
+      "published_file": "mtp/model.safetensors",
+      "published_bytes": 849400403,
+      "card_claim": "Paired native MTP artifact, optional speculative decoding; paired greedy output claimed identical to autoregressive output.",
+      "precision": "NOT_VERIFIED",
+      "strim_compatibility": "NOT_RUN",
+      "note": "No mtp/config.json is published at the attempted path (404). A later experiment must preserve and validate the paired head or an explicitly compatible overlay. No head was modified."
+    }
+  },
+  "tables": {
+    "comparison_to_documented_tiers": [
+      {
+        "recipe": "Rapid-MLX mixed 3.5",
+        "allocation": "2/3/4-bit activation-aware knapsack; embed/head 3-bit; g64",
+        "tier": "24 GB candidate per vendor, not approved",
+        "difference": "Specific allocation and vendor eval are new."
+      },
+      {
+        "recipe": "Jundot oQ3.5e-mtp",
+        "allocation": "3/4/5/6-bit g64; reported 4.249 total bpw",
+        "weights_and_head_GiB": 13.74,
+        "tier": "24 GB proposed ladder",
+        "difference": "Importance-matrix/WLS oQe, bundled head; not Rapid recipe."
+      },
+      {
+        "recipe": "AtomicChat 3.50 DWQ",
+        "allocation": "uniform 3-bit g64 + clipping + DWQ",
+        "weights_GiB": 11.82,
+        "tier": "low-bit candidate",
+        "difference": "Different allocation/method; documented neutral-text KL 0.215, top-1 79.6%, not transferable."
+      },
+      {
+        "recipe": "mlx-lm mixed_3_4",
+        "allocation": "3/4-bit fixed depth heuristic for selected v/down/head tensors",
+        "documented_bpw": 3.7,
+        "difference": "Not activation-aware knapsack; documented neutral-text KL 0.166, top-1 82.4%, not transferable."
+      },
+      {
+        "recipe": "Stock qwen38-4bit",
+        "allocation": "uniform 4-bit g64",
+        "weights_GiB": 14.95,
+        "tier": "current comparison baseline",
+        "difference": "No language modules demoted to 2/3-bit."
+      }
+    ],
+    "published_disk_metadata": {
+      "source": "https://huggingface.co/api/models/rapid-mlx/Qwen3.8-27B-mixed-3.5bpw-MLX?blobs=true",
+      "kind": "Remote file sizes only; no local disk measurement",
+      "files": [
+        {
+          "file": "model-00001-of-00003.safetensors",
+          "bytes": 5368226965
+        },
+        {
+          "file": "model-00002-of-00003.safetensors",
+          "bytes": 5342267585
+        },
+        {
+          "file": "model-00003-of-00003.safetensors",
+          "bytes": 3198378661
+        },
+        {
+          "file": "mtp/model.safetensors",
+          "bytes": 849400403
+        }
+      ],
+      "main_shards_bytes": 13908873211,
+      "main_shards_GiB": 12.953647608868778,
+      "with_mtp_bytes": 14758273614,
+      "with_mtp_GiB": 13.744713379070163,
+      "note": "Main shards include vision. Current main-shard size is 13.909 GB / 12.954 GiB; paired MTP adds 0.849 GB / 0.791 GiB. Do not interpret the card headline ~13 GB as the entire self-contained current download."
+    },
+    "vendor_M5_Max": [
+      {
+        "model": "4bit",
+        "decode_tok_s": 25.3,
+        "prefill_tok_s": 582,
+        "TTFT_s": 3.6,
+        "peak_memory_GB": 18.3,
+        "community_submissions": 2
+      },
+      {
+        "model": "mixed35",
+        "decode_tok_s": 26.5,
+        "prefill_tok_s": 604,
+        "TTFT_s": 3.5,
+        "peak_memory_GB": 16.7,
+        "community_submissions": 1
+      }
+    ],
+    "vendor_M5_Max_method": "M5 Max 36 GB, Rapid-MLX 0.12.18, 2026-08-21; single request, 1 warmup discarded + 5 measured rounds, greedy, prefix cache disabled. Separate model-page aggregates, not our paired ABBA or noise-floor measurement; concurrency 4 and cold 4K/16K are not established.",
+    "vendor_M5_Max_delta": {
+      "decode_percent": 4.743083003952564,
+      "prefill_percent": 3.7800687285223455,
+      "peak_memory_GB": -1.6,
+      "noise_floor": "UNKNOWN"
+    },
+    "vendor_card_quality": [
+      {
+        "benchmark": "MMLU-Pro",
+        "n": 500,
+        "uniform4_percent": 60.8,
+        "mixed35_percent": 61.0,
+        "uniform3_percent": 54.2
+      },
+      {
+        "benchmark": "GSM8K",
+        "n": 150,
+        "uniform4_percent": 95.3,
+        "mixed35_percent": 94.7,
+        "uniform3_percent": 92.7
+      },
+      {
+        "benchmark": "HumanEval+ thinking",
+        "n": 40,
+        "uniform4_percent": 77.5,
+        "mixed35_percent": 80.0,
+        "uniform3_percent": null
+      },
+      {
+        "benchmark": "MMBench-EN",
+        "n": 300,
+        "uniform4_percent": 90.3,
+        "mixed35_percent": 86.7,
+        "uniform3_percent": 87.3
+      }
+    ],
+    "vendor_quality_caveat": "Vendor card, small subsets, no per-item paired contingency/noise estimate and no Strim long-agent validation. No logits/KL claim follows from these task averages.",
+    "vendor_github_smoke": {
+      "passed": 15,
+      "total": 15,
+      "date": "2026-09-17T00:15:17.233069+00:00",
+      "hardware": "Mac Studio Mac15,14, M3 Ultra, 256 GB",
+      "note": "Five personal-intelligence smoke tasks across three seeds; not the requested 21 verified code-agent tasks."
+    },
+    "previous_local_synthetic": [
+      {
+        "bits": 2,
+        "group_size": 64,
+        "M": 1,
+        "ms_per_call": 0.051,
+        "weight_GB_per_s": 544.0,
+        "TFLOPS": 3.5
+      },
+      {
+        "bits": 2,
+        "group_size": 64,
+        "M": 4,
+        "ms_per_call": 0.102,
+        "weight_GB_per_s": 272.0,
+        "TFLOPS": 7.0
+      },
+      {
+        "bits": 2,
+        "group_size": 64,
+        "M": 1024,
+        "ms_per_call": 3.107,
+        "weight_GB_per_s": 9.0,
+        "TFLOPS": 58.7
+      },
+      {
+        "bits": 3,
+        "group_size": 64,
+        "M": 1,
+        "ms_per_call": 0.08,
+        "weight_GB_per_s": 484.0,
+        "TFLOPS": 2.2
+      },
+      {
+        "bits": 3,
+        "group_size": 64,
+        "M": 4,
+        "ms_per_call": 0.11,
+        "weight_GB_per_s": 355.0,
+        "TFLOPS": 6.5
+      },
+      {
+        "bits": 3,
+        "group_size": 64,
+        "M": 1024,
+        "ms_per_call": 3.247,
+        "weight_GB_per_s": 12.0,
+        "TFLOPS": 56.2
+      },
+      {
+        "bits": 4,
+        "group_size": 64,
+        "M": 1,
+        "ms_per_call": 0.1,
+        "weight_GB_per_s": 502.0,
+        "TFLOPS": 1.8
+      },
+      {
+        "bits": 4,
+        "group_size": 64,
+        "M": 4,
+        "ms_per_call": 0.108,
+        "weight_GB_per_s": 465.0,
+        "TFLOPS": 6.6
+      },
+      {
+        "bits": 4,
+        "group_size": 64,
+        "M": 1024,
+        "ms_per_call": 3.17,
+        "weight_GB_per_s": 16.0,
+        "TFLOPS": 57.6
+      }
+    ],
+    "previous_local_synthetic_caveat": "Reused 2026-10-28 results, not rerun. N=17408 K=5120, rotating random weights, minimum timings amid other activity. M=4 is matrix rows/MTP verification, not c=4 concurrent requests. Shows no 3-bit speed benefit at M=4, and cannot establish model-level decode or quality.",
+    "requested_local_evaluation": [
+      {
+        "metric": "disk / peak memory",
+        "baseline": null,
+        "mixed": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "metric": "decode c=1 / c=4 ABBA + noise floor",
+        "baseline": null,
+        "mixed": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "metric": "cold prefill 4K / 16K ABBA + noise floor",
+        "baseline": null,
+        "mixed": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "metric": "logit max/mean absolute drift + KL + top-1/top-5 on bench prompts and eight 4K stress prompts",
+        "baseline": null,
+        "mixed": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "metric": "greedy agreement",
+        "baseline": null,
+        "mixed": null,
+        "status": "NOT_RUN"
+      },
+      {
+        "metric": "paired agentbench H on 21 verified align-thinking-20261029 tasks, default knobs",
+        "baseline": null,
+        "mixed": null,
+        "only_4bit": null,
+        "only_mixed": null,
+        "pass_to_fail": null,
+        "status": "NOT_RUN"
+      }
+    ]
+  },
+  "blocker": {
+    "reason": "The prompt explicitly says to stop if Swift strim quantize/convert commands do not exist.",
+    "evidence": [
+      "Installed strim 0.1.7 --help lists quanteval ref/cmp/bits, but no quantize/convert.",
+      "Sources/StrimCLI/Commands.swift:5 and :40: standalone dispatch/help registry has no model quantize/convert command; Sources/StrimCLI/main.swift has no quantize/convert branch.",
+      "Sources/StrimCLI/Cmd_QuantEval.swift:106,142: quantized() is used to create random synthetic matrices, while ref/cmp evaluate already-quantized models.",
+      "docs/RESEARCH-QUANT-UPDATE-2026-10-28.md:156 explicitly records no Swift converter."
+    ],
+    "missing": [
+      "Swift checkpoint converter that reads bf16 tensors, applies the exact per-module affine g64 allocation, writes safetensors/index/config/tokenizer assets into /tmp/q35/models, and preserves or grafts a validated MTP head.",
+      "For independently regenerating the allocation rather than replaying the published mapping: reproducible activation-calibration data and allocator details."
+    ],
+    "current_loader_note": "HEAD has config-driven QuantConfig with 2/3/4-bit g64 support and unequal gate/up fusion fallback. The old group-size/fusion warnings in the Oct 28 doc have since been addressed in source; these are not the stopping blocker. Payload loading remains unverified."
+  },
+  "gate": {
+    "decode_gain_percent_min": 3,
+    "memory": "lower than 4-bit",
+    "quality": "KL and task passes within measured 4-bit noise; only_4bit <= only_mixed; at most one pass-to-fail",
+    "result": "UNTESTED",
+    "rule": "Speed changes must keep quality near-identical for long agent tasks; mixed quantization allowed only with minimal loss."
+  },
+  "keep_kill": {
+    "decision": "KILL_ADOPTION_FOR_NOW",
+    "candidate_quality_verdict": "UNDECIDED_UNTESTED",
+    "reason": "Do not ship or offer a newly approved tier on vendor speed/small-subset quality alone; required local gates are unrun. Stop this slice at missing Swift converter as instructed.",
+    "default": "unchanged",
+    "future_if_passes": "Optional model download only; never a silent default."
+  },
+  "safety": {
+    "execution": "CPU/web metadata only, far below 8 GB RAM",
+    "GPU_work_started": false,
+    "lock_acquired": false,
+    "lock_modified": false,
+    "model_weight_downloads": 0,
+    "model_written": false,
+    "strim_models_access": "No reads/writes needed",
+    "ports_opened": [
+
+    ],
+    "started_services": [
+
+    ],
+    "processes_left_running": [
+
+    ],
+    "python_used": false,
+    "committed": false,
+    "other_worktree_changes": "left untouched"
+  },
+  "sources": {
+    "model_card": "https://huggingface.co/rapid-mlx/Qwen3.8-27B-mixed-3.5bpw-MLX/blob/052cd9bad54ba78ef98b07ae01048bad90f26786/README.md",
+    "config": "https://huggingface.co/rapid-mlx/Qwen3.8-27B-mixed-3.5bpw-MLX/blob/052cd9bad54ba78ef98b07ae01048bad90f26786/config.json",
+    "tensor_index": "https://huggingface.co/rapid-mlx/Qwen3.8-27B-mixed-3.5bpw-MLX/blob/052cd9bad54ba78ef98b07ae01048bad90f26786/model.safetensors.index.json",
+    "hf_api": "https://huggingface.co/api/models/rapid-mlx/Qwen3.8-27B-mixed-3.5bpw-MLX?blobs=true",
+    "rapid_github": "https://github.com/raullenchai/Rapid-MLX/tree/94b0871ad06af95fba3f8aa447e695a34aa168bc",
+    "rapid_quality": "https://github.com/raullenchai/Rapid-MLX/blob/94b0871ad06af95fba3f8aa447e695a34aa168bc/reports/benchmarks/personal-intelligence-qwen3.8-27b-mixed-3.5bpw.json",
+    "speed_4bit": "https://rapidmlx.com/benchmarks/qwen3.8-27b-4bit/apple-m5-max",
+    "speed_mixed": "https://rapidmlx.com/benchmarks/qwen3.8-27b-mixed-3.5bpw/apple-m5-max"
+  },
+  "source_sha256": {
+    "rapid-model-card.md": "3de190f992913e35c433ec63f0b99a34cac861a9c37876d6e80a0d03e08ad202",
+    "rapid-config.json": "82eb3a40d289d363b3f5f7c1cda54b2fc6186db09e95045116d37e287aa9e2ba",
+    "rapid-index.json": "11317c1c997ad9d59b5d24e33ef566cecffcee9242bf5d8a18eb7e143668ddf0",
+    "rapid-hf-info.json": "b60f7afcff21b4bff9077ffa4338209f596d8b6b7d667d9063585f7b90985535",
+    "rapid-tree.json": "d0ba2fd7ee1060b2dd00439e3283a69ffe973da3b109207da6e3b6c5ceee32e9",
+    "rapid-quality.json": "dce486c219ec583c712892f0fff64009a1fe85850431d8ccd5a0708e81b67416",
+    "strim-help.txt": "a7c5c95656c521c3c1a46fe57b68f90d7758dcbb46d23eae02bfddbe7483e35b",
+    "strim-version.txt": "c1f4c6a7c5b97fde230b9dc4aa8b9fff1747560b89ce4c25ac7fecc36b02da33"
+  }
+}

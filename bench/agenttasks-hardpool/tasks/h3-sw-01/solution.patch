@@ -1,0 +1,36 @@
+diff --git a/Sources/Ledger/BalanceCache.swift b/Sources/Ledger/BalanceCache.swift
+index efe2704..056dc63 100644
+--- a/Sources/Ledger/BalanceCache.swift
++++ b/Sources/Ledger/BalanceCache.swift
+@@ -2,14 +2,15 @@ import Foundation
+ 
+ /// Cached totals by account. Values are valid for a specific store revision.
+ final class BalanceCache {
+-    private var values: [String: Int] = [:]
++    private var values: [String: (revision: Int, value: Int)] = [:]
+ 
+     func get(_ account: String, revision: Int) -> Int? {
+-        values[account]
++        guard let entry = values[account], entry.revision == revision else { return nil }
++        return entry.value
+     }
+ 
+     func put(_ value: Int, account: String, revision: Int) {
+-        values[account] = value
++        values[account] = (revision, value)
+     }
+ 
+     func clear() {
+diff --git a/Sources/Ledger/Ledger.swift b/Sources/Ledger/Ledger.swift
+index f731c5e..f2e3c92 100644
+--- a/Sources/Ledger/Ledger.swift
++++ b/Sources/Ledger/Ledger.swift
+@@ -22,7 +22,7 @@ public final class Ledger {
+         guard let account = store.account(id) else { throw LedgerError.missingAccount }
+         guard from < until else { throw LedgerError.invalidRange }
+         let all = try selectTransactions(store.allTransactions(), filter: TransactionFilter(account: id))
+-        let preceding = all.filter { $0.date <= from }
++        let preceding = all.filter { $0.date < from }
+         let opening = try addCents(account.opening, sumCents(preceding.map { $0.amount }))
+         let period = all.filter { $0.date >= from && $0.date < until }
+         return try makeStatement(opening: opening, transactions: period)

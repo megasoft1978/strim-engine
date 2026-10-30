@@ -1,0 +1,23 @@
+{
+  "base_commit" : "",
+  "class" : "test-fix",
+  "est_solo_turns" : 14,
+  "id" : "hd-js-01",
+  "language" : "javascript",
+  "license" : "MIT",
+  "note" : "Node.js ESM: job runner with several interacting defects across its modules",
+  "prompt" : "The automated tests of this Node.js package currently fail. Run `node --test` from the repository root to see the failures. Change the package non-test source code so that the whole suite passes. The test files are the specification: do not edit, delete or skip any test (they are restored and hash-checked before grading). Keep the change focused. Report briefly what was wrong.",
+  "repo" : "original (written for this benchmark)",
+  "repo_key" : "strim-agentbench-node",
+  "snapshot" : "snapshot.tar.gz",
+  "snapshot_bytes" : 3458,
+  "test_paths" : [
+    "test"
+  ],
+  "test_sha256" : {
+    "test\/duration.test.js" : "6985c3bb54a56382c632a0c4d06666c48db37ec8a9695aeff36c550059baff9f",
+    "test\/runner.test.js" : "fb29abf84b67d156eda76bb482257fe42a035617e811099f9816f0af64c29d79"
+  },
+  "tree_sha256" : "7a5074efdb1b3c5d23aeee4a568e452892a09ea5ad00b62e811d42b909c2aba1",
+  "verify_cmd" : "node --test"
+}

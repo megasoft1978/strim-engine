@@ -1,0 +1,46 @@
+diff --git a/src/cache.js b/src/cache.js
+index e2f6924..072ab28 100644
+--- a/src/cache.js
++++ b/src/cache.js
+@@ -22,10 +22,12 @@ export class Cache {
+     const existing = this.store.pending.get(key);
+     if (existing) return existing;
+     const pending = Promise.resolve().then(() => this.loader(key)).then(value => {
+-      this.store.write(key, { value, expiresAt: expiresAt(this.clock.now(), this.policy.ttl) });
++      if (this.store.pending.get(key) === pending) {
++        this.store.write(key, { value, expiresAt: expiresAt(this.clock.now(), this.policy.ttl) });
++      }
+       return value;
+     }).finally(() => {
+-      this.store.pending.delete(key);
++      if (this.store.pending.get(key) === pending) this.store.pending.delete(key);
+     });
+     this.store.pending.set(key, pending);
+     return pending;
+diff --git a/src/policy.js b/src/policy.js
+index 63f8672..9d11efe 100644
+--- a/src/policy.js
++++ b/src/policy.js
+@@ -9,5 +9,5 @@ export function cachePolicy(options = {}) {
+ export function expiresAt(now, ttl) { return now + ttl; }
+ 
+ export function isFresh(entry, now) {
+-  return now <= entry.expiresAt;
++  return now < entry.expiresAt;
+ }
+diff --git a/src/store.js b/src/store.js
+index 0a5febe..f09bb7f 100644
+--- a/src/store.js
++++ b/src/store.js
+@@ -30,9 +30,11 @@ export class Store {
+ 
+   remove(key) {
+     this.values.delete(key);
++    this.pending.delete(key);
+   }
+ 
+   clear() {
+     this.values.clear();
++    this.pending.clear();
+   }
+ }

@@ -25,6 +25,38 @@ import StrimHarness
         #expect(PackLibrary.fingerprint(.baseline, base: other) != PackLibrary.fingerprint(.baseline))
     }
 
+    // Pinned before the all_turns_medium option existed: the fingerprint of an existing candidate must not change.
+    @Test func existingFingerprintsArePinned() {
+        var ft = PackCandidate.baseline; ft.thinking = .firstPlanningTurn
+        #expect(PackLibrary.fingerprint(.baseline) == "010498d957b46c4f")
+        #expect(PackLibrary.fingerprint(ft) == "75ac0d39e9675f86")
+        var wt = PackCandidate.baseline; wt.temperature = .warm; wt.resultCap = .tight
+        #expect(PackLibrary.fingerprint(wt) == "7da68908ba8eeda1")
+    }
+
+    // knobs.json for all_turns_medium is what the harness reads: thinking on for every turn, effort medium.
+    @Test func allTurnsMediumRendersAndParsesInTheHarness() throws {
+        var c = PackCandidate.baseline; c.thinking = .allTurnsMedium
+        let knobs = PackLibrary.render(c).knobs
+        #expect(knobs.thinking == "all_turns" && knobs.reasoningEffort == "medium")
+        let k = try HarnessKnobs.decode(Canonical.json(knobs))
+        #expect(k.thinking == .allTurns && k.reasoningEffort == "medium" && k.temperature == 0)
+        #expect(PackLibrary.fingerprint(c) != PackLibrary.fingerprint(.baseline))
+        var ft = PackCandidate.baseline; ft.thinking = .firstPlanningTurn
+        #expect(PackLibrary.fingerprint(c) != PackLibrary.fingerprint(ft))
+    }
+
+    // Baseline and first_planning_turn knobs carry no reasoningEffort key (same knobs.json bytes as before).
+    @Test func existingThinkingKnobsHaveNoReasoningEffortKey() throws {
+        for t in [ThinkingPolicy.off, .firstPlanningTurn] {
+            var c = PackCandidate.baseline; c.thinking = t
+            let s = String(decoding: Canonical.json(PackLibrary.render(c).knobs), as: UTF8.self)
+            #expect(!s.contains("reasoningEffort"))
+        }
+        let baseKnobs = String(decoding: Canonical.json(PackLibrary.render(.baseline).knobs), as: UTF8.self)
+        #expect(baseKnobs.contains("\"thinking\":\"off\""))
+    }
+
     @Test func canonicalJSONIsByteStable() {
         let a = Canonical.json(PackCandidate.baseline), b = Canonical.json(PackCandidate())
         #expect(a == b)
@@ -34,13 +66,20 @@ import StrimHarness
 
     @Test func everyCoordinateHasAtLeastTwoOptionsAndPromptOnesThree() {
         for c in Coordinate.allCases { #expect(c.variants(of: .baseline).count >= 2) }
-        // Option counts per coordinate. Thinking and temperature are binary; the others have three options.
-        let binary: Set<Coordinate> = [.thinking, .temperature]
-        for c in Coordinate.allCases { #expect(c.variants(of: .baseline).count == (binary.contains(c) ? 2 : 3)) }
-        #expect(Coordinate.allCases.count == 10)
+        // Pin the expanded option surface, including the opt-in progress coordinates.
+        for c in Coordinate.allCases {
+            let expected: Int = switch c {
+            case .thinking: 8
+            case .systemPrompt, .playbookTestFix: 4
+            case .temperature, .stallNudge, .resultShape, .progressGate, .testStatus, .sampling, .preserveThinking: 2
+            default: 3
+            }
+            #expect(c.variants(of: .baseline).count == expected)
+        }
+        #expect(Coordinate.allCases.count == 17)
     }
 
-    /// The harness reads all 10 knobs (prompt text via STRIM_PACK_DIR, the rest via knobs.json), so the search covers all of them.
+    /// The harness reads all 17 knobs (prompt text via STRIM_PACK_DIR, the rest via knobs.json), so the search covers all of them.
     @Test func everyCoordinateIsConsumedByTheHarness() {
         let allConsumed = Coordinate.allCases.allSatisfy { $0.consumedByHarness }
         #expect(allConsumed)
@@ -62,10 +101,10 @@ import StrimHarness
     @Test func noPolicyFieldExists() {
         let forbidden = ["sandbox", "host", "policy", "deny", "redact", "limit", "ceiling", "verify", "mcp", "order", "tools", "secret", "token"]
         let labels = Mirror(reflecting: PackCandidate.baseline).children.compactMap(\.label).map { $0.lowercased() }
-        #expect(labels.count == 10)
+        #expect(labels.count == 17)
         for l in labels { for f in forbidden { #expect(!l.contains(f), "field \(l) looks like policy") } }
         let keys = PackCandidate.CodingKeys.allCases.map(\.rawValue)
-        #expect(keys.count == 10)
+        #expect(keys.count == 17)
         for k in keys { for f in forbidden { #expect(!k.contains(f)) } }
     }
 

@@ -1,0 +1,12 @@
+package @PKGNAME@
+
+import (
+	"os"
+	"testing"
+
+	strimguard "@GUARD@"
+)
+
+func TestMain(m *testing.M) {
+	os.Exit(strimguard.Finish("@PKGPATH@", m.Run()))
+}

@@ -1,0 +1,186 @@
+diff --git a/src/backoff.js b/src/backoff.js
+index 242d00a..2fbf086 100644
+--- a/src/backoff.js
++++ b/src/backoff.js
+@@ -4,5 +4,5 @@
+  * No jitter, so schedules stay deterministic.
+  */
+ export function delayFor(attempt, { baseMs, factor, maxMs }) {
+-  throw new Error('not implemented');
++  return Math.min(maxMs, baseMs * factor ** (attempt - 1));
+ }
+diff --git a/src/pqueue.js b/src/pqueue.js
+index f7d067e..2ad413d 100644
+--- a/src/pqueue.js
++++ b/src/pqueue.js
+@@ -10,19 +10,26 @@
+  *   size                            number of queued entries
+  */
+ export class PriorityQueue {
++  #entries = [];
++
+   push(item, priority, seq) {
+-    throw new Error('not implemented');
++    this.#entries.push({ item, priority, seq });
++    this.#entries.sort((a, b) => b.priority - a.priority || a.seq - b.seq);
+   }
+ 
+   takeFirst(accept) {
+-    throw new Error('not implemented');
++    const i = this.#entries.findIndex((e) => accept(e.item));
++    return i === -1 ? undefined : this.#entries.splice(i, 1)[0].item;
+   }
+ 
+   remove(item) {
+-    throw new Error('not implemented');
++    const i = this.#entries.findIndex((e) => e.item === item);
++    if (i === -1) return false;
++    this.#entries.splice(i, 1);
++    return true;
+   }
+ 
+   get size() {
+-    throw new Error('not implemented');
++    return this.#entries.length;
+   }
+ }
+diff --git a/src/scheduler.js b/src/scheduler.js
+index 0d3ccd8..c86351c 100644
+--- a/src/scheduler.js
++++ b/src/scheduler.js
+@@ -41,20 +41,132 @@ import { PriorityQueue } from './pqueue.js';
+  */
+ export class Scheduler {
+   #opts;
++  #queue = new PriorityQueue();
++  #seq = 0;
++  #running = 0;
++  #waiting = 0;
++  #busyKeys = new Set();
++  #idleWaiters = [];
+ 
+   constructor(opts) {
+     this.#opts = normalizeOptions(opts);
+   }
+ 
+   schedule(fn, options) {
+-    throw new Error('not implemented');
++    const o = normalizeJobOptions(options);
++    const { promise, resolve, reject } = deferred();
++    const job = { fn, o, seq: this.#seq++, attempt: 0, settled: false, state: 'queued', timer: undefined, abort: undefined, holdsKey: false, resolve, reject };
++    if (o.signal?.aborted) {
++      reject(new CancelledError());
++      return promise;
++    }
++    if (o.signal) {
++      job.abort = () => this.#cancel(job);
++      o.signal.addEventListener('abort', job.abort, { once: true });
++    }
++    this.#queue.push(job, o.priority, job.seq);
++    this.#pump();
++    return promise;
+   }
+ 
+   idle() {
+-    throw new Error('not implemented');
++    if (this.#isIdle()) return Promise.resolve();
++    const d = deferred();
++    this.#idleWaiters.push(d.resolve);
++    return d.promise;
+   }
+ 
+   stats() {
+-    throw new Error('not implemented');
++    return { queued: this.#queue.size, running: this.#running, waiting: this.#waiting };
++  }
++
++  #isIdle() {
++    return this.#queue.size === 0 && this.#running === 0 && this.#waiting === 0;
++  }
++
++  #pump() {
++    while (this.#running < this.#opts.concurrency) {
++      const job = this.#queue.takeFirst((j) => j.holdsKey || j.o.key === undefined || !this.#busyKeys.has(j.o.key));
++      if (!job) break;
++      this.#start(job);
++    }
++    if (this.#isIdle()) for (const w of this.#idleWaiters.splice(0)) w();
++  }
++
++  #start(job) {
++    job.state = 'running';
++    job.attempt++;
++    this.#running++;
++    if (job.o.key !== undefined) {
++      this.#busyKeys.add(job.o.key);
++      job.holdsKey = true;
++    }
++    job.ctl = new AbortController();
++    let run;
++    try {
++      run = Promise.resolve(job.fn({ attempt: job.attempt, signal: job.ctl.signal }));
++    } catch (err) {
++      run = Promise.reject(err);
++    }
++    run.then(
++      (value) => this.#finish(job, { value }),
++      (error) => this.#finish(job, { error }),
++    );
++  }
++
++  #finish(job, outcome) {
++    this.#running--;
++    if (job.state === 'cancelled') {
++      this.#releaseKey(job);
++    } else if ('value' in outcome) {
++      this.#settle(job, () => job.resolve(outcome.value));
++    } else if (!(outcome.error instanceof CancelledError) && job.attempt <= job.o.retries && job.o.shouldRetry(outcome.error, job.attempt)) {
++      job.state = 'waiting';
++      this.#waiting++;
++      job.timer = this.#opts.clock.setTimeout(() => {
++        this.#waiting--;
++        job.timer = undefined;
++        job.state = 'queued';
++        this.#queue.push(job, job.o.priority, job.seq);
++        this.#pump();
++      }, delayFor(job.attempt, job.o.backoff));
++    } else {
++      this.#settle(job, () => job.reject(outcome.error));
++    }
++    this.#pump();
++  }
++
++  #settle(job, fn) {
++    job.state = 'done';
++    this.#detach(job);
++    this.#releaseKey(job);
++    fn();
++  }
++
++  #cancel(job) {
++    const was = job.state;
++    if (was === 'done' || was === 'cancelled') return;
++    job.state = 'cancelled';
++    if (was === 'queued') this.#queue.remove(job);
++    if (was === 'waiting') {
++      this.#opts.clock.clearTimeout(job.timer);
++      this.#waiting--;
++    }
++    if (was === 'running') job.ctl.abort();
++    else this.#releaseKey(job);
++    this.#detach(job);
++    job.reject(new CancelledError());
++    this.#pump();
++  }
++
++  #releaseKey(job) {
++    if (job.holdsKey) {
++      this.#busyKeys.delete(job.o.key);
++      job.holdsKey = false;
++    }
++  }
++
++  #detach(job) {
++    if (job.abort) job.o.signal.removeEventListener('abort', job.abort);
+   }
+ }

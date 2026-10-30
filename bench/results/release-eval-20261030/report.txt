@@ -1,0 +1,8 @@
+ledger: /tmp/rel1/run/ledger.jsonl  rows 8
+release (phase release): A 010498d957b46c4f [baseline]
+                       B 45e18dfdad89bb8c [thinking=all_turns_medium]
+test A: n 4/4 pass 75.0% mean wall 86.80s mean local tokens 335141.0 false-done 0 (0.0%) timeouts 0
+test B: n 4/4 pass 100.0% mean wall 217.20s mean local tokens 286220.8 false-done 0 (0.0%) timeouts 0
+test hd2-fs-02: pairs 2/2 both-pass 2 only-A 0 only-B 0 neither 0
+test hd2-ts-01: pairs 2/2 both-pass 1 only-A 0 only-B 1 neither 0
+release regression: no
